@@ -9,6 +9,7 @@ import pytest
 from quant.backtest.engine import assert_no_lookahead, run_backtest
 from quant.strategies.base import (
     BuyAndHold,
+    ConsecutiveDownDays,
     MeanReversionStrategy,
     MovingAverageCrossover,
     RSIReversionStrategy,
@@ -231,4 +232,42 @@ def test_rsi_reversion_exits_above_exit_rsi():
 
 # ---------------------------------------------------------------------------
 # H005 – ConsecutiveDownDays
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H005 – ConsecutiveDownDays
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_consecutive_down_days_no_lookahead():
+    rng = np.random.default_rng(3)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(ConsecutiveDownDays().generate_positions, prices, n_checks=10)
+
+
+def test_consecutive_down_days_fires_on_streak():
+    """Entry fires after exactly n_down consecutive down days."""
+    n_down, hold_days = 3, 3
+    # 10 up days, then 3 down days, then 10 up days
+    rets = [0.01] * 10 + [-0.01] * n_down + [0.01] * 10
+    prices = _make_prices(rets)
+    strat = ConsecutiveDownDays(n_down=n_down, hold_days=hold_days)
+    pos = strat.generate_positions(prices)
+    # Signal fires at iloc[10 + n_down] (0-indexed, with initial price row at iloc[0])
+    signal_iloc = 1 + 10 + n_down - 1  # last of the 3 down days
+    assert pos.iloc[signal_iloc] == pytest.approx(1.0), f"Expected entry at iloc {signal_iloc}"
+    assert pos.iloc[signal_iloc + hold_days] == pytest.approx(0.0)
+
+
+def test_consecutive_down_days_no_signal_after_up_break():
+    """2 down, 1 up, 2 down should NOT fire a 3-day streak signal."""
+    rets = [0.01] * 5 + [-0.01, -0.01, 0.01, -0.01, -0.01] + [0.01] * 5
+    prices = _make_prices(rets)
+    strat = ConsecutiveDownDays(n_down=3, hold_days=3)
+    pos = strat.generate_positions(prices)
+    assert (pos == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H006 – VIXFilteredReversionStrategy
 # ---------------------------------------------------------------------------

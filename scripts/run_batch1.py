@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
+    ConsecutiveDownDays,
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
@@ -79,6 +80,14 @@ def main():
     for ent in [25, 30, 35]:
         wf = walk_forward(prices, lambda _, e=ent: RSIReversionStrategy(entry_rsi=e), folds=folds)
         print(f"    entry_rsi={ent}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H005
+    print(section("H005: ConsecutiveDownDays  canonical (n_down=3, hold_days=3)"))
+    wf5, rep5, lo5, hi5 = run(prices, folds, ConsecutiveDownDays, "canonical")
+    print("  Grid (n_down x hold_days):")
+    for nd, hd in product([2, 3, 4], [2, 3, 5]):
+        wf = walk_forward(prices, lambda _, n=nd, h=hd: ConsecutiveDownDays(n, h), folds=folds)
+        print(f"    n_down={nd} hold={hd}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

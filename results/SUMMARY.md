@@ -39,6 +39,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 025 | January Barometer | calendar | kept | 0.53 | [0.12, 0.94] | 5.47% | −29.53% | +0.565 | second-best MaxDD (−29.53%); avoids bear years via Jan filter |
 | 026 | Quarter-End Drift (5d) | calendar | killed | 0.30 | [−0.12, 0.72] | 1.42% | **−10.13%** | **+0.176** | lowest MaxDD and H001 corr in program; CI negative — standalone fails |
 | 027 | Seasonality + MA trend | hybrid calendar | kept | 0.61 | [0.19, 1.03] | 5.70% | −33.72% | +0.712 | matches H001 Sharpe; too correlated for ensemble |
+| 028 | VIX spike entry (30, 20d) | VIX contrarian | killed | 0.36 | [−0.07, 0.75] | 4.34% | −44.68% | +0.341 | below benchmark; long during crash continuation |
+| 029 | VIX regime filter (<20) | VIX regime | killed | 0.43 | [0.01, 0.84] | 3.39% | −25.53% | +0.562 | below benchmark; CI barely positive; good MaxDD |
+| 030 | VIX trend (L/S, MA 20d) | VIX L/S | killed | −0.09 | [−0.50, 0.31] | −3.65% | −83.24% | **−0.284** | negative Sharpe; first negative H001 corr in program |
+| 031 | Realized vs implied vol | VIX regime | **kept** | **0.58** | **[0.16, 0.96]** | 8.52% | −51.43% | +0.693 | vol risk premium filter; best CAGR in batch |
+| 032 | VIX mean reversion (2σ, 60d) | VIX contrarian | killed | −0.001 | [−0.43, 0.40] | −0.52% | −35.32% | +0.420 | near-zero Sharpe; indistinguishable from zero |
 
 ---
 
@@ -48,8 +53,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.13% (H026, killed)** / **−18.41% (H021, kept)** | **met** |
-| Strategies tested ≥ 50 | 27 | in progress |
-| Strategies kept (ensemble) | 10 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027) | in progress — corr still > 0.30; H026 (kill) lowest corr (0.176) |
+| Strategies tested ≥ 50 | 32 | in progress |
+| Strategies kept (ensemble) | 11 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031) | in progress — corr still > 0.30; H030 (kill) first negative H001 corr (−0.284) |
 
 ---
 

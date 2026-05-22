@@ -22,13 +22,17 @@ logging.basicConfig(
 )
 
 
-SYMBOLS = ["SPY"]
-START = "1993-01-01"
+# Per-symbol start dates (limited by ETF inception; yfinance clips automatically)
+SYMBOLS = {
+    "SPY": "1993-01-01",   # inception 1993-01-22
+    "TLT": "2002-01-01",   # inception 2002-07-26
+    "GLD": "2004-01-01",   # inception 2004-11-18
+}
 
 
 def main() -> None:
-    for symbol in SYMBOLS:
-        report = ingest(symbol, _full_path(symbol), start=START)
+    for symbol, start in SYMBOLS.items():
+        report = ingest(symbol, _full_path(symbol), start=start)
         print(f"\n=== {symbol} ===")
         print(json.dumps(report, indent=2, default=str))
 

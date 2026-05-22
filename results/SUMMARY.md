@@ -34,6 +34,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 020 | Best-of-3 momentum | multi-asset rotation | killed | 0.47 | [0.06, 0.86] | 6.04% | −31.29% | +0.329 | Sharpe < 0.51; early folds starved of TLT/GLD data |
 | 021 | SPY/TLT risk parity | risk parity | **kept ★** | **1.03** | **[0.62, 1.44]** | 7.69% | **−18.41%** | +0.407 | **FIRST OOS Sharpe ≥ 1.0; lowest MaxDD in program** |
 | 022 | Defensive equity hedge | multi-asset trend | kept | 0.68 | [0.25, 1.07] | 9.60% | −33.72% | +0.912 | best trend Sharpe; near-zero diversification value |
+| 023 | Sell in May | calendar | kept | 0.53 | [0.12, 0.93] | 6.71% | −34.82% | +0.505 | confirmed Bouman & Jacobsen; lower corr than all prior kept strategies |
+| 024 | Turn of Month (3d) | calendar | killed | 0.41 | [0.02, 0.82] | 3.72% | −34.41% | +0.363 | Sharpe < 0.51; n_days=5 version (0.54) narrowly beats benchmark |
+| 025 | January Barometer | calendar | kept | 0.53 | [0.12, 0.94] | 5.47% | −29.53% | +0.565 | second-best MaxDD (−29.53%); avoids bear years via Jan filter |
+| 026 | Quarter-End Drift (5d) | calendar | killed | 0.30 | [−0.12, 0.72] | 1.42% | **−10.13%** | **+0.176** | lowest MaxDD and H001 corr in program; CI negative — standalone fails |
+| 027 | Seasonality + MA trend | hybrid calendar | kept | 0.61 | [0.19, 1.03] | 5.70% | −33.72% | +0.712 | matches H001 Sharpe; too correlated for ensemble |
 
 ---
 
@@ -42,9 +47,9 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Target | Current best | Status |
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−18.41% (H021)** | **met** |
-| Strategies tested ≥ 50 | 22 | in progress |
-| Strategies kept (ensemble) | 7 (H001/H007/H008/H016/H018/H019/H022) | in progress — note: H021 best; high corr limits ensemble benefit |
+| Max DD < SPY (−55.92%) | **−10.13% (H026, killed)** / **−18.41% (H021, kept)** | **met** |
+| Strategies tested ≥ 50 | 27 | in progress |
+| Strategies kept (ensemble) | 10 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027) | in progress — corr still > 0.30; H026 (kill) lowest corr (0.176) |
 
 ---
 

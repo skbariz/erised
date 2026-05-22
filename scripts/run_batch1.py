@@ -22,6 +22,7 @@ from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
     AbsoluteMomentumStrategy,
     ConsecutiveDownDays,
+    MACDCrossover,
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
@@ -120,6 +121,14 @@ def main():
     for lb in [6, 9, 12]:
         wf = walk_forward(prices, lambda _, l=lb: AbsoluteMomentumStrategy(l), folds=folds)
         print(f"    lookback_months={lb}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H009
+    print(section("H009: MACDCrossover  canonical (12,26,9)"))
+    wf9, rep9, lo9, hi9 = run(prices, folds, MACDCrossover, "canonical")
+    print("  Grid variants:")
+    for f, s, sig in [(12, 26, 9), (8, 21, 5), (5, 13, 3)]:
+        wf = walk_forward(prices, lambda _, ff=f, ss=s, sg=sig: MACDCrossover(ff, ss, sg), folds=folds)
+        print(f"    MACD({f},{s},{sig})  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

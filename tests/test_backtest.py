@@ -11,6 +11,7 @@ from quant.strategies.base import (
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
+    MACDCrossover,
     MeanReversionStrategy,
     MovingAverageCrossover,
     RSIReversionStrategy,
@@ -370,4 +371,27 @@ def test_absolute_momentum_long_in_uptrend():
 
 # ---------------------------------------------------------------------------
 # H009 – MACDCrossover
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H009 – MACDCrossover
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_macd_no_lookahead():
+    rng = np.random.default_rng(7)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(MACDCrossover().generate_positions, prices, n_checks=10)
+
+
+def test_macd_flat_during_warmup():
+    strat = MACDCrossover(fast=12, slow=26, signal=9)
+    prices = _make_prices([0.001] * (strat.slow + strat.signal + 5))
+    pos = strat.generate_positions(prices)
+    warmup = strat.slow + strat.signal
+    assert (pos.iloc[:warmup] == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H010 – FastMACrossover
 # ---------------------------------------------------------------------------

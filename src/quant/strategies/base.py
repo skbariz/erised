@@ -128,3 +128,16 @@ class MeanReversionStrategy(Strategy):
         pos = entry.rolling(self.hold_days, min_periods=1).max()
         pos.name = "position"
         return pos
+
+
+class ShortHoldMeanReversion(MeanReversionStrategy):
+    """Hypothesis 003: 2-sigma z-score entry, 2-day hold.
+
+    Tests whether H002's 5-day hold overstays the reversion peak.
+    Canonical config locks lookback=20, threshold=2.0, hold_days=2.
+    """
+
+    name = "short_hold_mean_rev"
+
+    def __init__(self, lookback: int = 20, threshold: float = 2.0, hold_days: int = 2):
+        super().__init__(lookback=lookback, threshold=threshold, hold_days=hold_days)

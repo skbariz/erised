@@ -8,6 +8,7 @@ import pytest
 
 from quant.backtest.engine import assert_no_lookahead, run_backtest
 from quant.strategies.base import (
+    AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
     MeanReversionStrategy,
@@ -345,4 +346,28 @@ def test_ts_momentum_flat_before_warmup():
 
 # ---------------------------------------------------------------------------
 # H008 – AbsoluteMomentumStrategy
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H008 – AbsoluteMomentumStrategy
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_absolute_momentum_no_lookahead():
+    rng = np.random.default_rng(6)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(AbsoluteMomentumStrategy().generate_positions, prices, n_checks=10)
+
+
+def test_absolute_momentum_long_in_uptrend():
+    """Sustained uptrend → positive 12-month return → long."""
+    strat = AbsoluteMomentumStrategy(lookback_months=12)
+    prices = _make_prices([0.001] * (strat.lookback_days + 10))
+    pos = strat.generate_positions(prices)
+    # After warmup, positive drift → momentum positive → long
+    assert pos.iloc[-1] == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# H009 – MACDCrossover
 # ---------------------------------------------------------------------------

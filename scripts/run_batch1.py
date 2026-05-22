@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
+    AbsoluteMomentumStrategy,
     ConsecutiveDownDays,
     MovingAverageCrossover,
     RSIReversionStrategy,
@@ -111,6 +112,14 @@ def main():
     for lm in [6, 9, 12]:
         wf = walk_forward(prices, lambda _, l=lm: TimeSeriesMomentum(long_months=l), folds=folds)
         print(f"    long_months={lm}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H008
+    print(section("H008: AbsoluteMomentumStrategy  canonical (12m lookback)"))
+    wf8, rep8, lo8, hi8 = run(prices, folds, AbsoluteMomentumStrategy, "canonical")
+    print("  1-D sensitivity (lookback_months):")
+    for lb in [6, 9, 12]:
+        wf = walk_forward(prices, lambda _, l=lb: AbsoluteMomentumStrategy(l), folds=folds)
+        print(f"    lookback_months={lb}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

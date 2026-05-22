@@ -9,6 +9,7 @@ import pytest
 from quant.backtest.engine import assert_no_lookahead, run_backtest
 from quant.strategies.base import (
     BuyAndHold,
+    MeanReversionStrategy,
     MovingAverageCrossover,
 )
 
@@ -114,3 +115,55 @@ def test_buy_and_hold_compounds_correctly():
     assert result.equity.iloc[0] == pytest.approx(1.0)
     assert result.equity.iloc[1] == pytest.approx(1.10)
     assert result.equity.iloc[2] == pytest.approx(1.045)
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H002 – MeanReversionStrategy
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_mean_reversion_no_lookahead():
+    """MeanReversionStrategy must be lookahead-free across all parameter combos."""
+    rng = np.random.default_rng(42)
+    n = 1000
+    rets = rng.normal(0.0005, 0.012, n).tolist()
+    prices = _make_prices(rets)
+    for lookback, threshold, hold_days in [(20, 2.0, 5), (10, 1.5, 3), (30, 2.5, 7)]:
+        strat = MeanReversionStrategy(lookback=lookback, threshold=threshold, hold_days=hold_days)
+        assert_no_lookahead(strat.generate_positions, prices, n_checks=10)
+
+
+def test_mean_reversion_fires_on_down_move_and_holds():
+    """Entry fires on a large down day and the position is held for exactly hold_days bars.
+
+    Construction: 25 alternating ±0.01 returns establish a stable distribution
+    (mean=0, std≈0.01). A −10% return on bar 26 produces z≈−9.75, well past the
+    2σ threshold. No subsequent signal fires, so the hold should clear exactly
+    after hold_days bars.
+    """
+    lookback = 20
+    hold_days = 5
+    n_warmup = 25
+    # Alternating ±1%: mean=0, std≈1%, so −10% gives z≈−9.75
+    rets = [0.01 if i % 2 == 0 else -0.01 for i in range(n_warmup)]
+    rets.append(-0.10)                      # signal bar
+    rets.extend([0.001] * (hold_days + 2))  # neutral tail
+    prices = _make_prices(rets)
+    strat = MeanReversionStrategy(lookback=lookback, threshold=2.0, hold_days=hold_days)
+    pos = strat.generate_positions(prices)
+
+    # iloc[0] is the initial price row (no return); signal bar is iloc[n_warmup + 1]
+    signal_iloc = n_warmup + 1
+    for i in range(hold_days):
+        assert pos.iloc[signal_iloc + i] == pytest.approx(1.0), f"Expected long at hold offset {i}"
+    assert pos.iloc[signal_iloc + hold_days] == pytest.approx(0.0), "Expected flat after hold expires"
+
+
+def test_mean_reversion_flat_before_warmup():
+    """Position must be 0 until rolling stats have enough history."""
+    lookback = 20
+    rets = [0.005] * 40
+    prices = _make_prices(rets)
+    strat = MeanReversionStrategy(lookback=lookback, threshold=2.0, hold_days=5)
+    pos = strat.generate_positions(prices)
+    # rolling_std.shift(1) first non-NaN at iloc[lookback + 1]; everything before is flat.
+    assert (pos.iloc[: lookback + 1] == 0.0).all(), "Expected all-flat during warm-up"

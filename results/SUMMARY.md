@@ -29,6 +29,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 015 | Dual MA L/S (20/100) | trend L/S | killed | 0.08 | [−0.33, 0.50] | −0.28% | −51.00% | +0.213 | near-zero; whipsaw dominates; lowest H001 corr |
 | 016 | Volatility-scaled trend | risk mgmt | kept | 0.55 | [0.14, 0.95] | 5.33% | −26.30% | +0.788 | best max DD in program; no ensemble value |
 | 017 | Trend L/S + VIX gate | trend / hybrid | killed | 0.43 | [0.03, 0.83] | 5.92% | −39.10% | +0.701 | below SPY benchmark; VIX gate too rare to help |
+| 018 | SPY/TLT dual momentum | multi-asset rotation | kept | 0.57 | [0.17, 0.98] | 7.34% | −33.72% | +0.687 | beats benchmark; high H001 corr limits ensemble value |
+| 019 | SPY/GLD rotation | multi-asset rotation | kept | 0.63 | [0.22, 1.03] | 9.68% | −33.72% | +0.788 | highest CAGR in rotation batch; too correlated for ensemble |
+| 020 | Best-of-3 momentum | multi-asset rotation | killed | 0.47 | [0.06, 0.86] | 6.04% | −31.29% | +0.329 | Sharpe < 0.51; early folds starved of TLT/GLD data |
+| 021 | SPY/TLT risk parity | risk parity | **kept ★** | **1.03** | **[0.62, 1.44]** | 7.69% | **−18.41%** | +0.407 | **FIRST OOS Sharpe ≥ 1.0; lowest MaxDD in program** |
+| 022 | Defensive equity hedge | multi-asset trend | kept | 0.68 | [0.25, 1.07] | 9.60% | −33.72% | +0.912 | best trend Sharpe; near-zero diversification value |
 
 ---
 
@@ -36,10 +41,10 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | 0.62 (H007/H008) | in progress |
-| Max DD < SPY (−55.92%) | −31.23% (H008) | **met** |
-| Strategies tested ≥ 50 | 17 | in progress |
-| Strategies kept (ensemble) | 4 | in progress |
+| OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
+| Max DD < SPY (−55.92%) | **−18.41% (H021)** | **met** |
+| Strategies tested ≥ 50 | 22 | in progress |
+| Strategies kept (ensemble) | 7 (H001/H007/H008/H016/H018/H019/H022) | in progress — note: H021 best; high corr limits ensemble benefit |
 
 ---
 

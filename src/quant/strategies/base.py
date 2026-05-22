@@ -94,6 +94,40 @@ class LongShortMACrossover(MovingAverageCrossover):
         super().__init__(fast=fast, slow=slow, allow_short=True)
 
 
+class TrendVIXGate(Strategy):
+    """H017: MA(50,200) long/short, forced flat when VIX exceeds vix_extreme.
+
+    Hypothesis: in crash conditions (VIX > 40) trend signals are whipsawed by
+    panic volatility. Sitting flat avoids the worst drawdown periods while
+    keeping the long/short signal active in normal regimes.
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, fast: int = 50, slow: int = 200, vix_extreme: float = 40.0):
+        self.fast = fast
+        self.slow = slow
+        self.vix_extreme = vix_extreme
+        self.name = f"trend_vix_gate_{fast}_{slow}_{int(vix_extreme)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("TrendVIXGate requires 'vix_close' column")
+
+        px = prices["adj_close"]
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+
+        pos = pd.Series(np.where(fast_ma > slow_ma, 1.0, -1.0), index=px.index)
+        pos = pos.where(slow_ma.notna(), 0.0)
+
+        # Force flat when VIX signals crash territory
+        in_crash = prices["vix_close"] > self.vix_extreme
+        pos = pos.where(~in_crash, 0.0)
+
+        pos.name = "position"
+        return pos
+
+
 class VolScaledTrend(Strategy):
     """H016: MA trend direction scaled by volatility targeting.
 

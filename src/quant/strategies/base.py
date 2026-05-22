@@ -141,3 +141,51 @@ class ShortHoldMeanReversion(MeanReversionStrategy):
 
     def __init__(self, lookback: int = 20, threshold: float = 2.0, hold_days: int = 2):
         super().__init__(lookback=lookback, threshold=threshold, hold_days=hold_days)
+
+
+class RSIReversionStrategy(Strategy):
+    """Hypothesis 004: RSI oversold mean reversion.
+
+    Entry when RSI(period) < entry_rsi. Remains long while RSI <= exit_rsi
+    AND within hold_days bars of the entry signal.
+    """
+
+    def __init__(
+        self,
+        period: int = 14,
+        entry_rsi: float = 30.0,
+        exit_rsi: float = 50.0,
+        hold_days: int = 5,
+    ):
+        if entry_rsi >= exit_rsi:
+            raise ValueError("entry_rsi must be < exit_rsi")
+        self.period = period
+        self.entry_rsi = entry_rsi
+        self.exit_rsi = exit_rsi
+        self.hold_days = hold_days
+        self.name = f"rsi_rev_{period}_{int(entry_rsi)}_{int(exit_rsi)}_{hold_days}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        r = prices["adj_close"].pct_change()
+        gain = r.clip(lower=0)
+        loss = (-r).clip(lower=0)
+
+        # Wilder's smoothing: alpha = 1/period
+        alpha = 1.0 / self.period
+        avg_gain = gain.ewm(alpha=alpha, min_periods=self.period, adjust=False).mean()
+        avg_loss = loss.ewm(alpha=alpha, min_periods=self.period, adjust=False).mean()
+
+        rs = avg_gain / avg_loss.replace(0, float("nan"))
+        rsi = 100.0 - (100.0 / (1.0 + rs))
+
+        entry = (rsi < self.entry_rsi).astype(float)
+        entry = entry.where(rsi.notna(), 0.0)
+
+        # Long while: entry fired recently AND RSI hasn't exceeded exit level
+        time_active = entry.rolling(self.hold_days, min_periods=1).max()
+        not_exited = (rsi <= self.exit_rsi).astype(float)
+        not_exited = not_exited.where(rsi.notna(), 0.0)
+
+        pos = (time_active * not_exited).clip(0.0, 1.0)
+        pos.name = "position"
+        return pos

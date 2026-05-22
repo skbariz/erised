@@ -20,6 +20,7 @@ from quant.strategies.base import (
     ShortHoldMeanReversion,
     TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
+    VolatilityRegime,
 )
 
 
@@ -445,3 +446,21 @@ def test_adx_filtered_ma_suppresses_weak_trend():
 # ---------------------------------------------------------------------------
 # H012 – VolatilityRegime
 # ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H012 – VolatilityRegime
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_vol_regime_no_lookahead():
+    rng = np.random.default_rng(11)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1500).tolist())
+    assert_no_lookahead(VolatilityRegime().generate_positions, prices, n_checks=10)
+
+
+def test_vol_regime_flat_before_warmup():
+    strat = VolatilityRegime(vol_lookback=20, regime_lookback=252)
+    min_bars = strat.vol_lookback + strat.regime_lookback // 2 + 5
+    prices = _make_prices([0.005] * min_bars)
+    pos = strat.generate_positions(prices)
+    assert (pos.iloc[: strat.vol_lookback + 1] == 0.0).all()

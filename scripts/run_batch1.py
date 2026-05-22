@@ -30,6 +30,7 @@ from quant.strategies.base import (
     ShortHoldMeanReversion,
     TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
+    VolatilityRegime,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
 
@@ -148,6 +149,26 @@ def main():
         wf = walk_forward(prices, lambda _, t=thr: ADXFilteredMACrossover(adx_threshold=t), folds=folds)
         print(f"    adx_threshold={thr}  Sharpe {wf.combined_report.sharpe:.2f}")
 
+    # ------------------------------------------------------------------ H012
+    print(section("H012: VolatilityRegime  canonical (vol_lookback=20, regime=252)"))
+    wf12, rep12, lo12, hi12 = run(prices, folds, VolatilityRegime, "canonical")
+    print("  Grid (vol_lookback x regime_lookback):")
+    for vl, rl in product([10, 20, 30], [126, 252]):
+        wf = walk_forward(prices, lambda _, v=vl, r=rl: VolatilityRegime(v, r), folds=folds)
+        print(f"    vol={vl} regime={rl}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ Correlation table
+    print(section("CORRELATION WITH H001 (net returns, same folds)"))
+    strategies = [
+        ("H003", wf3), ("H004", wf4), ("H005", wf5), ("H006", wf6),
+        ("H007", wf7), ("H008", wf8), ("H009", wf9), ("H010", wf10),
+        ("H011", wf11), ("H012", wf12),
+    ]
+    h001_ret = wf_h001.combined_returns
+    print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")
+    for name, wf in strategies:
+        corr = wf.combined_returns.corr(h001_ret)
+        print(f"  {name:<8} {wf.combined_report.sharpe:>8.2f} {corr:>+10.3f}")
 
 
 if __name__ == "__main__":

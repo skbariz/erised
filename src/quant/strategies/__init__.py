@@ -12,6 +12,7 @@ from .base import (
     Strategy,
     TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
+    VolatilityRegime,
 )
 
 __all__ = [
@@ -28,4 +29,5 @@ __all__ = [
     "Strategy",
     "TimeSeriesMomentum",
     "VIXFilteredReversionStrategy",
+    "VolatilityRegime",
 ]

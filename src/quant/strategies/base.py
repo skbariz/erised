@@ -407,3 +407,33 @@ class ADXFilteredMACrossover(Strategy):
         pos = ma_signal * trend_on
         pos.name = "position"
         return pos
+
+
+class VolatilityRegime(Strategy):
+    """Hypothesis 012: long in low realized-volatility regimes.
+
+    Long when 20-day realized vol is below its rolling historical median
+    (using only past vol data). Flat in turbulent regimes. Tests the
+    low-volatility anomaly: calm markets produce better risk-adjusted returns.
+    """
+
+    def __init__(self, vol_lookback: int = 20, regime_lookback: int = 252):
+        self.vol_lookback = vol_lookback
+        self.regime_lookback = regime_lookback
+        self.name = f"vol_regime_{vol_lookback}_{regime_lookback}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        r = prices["adj_close"].pct_change()
+        realized_vol = r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std()
+
+        # Rolling median of PAST vols (shift by 1 so today's vol isn't in its own baseline)
+        rolling_median = (
+            realized_vol.shift(1)
+            .rolling(self.regime_lookback, min_periods=self.regime_lookback // 2)
+            .median()
+        )
+
+        pos = (realized_vol < rolling_median).astype(float)
+        pos = pos.where(rolling_median.notna(), 0.0)
+        pos.name = "position"
+        return pos

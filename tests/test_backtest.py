@@ -9,6 +9,7 @@ import pytest
 from quant.backtest.engine import assert_no_lookahead, run_backtest
 from quant.strategies.base import (
     BuyAndHold,
+    MovingAverageCrossover,
 )
 
 
@@ -85,3 +86,31 @@ def test_position_magnitude_validated():
     positions = pd.Series([2.0, 2.0], index=prices.index)
     with pytest.raises(ValueError, match="position magnitude"):
         run_backtest(prices, positions)
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H001 – MovingAverageCrossover
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_ma_crossover_no_lookahead():
+    """The MA crossover strategy must be lookahead-free."""
+    # Build a longer series so MAs can warm up
+    rng = np.random.default_rng(0)
+    n = 1000
+    rets = rng.normal(0.0005, 0.01, n).tolist()
+    prices = _make_prices(rets)
+    strat = MovingAverageCrossover(fast=20, slow=50)
+    assert_no_lookahead(strat.generate_positions, prices, n_checks=10)
+
+
+def test_buy_and_hold_compounds_correctly():
+    """A 10% then -5% return: equity = 1.10 * 0.95 = 1.045"""
+    prices = _make_prices([0.10, -0.05])
+    positions = pd.Series([1.0, 1.0, 1.0], index=prices.index)
+    result = run_backtest(prices, positions, commission_bps=0, slippage_bps=0)
+    # Day 0: no position yet (shifted) -> return 0, equity 1
+    # Day 1: applied position 1, return 10%, equity 1.10
+    # Day 2: applied position 1, return -5%, equity 1.045
+    assert result.equity.iloc[0] == pytest.approx(1.0)
+    assert result.equity.iloc[1] == pytest.approx(1.10)
+    assert result.equity.iloc[2] == pytest.approx(1.045)

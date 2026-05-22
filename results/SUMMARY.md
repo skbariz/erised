@@ -22,7 +22,7 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | 0.62 (H001) | in progress |
 | Max DD < SPY (−55.92%) | −33.72% (H001) | **met** |
-| Strategies tested ≥ 20 | 11 | in progress |
+| Strategies tested ≥ 20 | 12 | in progress |
 | Strategies kept (ensemble) | 3 | in progress |
 
 ---

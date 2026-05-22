@@ -129,6 +129,111 @@ def run_backtest(
     )
 
 
+# Asset name → prices column convention for multi-asset backtests.
+_ASSET_COL = {
+    "SPY": "adj_close",
+    "TLT": "tlt_close",
+    "GLD": "gld_close",
+}
+
+
+def run_multiasset_backtest(
+    prices: pd.DataFrame,
+    weights: pd.DataFrame,
+    name: str = "strategy",
+    commission_bps: float = DEFAULT_COMMISSION_BPS,
+    slippage_bps: float = DEFAULT_SLIPPAGE_BPS,
+) -> BacktestResult:
+    """Run a vectorized multi-asset backtest.
+
+    Parameters
+    ----------
+    prices : DataFrame containing asset price columns keyed by _ASSET_COL.
+             Must include 'adj_close' (SPY) at minimum.
+    weights : DataFrame with columns = asset names ('SPY', 'TLT', 'GLD').
+              Weight at time t is applied to period (t, t+1] via shift(1).
+              Values must be in [-1, 1]; per-row abs-sum must be ≤ 1.0.
+
+    Returns a BacktestResult where `positions` holds the SPY weight (or first
+    asset weight) as a representative single-asset proxy for compatibility.
+    """
+    weights = weights.reindex(prices.index).fillna(0.0)
+
+    # Compute per-asset returns
+    asset_rets = pd.DataFrame(index=prices.index)
+    for asset in weights.columns:
+        col = _ASSET_COL.get(asset, f"{asset.lower()}_close")
+        if col not in prices.columns:
+            raise ValueError(f"Column '{col}' not found in prices for asset '{asset}'")
+        asset_rets[asset] = prices[col].pct_change().fillna(0.0)
+
+    # Apply weights one bar later (position set at close of t, earns return t→t+1)
+    applied = weights.shift(1).fillna(0.0)
+
+    # Gross return = weighted sum across assets
+    gross = (applied * asset_rets).sum(axis=1)
+
+    # Transaction cost = total turnover across all assets × cost rate
+    first_row_turnover = weights.abs().sum(axis=1)
+    subsequent_turnover = weights.diff().abs().sum(axis=1)
+    turnover = subsequent_turnover.copy()
+    turnover.iloc[0] = first_row_turnover.iloc[0]
+    cost_rate = (commission_bps + slippage_bps) / 1e4
+    costs = (turnover * cost_rate).shift(1).fillna(0.0)
+
+    net = gross - costs
+    equity = (1 + net).cumprod()
+
+    # SPY benchmark
+    spy_rets = asset_rets.get("SPY", asset_rets.iloc[:, 0])
+    bench_applied = pd.Series(0.0, index=prices.index)
+    bench_applied.iloc[1:] = 1.0
+    bench_rets = bench_applied * spy_rets
+    bench_equity = (1 + bench_rets).cumprod()
+
+    # For BacktestResult compatibility, expose SPY weight (or total weight) as positions
+    proxy_positions = weights.get("SPY", weights.sum(axis=1)) if "SPY" in weights.columns else weights.sum(axis=1)
+    proxy_applied = applied.get("SPY", applied.sum(axis=1)) if "SPY" in applied.columns else applied.sum(axis=1)
+
+    return BacktestResult(
+        name=name,
+        positions=proxy_positions,
+        applied_positions=proxy_applied,
+        gross_returns=gross,
+        costs=costs,
+        net_returns=net,
+        equity=equity,
+        bench_returns=bench_rets,
+        bench_equity=bench_equity,
+    )
+
+
+def assert_no_lookahead_multi(weights_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0) -> None:
+    """No-lookahead check for MultiAssetStrategy.generate_weights.
+
+    Same logic as assert_no_lookahead but checks all weight columns.
+    """
+    rng = np.random.default_rng(seed)
+    n = len(prices)
+    if n < 500:
+        return
+    candidates = rng.choice(np.arange(300, n - 50), size=n_checks, replace=False)
+    for t_idx in candidates:
+        truncated = prices.iloc[: t_idx + 1]
+        full = prices.iloc[: t_idx + 51]
+        w_truncated = weights_fn(truncated)
+        w_full = weights_fn(full)
+        date = prices.index[t_idx]
+        for col in w_truncated.columns:
+            v_trunc = float(w_truncated.loc[date, col])
+            v_full = float(w_full.loc[date, col])
+            if not np.isclose(v_trunc, v_full, equal_nan=True):
+                raise AssertionError(
+                    f"Lookahead in column '{col}': weight at {date.date()} differs. "
+                    f"Truncated={v_trunc:.6f}, full={v_full:.6f}"
+                )
+
+
 def assert_no_lookahead(strategy_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0) -> None:
     """Sanity check: chopping off future data must not change today's position.
 

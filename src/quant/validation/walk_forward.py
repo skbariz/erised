@@ -19,9 +19,9 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-from ..backtest.engine import BacktestResult, run_backtest
+from ..backtest.engine import BacktestResult, run_backtest, run_multiasset_backtest
 from ..metrics.performance import PerformanceReport, report
-from ..strategies.base import Strategy
+from ..strategies.base import MultiAssetStrategy, Strategy
 
 
 @dataclass
@@ -141,6 +141,62 @@ def walk_forward(
         bt = run_backtest(
             test_df,
             test_positions,
+            name=f"{strategy.name}_fold{fold.fold_idx}",
+            commission_bps=commission_bps,
+            slippage_bps=slippage_bps,
+        )
+        fold_results.append(bt)
+        combined_returns_pieces.append(bt.net_returns)
+        combined_positions_pieces.append(bt.positions)
+
+    combined_returns = pd.concat(combined_returns_pieces).sort_index()
+    combined_positions = pd.concat(combined_positions_pieces).sort_index()
+    combined_report = report(combined_returns, positions=combined_positions)
+
+    return WalkForwardResult(
+        folds=folds,
+        fold_results=fold_results,
+        combined_returns=combined_returns,
+        combined_positions=combined_positions,
+        combined_report=combined_report,
+    )
+
+
+def walk_forward_multi(
+    prices: pd.DataFrame,
+    strategy_factory: Callable[[pd.DataFrame], MultiAssetStrategy],
+    folds: list[Fold] | None = None,
+    train_years: float = 5.0,
+    test_years: float = 1.0,
+    commission_bps: float = 0.5,
+    slippage_bps: float = 1.0,
+) -> WalkForwardResult:
+    """Walk-forward validation for MultiAssetStrategy.
+
+    Mirrors walk_forward() but calls strategy.generate_weights() and
+    run_multiasset_backtest() instead of generate_positions() / run_backtest().
+    """
+    if folds is None:
+        folds = make_folds(prices, train_years=train_years, test_years=test_years)
+    if len(folds) == 0:
+        raise ValueError("No folds produced. Check data range and fold sizes.")
+
+    fold_results: list[BacktestResult] = []
+    combined_returns_pieces = []
+    combined_positions_pieces = []
+
+    for fold in folds:
+        train_df = prices.loc[fold.train_start : fold.train_end - pd.Timedelta(days=1)]
+        warmup_and_test_df = prices.loc[: fold.test_end - pd.Timedelta(days=1)]
+        strategy = strategy_factory(train_df)
+        all_weights = strategy.generate_weights(warmup_and_test_df)
+
+        test_df = prices.loc[fold.test_start : fold.test_end - pd.Timedelta(days=1)]
+        test_weights = all_weights.reindex(test_df.index).fillna(0.0)
+
+        bt = run_multiasset_backtest(
+            test_df,
+            test_weights,
             name=f"{strategy.name}_fold{fold.fold_idx}",
             commission_bps=commission_bps,
             slippage_bps=slippage_bps,

@@ -43,6 +43,30 @@ class Strategy(ABC):
         ...
 
 
+class MultiAssetStrategy(ABC):
+    """Base class for strategies that allocate across multiple assets.
+
+    Override `generate_weights` to produce a DataFrame of portfolio weights.
+    Column names must match asset identifiers used by run_multiasset_backtest:
+    'SPY' -> prices['adj_close'], 'TLT' -> prices['tlt_close'], etc.
+
+    Weights at time t are shifted one bar by the framework before being applied,
+    so today's weight is applied to tomorrow's return. No-lookahead discipline
+    is the same as for Strategy: use only data available at each timestamp.
+    """
+
+    name: str = "unnamed"
+
+    @abstractmethod
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        """Return a DataFrame of portfolio weights, one column per asset.
+
+        Values should be in [0, 1] (long-only) or [-1, 1] (long/short).
+        Rows that sum to 0 represent a cash position.
+        """
+        ...
+
+
 class BuyAndHold(Strategy):
     """The benchmark. Always long 1.0."""
 

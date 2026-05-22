@@ -1,4 +1,5 @@
 from .base import (
+    ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
@@ -14,6 +15,7 @@ from .base import (
 )
 
 __all__ = [
+    "ADXFilteredMACrossover",
     "AbsoluteMomentumStrategy",
     "BuyAndHold",
     "ConsecutiveDownDays",

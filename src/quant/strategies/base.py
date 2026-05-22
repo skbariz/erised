@@ -345,3 +345,65 @@ class FastMACrossover(MovingAverageCrossover):
 
     def __init__(self, fast: int = 10, slow: int = 50):
         super().__init__(fast=fast, slow=slow)
+
+
+class ADXFilteredMACrossover(Strategy):
+    """Hypothesis 011: MA(50,200) crossover confirmed by ADX trend strength.
+
+    Takes H001 signals only when ADX(period) >= adx_threshold, filtering
+    out false crossovers in ranging, low-momentum markets.
+    """
+
+    def __init__(
+        self,
+        fast: int = 50,
+        slow: int = 200,
+        adx_period: int = 14,
+        adx_threshold: float = 25.0,
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.adx_period = adx_period
+        self.adx_threshold = adx_threshold
+        self.name = f"adx_ma_{fast}_{slow}_{adx_period}_{int(adx_threshold)}"
+
+    @staticmethod
+    def _adx(prices: pd.DataFrame, period: int) -> pd.Series:
+        hi = prices["high"]
+        lo = prices["low"]
+        cl = prices["adj_close"]
+
+        tr = pd.concat(
+            [hi - lo, (hi - cl.shift(1)).abs(), (lo - cl.shift(1)).abs()], axis=1
+        ).max(axis=1)
+
+        up = hi - hi.shift(1)
+        dn = lo.shift(1) - lo
+        plus_dm = ((up > dn) & (up > 0)) * up
+        minus_dm = ((dn > up) & (dn > 0)) * dn
+
+        alpha = 1.0 / period
+        atr = tr.ewm(alpha=alpha, adjust=False, min_periods=period).mean()
+        plus_di = 100 * plus_dm.ewm(alpha=alpha, adjust=False, min_periods=period).mean() / atr
+        minus_di = 100 * minus_dm.ewm(alpha=alpha, adjust=False, min_periods=period).mean() / atr
+
+        di_sum = plus_di + minus_di
+        dx = (100 * (plus_di - minus_di).abs() / di_sum).where(di_sum > 0, 0.0)
+        adx = dx.ewm(alpha=alpha, adjust=False, min_periods=period).mean()
+        return adx
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+
+        ma_signal = (fast_ma > slow_ma).astype(float)
+        ma_signal = ma_signal.where(slow_ma.notna(), 0.0)
+
+        adx = self._adx(prices, self.adx_period)
+        trend_on = (adx >= self.adx_threshold).astype(float)
+        trend_on = trend_on.where(adx.notna(), 0.0)
+
+        pos = ma_signal * trend_on
+        pos.name = "position"
+        return pos

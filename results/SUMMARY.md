@@ -28,6 +28,7 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 014 | TS momentum long/short | momentum L/S | killed | 0.44 | [0.04, 0.83] | 6.85% | −40.54% | +0.647 | below SPY benchmark; shorting degrades H007 |
 | 015 | Dual MA L/S (20/100) | trend L/S | killed | 0.08 | [−0.33, 0.50] | −0.28% | −51.00% | +0.213 | near-zero; whipsaw dominates; lowest H001 corr |
 | 016 | Volatility-scaled trend | risk mgmt | kept | 0.55 | [0.14, 0.95] | 5.33% | −26.30% | +0.788 | best max DD in program; no ensemble value |
+| 017 | Trend L/S + VIX gate | trend / hybrid | killed | 0.43 | [0.03, 0.83] | 5.92% | −39.10% | +0.701 | below SPY benchmark; VIX gate too rare to help |
 
 ---
 
@@ -37,7 +38,7 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | 0.62 (H007/H008) | in progress |
 | Max DD < SPY (−55.92%) | −31.23% (H008) | **met** |
-| Strategies tested ≥ 50 | 16 | in progress |
+| Strategies tested ≥ 50 | 17 | in progress |
 | Strategies kept (ensemble) | 4 | in progress |
 
 ---

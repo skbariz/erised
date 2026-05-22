@@ -543,8 +543,8 @@ def test_dual_ma_ls_warms_up_faster_than_h013():
     prices = _make_prices(rets)
     h013 = LongShortMACrossover().generate_positions(prices)
     h015 = DualMALongShort().generate_positions(prices)
-    # H013 flat for first 200 bars; H015 active from bar 100
-    assert (h013.iloc[:200] == 0.0).all()
+    # H013 (slow=200) flat through index 198 (slow-1 exclusive); H015 active from index 99
+    assert (h013.iloc[:199] == 0.0).all()
     assert (h015.iloc[100:] != 0.0).any()
 
 

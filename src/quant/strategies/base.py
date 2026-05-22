@@ -94,6 +94,27 @@ class LongShortMACrossover(MovingAverageCrossover):
         super().__init__(fast=fast, slow=slow, allow_short=True)
 
 
+class LongShortTSMomentum(Strategy):
+    """H014: 12-1 month time-series momentum, long/short.
+
+    Identical lookback logic to H007 (TimeSeriesMomentum) but goes short (−1)
+    when the 12-1 month return is negative rather than going flat. Tests whether
+    the momentum signal has predictive power on the short side.
+    """
+
+    def __init__(self, long_months: int = 12, skip_months: int = 1):
+        self.long_days = int(long_months * 21)
+        self.skip_days = int(skip_months * 21)
+        self.name = f"ls_ts_mom_{long_months}m_{skip_months}skip"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        mom = px.shift(self.skip_days) / px.shift(self.long_days) - 1
+        pos = mom.apply(lambda x: 0.0 if pd.isna(x) else float(np.sign(x)))
+        pos.name = "position"
+        return pos
+
+
 class MeanReversionStrategy(Strategy):
     """Short-term mean reversion after large down moves. (Hypothesis 002)
 

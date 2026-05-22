@@ -24,6 +24,7 @@ from quant.strategies.base import (
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
+    VIXFilteredReversionStrategy,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
 
@@ -57,6 +58,11 @@ def main():
     prices = load_research("SPY")
     print(f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}")
 
+    # VIX for H006
+    vix_path = Path(__file__).resolve().parents[1] / "data" / "VIX_research.parquet"
+    vix = pd.read_parquet(vix_path)[["adj_close"]].rename(columns={"adj_close": "vix_close"})
+    prices_vix = prices.join(vix, how="left")
+    prices_vix["vix_close"] = prices_vix["vix_close"].ffill()
 
     folds = make_folds(prices, train_years=5, test_years=2)
     print(f"Folds: {len(folds)}")
@@ -88,6 +94,14 @@ def main():
     for nd, hd in product([2, 3, 4], [2, 3, 5]):
         wf = walk_forward(prices, lambda _, n=nd, h=hd: ConsecutiveDownDays(n, h), folds=folds)
         print(f"    n_down={nd} hold={hd}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H006
+    print(section("H006: VIXFilteredReversionStrategy  canonical (lookback=20, thresh=2.0, hold=2, vix=20)"))
+    wf6, rep6, lo6, hi6 = run(prices_vix, folds, VIXFilteredReversionStrategy, "canonical")
+    print("  1-D sensitivity (vix_threshold):")
+    for vt in [15, 20, 25]:
+        wf = walk_forward(prices_vix, lambda _, v=vt: VIXFilteredReversionStrategy(vix_threshold=v), folds=folds)
+        print(f"    vix_threshold={vt}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

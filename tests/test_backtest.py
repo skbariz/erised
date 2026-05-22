@@ -14,6 +14,7 @@ from quant.strategies.base import (
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
+    VIXFilteredReversionStrategy,
 )
 
 
@@ -35,6 +36,19 @@ def _make_prices(returns: list[float], start: str = "2020-01-02") -> pd.DataFram
         index=idx,
     )
     return df
+
+
+def _make_prices_with_vix(spy_rets, vix_levels, start="2020-01-02"):
+    """Build prices DataFrame with a vix_close column for H006 tests."""
+    df = _make_prices(spy_rets, start=start)
+    assert len(vix_levels) == len(df), "vix_levels must match price rows"
+    df["vix_close"] = vix_levels
+    return df
+
+
+# ---------------------------------------------------------------------------
+# H003 – ShortHoldMeanReversion
+# ---------------------------------------------------------------------------
 
 
 def test_buy_and_hold_matches_benchmark():
@@ -270,4 +284,41 @@ def test_consecutive_down_days_no_signal_after_up_break():
 
 # ---------------------------------------------------------------------------
 # H006 – VIXFilteredReversionStrategy
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H006 – VIXFilteredReversionStrategy
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_vix_filtered_reversion_no_lookahead():
+    rng = np.random.default_rng(4)
+    n = 1000
+    spy_rets = rng.normal(0.0005, 0.012, n).tolist()
+    vix = [20.0] * (n + 1)
+    prices = _make_prices_with_vix(spy_rets, vix)
+    assert_no_lookahead(VIXFilteredReversionStrategy().generate_positions, prices, n_checks=10)
+
+
+def test_vix_filtered_reversion_suppressed_in_low_vix():
+    """No entries when VIX is below the threshold even on large down days."""
+    n_warmup = 25
+    rets = [0.01 if i % 2 == 0 else -0.01 for i in range(n_warmup)]
+    rets.append(-0.10)
+    rets.extend([0.001] * 5)
+    vix = [10.0] * (len(rets) + 1)  # VIX = 10, below threshold of 20
+    prices = _make_prices_with_vix(rets, vix)
+    strat = VIXFilteredReversionStrategy(vix_threshold=20.0)
+    pos = strat.generate_positions(prices)
+    assert (pos == 0.0).all(), "Expected no entries when VIX below threshold"
+
+
+def test_vix_filtered_reversion_requires_vix_column():
+    prices = _make_prices([0.01] * 10)
+    with pytest.raises(ValueError, match="vix_close"):
+        VIXFilteredReversionStrategy().generate_positions(prices)
+
+
+# ---------------------------------------------------------------------------
+# H007 – TimeSeriesMomentum
 # ---------------------------------------------------------------------------

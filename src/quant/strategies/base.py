@@ -939,3 +939,143 @@ class DefensiveEquityHedge(MultiAssetStrategy):
 
         weights = pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
         return weights
+
+
+# ---------------------------------------------------------------------------
+# Batch 5 — H028–H032: VIX-Based Strategies
+# All require a 'vix_close' column in the prices DataFrame.
+# ---------------------------------------------------------------------------
+
+
+class VIXSpikeEntry(Strategy):
+    """H028: Contrarian long after VIX spikes above a threshold.
+
+    When VIX crosses above vix_threshold, enter long SPY and hold for
+    hold_days trading days. Fear spikes historically mark local bottoms —
+    this captures the mean-reversion bounce in equities.
+
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, vix_threshold: float = 30.0, hold_days: int = 20):
+        self.vix_threshold = vix_threshold
+        self.hold_days = hold_days
+        self.name = f"vix_spike_{int(vix_threshold)}_{hold_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VIXSpikeEntry requires 'vix_close' column")
+        vix = prices["vix_close"].shift(1)
+        spike = (vix > self.vix_threshold).astype(float)
+        # Active during hold_days window after a spike (rolling max of spike flag)
+        pos = spike.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos
+
+
+class VIXRegimeFilter(Strategy):
+    """H029: Long SPY only when VIX is below threshold (low-fear regime).
+
+    VIX below vix_threshold signals a calm, risk-on environment historically
+    associated with positive equity returns and lower drawdown risk.
+
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, vix_threshold: float = 20.0):
+        self.vix_threshold = vix_threshold
+        self.name = f"vix_regime_{int(vix_threshold)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VIXRegimeFilter requires 'vix_close' column")
+        vix = prices["vix_close"].shift(1)
+        pos = (vix < self.vix_threshold).astype(float)
+        pos.name = "position"
+        return pos
+
+
+class VIXTrendSignal(Strategy):
+    """H030: Trade equity direction via VIX trend (rising fear → short).
+
+    When VIX is above its rolling MA (trending up), short SPY: rising fear
+    implies falling equity prices. When VIX is below its MA (trending down),
+    long SPY. Uses 1-bar lag to avoid lookahead.
+
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, ma_period: int = 20):
+        self.ma_period = ma_period
+        self.name = f"vix_trend_{ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VIXTrendSignal requires 'vix_close' column")
+        vix = prices["vix_close"]
+        vix_ma = vix.rolling(self.ma_period, min_periods=self.ma_period).mean()
+        valid = vix_ma.notna()
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        pos = pos.where(~(valid & (vix.shift(1) < vix_ma.shift(1))), 1.0)
+        pos = pos.where(~(valid & (vix.shift(1) >= vix_ma.shift(1))), -1.0)
+        return pos
+
+
+class RealizedVsImpliedVol(Strategy):
+    """H031: Long when implied vol (VIX) exceeds realized vol (vol risk premium).
+
+    The volatility risk premium (VRP = VIX − realized_vol) is historically
+    positive on average. Long SPY in VRP-positive regimes (implied > realized),
+    flat otherwise. Normalized vol: both in annualized percentage terms.
+
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, realized_window: int = 20):
+        self.realized_window = realized_window
+        self.name = f"vrp_{realized_window}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("RealizedVsImpliedVol requires 'vix_close' column")
+        rets = prices["adj_close"].pct_change()
+        realized_vol = (
+            rets.rolling(self.realized_window, min_periods=self.realized_window)
+            .std()
+            .shift(1)
+            * np.sqrt(252)
+            * 100
+        )
+        vix = prices["vix_close"].shift(1)
+        valid = realized_vol.notna() & vix.notna()
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        pos[valid & (vix > realized_vol)] = 1.0
+        return pos
+
+
+class VIXMeanReversion(Strategy):
+    """H032: Contrarian long when VIX is at a statistically extreme high.
+
+    Computes a rolling z-score of VIX relative to its own history. A high
+    z-score (> n_sigma) signals extreme fear that tends to revert — the
+    reversion coincides with equity rallies. Unlike H028 (absolute threshold),
+    this normalizes by the current volatility regime.
+
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, lookback: int = 60, n_sigma: float = 2.0):
+        self.lookback = lookback
+        self.n_sigma = n_sigma
+        self.name = f"vix_mr_{lookback}d_{n_sigma}s"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VIXMeanReversion requires 'vix_close' column")
+        vix = prices["vix_close"]
+        vix_ma = vix.rolling(self.lookback, min_periods=self.lookback).mean().shift(1)
+        vix_std = vix.rolling(self.lookback, min_periods=self.lookback).std().shift(1)
+        vix_z = (vix.shift(1) - vix_ma) / vix_std.replace(0, np.nan)
+        pos = (vix_z > self.n_sigma).astype(float)
+        pos.name = "position"
+        return pos

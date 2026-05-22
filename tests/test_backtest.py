@@ -23,6 +23,7 @@ from quant.strategies.base import (
     MovingAverageCrossover,
     QuarterEndDrift,
     RSIReversionStrategy,
+    RealizedVsImpliedVol,
     RiskParity,
     SPYGLDRotation,
     SPYTLTDualMomentum,
@@ -34,6 +35,10 @@ from quant.strategies.base import (
     TrendVIXGate,
     TurnOfMonth,
     VIXFilteredReversionStrategy,
+    VIXMeanReversion,
+    VIXRegimeFilter,
+    VIXSpikeEntry,
+    VIXTrendSignal,
     VolatilityRegime,
     VolScaledTrend,
 )
@@ -1079,3 +1084,210 @@ def test_seasonality_trend_combo_flat_in_downtrend_favorable():
     dec_dates = pos.index[(pos.index.month == 12) & (pos.index.year >= 1996)]
     assert len(dec_dates) > 0
     assert np.allclose(pos[dec_dates].values, 0.0)
+
+
+# ---------------------------------------------------------------------------
+# H028 — VIXSpikeEntry
+# ---------------------------------------------------------------------------
+
+def _make_vix_prices(spy_rets, vix_levels, start="2010-01-04"):
+    n = len(spy_rets)
+    idx = pd.bdate_range(start=start, periods=n + 1)
+    px = [100.0]
+    for r in spy_rets:
+        px.append(px[-1] * (1 + r))
+    df = pd.DataFrame({"adj_close": px, "open": px, "high": px, "low": px,
+                       "close": px, "volume": [1_000_000] * (n + 1)}, index=idx)
+    assert len(vix_levels) == n + 1
+    df["vix_close"] = vix_levels
+    return df
+
+
+def test_vix_spike_entry_no_lookahead():
+    rng = np.random.default_rng(42)
+    spy = rng.normal(0.0005, 0.01, 700).tolist()
+    vix = (20 + rng.normal(0, 5, 701)).clip(10, 80).tolist()
+    prices = _make_vix_prices(spy, vix)
+    assert_no_lookahead(VIXSpikeEntry().generate_positions, prices)
+
+
+def test_vix_spike_entry_active_after_spike():
+    """Position should be 1 in the days immediately following a VIX spike."""
+    spy = [0.001] * 100
+    vix = [15.0] * 50 + [35.0] + [15.0] * 50  # spike at index 50
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXSpikeEntry(vix_threshold=30.0, hold_days=20).generate_positions(prices)
+    # After spike (shifted by 1), should be active for 20 bars
+    assert pos.iloc[52] == 1.0
+
+
+def test_vix_spike_entry_flat_before_spike():
+    """Position should be 0 when VIX has never spiked."""
+    spy = [0.001] * 100
+    vix = [15.0] * 101
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXSpikeEntry(vix_threshold=30.0).generate_positions(prices)
+    assert (pos == 0.0).all()
+
+
+def test_vix_spike_entry_binary():
+    rng = np.random.default_rng(1)
+    spy = rng.normal(0, 0.01, 200).tolist()
+    vix = (20 + rng.normal(0, 8, 201)).clip(10, 80).tolist()
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXSpikeEntry().generate_positions(prices)
+    assert set(pos.values.round(6)).issubset({0.0, 1.0})
+
+
+# ---------------------------------------------------------------------------
+# H029 — VIXRegimeFilter
+# ---------------------------------------------------------------------------
+
+def test_vix_regime_filter_no_lookahead():
+    rng = np.random.default_rng(42)
+    spy = rng.normal(0.0005, 0.01, 700).tolist()
+    vix = (18 + rng.normal(0, 4, 701)).clip(10, 50).tolist()
+    prices = _make_vix_prices(spy, vix)
+    assert_no_lookahead(VIXRegimeFilter().generate_positions, prices)
+
+
+def test_vix_regime_filter_long_when_low():
+    """VIX below threshold → position 1.0."""
+    spy = [0.001] * 100
+    vix = [15.0] * 101
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXRegimeFilter(vix_threshold=20.0).generate_positions(prices)
+    assert (pos.iloc[1:] == 1.0).all()
+
+
+def test_vix_regime_filter_flat_when_high():
+    """VIX above threshold → position 0.0."""
+    spy = [0.001] * 100
+    vix = [30.0] * 101
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXRegimeFilter(vix_threshold=20.0).generate_positions(prices)
+    assert (pos == 0.0).all()
+
+
+def test_vix_regime_filter_binary():
+    rng = np.random.default_rng(2)
+    spy = rng.normal(0, 0.01, 200).tolist()
+    vix = (20 + rng.normal(0, 5, 201)).clip(10, 50).tolist()
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXRegimeFilter().generate_positions(prices)
+    assert set(pos.values.round(6)).issubset({0.0, 1.0})
+
+
+# ---------------------------------------------------------------------------
+# H030 — VIXTrendSignal
+# ---------------------------------------------------------------------------
+
+def test_vix_trend_signal_no_lookahead():
+    rng = np.random.default_rng(42)
+    spy = rng.normal(0.0005, 0.01, 700).tolist()
+    vix = (18 + rng.normal(0, 4, 701)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    assert_no_lookahead(VIXTrendSignal().generate_positions, prices)
+
+
+def test_vix_trend_signal_long_when_vix_below_ma():
+    """VIX below its MA → declining fear → long (+1)."""
+    spy = [0.001] * 300
+    # VIX trends down: starts at 25, gradually falls to 10
+    vix = [25 - 0.05 * i for i in range(301)]
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXTrendSignal(ma_period=20).generate_positions(prices)
+    # Well after warmup (bar 50+), VIX declining → long
+    assert pos.iloc[100] == pytest.approx(1.0)
+
+
+def test_vix_trend_signal_short_when_vix_above_ma():
+    """VIX above its MA → rising fear → short (−1)."""
+    spy = [0.001] * 300
+    # VIX trends up: starts at 10, gradually rises to 40
+    vix = [10 + 0.1 * i for i in range(301)]
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXTrendSignal(ma_period=20).generate_positions(prices)
+    assert pos.iloc[100] == pytest.approx(-1.0)
+
+
+def test_vix_trend_signal_valid_range():
+    """Positions after warmup should be only +1 or -1."""
+    rng = np.random.default_rng(3)
+    spy = rng.normal(0, 0.01, 300).tolist()
+    vix = (20 + rng.normal(0, 5, 301)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXTrendSignal(ma_period=20).generate_positions(prices)
+    valid = pos.iloc[21:]
+    assert set(valid.values.round(6)).issubset({-1.0, 1.0})
+
+
+# ---------------------------------------------------------------------------
+# H031 — RealizedVsImpliedVol
+# ---------------------------------------------------------------------------
+
+def test_realized_vs_implied_no_lookahead():
+    rng = np.random.default_rng(42)
+    spy = rng.normal(0.0005, 0.01, 700).tolist()
+    vix = (18 + rng.normal(0, 4, 701)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    assert_no_lookahead(RealizedVsImpliedVol().generate_positions, prices)
+
+
+def test_realized_vs_implied_long_when_vix_higher():
+    """When VIX > realized vol, position should be 1."""
+    spy = [0.0] * 200  # zero returns → realized vol ≈ 0
+    vix = [20.0] * 201  # VIX >> realized
+    prices = _make_vix_prices(spy, vix)
+    pos = RealizedVsImpliedVol(realized_window=20).generate_positions(prices)
+    assert (pos.iloc[22:] == 1.0).all()
+
+
+def test_realized_vs_implied_binary():
+    rng = np.random.default_rng(4)
+    spy = rng.normal(0, 0.01, 300).tolist()
+    vix = (20 + rng.normal(0, 4, 301)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    pos = RealizedVsImpliedVol().generate_positions(prices)
+    assert set(pos.values.round(6)).issubset({0.0, 1.0})
+
+
+# ---------------------------------------------------------------------------
+# H032 — VIXMeanReversion
+# ---------------------------------------------------------------------------
+
+def test_vix_mean_reversion_no_lookahead():
+    rng = np.random.default_rng(42)
+    spy = rng.normal(0.0005, 0.01, 700).tolist()
+    vix = (18 + rng.normal(0, 4, 701)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    assert_no_lookahead(VIXMeanReversion().generate_positions, prices)
+
+
+def test_vix_mean_reversion_active_on_extreme_vix():
+    """Extreme VIX spike (> 2σ above mean) should activate position."""
+    spy = [0.001] * 200
+    # Low VIX for warmup, then one extreme spike
+    vix = [15.0] * 160 + [60.0] + [15.0] * 40
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXMeanReversion(lookback=60, n_sigma=2.0).generate_positions(prices)
+    # Day after the spike (shifted by 1), should be active
+    assert pos.iloc[161] == 1.0
+
+
+def test_vix_mean_reversion_flat_when_normal():
+    """Normal VIX conditions → position 0."""
+    spy = [0.001] * 200
+    vix = [18.0] * 201
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXMeanReversion(lookback=60, n_sigma=2.0).generate_positions(prices)
+    assert (pos.iloc[62:] == 0.0).all()
+
+
+def test_vix_mean_reversion_binary():
+    rng = np.random.default_rng(5)
+    spy = rng.normal(0, 0.01, 300).tolist()
+    vix = (20 + rng.normal(0, 5, 301)).clip(10, 60).tolist()
+    prices = _make_vix_prices(spy, vix)
+    pos = VIXMeanReversion().generate_positions(prices)
+    assert set(pos.values.round(6)).issubset({0.0, 1.0})

@@ -94,6 +94,17 @@ class LongShortMACrossover(MovingAverageCrossover):
         super().__init__(fast=fast, slow=slow, allow_short=True)
 
 
+class DualMALongShort(MovingAverageCrossover):
+    """H015: MA(20,100) long/short — faster signal than H013's 50/200 pair.
+
+    Tests whether catching trend turns earlier improves Sharpe or erodes gains
+    through excess turnover. allow_short=True: −1 below the 100-day MA.
+    """
+
+    def __init__(self, fast: int = 20, slow: int = 100):
+        super().__init__(fast=fast, slow=slow, allow_short=True)
+
+
 class LongShortTSMomentum(Strategy):
     """H014: 12-1 month time-series momentum, long/short.
 

@@ -332,3 +332,16 @@ class MACDCrossover(Strategy):
             pos.iloc[:warmup] = 0.0
         pos.name = "position"
         return pos
+
+
+class FastMACrossover(MovingAverageCrossover):
+    """Hypothesis 010: MA(10/50) — faster trend-following.
+
+    Tests whether catching trend turns earlier than H001's MA(50/200)
+    improves Sharpe, or whether the extra turnover erodes gains.
+    """
+
+    name = "fast_ma_cross_10_50"
+
+    def __init__(self, fast: int = 10, slow: int = 50):
+        super().__init__(fast=fast, slow=slow)

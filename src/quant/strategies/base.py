@@ -590,3 +590,186 @@ class VolatilityRegime(Strategy):
         pos = pos.where(rolling_median.notna(), 0.0)
         pos.name = "position"
         return pos
+
+
+class SPYTLTDualMomentum(MultiAssetStrategy):
+    """H018: Antonacci GEM-style dual momentum across SPY and TLT.
+
+    Hold SPY when its 12m return is positive. If SPY is negative, hold TLT when
+    TLT's 12m return is positive. If both are negative, go to cash. The
+    absolute-momentum filter (cash when all assets are negative) is the key
+    distinguisher from cross-sectional-only rotation.
+    """
+
+    def __init__(self, lookback_months: int = 12, skip_months: int = 1):
+        self.lookback_days = int(lookback_months * 21)
+        self.skip_days = int(skip_months * 21)
+        self.name = f"spy_tlt_dual_mom_{lookback_months}m"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy = prices["adj_close"]
+        tlt = prices["tlt_close"]
+
+        spy_mom = spy.shift(self.skip_days) / spy.shift(self.lookback_days) - 1
+        tlt_mom = tlt.shift(self.skip_days) / tlt.shift(self.lookback_days) - 1
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+
+        spy_positive = spy_mom > 0
+        tlt_positive = tlt_mom > 0
+        both_valid = spy_mom.notna() & tlt_mom.notna()
+
+        w_spy = w_spy.where(~(both_valid & spy_positive), 1.0)
+        w_tlt = w_tlt.where(~(both_valid & ~spy_positive & tlt_positive), 1.0)
+
+        weights = pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+        return weights
+
+
+class SPYGLDRotation(MultiAssetStrategy):
+    """H019: SPY/GLD rotation — always allocated, no cash.
+
+    Hold SPY when its 12m momentum is positive; hold GLD when SPY momentum is
+    negative. Stays fully invested at all times. GLD historically appreciates
+    during equity bear markets, particularly in inflationary regimes.
+    """
+
+    def __init__(self, lookback_months: int = 12, skip_months: int = 1):
+        self.lookback_days = int(lookback_months * 21)
+        self.skip_days = int(skip_months * 21)
+        self.name = f"spy_gld_rotation_{lookback_months}m"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy = prices["adj_close"]
+        spy_mom = spy.shift(self.skip_days) / spy.shift(self.lookback_days) - 1
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_gld = pd.Series(0.0, index=prices.index)
+
+        valid = spy_mom.notna()
+        spy_positive = valid & (spy_mom > 0)
+        spy_negative = valid & (spy_mom <= 0)
+
+        w_spy = w_spy.where(~spy_positive, 1.0)
+        w_gld = w_gld.where(~spy_negative, 1.0)
+
+        weights = pd.DataFrame({"SPY": w_spy, "GLD": w_gld}, index=prices.index)
+        return weights
+
+
+class ThreeAssetMomentum(MultiAssetStrategy):
+    """H020: Best-of-3 absolute momentum across SPY, TLT, GLD.
+
+    Hold the single best 12m performer. Go to cash if the winner's momentum
+    is negative (universal absolute-momentum filter). Broadest opportunity
+    set in Batch 3 — captures regimes where equities AND bonds decline
+    but commodities rise (e.g. inflationary bear markets).
+    """
+
+    def __init__(self, lookback_months: int = 12, skip_months: int = 1):
+        self.lookback_days = int(lookback_months * 21)
+        self.skip_days = int(skip_months * 21)
+        self.name = f"three_asset_mom_{lookback_months}m"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        assets = {
+            "SPY": prices["adj_close"],
+            "TLT": prices["tlt_close"],
+            "GLD": prices["gld_close"],
+        }
+        moms = pd.DataFrame({
+            name: px.shift(self.skip_days) / px.shift(self.lookback_days) - 1
+            for name, px in assets.items()
+        })
+
+        weights = pd.DataFrame(0.0, index=prices.index, columns=list(assets.keys()))
+        valid_rows = moms.notna().all(axis=1)
+
+        if valid_rows.any():
+            best = pd.Series(np.nan, index=prices.index, dtype=object)
+            best_mom = pd.Series(np.nan, index=prices.index)
+            best[valid_rows] = moms[valid_rows].idxmax(axis=1)
+            best_mom[valid_rows] = moms[valid_rows].max(axis=1)
+
+            for asset in assets:
+                weights[asset] = np.where(
+                    valid_rows & (best == asset) & (best_mom > 0), 1.0, 0.0
+                )
+
+        return weights
+
+
+class RiskParity(MultiAssetStrategy):
+    """H021: SPY/TLT equal-risk contribution weighting.
+
+    Weights each asset by the inverse of its 60-day realized volatility,
+    normalized to sum to 1. Both assets are held simultaneously at all times.
+    Diversification benefit: SPY and TLT have historically low/negative
+    correlation, so equal-risk allocation approximates minimum-variance.
+    """
+
+    def __init__(self, vol_lookback: int = 60):
+        self.vol_lookback = vol_lookback
+        self.name = f"risk_parity_{vol_lookback}d"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        # Annualized vol; shift 1 bar to prevent lookahead
+        spy_vol = (
+            spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
+            .std()
+            .shift(1)
+            * np.sqrt(252)
+        )
+        tlt_vol = (
+            tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
+            .std()
+            .shift(1)
+            * np.sqrt(252)
+        )
+
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+
+        w_spy = (inv_spy / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        weights = pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+        return weights
+
+
+class DefensiveEquityHedge(MultiAssetStrategy):
+    """H022: Trend-following with a bond overlay in downtrends.
+
+    100% SPY when MA(fast, slow) is bullish. Shifts to 50% SPY + 50% TLT when
+    the trend turns bearish — maintains equity participation but hedges with
+    duration. Avoids the full whipsaw cost of going to cash (H001) or going
+    short (H013) during slow downtrends.
+    """
+
+    def __init__(self, fast: int = 50, slow: int = 200):
+        self.fast = fast
+        self.slow = slow
+        self.name = f"defensive_hedge_{fast}_{slow}"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        px = prices["adj_close"]
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+
+        trend_on = fast_ma > slow_ma
+        valid = slow_ma.notna()
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+
+        w_spy = w_spy.where(~(valid & trend_on), 1.0)
+        w_spy = w_spy.where(~(valid & ~trend_on), 0.5)
+        w_tlt = w_tlt.where(~(valid & ~trend_on), 0.5)
+
+        weights = pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+        return weights

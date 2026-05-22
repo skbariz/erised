@@ -6,12 +6,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead, run_backtest
+from quant.backtest.engine import assert_no_lookahead, assert_no_lookahead_multi, run_backtest
 from quant.strategies.base import (
     ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
+    DefensiveEquityHedge,
     DualMALongShort,
     FastMACrossover,
     LongShortMACrossover,
@@ -20,7 +21,11 @@ from quant.strategies.base import (
     MeanReversionStrategy,
     MovingAverageCrossover,
     RSIReversionStrategy,
+    RiskParity,
+    SPYGLDRotation,
+    SPYTLTDualMomentum,
     ShortHoldMeanReversion,
+    ThreeAssetMomentum,
     TimeSeriesMomentum,
     TrendVIXGate,
     VIXFilteredReversionStrategy,
@@ -621,3 +626,244 @@ def test_trend_vix_gate_requires_vix_column():
     prices = _make_prices([0.01] * 10)
     with pytest.raises(ValueError, match="vix_close"):
         TrendVIXGate().generate_positions(prices)
+
+
+# ---------------------------------------------------------------------------
+# H018: SPYTLTDualMomentum helpers
+# ---------------------------------------------------------------------------
+
+def _make_multiasset_prices(spy_rets, tlt_rets=None, gld_rets=None, start="2010-01-04"):
+    """Build a prices DataFrame with SPY + optional TLT/GLD columns."""
+    n = len(spy_rets)
+    idx = pd.bdate_range(start=start, periods=n + 1)
+
+    spy_px = [100.0]
+    for r in spy_rets:
+        spy_px.append(spy_px[-1] * (1 + r))
+
+    df = pd.DataFrame(
+        {
+            "open": spy_px,
+            "high": [p * 1.01 for p in spy_px],
+            "low": [p * 0.99 for p in spy_px],
+            "close": spy_px,
+            "adj_close": spy_px,
+            "volume": [1_000_000] * len(spy_px),
+        },
+        index=idx,
+    )
+
+    if tlt_rets is not None:
+        tlt_px = [100.0]
+        for r in tlt_rets:
+            tlt_px.append(tlt_px[-1] * (1 + r))
+        df["tlt_close"] = tlt_px
+
+    if gld_rets is not None:
+        gld_px = [100.0]
+        for r in gld_rets:
+            gld_px.append(gld_px[-1] * (1 + r))
+        df["gld_close"] = gld_px
+
+    return df
+
+
+# ---------------------------------------------------------------------------
+# H018 tests
+# ---------------------------------------------------------------------------
+
+def test_spy_tlt_dual_momentum_no_lookahead():
+    n = 700
+    spy_rets = [0.001] * n
+    tlt_rets = [-0.0005] * n
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    s = SPYTLTDualMomentum()
+    assert_no_lookahead_multi(s.generate_weights, prices)
+
+
+def test_spy_tlt_dual_momentum_spy_positive_holds_spy():
+    """When SPY momentum positive, should be 100% SPY, 0% TLT."""
+    spy_rets = [0.001] * 300  # rising SPY
+    tlt_rets = [-0.001] * 300  # falling TLT
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = SPYTLTDualMomentum().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(1.0)
+    assert w["TLT"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_spy_tlt_dual_momentum_cash_when_both_negative():
+    """When both SPY and TLT momentum negative, both weights must be 0."""
+    spy_rets = [-0.001] * 300  # falling SPY
+    tlt_rets = [-0.001] * 300  # falling TLT
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = SPYTLTDualMomentum().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(0.0)
+    assert w["TLT"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_spy_tlt_dual_momentum_tlt_when_spy_negative():
+    """SPY falling, TLT rising → should allocate to TLT."""
+    spy_rets = [-0.001] * 300
+    tlt_rets = [0.001] * 300  # TLT rising
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = SPYTLTDualMomentum().generate_weights(prices)
+    assert w["TLT"].iloc[-1] == pytest.approx(1.0)
+    assert w["SPY"].iloc[-1] == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H019 tests
+# ---------------------------------------------------------------------------
+
+def test_spy_gld_rotation_no_lookahead():
+    n = 700
+    spy_rets = [0.001] * n
+    gld_rets = [0.0005] * n
+    prices = _make_multiasset_prices(spy_rets, gld_rets=gld_rets)
+    s = SPYGLDRotation()
+    assert_no_lookahead_multi(s.generate_weights, prices)
+
+
+def test_spy_gld_rotation_spy_when_positive():
+    spy_rets = [0.001] * 300
+    gld_rets = [0.0005] * 300
+    prices = _make_multiasset_prices(spy_rets, gld_rets=gld_rets)
+    w = SPYGLDRotation().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(1.0)
+    assert w["GLD"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_spy_gld_rotation_gld_when_spy_negative():
+    spy_rets = [-0.001] * 300
+    gld_rets = [0.0005] * 300
+    prices = _make_multiasset_prices(spy_rets, gld_rets=gld_rets)
+    w = SPYGLDRotation().generate_weights(prices)
+    assert w["GLD"].iloc[-1] == pytest.approx(1.0)
+    assert w["SPY"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_spy_gld_rotation_always_fully_invested():
+    """Sum of weights must always be 0 (pre-warmup) or 1 (post-warmup)."""
+    spy_rets = [-0.001] * 300
+    gld_rets = [0.001] * 300
+    prices = _make_multiasset_prices(spy_rets, gld_rets=gld_rets)
+    w = SPYGLDRotation().generate_weights(prices)
+    row_sums = (w["SPY"] + w["GLD"]).iloc[270:]  # after warmup
+    assert np.allclose(row_sums.values, 1.0)
+
+
+# ---------------------------------------------------------------------------
+# H020 tests
+# ---------------------------------------------------------------------------
+
+def test_three_asset_momentum_no_lookahead():
+    n = 700
+    spy_rets = [0.001] * n
+    tlt_rets = [0.0005] * n
+    gld_rets = [0.0008] * n
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets, gld_rets=gld_rets)
+    s = ThreeAssetMomentum()
+    assert_no_lookahead_multi(s.generate_weights, prices)
+
+
+def test_three_asset_momentum_picks_best():
+    """Asset with highest 12m return should get weight 1.0."""
+    spy_rets = [0.002] * 300   # best
+    tlt_rets = [0.001] * 300
+    gld_rets = [0.0005] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets, gld_rets=gld_rets)
+    w = ThreeAssetMomentum().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(1.0)
+    assert w["TLT"].iloc[-1] == pytest.approx(0.0)
+    assert w["GLD"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_three_asset_momentum_cash_when_all_negative():
+    spy_rets = [-0.001] * 300
+    tlt_rets = [-0.001] * 300
+    gld_rets = [-0.001] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets, gld_rets=gld_rets)
+    w = ThreeAssetMomentum().generate_weights(prices)
+    assert w.iloc[-1].sum() == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H021 tests
+# ---------------------------------------------------------------------------
+
+def test_risk_parity_no_lookahead():
+    n = 700
+    spy_rets = [0.001 * (1 + 0.1 * (i % 10)) for i in range(n)]
+    tlt_rets = [0.0005 * (1 + 0.1 * ((i + 3) % 10)) for i in range(n)]
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    s = RiskParity()
+    assert_no_lookahead_multi(s.generate_weights, prices)
+
+
+def test_risk_parity_weights_sum_to_one():
+    """After warmup, SPY + TLT weights must sum to 1.0."""
+    spy_rets = [0.001] * 300
+    tlt_rets = [0.0005] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = RiskParity(vol_lookback=60).generate_weights(prices)
+    # After warmup + 1-bar shift (61 + 1 = 62 bars), weights should sum to 1
+    valid = (w["SPY"] + w["TLT"]) > 0
+    row_sums = (w["SPY"] + w["TLT"])[valid]
+    assert np.allclose(row_sums.values, 1.0)
+
+
+def test_risk_parity_higher_vol_gets_lower_weight():
+    """Asset with higher realized vol should receive lower weight."""
+    import numpy as np
+    rng = np.random.default_rng(42)
+    # SPY: high vol (2%), TLT: low vol (0.5%)
+    spy_rets = (rng.normal(0, 0.02, 300)).tolist()
+    tlt_rets = (rng.normal(0, 0.005, 300)).tolist()
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = RiskParity(vol_lookback=60).generate_weights(prices)
+    # After warmup, TLT should have higher weight than SPY
+    assert w["TLT"].iloc[-1] > w["SPY"].iloc[-1]
+
+
+# ---------------------------------------------------------------------------
+# H022 tests
+# ---------------------------------------------------------------------------
+
+def test_defensive_equity_hedge_no_lookahead():
+    n = 700
+    spy_rets = [0.001] * n
+    tlt_rets = [-0.0005] * n
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    s = DefensiveEquityHedge()
+    assert_no_lookahead_multi(s.generate_weights, prices)
+
+
+def test_defensive_equity_hedge_full_spy_in_uptrend():
+    """Uptrend → 100% SPY, 0% TLT."""
+    spy_rets = [0.001] * 300
+    tlt_rets = [0.0] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = DefensiveEquityHedge().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(1.0)
+    assert w["TLT"].iloc[-1] == pytest.approx(0.0)
+
+
+def test_defensive_equity_hedge_splits_in_downtrend():
+    """Downtrend → 50% SPY, 50% TLT."""
+    spy_rets = [-0.001] * 300
+    tlt_rets = [0.0] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = DefensiveEquityHedge().generate_weights(prices)
+    assert w["SPY"].iloc[-1] == pytest.approx(0.5)
+    assert w["TLT"].iloc[-1] == pytest.approx(0.5)
+
+
+def test_defensive_equity_hedge_always_fully_invested():
+    """Weights must always sum to 0 (pre-warmup) or 1 (post-warmup)."""
+    spy_rets = [-0.001] * 300
+    tlt_rets = [0.001] * 300
+    prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets)
+    w = DefensiveEquityHedge().generate_weights(prices)
+    valid = (w["SPY"] + w["TLT"]) > 0
+    row_sums = (w["SPY"] + w["TLT"])[valid]
+    assert np.allclose(row_sums.values, 1.0)

@@ -189,3 +189,31 @@ class RSIReversionStrategy(Strategy):
         pos = (time_active * not_exited).clip(0.0, 1.0)
         pos.name = "position"
         return pos
+
+
+class ConsecutiveDownDays(Strategy):
+    """Hypothesis 005: entry after n_down consecutive negative closes.
+
+    The rolling-minimum trick: rolling(n_down).min() on the binary
+    is_down series equals 1 iff every bar in the window was a down day.
+    Lookahead-free and fully vectorized.
+    """
+
+    def __init__(self, n_down: int = 3, hold_days: int = 3):
+        if n_down < 2:
+            raise ValueError("n_down must be >= 2")
+        self.n_down = n_down
+        self.hold_days = hold_days
+        self.name = f"consec_down_{n_down}_{hold_days}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        r = prices["adj_close"].pct_change()
+        is_down = (r < 0).astype(float)
+
+        # All n_down bars in the rolling window are down iff min == 1
+        consec_min = is_down.rolling(self.n_down, min_periods=self.n_down).min()
+        entry = (consec_min >= 1.0).astype(float)
+
+        pos = entry.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos

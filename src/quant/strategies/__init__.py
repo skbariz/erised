@@ -1,5 +1,6 @@
 from .base import (
     BuyAndHold,
+    ConsecutiveDownDays,
     MeanReversionStrategy,
     MovingAverageCrossover,
     RSIReversionStrategy,
@@ -9,6 +10,7 @@ from .base import (
 
 __all__ = [
     "BuyAndHold",
+    "ConsecutiveDownDays",
     "MeanReversionStrategy",
     "MovingAverageCrossover",
     "RSIReversionStrategy",

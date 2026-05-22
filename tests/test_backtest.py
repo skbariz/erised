@@ -12,6 +12,7 @@ from quant.strategies.base import (
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
+    DualMALongShort,
     FastMACrossover,
     LongShortMACrossover,
     LongShortTSMomentum,
@@ -521,4 +522,32 @@ def test_ls_ts_momentum_positions_binary():
     rng = np.random.default_rng(15)
     prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
     pos = LongShortTSMomentum().generate_positions(prices)
+    assert pos.isin([-1.0, 0.0, 1.0]).all()
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H015 – DualMALongShort
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_dual_ma_ls_no_lookahead():
+    rng = np.random.default_rng(16)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(DualMALongShort().generate_positions, prices, n_checks=10)
+
+
+def test_dual_ma_ls_warms_up_faster_than_h013():
+    """DualMALongShort (slow=100) produces non-zero positions before H013 (slow=200) warms up."""
+    rets = [0.001] * 210
+    prices = _make_prices(rets)
+    h013 = LongShortMACrossover().generate_positions(prices)
+    h015 = DualMALongShort().generate_positions(prices)
+    # H013 flat for first 200 bars; H015 active from bar 100
+    assert (h013.iloc[:200] == 0.0).all()
+    assert (h015.iloc[100:] != 0.0).any()
+
+
+def test_dual_ma_ls_positions_binary():
+    rng = np.random.default_rng(17)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
+    pos = DualMALongShort().generate_positions(prices)
     assert pos.isin([-1.0, 0.0, 1.0]).all()

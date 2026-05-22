@@ -16,6 +16,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
+    DualMALongShort,
     LongShortMACrossover,
     LongShortTSMomentum,
     MovingAverageCrossover,
@@ -82,9 +83,17 @@ def main():
         wf = walk_forward(prices, lambda _, l=lm: LongShortTSMomentum(long_months=l), folds=folds)
         print(f"    long_months={lm}  Sharpe {wf.combined_report.sharpe:.2f}")
 
+    # ------------------------------------------------------------------ H015
+    print(section("H015: DualMALongShort  canonical (fast=20, slow=100)"))
+    wf15, rep15, lo15, hi15 = run(prices, folds, DualMALongShort, "canonical")
+    print("  1-D sensitivity (fast/slow):")
+    for f, s in [(10, 50), (20, 100), (20, 50)]:
+        wf = walk_forward(prices, lambda _, ff=f, ss=s: DualMALongShort(ff, ss), folds=folds)
+        print(f"    MA({f},{s})  Sharpe {wf.combined_report.sharpe:.2f}")
+
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
-    strategies = [("H013", wf13), ("H014", wf14)]
+    strategies = [("H013", wf13), ("H014", wf14), ("H015", wf15)]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")
     for name, wf in strategies:

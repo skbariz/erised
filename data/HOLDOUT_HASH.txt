@@ -1,0 +1,4 @@
+# Holdout integrity record. Committed to git.
+# Holdout start: 2023-01-01
+
+SPY  sha256=b6a53153d00c6c5c5bf4095288cd9acaa1418c7f096fe06085952b022de9a292  rows=848  range=2023-01-03..2026-05-20

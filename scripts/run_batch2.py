@@ -20,6 +20,7 @@ from quant.strategies.base import (
     LongShortMACrossover,
     LongShortTSMomentum,
     MovingAverageCrossover,
+    TrendVIXGate,
     VolScaledTrend,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
@@ -100,9 +101,17 @@ def main():
         wf = walk_forward(prices, lambda _, t=tv: VolScaledTrend(target_vol=t), folds=folds)
         print(f"    target_vol={tv:.0%}  Sharpe {wf.combined_report.sharpe:.2f}")
 
+    # ------------------------------------------------------------------ H017
+    print(section("H017: TrendVIXGate  canonical (fast=50, slow=200, vix_extreme=40)"))
+    wf17, rep17, lo17, hi17 = run(prices_vix, folds, TrendVIXGate, "canonical")
+    print("  1-D sensitivity (vix_extreme):")
+    for ve in [30, 40, 50]:
+        wf = walk_forward(prices_vix, lambda _, v=ve: TrendVIXGate(vix_extreme=v), folds=folds)
+        print(f"    vix_extreme={ve}  Sharpe {wf.combined_report.sharpe:.2f}")
+
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
-    strategies = [("H013", wf13), ("H014", wf14), ("H015", wf15), ("H016", wf16)]
+    strategies = [("H013", wf13), ("H014", wf14), ("H015", wf15), ("H016", wf16), ("H017", wf17)]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")
     for name, wf in strategies:

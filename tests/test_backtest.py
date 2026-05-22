@@ -22,6 +22,7 @@ from quant.strategies.base import (
     RSIReversionStrategy,
     ShortHoldMeanReversion,
     TimeSeriesMomentum,
+    TrendVIXGate,
     VIXFilteredReversionStrategy,
     VolatilityRegime,
     VolScaledTrend,
@@ -582,3 +583,41 @@ def test_vol_scaled_trend_scales_down_in_high_vol():
     non_zero = pos[pos != 0.0]
     if len(non_zero) > 0:
         assert (non_zero.abs() < 1.0).all()
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H017 – TrendVIXGate
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_trend_vix_gate_no_lookahead():
+    rng = np.random.default_rng(20)
+    n = 1000
+    spy_rets = rng.normal(0.0005, 0.012, n).tolist()
+    vix = [20.0] * (n + 1)
+    prices = _make_prices_with_vix(spy_rets, vix)
+    assert_no_lookahead(TrendVIXGate().generate_positions, prices, n_checks=10)
+
+
+def test_trend_vix_gate_flat_in_crash():
+    """When VIX > 40, position must be 0 regardless of MA signal."""
+    rets = [0.001] * 300  # uptrend — MA signal would be long
+    vix = [50.0] * 301    # crash-level VIX throughout
+    prices = _make_prices_with_vix(rets, vix)
+    pos = TrendVIXGate(vix_extreme=40.0).generate_positions(prices)
+    assert (pos == 0.0).all()
+
+
+def test_trend_vix_gate_active_in_normal_vix():
+    """Below the VIX gate, strategy behaves like a standard long/short MA."""
+    rets = [0.001] * 300
+    vix = [15.0] * 301  # normal VIX, gate inactive
+    prices = _make_prices_with_vix(rets, vix)
+    pos = TrendVIXGate(vix_extreme=40.0).generate_positions(prices)
+    # After warmup in uptrend, position should be +1
+    assert pos.iloc[-1] == pytest.approx(1.0)
+
+
+def test_trend_vix_gate_requires_vix_column():
+    prices = _make_prices([0.01] * 10)
+    with pytest.raises(ValueError, match="vix_close"):
+        TrendVIXGate().generate_positions(prices)

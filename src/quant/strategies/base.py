@@ -301,3 +301,34 @@ class AbsoluteMomentumStrategy(Strategy):
         pos = pos.where(mom.notna(), 0.0)
         pos.name = "position"
         return pos
+
+
+class MACDCrossover(Strategy):
+    """Hypothesis 009: MACD signal-line crossover.
+
+    Long when MACD (EMA_fast - EMA_slow) is above its signal line (EMA of MACD).
+    All EMAs are computed from data through t — no lookahead.
+    """
+
+    def __init__(self, fast: int = 12, slow: int = 26, signal: int = 9):
+        if fast >= slow:
+            raise ValueError("fast must be < slow")
+        self.fast = fast
+        self.slow = slow
+        self.signal = signal
+        self.name = f"macd_{fast}_{slow}_{signal}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        ema_fast = px.ewm(span=self.fast, adjust=False).mean()
+        ema_slow = px.ewm(span=self.slow, adjust=False).mean()
+        macd_line = ema_fast - ema_slow
+        signal_line = macd_line.ewm(span=self.signal, adjust=False).mean()
+
+        pos = (macd_line > signal_line).astype(float)
+        # Zero out the warm-up window where EMAs are unreliable
+        warmup = self.slow + self.signal
+        if len(pos) > warmup:
+            pos.iloc[:warmup] = 0.0
+        pos.name = "position"
+        return pos

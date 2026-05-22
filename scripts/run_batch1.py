@@ -21,6 +21,7 @@ from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
     MovingAverageCrossover,
+    RSIReversionStrategy,
     ShortHoldMeanReversion,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
@@ -70,6 +71,14 @@ def main():
     for hd in [1, 2, 3]:
         wf = walk_forward(prices, lambda _, h=hd: ShortHoldMeanReversion(hold_days=h), folds=folds)
         print(f"    hold_days={hd}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H004
+    print(section("H004: RSIReversionStrategy  canonical (period=14, entry=30, exit=50, hold=5)"))
+    wf4, rep4, lo4, hi4 = run(prices, folds, RSIReversionStrategy, "canonical")
+    print("  1-D sensitivity (entry_rsi):")
+    for ent in [25, 30, 35]:
+        wf = walk_forward(prices, lambda _, e=ent: RSIReversionStrategy(entry_rsi=e), folds=folds)
+        print(f"    entry_rsi={ent}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

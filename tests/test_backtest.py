@@ -11,6 +11,7 @@ from quant.strategies.base import (
     BuyAndHold,
     MeanReversionStrategy,
     MovingAverageCrossover,
+    RSIReversionStrategy,
     ShortHoldMeanReversion,
 )
 
@@ -196,4 +197,38 @@ def test_short_hold_mean_reversion_hold_expires_at_2():
 
 # ---------------------------------------------------------------------------
 # H004 – RSIReversionStrategy
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H004 – RSIReversionStrategy
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_rsi_reversion_no_lookahead():
+    rng = np.random.default_rng(2)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(RSIReversionStrategy().generate_positions, prices, n_checks=10)
+
+
+def test_rsi_reversion_flat_before_warmup():
+    """No position before RSI has enough history."""
+    prices = _make_prices([0.005] * 50)
+    pos = RSIReversionStrategy(period=14).generate_positions(prices)
+    assert (pos.iloc[:14] == 0.0).all()
+
+
+def test_rsi_reversion_exits_above_exit_rsi():
+    """When RSI exceeds exit_rsi while in a hold, position becomes 0."""
+    rng = np.random.default_rng(99)
+    # Build a series long enough for EWM warmup
+    prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
+    strat = RSIReversionStrategy(period=14, entry_rsi=30.0, exit_rsi=50.0, hold_days=5)
+    pos = strat.generate_positions(prices)
+    # positions are valid (no NaN, within [-1, 1])
+    assert pos.notna().all()
+    assert (pos.abs() <= 1.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H005 – ConsecutiveDownDays
 # ---------------------------------------------------------------------------

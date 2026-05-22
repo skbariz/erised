@@ -15,19 +15,24 @@ from quant.strategies.base import (
     DefensiveEquityHedge,
     DualMALongShort,
     FastMACrossover,
+    JanuaryBarometer,
     LongShortMACrossover,
     LongShortTSMomentum,
     MACDCrossover,
     MeanReversionStrategy,
     MovingAverageCrossover,
+    QuarterEndDrift,
     RSIReversionStrategy,
     RiskParity,
     SPYGLDRotation,
     SPYTLTDualMomentum,
+    SeasonalityTrendCombo,
+    SellInMay,
     ShortHoldMeanReversion,
     ThreeAssetMomentum,
     TimeSeriesMomentum,
     TrendVIXGate,
+    TurnOfMonth,
     VIXFilteredReversionStrategy,
     VolatilityRegime,
     VolScaledTrend,
@@ -867,3 +872,210 @@ def test_defensive_equity_hedge_always_fully_invested():
     valid = (w["SPY"] + w["TLT"]) > 0
     row_sums = (w["SPY"] + w["TLT"])[valid]
     assert np.allclose(row_sums.values, 1.0)
+
+
+# ---------------------------------------------------------------------------
+# Helpers for calendar strategy tests
+# ---------------------------------------------------------------------------
+
+def _make_prices_dated(n_rets: int, start: str = "1995-01-03") -> pd.DataFrame:
+    """Build prices anchored at a known calendar date for calendar-effect tests."""
+    return _make_prices([0.0005] * n_rets, start=start)
+
+
+# ---------------------------------------------------------------------------
+# H023 — SellInMay
+# ---------------------------------------------------------------------------
+
+def test_sell_in_may_no_lookahead():
+    prices = _make_prices([0.001] * 700, start="1995-01-03")
+    assert_no_lookahead(SellInMay().generate_positions, prices)
+
+
+def test_sell_in_may_long_in_november():
+    """November is a favorable month — position must be 1.0."""
+    prices = _make_prices_dated(500, start="1995-01-03")
+    pos = SellInMay().generate_positions(prices)
+    nov_dates = pos.index[pos.index.month == 11]
+    assert len(nov_dates) > 0
+    assert (pos[nov_dates] == 1.0).all()
+
+
+def test_sell_in_may_flat_in_june():
+    """June is an unfavorable month — position must be 0.0."""
+    prices = _make_prices_dated(500, start="1995-01-03")
+    pos = SellInMay().generate_positions(prices)
+    jun_dates = pos.index[pos.index.month == 6]
+    assert len(jun_dates) > 0
+    assert (pos[jun_dates] == 0.0).all()
+
+
+def test_sell_in_may_transitions_at_boundary():
+    """Position flips at May 1 and November 1."""
+    prices = _make_prices_dated(500, start="1995-01-03")
+    pos = SellInMay().generate_positions(prices)
+    apr_dates = pos.index[pos.index.month == 4]
+    may_dates = pos.index[pos.index.month == 5]
+    oct_dates = pos.index[pos.index.month == 10]
+    nov_dates = pos.index[pos.index.month == 11]
+    assert (pos[apr_dates] == 1.0).all()
+    assert (pos[may_dates] == 0.0).all()
+    assert (pos[oct_dates] == 0.0).all()
+    assert (pos[nov_dates] == 1.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H024 — TurnOfMonth
+# ---------------------------------------------------------------------------
+
+def test_turn_of_month_no_lookahead():
+    """Ranks must be stable when future price rows are added."""
+    prices = _make_prices([0.001] * 700, start="1995-01-03")
+    assert_no_lookahead(TurnOfMonth().generate_positions, prices)
+
+
+def test_turn_of_month_first_day_long():
+    """First trading day of a month must be in the window."""
+    # Start at a month boundary: 1995-01-03 is the first business day of January
+    prices = _make_prices_dated(50, start="1995-01-03")
+    pos = TurnOfMonth(n_days=3).generate_positions(prices)
+    assert pos.iloc[0] == pytest.approx(1.0)
+
+
+def test_turn_of_month_middle_of_month_flat():
+    """Middle trading days of a month must be flat."""
+    # Jan 1995 has ~21 trading days; the 10th trading day is in the middle
+    prices = _make_prices_dated(30, start="1995-01-03")
+    pos = TurnOfMonth(n_days=3).generate_positions(prices)
+    # Day at index 9 (10th trading day, 0-indexed): not first 3, not last 3 of Jan
+    assert pos.iloc[9] == pytest.approx(0.0)
+
+
+def test_turn_of_month_last_day_long():
+    """Last trading day of a month must be in the window."""
+    # Build enough data that we can check the last day of January 1995
+    prices = _make_prices_dated(25, start="1995-01-03")
+    pos = TurnOfMonth(n_days=3).generate_positions(prices)
+    jan_dates = pos.index[pos.index.month == 1]
+    assert pos[jan_dates[-1]] == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# H025 — JanuaryBarometer
+# ---------------------------------------------------------------------------
+
+def test_january_barometer_no_lookahead():
+    prices = _make_prices([0.001] * 700, start="1995-01-03")
+    assert_no_lookahead(JanuaryBarometer().generate_positions, prices)
+
+
+def test_january_barometer_long_after_positive_january():
+    """Rising January → position = 1.0 in February."""
+    # Start Jan 1995, rising prices throughout
+    prices = _make_prices([0.003] * 400, start="1995-01-03")
+    pos = JanuaryBarometer().generate_positions(prices)
+    feb_dates = pos.index[(pos.index.year == 1995) & (pos.index.month == 2)]
+    assert len(feb_dates) > 0
+    assert (pos[feb_dates] == 1.0).all()
+
+
+def test_january_barometer_flat_after_negative_january():
+    """Falling January → position = 0.0 in February."""
+    # Jan 1995 falls, then flat for the rest
+    n_total = 400
+    # Jan 1995 has ~21 trading days, make them fall
+    jan_rets = [-0.005] * 21
+    rest_rets = [0.001] * (n_total - 21)
+    prices = _make_prices(jan_rets + rest_rets, start="1995-01-03")
+    pos = JanuaryBarometer().generate_positions(prices)
+    feb_dates = pos.index[(pos.index.year == 1995) & (pos.index.month == 2)]
+    assert len(feb_dates) > 0
+    assert (pos[feb_dates] == 0.0).all()
+
+
+def test_january_barometer_flat_in_january():
+    """Position must be 0.0 in January itself (signal not yet set)."""
+    prices = _make_prices([0.001] * 300, start="1995-01-03")
+    pos = JanuaryBarometer().generate_positions(prices)
+    jan_dates = pos.index[pos.index.month == 1]
+    assert (pos[jan_dates] == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H026 — QuarterEndDrift
+# ---------------------------------------------------------------------------
+
+def test_quarter_end_drift_no_lookahead():
+    """Ranks must be stable when future price rows are added."""
+    prices = _make_prices([0.001] * 700, start="1995-01-03")
+    assert_no_lookahead(QuarterEndDrift().generate_positions, prices)
+
+
+def test_quarter_end_drift_last_day_of_quarter_long():
+    """The last trading day of a quarter must be in the drift window."""
+    # Mar 31 1995 is a Friday — last business day of Q1
+    prices = _make_prices_dated(80, start="1995-01-03")
+    pos = QuarterEndDrift(n_days=5).generate_positions(prices)
+    # Last day of Q1 1995
+    q1_dates = pos.index[(pos.index.year == 1995) & (pos.index.month == 3)]
+    assert pos[q1_dates[-1]] == pytest.approx(1.0)
+
+
+def test_quarter_end_drift_early_in_quarter_flat():
+    """Early trading days of a quarter (not near end) must be flat."""
+    prices = _make_prices_dated(80, start="1995-01-03")
+    pos = QuarterEndDrift(n_days=5).generate_positions(prices)
+    # 10th trading day of Q1 (mid-January) must be flat
+    assert pos.iloc[9] == pytest.approx(0.0)
+
+
+def test_quarter_end_drift_only_active_near_quarter_end():
+    """No more than n_days per quarter should be in the window."""
+    prices = _make_prices_dated(300, start="1995-01-03")
+    pos = QuarterEndDrift(n_days=5).generate_positions(prices)
+    # Count active days per quarter
+    from quant.strategies.base import _calendar_quarter_rank_end
+    rank_end = _calendar_quarter_rank_end(prices.index)
+    # Active days = rank_end < 5; should be exactly 5 per quarter for full quarters
+    quarters = prices.index.to_period("Q")
+    for q in quarters.unique():
+        q_active = pos[quarters == q].sum()
+        assert q_active <= 5
+
+
+# ---------------------------------------------------------------------------
+# H027 — SeasonalityTrendCombo
+# ---------------------------------------------------------------------------
+
+def test_seasonality_trend_combo_no_lookahead():
+    prices = _make_prices([0.001] * 700, start="1995-01-03")
+    assert_no_lookahead(SeasonalityTrendCombo().generate_positions, prices)
+
+
+def test_seasonality_trend_combo_long_in_uptrend_favorable():
+    """Uptrend in November (favorable, post-warmup) → long."""
+    # 800 bars from 1995-01-03 ≈ 3.2 years; MA(200) warms up ~Oct 1995
+    prices = _make_prices([0.001] * 800, start="1995-01-03")
+    pos = SeasonalityTrendCombo().generate_positions(prices)
+    # Check any November after 1996 (well past 200-bar warmup)
+    nov_dates = pos.index[(pos.index.month == 11) & (pos.index.year >= 1996)]
+    assert len(nov_dates) > 0
+    assert np.allclose(pos[nov_dates].values, 1.0)
+
+
+def test_seasonality_trend_combo_flat_in_uptrend_unfavorable():
+    """Uptrend in July (unfavorable month) → flat despite trend signal."""
+    prices = _make_prices([0.001] * 800, start="1995-01-03")
+    pos = SeasonalityTrendCombo().generate_positions(prices)
+    jul_dates = pos.index[(pos.index.month == 7) & (pos.index.year >= 1996)]
+    assert len(jul_dates) > 0
+    assert np.allclose(pos[jul_dates].values, 0.0)
+
+
+def test_seasonality_trend_combo_flat_in_downtrend_favorable():
+    """Downtrend in December (favorable) → flat because trend is off."""
+    prices = _make_prices([-0.001] * 800, start="1995-01-03")
+    pos = SeasonalityTrendCombo().generate_positions(prices)
+    dec_dates = pos.index[(pos.index.month == 12) & (pos.index.year >= 1996)]
+    assert len(dec_dates) > 0
+    assert np.allclose(pos[dec_dates].values, 0.0)

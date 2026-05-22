@@ -592,6 +592,172 @@ class VolatilityRegime(Strategy):
         return pos
 
 
+# ---------------------------------------------------------------------------
+# Calendar helpers — used by H024 and H026.
+# ---------------------------------------------------------------------------
+
+def _calendar_month_ranks(index: pd.DatetimeIndex) -> tuple[pd.Series, pd.Series]:
+    """Rank each date from the start and end of its calendar month.
+
+    Uses a fixed business-day calendar anchored at index.min() + 50 years so
+    that truncating the price series at any point T does not change the
+    rank_end value at T. This makes calendar strategies pass assert_no_lookahead
+    (which checks that positions at T are stable under price-data extension).
+    """
+    start = index.min()
+    cal_end = start + pd.DateOffset(years=50)
+    all_bdays = pd.bdate_range(start, cal_end)
+    ym = all_bdays.year * 100 + all_bdays.month
+    ym_series = pd.Series(ym, index=all_bdays, name="ym")
+    rank_start = ym_series.groupby(ym_series).cumcount()
+    rank_end = ym_series.groupby(ym_series).cumcount(ascending=False)
+    return rank_start.reindex(index), rank_end.reindex(index)
+
+
+def _calendar_quarter_rank_end(index: pd.DatetimeIndex) -> pd.Series:
+    """Rank each date from the END of its calendar quarter.
+
+    Same fixed-calendar projection as _calendar_month_ranks.
+    """
+    start = index.min()
+    cal_end = start + pd.DateOffset(years=50)
+    all_bdays = pd.bdate_range(start, cal_end)
+    yq = all_bdays.year * 10 + all_bdays.quarter
+    yq_series = pd.Series(yq, index=all_bdays, name="yq")
+    rank_end = yq_series.groupby(yq_series).cumcount(ascending=False)
+    return rank_end.reindex(index)
+
+
+class SellInMay(Strategy):
+    """H023: Sell in May — long Nov-Apr, flat May-Oct.
+
+    Bouman & Jacobsen (2002) documented this anomaly in 37 countries over 40+
+    years. Institutional tax-loss selling in December, year-end rebalancing, and
+    reduced summer participation drive the pattern. Signal is purely calendar-
+    based; correlation with H001 (price-momentum) is structurally low.
+    """
+
+    def __init__(self, favorable_months: tuple = (11, 12, 1, 2, 3, 4)):
+        self.favorable_months = frozenset(favorable_months)
+        self.name = "sell_in_may"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        is_favorable = prices.index.month.isin(self.favorable_months)
+        pos = pd.Series(is_favorable.astype(float), index=prices.index, name="position")
+        return pos
+
+
+class TurnOfMonth(Strategy):
+    """H024: Long the last + first N trading days of each calendar month.
+
+    Ariel (1987) showed that virtually all stock market gains are concentrated
+    near month boundaries. Institutional cash flows (pension contributions,
+    dividend reinvestment) concentrate at month turns.
+
+    Uses a fixed business-day calendar projection so that within-month
+    rank_end values are stable under price-series truncation (allowing
+    assert_no_lookahead to pass for this calendar-based strategy).
+    """
+
+    def __init__(self, n_days: int = 3):
+        self.n_days = n_days
+        self.name = f"turn_of_month_{n_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        rank_start, rank_end = _calendar_month_ranks(prices.index)
+        in_window = (rank_start < self.n_days) | (rank_end < self.n_days)
+        pos = in_window.astype(float)
+        pos.name = "position"
+        return pos
+
+
+class JanuaryBarometer(Strategy):
+    """H025: January return predicts the rest of the year.
+
+    'As goes January, so goes the year.' Long SPY from February through
+    December if January's return is positive; flat otherwise. Eliminates
+    years that begin with a loss (which historically often precede full-year
+    bear markets). Signal updates annually at end of January; flat in January.
+    """
+
+    name = "january_barometer"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        pos = pd.Series(0.0, index=px.index, name="position")
+
+        for year in sorted(px.index.year.unique()):
+            jan_px = px[(px.index.year == year) & (px.index.month == 1)]
+            if len(jan_px) < 2:
+                continue
+            jan_ret = jan_px.iloc[-1] / jan_px.iloc[0] - 1
+            # Signal active Feb–Dec of the same year
+            rest_of_year = (px.index.year == year) & (px.index.month > 1)
+            pos[rest_of_year] = 1.0 if jan_ret > 0 else 0.0
+
+        return pos
+
+
+class QuarterEndDrift(Strategy):
+    """H026: Long the last N trading days of each calendar quarter.
+
+    Lakonishok et al. (1991) documented institutional window dressing near
+    quarter-end: fund managers buy winners to improve reported holdings.
+    This mechanical buying creates a predictable short-term drift in the
+    5 trading days before March/June/September/December quarter ends.
+
+    Only ~20 trading days active per year → structural low H001 correlation.
+    """
+
+    def __init__(self, n_days: int = 5):
+        self.n_days = n_days
+        self.name = f"quarter_end_drift_{n_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        rank_end = _calendar_quarter_rank_end(prices.index)
+        pos = (rank_end < self.n_days).astype(float)
+        pos.name = "position"
+        return pos
+
+
+class SeasonalityTrendCombo(Strategy):
+    """H027: MA(50,200) trend signal gated to seasonally favorable months.
+
+    Applies H001's golden/death-cross trend signal only during Nov–Apr
+    (the historically stronger half-year). Forces flat during May–Oct
+    regardless of the trend signal. Tests whether seasonal filtering
+    improves the trend signal's Sharpe by removing the noisier summer period.
+    """
+
+    def __init__(
+        self,
+        fast: int = 50,
+        slow: int = 200,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.favorable_months = frozenset(favorable_months)
+        self.name = f"seasonality_trend_{fast}_{slow}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+
+        trend = (fast_ma > slow_ma).astype(float)
+        trend = trend.where(slow_ma.notna(), 0.0)
+
+        season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float),
+            index=prices.index,
+        )
+
+        pos = trend * season
+        pos.name = "position"
+        return pos
+
+
 class SPYTLTDualMomentum(MultiAssetStrategy):
     """H018: Antonacci GEM-style dual momentum across SPY and TLT.
 

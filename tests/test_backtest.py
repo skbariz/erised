@@ -11,6 +11,7 @@ from quant.strategies.base import (
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
+    FastMACrossover,
     MACDCrossover,
     MeanReversionStrategy,
     MovingAverageCrossover,
@@ -394,4 +395,27 @@ def test_macd_flat_during_warmup():
 
 # ---------------------------------------------------------------------------
 # H010 – FastMACrossover
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H010 – FastMACrossover
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_fast_ma_no_lookahead():
+    rng = np.random.default_rng(8)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(FastMACrossover().generate_positions, prices, n_checks=10)
+
+
+def test_fast_ma_flat_before_slow_ma_warm():
+    strat = FastMACrossover(fast=10, slow=50)
+    prices = _make_prices([0.001] * 55)
+    pos = strat.generate_positions(prices)
+    # slow MA(50) first valid at iloc[49]; everything before that must be flat
+    assert (pos.iloc[: strat.slow - 1] == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H011 – ADXFilteredMACrossover
 # ---------------------------------------------------------------------------

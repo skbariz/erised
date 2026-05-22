@@ -80,3 +80,51 @@ class MovingAverageCrossover(Strategy):
         pos = pos.where(slow_ma.notna(), 0.0)
         pos.name = "position"
         return pos
+
+
+class MeanReversionStrategy(Strategy):
+    """Short-term mean reversion after large down moves. (Hypothesis 002)
+
+    Enters long when today's return is more than `threshold` standard
+    deviations below the recent rolling mean. Holds for `hold_days` bars,
+    with consecutive signals extending the hold window via rolling max.
+
+    The rolling mean and std are shifted by one bar so today's return is
+    compared against the *past* distribution — not a distribution that
+    includes itself. This is the critical lookahead-avoidance discipline.
+    """
+
+    def __init__(self, lookback: int = 20, threshold: float = 2.0, hold_days: int = 5):
+        if lookback < 5:
+            raise ValueError("lookback must be >= 5")
+        if threshold <= 0:
+            raise ValueError("threshold must be positive")
+        if hold_days < 1:
+            raise ValueError("hold_days must be >= 1")
+        self.lookback = lookback
+        self.threshold = threshold
+        self.hold_days = hold_days
+        self.name = f"mean_rev_{lookback}_{threshold}_{hold_days}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        r = px.pct_change()
+
+        # Rolling stats shifted one bar: at time t, these reflect the
+        # distribution of returns through t-1, not through t.
+        rolling_mean = r.rolling(self.lookback, min_periods=self.lookback).mean().shift(1)
+        rolling_std = r.rolling(self.lookback, min_periods=self.lookback).std(ddof=1).shift(1)
+
+        # z-score of today's return against yesterday's distribution.
+        z = (r - rolling_mean) / rolling_std
+
+        # Entry: z < -threshold (unusually large down move).
+        # Where std is NaN or zero (warm-up / degenerate), stay flat.
+        entry = (z < -self.threshold).astype(float)
+        entry = entry.where(rolling_std.notna() & (rolling_std > 0), 0.0)
+
+        # Remain long for hold_days bars after any entry signal.
+        # rolling max naturally handles overlapping signals.
+        pos = entry.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos

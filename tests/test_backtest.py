@@ -13,6 +13,7 @@ from quant.strategies.base import (
     BuyAndHold,
     ConsecutiveDownDays,
     FastMACrossover,
+    LongShortMACrossover,
     MACDCrossover,
     MeanReversionStrategy,
     MovingAverageCrossover,
@@ -464,3 +465,32 @@ def test_vol_regime_flat_before_warmup():
     prices = _make_prices([0.005] * min_bars)
     pos = strat.generate_positions(prices)
     assert (pos.iloc[: strat.vol_lookback + 1] == 0.0).all()
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H013 – LongShortMACrossover
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_ls_ma_crossover_no_lookahead():
+    rng = np.random.default_rng(12)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(LongShortMACrossover().generate_positions, prices, n_checks=10)
+
+
+def test_ls_ma_crossover_short_in_downtrend():
+    """After warmup in a sustained downtrend, position must be -1 (not 0 as in H001)."""
+    rets = [-0.003] * 300
+    prices = _make_prices(rets)
+    h001 = MovingAverageCrossover(50, 200).generate_positions(prices)
+    h013 = LongShortMACrossover(50, 200).generate_positions(prices)
+    # H001 goes flat; H013 goes short
+    assert (h001.iloc[200:] == 0.0).all()
+    assert (h013.iloc[200:] == -1.0).all()
+
+
+def test_ls_ma_crossover_positions_binary():
+    """All positions must be in {-1, 0, +1}."""
+    rng = np.random.default_rng(13)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
+    pos = LongShortMACrossover().generate_positions(prices)
+    assert pos.isin([-1.0, 0.0, 1.0]).all()

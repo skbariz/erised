@@ -8,6 +8,7 @@ import pytest
 
 from quant.backtest.engine import assert_no_lookahead, run_backtest
 from quant.strategies.base import (
+    ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
@@ -418,4 +419,29 @@ def test_fast_ma_flat_before_slow_ma_warm():
 
 # ---------------------------------------------------------------------------
 # H011 – ADXFilteredMACrossover
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H011 – ADXFilteredMACrossover
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_adx_filtered_ma_no_lookahead():
+    rng = np.random.default_rng(9)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    # ADX needs OHLC — _make_prices already provides high/low/close
+    assert_no_lookahead(ADXFilteredMACrossover().generate_positions, prices, n_checks=10)
+
+
+def test_adx_filtered_ma_suppresses_weak_trend():
+    """With a very high ADX threshold (100), no MA signal should pass through."""
+    rng = np.random.default_rng(10)
+    prices = _make_prices(rng.normal(0.0, 0.005, 1000).tolist())  # low-vol, flat
+    strat = ADXFilteredMACrossover(adx_threshold=100.0)  # impossible threshold
+    pos = strat.generate_positions(prices)
+    assert (pos == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H012 – VolatilityRegime
 # ---------------------------------------------------------------------------

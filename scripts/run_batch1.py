@@ -20,6 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
+    ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
     ConsecutiveDownDays,
     FastMACrossover,
@@ -138,6 +139,14 @@ def main():
     for f, s in [(10, 50), (20, 100), (5, 20)]:
         wf = walk_forward(prices, lambda _, ff=f, ss=s: FastMACrossover(ff, ss), folds=folds)
         print(f"    MA({f},{s})  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H011
+    print(section("H011: ADXFilteredMACrossover  canonical (MA50/200, ADX14>25)"))
+    wf11, rep11, lo11, hi11 = run(prices, folds, ADXFilteredMACrossover, "canonical")
+    print("  1-D sensitivity (adx_threshold):")
+    for thr in [20, 25, 30]:
+        wf = walk_forward(prices, lambda _, t=thr: ADXFilteredMACrossover(adx_threshold=t), folds=folds)
+        print(f"    adx_threshold={thr}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

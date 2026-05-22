@@ -82,6 +82,18 @@ class MovingAverageCrossover(Strategy):
         return pos
 
 
+class LongShortMACrossover(MovingAverageCrossover):
+    """H013: MA(50,200) long/short — short below the death cross instead of flat.
+
+    Identical signal to H001 (MovingAverageCrossover) but sets allow_short=True,
+    going −1 when fast MA < slow MA rather than 0. Captures bear-market returns
+    that H001 abandons by going to cash.
+    """
+
+    def __init__(self, fast: int = 50, slow: int = 200):
+        super().__init__(fast=fast, slow=slow, allow_short=True)
+
+
 class MeanReversionStrategy(Strategy):
     """Short-term mean reversion after large down moves. (Hypothesis 002)
 

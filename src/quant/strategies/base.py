@@ -257,3 +257,26 @@ class VIXFilteredReversionStrategy(Strategy):
         pos = entry.rolling(self.hold_days, min_periods=1).max()
         pos.name = "position"
         return pos
+
+
+class TimeSeriesMomentum(Strategy):
+    """Hypothesis 007: 12-1 month time-series momentum (skip-month convention).
+
+    Long when the return from 12 months ago to 1 month ago is positive.
+    The 1-month skip avoids the short-term reversal at lag 1 (Jegadeesh & Titman).
+    """
+
+    def __init__(self, long_months: int = 12, skip_months: int = 1):
+        self.long_days = int(long_months * 21)
+        self.skip_days = int(skip_months * 21)
+        self.name = f"ts_mom_{long_months}m_{skip_months}skip"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        # Return from long_days ago to skip_days ago (both purely past data)
+        mom = px.shift(self.skip_days) / px.shift(self.long_days) - 1
+
+        pos = (mom > 0).astype(float)
+        pos = pos.where(mom.notna(), 0.0)
+        pos.name = "position"
+        return pos

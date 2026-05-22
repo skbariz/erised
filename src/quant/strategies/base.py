@@ -217,3 +217,43 @@ class ConsecutiveDownDays(Strategy):
         pos = entry.rolling(self.hold_days, min_periods=1).max()
         pos.name = "position"
         return pos
+
+
+class VIXFilteredReversionStrategy(Strategy):
+    """Hypothesis 006: mean reversion only in elevated-VIX regimes.
+
+    Same z-score entry as MeanReversionStrategy but gated by VIX > vix_threshold.
+    Hypothesis: reversions succeed in genuine panic; not in low-vol drift.
+    Requires a 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(
+        self,
+        lookback: int = 20,
+        threshold: float = 2.0,
+        hold_days: int = 2,
+        vix_threshold: float = 20.0,
+    ):
+        self.lookback = lookback
+        self.threshold = threshold
+        self.hold_days = hold_days
+        self.vix_threshold = vix_threshold
+        self.name = f"vix_rev_{lookback}_{threshold}_{hold_days}_{int(vix_threshold)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VIXFilteredReversionStrategy requires 'vix_close' column")
+
+        r = prices["adj_close"].pct_change()
+        rolling_mean = r.rolling(self.lookback, min_periods=self.lookback).mean().shift(1)
+        rolling_std = r.rolling(self.lookback, min_periods=self.lookback).std(ddof=1).shift(1)
+        z = (r - rolling_mean) / rolling_std
+
+        vix_elevated = (prices["vix_close"] > self.vix_threshold)
+
+        entry = ((z < -self.threshold) & vix_elevated).astype(float)
+        entry = entry.where(rolling_std.notna() & (rolling_std > 0), 0.0)
+
+        pos = entry.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos

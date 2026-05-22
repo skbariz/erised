@@ -6,6 +6,7 @@ from .base import (
     RSIReversionStrategy,
     ShortHoldMeanReversion,
     Strategy,
+    VIXFilteredReversionStrategy,
 )
 
 __all__ = [
@@ -16,4 +17,5 @@ __all__ = [
     "RSIReversionStrategy",
     "ShortHoldMeanReversion",
     "Strategy",
+    "VIXFilteredReversionStrategy",
 ]

@@ -20,6 +20,7 @@ from abc import ABC, abstractmethod
 
 import pandas as pd
 
+
 class Strategy(ABC):
     """Base class for all strategies.
 
@@ -40,6 +41,7 @@ class Strategy(ABC):
         """
         ...
 
+
 class BuyAndHold(Strategy):
     """The benchmark. Always long 1.0."""
 
@@ -47,3 +49,34 @@ class BuyAndHold(Strategy):
 
     def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
         return pd.Series(1.0, index=prices.index, name="position")
+
+
+class MovingAverageCrossover(Strategy):
+    """Classic dual-MA trend-following.
+
+    Long when fast MA > slow MA, flat otherwise. By default uses
+    50/200, which is the textbook "golden cross" / "death cross".
+    """
+
+    def __init__(self, fast: int = 50, slow: int = 200, allow_short: bool = False):
+        if fast >= slow:
+            raise ValueError("fast must be < slow")
+        self.fast = fast
+        self.slow = slow
+        self.allow_short = allow_short
+        self.name = f"ma_cross_{fast}_{slow}{'_ls' if allow_short else ''}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+        long_signal = (fast_ma > slow_ma).astype(float)
+        if self.allow_short:
+            short_signal = (fast_ma < slow_ma).astype(float)
+            pos = long_signal - short_signal
+        else:
+            pos = long_signal
+        # Before we have enough history, stay flat.
+        pos = pos.where(slow_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos

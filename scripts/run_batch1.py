@@ -24,6 +24,7 @@ from quant.strategies.base import (
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
+    TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
@@ -102,6 +103,14 @@ def main():
     for vt in [15, 20, 25]:
         wf = walk_forward(prices_vix, lambda _, v=vt: VIXFilteredReversionStrategy(vix_threshold=v), folds=folds)
         print(f"    vix_threshold={vt}  Sharpe {wf.combined_report.sharpe:.2f}")
+
+    # ------------------------------------------------------------------ H007
+    print(section("H007: TimeSeriesMomentum  canonical (12m-1m skip)"))
+    wf7, rep7, lo7, hi7 = run(prices, folds, TimeSeriesMomentum, "canonical")
+    print("  1-D sensitivity (long_months):")
+    for lm in [6, 9, 12]:
+        wf = walk_forward(prices, lambda _, l=lm: TimeSeriesMomentum(long_months=l), folds=folds)
+        print(f"    long_months={lm}  Sharpe {wf.combined_report.sharpe:.2f}")
 
 
 

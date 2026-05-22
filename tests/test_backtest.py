@@ -14,6 +14,7 @@ from quant.strategies.base import (
     MovingAverageCrossover,
     RSIReversionStrategy,
     ShortHoldMeanReversion,
+    TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
 )
 
@@ -321,4 +322,27 @@ def test_vix_filtered_reversion_requires_vix_column():
 
 # ---------------------------------------------------------------------------
 # H007 – TimeSeriesMomentum
+# ---------------------------------------------------------------------------
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H007 – TimeSeriesMomentum
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_ts_momentum_no_lookahead():
+    rng = np.random.default_rng(5)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(TimeSeriesMomentum().generate_positions, prices, n_checks=10)
+
+
+def test_ts_momentum_flat_before_warmup():
+    """No position before long_days + skip_days of history."""
+    strat = TimeSeriesMomentum(long_months=12, skip_months=1)
+    prices = _make_prices([0.001] * (strat.long_days + 5))
+    pos = strat.generate_positions(prices)
+    assert (pos.iloc[: strat.long_days] == 0.0).all()
+
+
+# ---------------------------------------------------------------------------
+# H008 – AbsoluteMomentumStrategy
 # ---------------------------------------------------------------------------

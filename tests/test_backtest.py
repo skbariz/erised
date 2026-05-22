@@ -11,6 +11,7 @@ from quant.strategies.base import (
     BuyAndHold,
     MeanReversionStrategy,
     MovingAverageCrossover,
+    ShortHoldMeanReversion,
 )
 
 
@@ -167,3 +168,32 @@ def test_mean_reversion_flat_before_warmup():
     pos = strat.generate_positions(prices)
     # rolling_std.shift(1) first non-NaN at iloc[lookback + 1]; everything before is flat.
     assert (pos.iloc[: lookback + 1] == 0.0).all(), "Expected all-flat during warm-up"
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H003 – ShortHoldMeanReversion
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_short_hold_mean_reversion_no_lookahead():
+    rng = np.random.default_rng(1)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(ShortHoldMeanReversion().generate_positions, prices, n_checks=10)
+
+
+def test_short_hold_mean_reversion_hold_expires_at_2():
+    """Signal fires and hold expires after exactly 2 bars."""
+    n_warmup = 25
+    rets = [0.01 if i % 2 == 0 else -0.01 for i in range(n_warmup)]
+    rets.append(-0.10)
+    rets.extend([0.001] * 5)
+    prices = _make_prices(rets)
+    pos = ShortHoldMeanReversion().generate_positions(prices)
+    signal_iloc = n_warmup + 1
+    assert pos.iloc[signal_iloc] == pytest.approx(1.0)
+    assert pos.iloc[signal_iloc + 1] == pytest.approx(1.0)
+    assert pos.iloc[signal_iloc + 2] == pytest.approx(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H004 – RSIReversionStrategy
+# ---------------------------------------------------------------------------

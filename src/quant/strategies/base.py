@@ -94,6 +94,56 @@ class LongShortMACrossover(MovingAverageCrossover):
         super().__init__(fast=fast, slow=slow, allow_short=True)
 
 
+class VolScaledTrend(Strategy):
+    """H016: MA trend direction scaled by volatility targeting.
+
+    Position = sign(MA signal) × min(target_vol / 20d_realized_vol, 1.0).
+    Sizes up in calm markets and down in turbulent ones, converting H001's
+    binary 0/+1 into a continuous signal. Tests whether dynamic position sizing
+    improves risk-adjusted returns over constant full-notional exposure.
+    """
+
+    def __init__(
+        self,
+        fast: int = 50,
+        slow: int = 200,
+        target_vol: float = 0.10,
+        vol_lookback: int = 20,
+    ):
+        self.fast = fast
+        self.slow = slow
+        self.target_vol = target_vol
+        self.vol_lookback = vol_lookback
+        self.name = f"vol_scaled_trend_{fast}_{slow}_{int(target_vol * 100)}pct"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        r = px.pct_change()
+
+        fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
+
+        direction = pd.Series(
+            np.where(fast_ma > slow_ma, 1.0, -1.0), index=px.index
+        )
+        direction = direction.where(slow_ma.notna(), 0.0)
+
+        # Shift realized vol by 1 bar so today's close is not used in today's signal
+        realized_vol = (
+            r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
+            .std()
+            .shift(1)
+            * np.sqrt(252)
+        )
+        scale = (self.target_vol / realized_vol).clip(upper=1.0)
+        scale = scale.where(realized_vol.notna() & (realized_vol > 0), 0.0)
+
+        pos = (direction * scale).clip(-1.0, 1.0)
+        pos = pos.where(slow_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
 class DualMALongShort(MovingAverageCrossover):
     """H015: MA(20,100) long/short — faster signal than H013's 50/200 pair.
 

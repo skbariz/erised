@@ -16,6 +16,7 @@ from .base import (
     TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
     VolatilityRegime,
+    VolScaledTrend,
 )
 
 __all__ = [
@@ -36,4 +37,5 @@ __all__ = [
     "TimeSeriesMomentum",
     "VIXFilteredReversionStrategy",
     "VolatilityRegime",
+    "VolScaledTrend",
 ]

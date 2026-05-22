@@ -17,6 +17,7 @@ from quant.data.loader import load_research
 from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
 from quant.strategies.base import (
     LongShortMACrossover,
+    LongShortTSMomentum,
     MovingAverageCrossover,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
@@ -73,9 +74,17 @@ def main():
         wf = walk_forward(prices, lambda _, ff=f, ss=s: LSMA(ff, ss), folds=folds)
         print(f"    MA({f},{s})  Sharpe {wf.combined_report.sharpe:.2f}")
 
+    # ------------------------------------------------------------------ H014
+    print(section("H014: LongShortTSMomentum  canonical (12m-1m skip)"))
+    wf14, rep14, lo14, hi14 = run(prices, folds, LongShortTSMomentum, "canonical")
+    print("  1-D sensitivity (long_months):")
+    for lm in [6, 9, 12]:
+        wf = walk_forward(prices, lambda _, l=lm: LongShortTSMomentum(long_months=l), folds=folds)
+        print(f"    long_months={lm}  Sharpe {wf.combined_report.sharpe:.2f}")
+
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
-    strategies = [("H013", wf13)]
+    strategies = [("H013", wf13), ("H014", wf14)]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")
     for name, wf in strategies:

@@ -14,6 +14,7 @@ from quant.strategies.base import (
     ConsecutiveDownDays,
     FastMACrossover,
     LongShortMACrossover,
+    LongShortTSMomentum,
     MACDCrossover,
     MeanReversionStrategy,
     MovingAverageCrossover,
@@ -493,4 +494,31 @@ def test_ls_ma_crossover_positions_binary():
     rng = np.random.default_rng(13)
     prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
     pos = LongShortMACrossover().generate_positions(prices)
+    assert pos.isin([-1.0, 0.0, 1.0]).all()
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H014 – LongShortTSMomentum
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_ls_ts_momentum_no_lookahead():
+    rng = np.random.default_rng(14)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(LongShortTSMomentum().generate_positions, prices, n_checks=10)
+
+
+def test_ls_ts_momentum_short_in_downtrend():
+    """Sustained downtrend → negative 12m return → short position."""
+    strat = LongShortTSMomentum(long_months=12, skip_months=1)
+    rets = [-0.001] * (strat.long_days + 30)
+    prices = _make_prices(rets)
+    pos = strat.generate_positions(prices)
+    assert pos.iloc[-1] == pytest.approx(-1.0)
+
+
+def test_ls_ts_momentum_positions_binary():
+    """All non-NaN positions must be in {-1, 0, +1}."""
+    rng = np.random.default_rng(15)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
+    pos = LongShortTSMomentum().generate_positions(prices)
     assert pos.isin([-1.0, 0.0, 1.0]).all()

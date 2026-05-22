@@ -20,6 +20,7 @@ from quant.strategies.base import (
     LongShortMACrossover,
     LongShortTSMomentum,
     MovingAverageCrossover,
+    VolScaledTrend,
 )
 from quant.validation.walk_forward import make_folds, walk_forward
 
@@ -91,9 +92,17 @@ def main():
         wf = walk_forward(prices, lambda _, ff=f, ss=s: DualMALongShort(ff, ss), folds=folds)
         print(f"    MA({f},{s})  Sharpe {wf.combined_report.sharpe:.2f}")
 
+    # ------------------------------------------------------------------ H016
+    print(section("H016: VolScaledTrend  canonical (fast=50, slow=200, target_vol=10%)"))
+    wf16, rep16, lo16, hi16 = run(prices, folds, VolScaledTrend, "canonical")
+    print("  1-D sensitivity (target_vol):")
+    for tv in [0.08, 0.10, 0.15]:
+        wf = walk_forward(prices, lambda _, t=tv: VolScaledTrend(target_vol=t), folds=folds)
+        print(f"    target_vol={tv:.0%}  Sharpe {wf.combined_report.sharpe:.2f}")
+
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
-    strategies = [("H013", wf13), ("H014", wf14), ("H015", wf15)]
+    strategies = [("H013", wf13), ("H014", wf14), ("H015", wf15), ("H016", wf16)]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")
     for name, wf in strategies:

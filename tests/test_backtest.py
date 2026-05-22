@@ -24,6 +24,7 @@ from quant.strategies.base import (
     TimeSeriesMomentum,
     VIXFilteredReversionStrategy,
     VolatilityRegime,
+    VolScaledTrend,
 )
 
 
@@ -551,3 +552,33 @@ def test_dual_ma_ls_positions_binary():
     prices = _make_prices(rng.normal(0.0005, 0.012, 500).tolist())
     pos = DualMALongShort().generate_positions(prices)
     assert pos.isin([-1.0, 0.0, 1.0]).all()
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# H016 – VolScaledTrend
+# ───────────────────────────────────────────────────────────────────────────
+
+def test_vol_scaled_trend_no_lookahead():
+    rng = np.random.default_rng(18)
+    prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
+    assert_no_lookahead(VolScaledTrend().generate_positions, prices, n_checks=10)
+
+
+def test_vol_scaled_trend_positions_in_range():
+    """All positions must be in [-1, 1]."""
+    rng = np.random.default_rng(19)
+    prices = _make_prices(rng.normal(0.0005, 0.02, 1000).tolist())
+    pos = VolScaledTrend().generate_positions(prices)
+    assert (pos.abs() <= 1.0 + 1e-9).all()
+
+
+def test_vol_scaled_trend_scales_down_in_high_vol():
+    """In high-vol conditions, position magnitude is < 1 (not binary full notional)."""
+    # ±5% / ±4% alternating → realized vol well above 10% target
+    rets = [0.05 if i % 2 == 0 else -0.04 for i in range(500)]
+    prices = _make_prices(rets)
+    strat = VolScaledTrend(target_vol=0.10)
+    pos = strat.generate_positions(prices)
+    non_zero = pos[pos != 0.0]
+    if len(non_zero) > 0:
+        assert (non_zero.abs() < 1.0).all()

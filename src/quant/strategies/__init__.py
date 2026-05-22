@@ -1,4 +1,5 @@
 from .base import (
+    AbsoluteMomentumStrategy,
     BuyAndHold,
     ConsecutiveDownDays,
     MeanReversionStrategy,
@@ -11,6 +12,7 @@ from .base import (
 )
 
 __all__ = [
+    "AbsoluteMomentumStrategy",
     "BuyAndHold",
     "ConsecutiveDownDays",
     "MeanReversionStrategy",

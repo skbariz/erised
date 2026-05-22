@@ -280,3 +280,24 @@ class TimeSeriesMomentum(Strategy):
         pos = pos.where(mom.notna(), 0.0)
         pos.name = "position"
         return pos
+
+
+class AbsoluteMomentumStrategy(Strategy):
+    """Hypothesis 008: Antonacci's absolute momentum.
+
+    Long when the trailing lookback_months return is positive; flat (cash) when
+    negative. The simplest crash-protection filter — exits sustained downtrends.
+    """
+
+    def __init__(self, lookback_months: int = 12):
+        self.lookback_days = int(lookback_months * 21)
+        self.name = f"abs_mom_{lookback_months}m"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        mom = px / px.shift(self.lookback_days) - 1
+
+        pos = (mom > 0).astype(float)
+        pos = pos.where(mom.notna(), 0.0)
+        pos.name = "position"
+        return pos

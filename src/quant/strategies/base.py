@@ -1450,3 +1450,194 @@ class VolOfVolCalm(Strategy):
         pos = pos.where(valid, 0.0)
         pos.name = "position"
         return pos
+
+
+# ---------------------------------------------------------------------------
+# Batch 8 — H043–H047: Calendar Refinements + Cross-Asset Hybrids
+# ---------------------------------------------------------------------------
+
+
+class SellInMayBondConfirm(Strategy):
+    """H043: Sell-in-May seasonality gated by bond-trend macro confirmation.
+
+    H023 (Nov–Apr long) produced H001 corr 0.505 — decent but drifts with
+    trend in bull winters. Adding a TLT confirmation removes entries where the
+    macro environment (bonds in uptrend = risk-off) contradicts the seasonal
+    signal, targeting lower H001 corr and reduced winter draw-down exposure.
+
+    Enters the Nov–Apr seasonal window ONLY when TLT < tlt_ma_period MA
+    (bonds in downtrend = risk-on). Flat in May–Oct unconditionally.
+    Requires 'tlt_close' column.
+    """
+
+    def __init__(
+        self,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+        tlt_ma_period: int = 200,
+    ):
+        self.favorable_months = frozenset(favorable_months)
+        self.tlt_ma_period = tlt_ma_period
+        self.name = f"sell_in_may_bond_confirm_{tlt_ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns:
+            raise ValueError("SellInMayBondConfirm requires 'tlt_close' column")
+
+        tlt = prices["tlt_close"]
+        tlt_ma = tlt.rolling(self.tlt_ma_period, min_periods=self.tlt_ma_period).mean().shift(1)
+
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        bond_riskoff = (tlt.shift(1) > tlt_ma).astype(float)
+
+        # Long only when in season AND bonds NOT in uptrend (risk-on macro)
+        pos = in_season * (1.0 - bond_riskoff)
+        pos = pos.where(tlt_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
+class JanuaryBarometerGoldFilter(Strategy):
+    """H044: January Barometer with GLD trend override.
+
+    H025 is long Feb–Dec when January return is positive, flat otherwise.
+    GLD trending up in January signals inflation/fear (rising gold precedes
+    equity weakness) — gold in uptrend overrides the positive January signal.
+    Adds a second independent decorrelating filter without changing the
+    calendar structure. Requires 'gld_close' column.
+    """
+
+    def __init__(self, gld_ma_period: int = 50):
+        self.gld_ma_period = gld_ma_period
+        self.name = f"january_barometer_gold_filter_{gld_ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "gld_close" not in prices.columns:
+            raise ValueError("JanuaryBarometerGoldFilter requires 'gld_close' column")
+
+        px = prices["adj_close"]
+        gld = prices["gld_close"]
+        pos = pd.Series(0.0, index=px.index, name="position")
+
+        for year in sorted(px.index.year.unique()):
+            jan_px = px[(px.index.year == year) & (px.index.month == 1)]
+            if len(jan_px) < 2:
+                continue
+            jan_ret = jan_px.iloc[-1] / jan_px.iloc[0] - 1
+            if jan_ret <= 0:
+                continue
+
+            # Check GLD trend at end of January — use last day of Jan
+            jan_gld = gld[(gld.index.year == year) & (gld.index.month == 1)]
+            if len(jan_gld) == 0:
+                continue
+            # gld_hist covers all history up to end of January for the MA calculation
+            gld_hist = gld[gld.index <= jan_gld.index[-1]]
+            if len(gld_hist) < self.gld_ma_period:
+                continue
+            gld_ma_val = gld_hist.iloc[-self.gld_ma_period :].mean()
+            if pd.isna(gld_ma_val) or pd.isna(jan_gld.iloc[-1]):
+                # GLD not yet available — no filter, allow the signal
+                gld_trending_up = False
+            else:
+                gld_trending_up = jan_gld.iloc[-1] > gld_ma_val
+
+            if gld_trending_up:
+                continue  # Gold fear gauge overrides the positive January signal
+
+            rest_of_year = (px.index.year == year) & (px.index.month > 1)
+            pos[rest_of_year] = 1.0
+
+        return pos
+
+
+class TurnOfMonthLowVol(Strategy):
+    """H045: Turn-of-Month window gated by VIX calm regime.
+
+    H024 (3-day turn-of-month, Sharpe 0.41) was killed on Sharpe < 0.51. The
+    window-dressing / cash-flow mechanism works in normal markets but is
+    overwhelmed by fear during high-VIX periods. Restricting entries to VIX <
+    vix_threshold should remove the panic-driven negative turns and improve the
+    Sharpe of the remaining trades. Requires 'vix_close' column.
+    """
+
+    def __init__(self, n_days: int = 3, vix_threshold: float = 25.0):
+        self.n_days = n_days
+        self.vix_threshold = vix_threshold
+        self.name = f"turn_of_month_low_vol_{n_days}d_vix{int(vix_threshold)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("TurnOfMonthLowVol requires 'vix_close' column")
+
+        rank_start, rank_end = _calendar_month_ranks(prices.index)
+        in_window = (rank_start < self.n_days) | (rank_end < self.n_days)
+
+        vix = prices["vix_close"].shift(1)
+        low_vol = vix < self.vix_threshold
+
+        pos = (in_window & low_vol).astype(float)
+        pos.name = "position"
+        return pos
+
+
+class HalloweenMomentumConfirm(Strategy):
+    """H046: Sell-in-May seasonal window gated by SPY 6-month momentum.
+
+    H023 is long Nov–Apr regardless of the trend backdrop. Adding 6-month
+    price momentum as a confirmation filter skips unfavorable winters where
+    a bearish trend fights the seasonal tailwind (e.g., 2008 winter).
+    Targeting H001 corr 0.30–0.50 with improved Sharpe vs H023.
+    """
+
+    def __init__(
+        self,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+        momentum_days: int = 126,
+    ):
+        self.favorable_months = frozenset(favorable_months)
+        self.momentum_days = momentum_days
+        self.name = f"halloween_momentum_{momentum_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        mom = (px / px.shift(self.momentum_days) - 1).shift(1)
+
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        pos_mom = (mom > 0).astype(float)
+        pos_mom = pos_mom.where(mom.notna(), 0.0)
+
+        pos = in_season * pos_mom
+        pos.name = "position"
+        return pos
+
+
+class PreEarningsDrift(Strategy):
+    """H047: Long the 5 trading days before each quarterly earnings season open.
+
+    Institutional pre-positioning ahead of earnings season drives inflows in
+    the first week of January, April, July, and October. This is structurally
+    different from H026 (quarter-end window-dressing): that strategy catches
+    the last 5 days of Mar/Jun/Sep/Dec; this catches the first 5 days of
+    Jan/Apr/Jul/Oct.
+
+    Only ~20 trading days active per year → expected low H001 correlation.
+    """
+
+    def __init__(self, n_days: int = 5, earnings_months: tuple = (1, 4, 7, 10)):
+        self.n_days = n_days
+        self.earnings_months = frozenset(earnings_months)
+        self.name = f"pre_earnings_drift_{n_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        rank_start, _ = _calendar_month_ranks(prices.index)
+        in_earnings_month = pd.Series(
+            prices.index.month.isin(self.earnings_months).astype(float), index=prices.index
+        )
+        in_early_window = (rank_start < self.n_days).astype(float)
+        pos = in_earnings_month * in_early_window
+        pos.name = "position"
+        return pos

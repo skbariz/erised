@@ -49,6 +49,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 035 | Gold fear gauge | cross-asset macro | **kept** | 0.57 | [0.15, 0.97] | 5.51% | −41.55% | **+0.384** | best H001 corr of batch; sensitivity drops past 50d MA |
 | 036 | Equity vs safe-haven momentum | cross-asset macro | killed | 0.49 | [0.10, 0.91] | 3.79% | −22.02% | +0.477 | just misses benchmark; good MaxDD |
 | 037 | Dual safe-haven confirmation | cross-asset macro | killed | 0.22 | [−0.17, 0.62] | 0.83% | −11.70% | **+0.264** | lowest H001 corr in program; too restrictive — 5 zero folds |
+| 038 | Long-term reversal | contrarian | killed | 0.243 | [−0.179, 0.627] | 2.37% | −46.86% | **+0.165** | 7 zero folds; very low H001 corr but inactive; 1512d lookback best |
+| 039 | Deep drawdown crisis buyer | contrarian | killed | 0.061 | [−0.353, 0.450] | −0.04% | −56.47% | **+0.133** | N=6 trades, 9 zero folds; too few trades to be viable |
+| 040 | Short-term weekly reversal | contrarian | killed | 0.481 | [0.061, 0.880] | 6.28% | −43.70% | +0.480 | just misses benchmark; p15 threshold lifts Sharpe to 0.532 |
+| 041 | Post-crash recovery | contrarian | killed | 0.405 | [−0.001, 0.806] | 3.55% | −31.27% | **+0.108** | CI clips zero; N=18; vix=35 gives CI > 0 but Sharpe 0.485 |
+| 042 | Vol-of-vol calm | contrarian | killed | 0.106 | [−0.300, 0.525] | 0.43% | −17.49% | +0.338 | highly inconsistent fold-by-fold; sensitive to vov_window |
 
 ---
 
@@ -58,8 +63,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.13% (H026, killed)** / **−18.41% (H021, kept)** | **met** |
-| Strategies tested ≥ 50 | 37 | in progress |
-| Strategies kept (ensemble) | 13 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035) | in progress — H035 best kept corr (+0.384); H037 (kill) lowest overall corr (+0.264) |
+| Strategies tested ≥ 50 | 42 | in progress |
+| Strategies kept (ensemble) | 13 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035) | in progress — H035 best kept corr (+0.384); H039/H041 lowest overall (+0.108/+0.133, killed) |
 
 ---
 

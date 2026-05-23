@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H040",
+  "name": "short-term-weekly-reversal",
+  "strategy_class": "ShortTermWeeklyReversal",
+  "family": "contrarian",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.4811,
+  "ci_low": 0.0606,
+  "ci_high": 0.8796,
+  "cagr": 0.0628,
+  "max_drawdown": -0.437,
+  "n_trades": 381,
+  "h001_corr": 0.4795,
+  "fold_sharpes": [
+    1.141,
+    0.388,
+    0.532,
+    0.033,
+    0.45,
+    -0.092,
+    1.049,
+    1.704,
+    0.981,
+    1.141,
+    0.059,
+    0.62
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long when 5-day return in bottom decile of historical distribution; hold 5 days (Lehmann 1990).",
+  "canonical_params": {
+    "hold_days": 5,
+    "threshold": 10.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

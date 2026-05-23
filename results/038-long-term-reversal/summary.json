@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H038",
+  "name": "long-term-reversal",
+  "strategy_class": "LongTermReversal",
+  "family": "contrarian",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.2426,
+  "ci_low": -0.1787,
+  "ci_high": 0.6271,
+  "cagr": 0.0237,
+  "max_drawdown": -0.4686,
+  "n_trades": 62,
+  "h001_corr": 0.1646,
+  "fold_sharpes": [
+    0.0,
+    -0.511,
+    0.198,
+    0.706,
+    0.0,
+    0.483,
+    1.401,
+    0.186,
+    0.0,
+    0.0,
+    0.0,
+    0.0
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long when 5yr rolling return in bottom tercile of historical distribution (DeBondt-Thaler 1985).",
+  "canonical_params": {
+    "lookback_days": 1260,
+    "percentile": 33.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

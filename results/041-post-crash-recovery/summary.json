@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H041",
+  "name": "post-crash-recovery",
+  "strategy_class": "PostCrashRecovery",
+  "family": "contrarian",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.4054,
+  "ci_low": -0.0009,
+  "ci_high": 0.8061,
+  "cagr": 0.0355,
+  "max_drawdown": -0.3127,
+  "n_trades": 18,
+  "h001_corr": 0.1083,
+  "fold_sharpes": [
+    1.235,
+    0.669,
+    -0.177,
+    0.0,
+    0.0,
+    0.357,
+    0.789,
+    0.858,
+    0.161,
+    0.0,
+    0.0,
+    1.195
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY 30 days after VIX spikes above 40; hold 60 days. Captures post-capitulation recovery.",
+  "canonical_params": {
+    "vix_threshold": 40.0,
+    "delay_days": 30,
+    "hold_days": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

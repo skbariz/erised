@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H039",
+  "name": "deep-drawdown-crisis-buyer",
+  "strategy_class": "DeepDrawdownCrisisBuyer",
+  "family": "contrarian",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.0613,
+  "ci_low": -0.3533,
+  "ci_high": 0.4502,
+  "cagr": -0.0004,
+  "max_drawdown": -0.5647,
+  "n_trades": 6,
+  "h001_corr": 0.133,
+  "fold_sharpes": [
+    0.0,
+    -0.027,
+    -0.181,
+    0.0,
+    0.0,
+    -0.042,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.866
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long when drawdown from 1yr peak exceeds 20%; exit when recovered to -5%.",
+  "canonical_params": {
+    "entry_dd": -0.2,
+    "exit_dd": -0.05,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

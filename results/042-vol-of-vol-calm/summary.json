@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H042",
+  "name": "vol-of-vol-calm",
+  "strategy_class": "VolOfVolCalm",
+  "family": "vol signal",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.1064,
+  "ci_low": -0.3,
+  "ci_high": 0.5245,
+  "cagr": 0.0043,
+  "max_drawdown": -0.1749,
+  "n_trades": 176,
+  "h001_corr": 0.3375,
+  "fold_sharpes": [
+    1.174,
+    0.181,
+    0.054,
+    -0.353,
+    0.826,
+    -0.88,
+    0.601,
+    -0.727,
+    -0.286,
+    1.628,
+    0.008,
+    -0.155
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long when VIX 20d std dev in bottom tercile (stable fear = calm regime). Second-order VIX signal.",
+  "canonical_params": {
+    "vov_window": 20,
+    "percentile": 33.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

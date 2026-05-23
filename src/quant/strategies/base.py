@@ -1222,3 +1222,231 @@ class DualSafeHavenConfirmation(Strategy):
         pos = pos.where(valid, 0.0)
         pos.name = "position"
         return pos
+
+
+# ---------------------------------------------------------------------------
+# Batch 7 — H038–H042: Contrarian & Mean Reversion
+# Structurally opposite to H001 — fire when H001 is dormant or wrong.
+# Target H001 corr: −0.30 to +0.15.
+# ---------------------------------------------------------------------------
+
+
+class LongTermReversal(Strategy):
+    """H038: Long when SPY's 5-year rolling return is in the bottom tercile.
+
+    DeBondt & Thaler (1985): long-horizon losers become medium-horizon winners.
+    Applied to SPY as a single asset, this fires when cumulative multi-year
+    returns are historically poor — i.e., at or near the end of bear markets.
+    These are exactly the periods when H001 is flat or short, producing
+    structurally low/negative H001 correlation.
+
+    lookback_days : rolling window to compute the return (default 5yr ≈ 1260d).
+    percentile    : rank threshold; long when return is below this percentile
+                    of all rolling returns seen so far (default 33 = bottom third).
+    history_min   : minimum observations needed to estimate the percentile
+                    before producing any signal (default 252).
+    """
+
+    def __init__(
+        self,
+        lookback_days: int = 1260,
+        percentile: float = 33.0,
+        history_min: int = 252,
+    ):
+        self.lookback_days = lookback_days
+        self.percentile = percentile
+        self.history_min = history_min
+        self.name = f"long_term_reversal_{lookback_days}d_p{int(percentile)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        # N-year return shifted 1 bar so today's close is not in its own signal
+        rolling_ret = (px / px.shift(self.lookback_days) - 1).shift(1)
+        # Expanding quantile: percentile of all past return observations so far
+        threshold = rolling_ret.expanding(min_periods=self.history_min).quantile(
+            self.percentile / 100.0
+        )
+        valid = rolling_ret.notna() & threshold.notna()
+        pos = (rolling_ret <= threshold).astype(float)
+        pos = pos.where(valid, 0.0)
+        pos.name = "position"
+        return pos
+
+
+class DeepDrawdownCrisisBuyer(Strategy):
+    """H039: Long when SPY drawdown from rolling peak exceeds entry_dd; exit at exit_dd.
+
+    Systematic crisis buying: enter when the market is in historically deep
+    distress and exit only once prices have substantially recovered. This
+    fires when H001 is definitively flat/short (price well below 200MA),
+    targeting structurally negative H001 correlation.
+
+    entry_dd : drawdown threshold to enter long (default −0.20 = −20%).
+    exit_dd  : drawdown threshold to exit (default −0.05 = −5%).
+    lookback : rolling window to compute the peak (default 252 trading days = 1yr).
+    """
+
+    def __init__(
+        self,
+        entry_dd: float = -0.20,
+        exit_dd: float = -0.05,
+        lookback: int = 252,
+    ):
+        if entry_dd >= exit_dd:
+            raise ValueError("entry_dd must be more negative than exit_dd")
+        self.entry_dd = entry_dd
+        self.exit_dd = exit_dd
+        self.lookback = lookback
+        self.name = f"deep_dd_buyer_{int(abs(entry_dd) * 100)}pct_{int(abs(exit_dd) * 100)}pct"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        # Rolling peak over the lookback window, shifted 1 bar to avoid lookahead
+        rolling_peak = px.rolling(self.lookback, min_periods=1).max().shift(1)
+        drawdown = px / rolling_peak - 1
+
+        in_crisis = drawdown <= self.entry_dd
+        recovered = drawdown >= self.exit_dd
+
+        # Build position state: enter on crisis, exit on recovery
+        pos = pd.Series(0.0, index=px.index, name="position")
+        active = False
+        for i in range(len(pos)):
+            if pd.isna(drawdown.iloc[i]) or pd.isna(rolling_peak.iloc[i]):
+                continue
+            if not active and in_crisis.iloc[i]:
+                active = True
+            elif active and recovered.iloc[i]:
+                active = False
+            pos.iloc[i] = 1.0 if active else 0.0
+
+        pos.name = "position"
+        return pos
+
+
+class ShortTermWeeklyReversal(Strategy):
+    """H040: Long when SPY's 5-day return is in the bottom decile; hold 5 days.
+
+    Lehmann (1990): weekly price reversals driven by institutional liquidity
+    demand. After a very bad week, market-makers have built up inventory
+    and push prices back. For SPY as a liquid index fund, the reversal is
+    modest but positive-expectation. Fires in declining markets where H001
+    is most likely to be bearish, producing low/negative H001 correlation.
+
+    hold_days   : how long to hold after entry signal (default 5).
+    history_min : bars needed to estimate the percentile (default 252).
+    threshold   : bottom-percentile threshold for entry (default 10 = decile).
+    """
+
+    def __init__(
+        self,
+        hold_days: int = 5,
+        history_min: int = 252,
+        threshold: float = 10.0,
+    ):
+        self.hold_days = hold_days
+        self.history_min = history_min
+        self.threshold = threshold
+        self.name = f"short_term_reversal_{hold_days}d_p{int(threshold)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        ret_5d = px / px.shift(self.hold_days) - 1
+
+        # Expanding percentile threshold: bottom N% of all past 5-day returns
+        lower_bound = ret_5d.expanding(min_periods=self.history_min).quantile(
+            self.threshold / 100.0
+        )
+        valid = ret_5d.notna() & lower_bound.notna()
+        entry = (ret_5d <= lower_bound).astype(float)
+        entry = entry.where(valid, 0.0)
+
+        # Hold for hold_days bars after entry signal
+        pos = entry.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos
+
+
+class PostCrashRecovery(Strategy):
+    """H041: Long SPY starting delay_days after VIX spikes above threshold.
+
+    Captures the recovery bounce that follows capitulation events (2003,
+    2009, 2020). Unlike H028 (enters at the spike itself and catches downside
+    continuation), this waits delay_days after the panic peak for the acute
+    phase to pass before going long, then holds for hold_days.
+
+    vix_threshold : VIX level defining a capitulation event (default 40).
+    delay_days    : bars to wait after the spike before entering (default 30).
+    hold_days     : bars to hold after entry (default 60).
+    Requires 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(
+        self,
+        vix_threshold: float = 40.0,
+        delay_days: int = 30,
+        hold_days: int = 60,
+    ):
+        self.vix_threshold = vix_threshold
+        self.delay_days = delay_days
+        self.hold_days = hold_days
+        self.name = f"post_crash_{int(vix_threshold)}vix_{delay_days}d_delay_{hold_days}d_hold"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("PostCrashRecovery requires 'vix_close' column")
+
+        vix = prices["vix_close"].shift(1)
+        spike = (vix > self.vix_threshold).astype(float)
+
+        # Mark the bar delay_days AFTER a spike as an entry signal.
+        # Shift the spike forward by delay_days so we enter later.
+        delayed_entry = spike.shift(self.delay_days).fillna(0.0)
+
+        # Hold for hold_days bars after the delayed entry
+        pos = delayed_entry.rolling(self.hold_days, min_periods=1).max()
+        pos.name = "position"
+        return pos
+
+
+class VolOfVolCalm(Strategy):
+    """H042: Long when VIX's own rolling std dev is in the bottom tercile.
+
+    Second-order VIX signal: stable fear (low vol-of-vol) indicates a calm,
+    predictable risk environment, historically associated with steady equity
+    gains. Spikes in VIX's own volatility often precede drawdowns before the
+    VIX level itself rises — this signal turns off earlier than H001 in
+    deteriorating regimes. Targeting H001 corr 0.10–0.30.
+
+    vov_window  : rolling window for VIX std dev (default 20 days).
+    history_min : min observations to estimate the percentile (default 252).
+    percentile  : upper percentile of calm VIX-vol to accept (default 33).
+    Requires 'vix_close' column in the prices DataFrame.
+    """
+
+    def __init__(
+        self,
+        vov_window: int = 20,
+        history_min: int = 252,
+        percentile: float = 33.0,
+    ):
+        self.vov_window = vov_window
+        self.history_min = history_min
+        self.percentile = percentile
+        self.name = f"vol_of_vol_calm_{vov_window}d_p{int(percentile)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VolOfVolCalm requires 'vix_close' column")
+
+        vix = prices["vix_close"]
+        # Rolling std of VIX (vol-of-vol), shifted to avoid lookahead
+        vov = vix.rolling(self.vov_window, min_periods=self.vov_window).std().shift(1)
+
+        # Expanding percentile: is current VoV in the calmest bottom tercile?
+        upper_bound = vov.expanding(min_periods=self.history_min).quantile(self.percentile / 100.0)
+        valid = vov.notna() & upper_bound.notna()
+        pos = (vov <= upper_bound).astype(float)
+        pos = pos.where(valid, 0.0)
+        pos.name = "position"
+        return pos

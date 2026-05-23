@@ -59,6 +59,68 @@ Not the full strategy description. Check actual folder names with rg or dir befo
 - The correlation/activity tradeoff: strategies most decorrelated from H001 are those that trade
   rarely (crisis buyers, long-term reversal) — too infrequently to clear the keep bar
 
+# Strategy family performance summary (H001–H050)
+
+What each family produced and why — essential context for H051+ design.
+
+## Trend-following (H001, H007, H008, H009–H011, H013–H015, H016, H017, H027)
+- Long-only works (H001: 0.61, H007: 0.62, H008: 0.62). Long/short universally fails — shorting adds
+  whipsaw costs (1.5 bps/turn) without capturing enough bear-market alpha to compensate.
+- Vol-scaling (H016) improves Max DD to -26% but not Sharpe. Hybrid calendar+trend (H027) matches H001.
+- All trend signals have H001 corr > 0.70 — they're measuring the same underlying signal.
+- **Do not pursue more trend variants.** The family is saturated.
+
+## Multi-asset rotation (H018–H022)
+- The highest-value family. Bonds and gold provide genuine crisis diversification.
+- RiskParity (H021) is the star of the program: Sharpe 1.03, Max DD -18.41%.
+- Rotation strategies (H018, H019) kept but still correlated with H001 (~0.69–0.79) — they hold SPY
+  most of the time and only rotate in crises.
+- TLT available from 2002, GLD from 2004. Early folds (1993–2002) starved — killed H020 (3-asset).
+- **High-value area for H051+:** adding more assets (e.g. commodities, EM bonds, real estate).
+
+## Calendar effects (H023–H027, H043–H047)
+- Confirmed real anomalies: Sell-in-May, January Barometer, Halloween effect all pass the keep bar.
+- H001 corr range: 0.33–0.71. Calendar signals are the lowest-corr family that reliably keeps.
+- Adding cross-asset confirmation (H043 TLT filter, H046 momentum filter) improves Max DD and Sharpe.
+- H043 (SellInMayBondConfirm) achieves the best Max DD in the program at -10.11%.
+- **Diminishing returns reached.** More calendar hybrids likely to be marginal.
+
+## VIX-based (H028–H032)
+- Only H031 (RealizedVsImpliedVol) kept. The vol risk premium (realized < implied = safe to be long)
+  is the only durable VIX signal. Pure VIX contrarian (spike entry, mean reversion) fails because
+  it enters during crash continuation, not after capitulation.
+- H030 (VIX trend L/S) proved negative H001 corr (-0.284) is possible but at negative Sharpe.
+
+## Cross-asset macro (H033–H037)
+- Bond trend (H034) and gold fear gauge (H035) kept. Both are slow-moving regime indicators.
+- H037 (dual safe-haven confirmation) achieved lowest H001 corr of any kept strategy (+0.264) but
+  was too restrictive: 5 zero-trade folds → killed.
+- H035 is an anchor of the target ensemble (H049) despite high H001 corr — pairwise corr with
+  H021 and H046 is low enough to add ensemble value.
+
+## Contrarian / mean reversion (H038–H042)
+- ALL killed. Lowest H001 corr in the program (+0.108 to +0.165) but N=6–18 trades over 30 years.
+- The fundamental tradeoff: strategies that fire only in crises are most decorrelated but least
+  tradeable. No fix exists within this framework — more data or multi-market generalization needed.
+- **Do not pursue more contrarian signals** unless you have a mechanism to increase trade frequency.
+
+## Ensemble (H048–H050)
+- Min-corr subset (H049) at Sharpe 0.959 beats equal-weight (H048: 0.800) and Sharpe-weighted (H050: 0.820).
+- Key insight: 4 orthogonal strategies outperform 16 correlated ones. Variance reduction > quality-weighting.
+
+# Research directions for H051+
+
+Ranked by expected information value (what we don't yet know):
+
+1. **Equity factors (value, quality, low-vol, size)** — SPY-only but signal is fundamentally different
+   from price momentum. Academic evidence strong. Expected H001 corr: 0.10–0.40.
+2. **Additional asset classes** — commodities index (DBC), real estate (VNQ), EM bonds (EMB) as
+   rotation candidates in multi-asset framework. Builds on H021's success.
+3. **Macro regime conditioning** — yield curve slope (10y−2y), credit spread (HYG−LQD) as overlay
+   signals. Turn off equity exposure when yield curve inverts or spreads spike.
+4. **Holdout evaluation** — Before H051, run H049 (the target ensemble) on the sealed 2023+ data
+   to get a true out-of-sample read on the program's flagship result.
+
 # Trading rules
 - Always report: OOS Sharpe, 95% CI, CAGR, Max DD, H001 corr, trade count, fold Sharpe range.
 - A strategy is only "kept" if: CI lower bound > 0 AND OOS Sharpe > SPY benchmark (0.51).

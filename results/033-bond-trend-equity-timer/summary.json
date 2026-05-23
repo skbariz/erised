@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H033",
+  "name": "bond-trend-equity-timer",
+  "strategy_class": "BondTrendEquityTimer",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.4442,
+  "ci_low": 0.0359,
+  "ci_high": 0.8498,
+  "cagr": 0.0296,
+  "max_drawdown": -0.1415,
+  "n_trades": 175,
+  "h001_corr": 0.4424,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.496,
+    0.897,
+    -0.215,
+    0.769,
+    1.077,
+    1.188,
+    -0.371,
+    1.692,
+    -0.554,
+    0.89
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when TLT < 200MA (bonds weak = risk-on); flat when TLT > 200MA.",
+  "canonical_params": {
+    "ma_period": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

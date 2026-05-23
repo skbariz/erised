@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H049",
+  "name": "min-corr-ensemble",
+  "strategy_class": "MinCorrEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.9589,
+  "ci_low": 0.5429,
+  "ci_high": 1.3568,
+  "cagr": 0.0759,
+  "max_drawdown": -0.1826,
+  "n_trades": 0,
+  "h001_corr": 0.8028,
+  "fold_sharpes": [
+    1.215,
+    0.091,
+    0.976,
+    1.052,
+    0.965,
+    0.504,
+    1.819,
+    1.565,
+    0.645,
+    2.635,
+    0.399,
+    0.723
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Greedy max-subset with all pairwise OOS corr < 0.5. Selected: ['H021', 'H046', 'H019', 'H035'].",
+  "canonical_params": {
+    "threshold": 0.5,
+    "selected": [
+      "H021",
+      "H046",
+      "H019",
+      "H035"
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

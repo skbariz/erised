@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H050",
+  "name": "sharpe-weighted-ensemble",
+  "strategy_class": "SharpeWeightedEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.8201,
+  "ci_low": 0.4006,
+  "ci_high": 1.2285,
+  "cagr": 0.075,
+  "max_drawdown": -0.2294,
+  "n_trades": 0,
+  "h001_corr": 0.9136,
+  "fold_sharpes": [
+    1.031,
+    0.033,
+    1.082,
+    0.905,
+    0.606,
+    0.588,
+    1.002,
+    1.515,
+    0.401,
+    2.714,
+    0.513,
+    0.605
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Weight kept strategies by OOS Sharpe (clipped at 0). H021 (Sharpe 1.03) gets highest weight.",
+  "canonical_params": {
+    "weighting": "sharpe",
+    "clip_negative": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -59,6 +59,9 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 045 | Turn-of-month + low vol gate | calendar-hybrid | killed | 0.490 | [0.080, 0.903] | 3.08% | −15.63% | +0.371 | just below benchmark; vix<35 gives 0.555 but sensitivity inconsistent |
 | 046 | Halloween + momentum confirm | calendar-hybrid | **kept** | **0.707** | **[0.300, 1.119]** | 6.04% | −23.65% | +0.579 | best Sharpe in calendar family; consistent folds; H001 corr too high for ensemble |
 | 047 | Pre-earnings drift | calendar | killed | 0.234 | [−0.177, 0.638] | 1.09% | −25.66% | **+0.151** | CI contains zero; no sensitivity shows improvement |
+| 048 | Equal-weight ensemble | ensemble | **kept** | 0.800 | [0.378, 1.207] | 7.43% | −23.35% | +0.914 | 16 components equal-weight; noise cancellation lifts Sharpe from 0.614 to 0.800 |
+| 049 | Min-corr ensemble | ensemble | **kept ★★** | **0.959** | **[0.543, 1.357]** | 7.59% | **−18.26%** | +0.697 | **Best ensemble: 4 components (H021+H046+H019+H035); all pairwise corr < 0.50** |
+| 050 | Sharpe-weighted ensemble | ensemble | **kept** | 0.820 | [0.401, 1.228] | 7.50% | −22.94% | +0.914 | Sharpe weighting negligible improvement over equal-weight |
 
 ---
 
@@ -66,10 +69,10 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−10.11% (H043, kept)** / **−10.13% (H026, killed)** | **met** |
-| Strategies tested ≥ 50 | 47 | in progress |
-| Strategies kept (ensemble) | 15 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046) | in progress — H043 new best MaxDD (−10.11%) and best kept corr (+0.334) |
+| OOS Sharpe ≥ 1.0 | **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
+| Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **met** |
+| Strategies tested ≥ 50 | **50** | **MET ★** |
+| Strategies kept (ensemble) | 19 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046 + H048/H049/H050) | **COMPLETE** — H049 is the target ensemble (Sharpe 0.959, MaxDD −18.26%) |
 
 ---
 

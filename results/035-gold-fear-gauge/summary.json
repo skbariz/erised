@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H035",
+  "name": "gold-fear-gauge",
+  "strategy_class": "GoldFearGauge",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.5683,
+  "ci_low": 0.1529,
+  "ci_high": 0.9725,
+  "cagr": 0.0551,
+  "max_drawdown": -0.4155,
+  "n_trades": 324,
+  "h001_corr": 0.3842,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    1.372,
+    1.822,
+    0.06,
+    1.772,
+    1.321,
+    0.574,
+    0.834,
+    -0.3,
+    0.691
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long SPY when GLD < 50MA (no panic bid for gold = risk-on); flat when GLD trending up.",
+  "canonical_params": {
+    "ma_period": 50
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

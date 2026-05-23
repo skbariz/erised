@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H036",
+  "name": "equity-vs-safe-haven",
+  "strategy_class": "EquityVsSafeHavenMomentum",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.492,
+  "ci_low": 0.0966,
+  "ci_high": 0.9057,
+  "cagr": 0.0379,
+  "max_drawdown": -0.2202,
+  "n_trades": 222,
+  "h001_corr": 0.4775,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    -0.533,
+    0.607,
+    0.35,
+    0.628,
+    0.98,
+    -0.366,
+    1.244,
+    0.039,
+    1.514
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when SPY 3m return > avg(TLT 3m, GLD 3m); flat otherwise (risk assets outperforming safe havens).",
+  "canonical_params": {
+    "lookback_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

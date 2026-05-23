@@ -44,6 +44,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 030 | VIX trend (L/S, MA 20d) | VIX L/S | killed | −0.09 | [−0.50, 0.31] | −3.65% | −83.24% | **−0.284** | negative Sharpe; first negative H001 corr in program |
 | 031 | Realized vs implied vol | VIX regime | **kept** | **0.58** | **[0.16, 0.96]** | 8.52% | −51.43% | +0.693 | vol risk premium filter; best CAGR in batch |
 | 032 | VIX mean reversion (2σ, 60d) | VIX contrarian | killed | −0.001 | [−0.43, 0.40] | −0.52% | −35.32% | +0.420 | near-zero Sharpe; indistinguishable from zero |
+| 033 | Bond trend equity timer | cross-asset macro | killed | 0.44 | [0.04, 0.85] | 2.96% | −14.15% | +0.442 | Sharpe below benchmark; excellent MaxDD −14.15% |
+| 034 | SPY-TLT correlation regime | cross-asset macro | kept | 0.55 | [0.13, 0.95] | 7.96% | −55.92% | +0.562 | MaxDD = SPY (−55.92%) — held long during 2008; limited ensemble value |
+| 035 | Gold fear gauge | cross-asset macro | **kept** | 0.57 | [0.15, 0.97] | 5.51% | −41.55% | **+0.384** | best H001 corr of batch; sensitivity drops past 50d MA |
+| 036 | Equity vs safe-haven momentum | cross-asset macro | killed | 0.49 | [0.10, 0.91] | 3.79% | −22.02% | +0.477 | just misses benchmark; good MaxDD |
+| 037 | Dual safe-haven confirmation | cross-asset macro | killed | 0.22 | [−0.17, 0.62] | 0.83% | −11.70% | **+0.264** | lowest H001 corr in program; too restrictive — 5 zero folds |
 
 ---
 
@@ -53,8 +58,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.13% (H026, killed)** / **−18.41% (H021, kept)** | **met** |
-| Strategies tested ≥ 50 | 32 | in progress |
-| Strategies kept (ensemble) | 11 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031) | in progress — corr still > 0.30; H030 (kill) first negative H001 corr (−0.284) |
+| Strategies tested ≥ 50 | 37 | in progress |
+| Strategies kept (ensemble) | 13 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035) | in progress — H035 best kept corr (+0.384); H037 (kill) lowest overall corr (+0.264) |
 
 ---
 

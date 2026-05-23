@@ -182,18 +182,13 @@ class VolScaledTrend(Strategy):
         fast_ma = px.rolling(self.fast, min_periods=self.fast).mean()
         slow_ma = px.rolling(self.slow, min_periods=self.slow).mean()
 
-        direction = pd.Series(
-            np.where(fast_ma > slow_ma, 1.0, -1.0), index=px.index
-        )
+        direction = pd.Series(np.where(fast_ma > slow_ma, 1.0, -1.0), index=px.index)
         direction = direction.where(slow_ma.notna(), 0.0)
 
         # Shift realized vol by 1 bar so today's close is not used in today's signal
-        realized_vol = (
-            r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
-            .std()
-            .shift(1)
-            * np.sqrt(252)
-        )
+        realized_vol = r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
         scale = (self.target_vol / realized_vol).clip(upper=1.0)
         scale = scale.where(realized_vol.notna() & (realized_vol > 0), 0.0)
 
@@ -402,7 +397,7 @@ class VIXFilteredReversionStrategy(Strategy):
         rolling_std = r.rolling(self.lookback, min_periods=self.lookback).std(ddof=1).shift(1)
         z = (r - rolling_mean) / rolling_std
 
-        vix_elevated = (prices["vix_close"] > self.vix_threshold)
+        vix_elevated = prices["vix_close"] > self.vix_threshold
 
         entry = ((z < -self.threshold) & vix_elevated).astype(float)
         entry = entry.where(rolling_std.notna() & (rolling_std > 0), 0.0)
@@ -526,9 +521,9 @@ class ADXFilteredMACrossover(Strategy):
         lo = prices["low"]
         cl = prices["adj_close"]
 
-        tr = pd.concat(
-            [hi - lo, (hi - cl.shift(1)).abs(), (lo - cl.shift(1)).abs()], axis=1
-        ).max(axis=1)
+        tr = pd.concat([hi - lo, (hi - cl.shift(1)).abs(), (lo - cl.shift(1)).abs()], axis=1).max(
+            axis=1
+        )
 
         up = hi - hi.shift(1)
         dn = lo.shift(1) - lo
@@ -595,6 +590,7 @@ class VolatilityRegime(Strategy):
 # ---------------------------------------------------------------------------
 # Calendar helpers — used by H024 and H026.
 # ---------------------------------------------------------------------------
+
 
 def _calendar_month_ranks(index: pd.DatetimeIndex) -> tuple[pd.Series, pd.Series]:
     """Rank each date from the start and end of its calendar month.
@@ -844,10 +840,12 @@ class ThreeAssetMomentum(MultiAssetStrategy):
             "TLT": prices["tlt_close"],
             "GLD": prices["gld_close"],
         }
-        moms = pd.DataFrame({
-            name: px.shift(self.skip_days) / px.shift(self.lookback_days) - 1
-            for name, px in assets.items()
-        })
+        moms = pd.DataFrame(
+            {
+                name: px.shift(self.skip_days) / px.shift(self.lookback_days) - 1
+                for name, px in assets.items()
+            }
+        )
 
         weights = pd.DataFrame(0.0, index=prices.index, columns=list(assets.keys()))
         valid_rows = moms.notna().all(axis=1)
@@ -859,9 +857,7 @@ class ThreeAssetMomentum(MultiAssetStrategy):
             best_mom[valid_rows] = moms[valid_rows].max(axis=1)
 
             for asset in assets:
-                weights[asset] = np.where(
-                    valid_rows & (best == asset) & (best_mom > 0), 1.0, 0.0
-                )
+                weights[asset] = np.where(valid_rows & (best == asset) & (best_mom > 0), 1.0, 0.0)
 
         return weights
 
@@ -884,18 +880,12 @@ class RiskParity(MultiAssetStrategy):
         tlt_r = prices["tlt_close"].pct_change()
 
         # Annualized vol; shift 1 bar to prevent lookahead
-        spy_vol = (
-            spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
-            .std()
-            .shift(1)
-            * np.sqrt(252)
-        )
-        tlt_vol = (
-            tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback)
-            .std()
-            .shift(1)
-            * np.sqrt(252)
-        )
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
 
         inv_spy = 1.0 / spy_vol.replace(0, np.nan)
         inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
@@ -1040,9 +1030,7 @@ class RealizedVsImpliedVol(Strategy):
             raise ValueError("RealizedVsImpliedVol requires 'vix_close' column")
         rets = prices["adj_close"].pct_change()
         realized_vol = (
-            rets.rolling(self.realized_window, min_periods=self.realized_window)
-            .std()
-            .shift(1)
+            rets.rolling(self.realized_window, min_periods=self.realized_window).std().shift(1)
             * np.sqrt(252)
             * 100
         )
@@ -1077,5 +1065,160 @@ class VIXMeanReversion(Strategy):
         vix_std = vix.rolling(self.lookback, min_periods=self.lookback).std().shift(1)
         vix_z = (vix.shift(1) - vix_ma) / vix_std.replace(0, np.nan)
         pos = (vix_z > self.n_sigma).astype(float)
+        pos.name = "position"
+        return pos
+
+
+# ---------------------------------------------------------------------------
+# Batch 6 — H033–H037: Cross-Asset Macro Timing
+# All require 'tlt_close' and/or 'gld_close' columns in the prices DataFrame.
+# ---------------------------------------------------------------------------
+
+
+class BondTrendEquityTimer(Strategy):
+    """H033: Long SPY when TLT is below its MA (bonds weak = risk-on).
+
+    Flight-to-safety bond rallies occur when investors fear equity losses.
+    TLT trending above its 200MA signals bond demand = risk-off environment.
+    TLT below its 200MA = no flight to safety = risk-on.
+
+    Decorrelation thesis: bond trend and equity trend diverge in crises —
+    exactly the regime where H001 is most likely to be wrong or late.
+    Requires 'tlt_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, ma_period: int = 200):
+        self.ma_period = ma_period
+        self.name = f"bond_trend_equity_{ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns:
+            raise ValueError("BondTrendEquityTimer requires 'tlt_close' column")
+        tlt = prices["tlt_close"]
+        tlt_ma = tlt.rolling(self.ma_period, min_periods=self.ma_period).mean()
+        pos = (tlt < tlt_ma).astype(float)
+        pos = pos.where(tlt_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
+class SPYTLTCorrelationRegime(Strategy):
+    """H034: Long SPY only when rolling SPY-TLT correlation is negative.
+
+    In normal markets, equities and bonds have negative return correlation
+    (flight-to-safety effect). During crisis contagion, both assets fall
+    together and correlation flips positive. Flat when correlation is
+    positive avoids the regime where diversification fails entirely.
+
+    Decorrelation thesis: this signal uses cross-asset covariance structure,
+    not price levels. It turns off at exactly the time H001 gets hurt most.
+    Requires 'tlt_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, corr_window: int = 60):
+        self.corr_window = corr_window
+        self.name = f"spy_tlt_corr_regime_{corr_window}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns:
+            raise ValueError("SPYTLTCorrelationRegime requires 'tlt_close' column")
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        rolling_corr = spy_r.rolling(self.corr_window, min_periods=self.corr_window).corr(tlt_r)
+        pos = (rolling_corr < 0).astype(float)
+        pos = pos.where(rolling_corr.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
+class GoldFearGauge(Strategy):
+    """H035: Long SPY when GLD is below its MA (no panic bid for gold).
+
+    Gold outperformance signals fear and inflation anxiety that historically
+    precede equity weakness. GLD trending above its MA = investors seeking
+    the gold safe haven = risk-off environment. GLD below MA = no fear
+    premium in the gold market = risk-on signal for equities.
+
+    Requires 'gld_close' column in the prices DataFrame.
+    """
+
+    def __init__(self, ma_period: int = 50):
+        self.ma_period = ma_period
+        self.name = f"gold_fear_gauge_{ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "gld_close" not in prices.columns:
+            raise ValueError("GoldFearGauge requires 'gld_close' column")
+        gld = prices["gld_close"]
+        gld_ma = gld.rolling(self.ma_period, min_periods=self.ma_period).mean()
+        pos = (gld < gld_ma).astype(float)
+        pos = pos.where(gld_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
+class EquityVsSafeHavenMomentum(Strategy):
+    """H036: Long SPY when SPY 3m return > average of TLT and GLD 3m returns.
+
+    Risk-on regime: equity outperforms safe havens. Risk-off: safe havens
+    outperform equity. This relative momentum signal captures regime shifts
+    earlier than absolute momentum because safe-haven outperformance often
+    precedes equity declines by days to weeks.
+
+    Decorrelation thesis: the signal is relative (SPY vs TLT/GLD), not
+    absolute SPY trend. In bull markets both agree; in transitions, this
+    signal flips before H001's MA crossover fires.
+    Requires 'tlt_close' and 'gld_close' columns in the prices DataFrame.
+    """
+
+    def __init__(self, lookback_days: int = 63):
+        self.lookback_days = lookback_days
+        self.name = f"equity_vs_safe_haven_{lookback_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns or "gld_close" not in prices.columns:
+            raise ValueError(
+                "EquityVsSafeHavenMomentum requires 'tlt_close' and 'gld_close' columns"
+            )
+        spy_mom = prices["adj_close"] / prices["adj_close"].shift(self.lookback_days) - 1
+        tlt_mom = prices["tlt_close"] / prices["tlt_close"].shift(self.lookback_days) - 1
+        gld_mom = prices["gld_close"] / prices["gld_close"].shift(self.lookback_days) - 1
+        safe_haven_avg = (tlt_mom + gld_mom) / 2
+        valid = spy_mom.notna() & tlt_mom.notna() & gld_mom.notna()
+        pos = (spy_mom > safe_haven_avg).astype(float)
+        pos = pos.where(valid, 0.0)
+        pos.name = "position"
+        return pos
+
+
+class DualSafeHavenConfirmation(Strategy):
+    """H037: Long SPY only when BOTH TLT and GLD are below their 200MAs.
+
+    Maximum risk-on confirmation: no flight to either bonds or gold.
+    When either safe haven is trending up, equity exposure is reduced
+    to zero. The dual-filter is intentionally restrictive — it targets
+    only the highest-quality risk-on windows where both safe havens
+    are dormant, structurally avoiding the crises that hurt all trend
+    strategies simultaneously.
+
+    Requires 'tlt_close' and 'gld_close' columns in the prices DataFrame.
+    """
+
+    def __init__(self, ma_period: int = 200):
+        self.ma_period = ma_period
+        self.name = f"dual_safe_haven_{ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns or "gld_close" not in prices.columns:
+            raise ValueError(
+                "DualSafeHavenConfirmation requires 'tlt_close' and 'gld_close' columns"
+            )
+        tlt = prices["tlt_close"]
+        gld = prices["gld_close"]
+        tlt_ma = tlt.rolling(self.ma_period, min_periods=self.ma_period).mean()
+        gld_ma = gld.rolling(self.ma_period, min_periods=self.ma_period).mean()
+        valid = tlt_ma.notna() & gld_ma.notna()
+        pos = ((tlt < tlt_ma) & (gld < gld_ma)).astype(float)
+        pos = pos.where(valid, 0.0)
         pos.name = "position"
         return pos

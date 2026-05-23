@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H034",
+  "name": "spy-tlt-corr-regime",
+  "strategy_class": "SPYTLTCorrelationRegime",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.549,
+  "ci_low": 0.1278,
+  "ci_high": 0.9524,
+  "cagr": 0.0796,
+  "max_drawdown": -0.5592,
+  "n_trades": 61,
+  "h001_corr": 0.562,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.902,
+    1.571,
+    0.218,
+    -0.061,
+    0.671,
+    1.263,
+    0.463,
+    2.451,
+    0.888,
+    0.538
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long SPY when rolling 60d SPY-TLT correlation is negative; flat when positive (crisis contagion).",
+  "canonical_params": {
+    "corr_window": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

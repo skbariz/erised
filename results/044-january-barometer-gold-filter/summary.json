@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H044",
+  "name": "january-barometer-gold-filter",
+  "strategy_class": "JanuaryBarometerGoldFilter",
+  "family": "calendar-hybrid",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.3745,
+  "ci_low": -0.0267,
+  "ci_high": 0.7808,
+  "cagr": 0.031,
+  "max_drawdown": -0.2953,
+  "n_trades": 14,
+  "h001_corr": 0.399,
+  "fold_sharpes": [
+    1.044,
+    -0.489,
+    0.0,
+    0.516,
+    0.0,
+    0.0,
+    0.066,
+    1.422,
+    0.0,
+    0.0,
+    0.0,
+    1.51
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H025 (January Barometer) with GLD < 50MA override. Rising gold in January (fear/inflation) overrides positive Jan signal.",
+  "canonical_params": {
+    "gld_ma_period": 50
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

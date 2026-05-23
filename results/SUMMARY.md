@@ -54,6 +54,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 040 | Short-term weekly reversal | contrarian | killed | 0.481 | [0.061, 0.880] | 6.28% | −43.70% | +0.480 | just misses benchmark; p15 threshold lifts Sharpe to 0.532 |
 | 041 | Post-crash recovery | contrarian | killed | 0.405 | [−0.001, 0.806] | 3.55% | −31.27% | **+0.108** | CI clips zero; N=18; vix=35 gives CI > 0 but Sharpe 0.485 |
 | 042 | Vol-of-vol calm | contrarian | killed | 0.106 | [−0.300, 0.525] | 0.43% | −17.49% | +0.338 | highly inconsistent fold-by-fold; sensitive to vov_window |
+| 043 | Sell-in-May + bond confirm | calendar-hybrid | **kept** | 0.577 | [0.168, 0.976] | 2.67% | **−10.11%** | +0.334 | best MaxDD of any kept strategy (−10.11%); lower corr than H023 (+0.505) |
+| 044 | January barometer + gold filter | calendar-hybrid | killed | 0.374 | [−0.027, 0.781] | 3.10% | −29.53% | +0.399 | CI clips zero; N=14 trades; gold filter too restrictive |
+| 045 | Turn-of-month + low vol gate | calendar-hybrid | killed | 0.490 | [0.080, 0.903] | 3.08% | −15.63% | +0.371 | just below benchmark; vix<35 gives 0.555 but sensitivity inconsistent |
+| 046 | Halloween + momentum confirm | calendar-hybrid | **kept** | **0.707** | **[0.300, 1.119]** | 6.04% | −23.65% | +0.579 | best Sharpe in calendar family; consistent folds; H001 corr too high for ensemble |
+| 047 | Pre-earnings drift | calendar | killed | 0.234 | [−0.177, 0.638] | 1.09% | −25.66% | **+0.151** | CI contains zero; no sensitivity shows improvement |
 
 ---
 
@@ -62,9 +67,9 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Target | Current best | Status |
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−10.13% (H026, killed)** / **−18.41% (H021, kept)** | **met** |
-| Strategies tested ≥ 50 | 42 | in progress |
-| Strategies kept (ensemble) | 13 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035) | in progress — H035 best kept corr (+0.384); H039/H041 lowest overall (+0.108/+0.133, killed) |
+| Max DD < SPY (−55.92%) | **−10.11% (H043, kept)** / **−10.13% (H026, killed)** | **met** |
+| Strategies tested ≥ 50 | 47 | in progress |
+| Strategies kept (ensemble) | 15 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046) | in progress — H043 new best MaxDD (−10.11%) and best kept corr (+0.334) |
 
 ---
 

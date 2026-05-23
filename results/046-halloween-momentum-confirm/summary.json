@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H046",
+  "name": "halloween-momentum-confirm",
+  "strategy_class": "HalloweenMomentumConfirm",
+  "family": "calendar-hybrid",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.7073,
+  "ci_low": 0.2997,
+  "ci_high": 1.1192,
+  "cagr": 0.0604,
+  "max_drawdown": -0.2365,
+  "n_trades": 91,
+  "h001_corr": 0.5791,
+  "fold_sharpes": [
+    1.372,
+    0.149,
+    -0.193,
+    0.628,
+    0.453,
+    0.662,
+    1.601,
+    1.306,
+    0.344,
+    2.696,
+    0.097,
+    0.316
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H023 (Nov-Apr) gated by 6-month positive momentum. Skips unfavorable winters where seasonal tailwind fights a bearish trend.",
+  "canonical_params": {
+    "momentum_days": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

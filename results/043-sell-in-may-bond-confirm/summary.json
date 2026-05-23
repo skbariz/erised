@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H043",
+  "name": "sell-in-may-bond-confirm",
+  "strategy_class": "SellInMayBondConfirm",
+  "family": "calendar-hybrid",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.5765,
+  "ci_low": 0.1676,
+  "ci_high": 0.9761,
+  "cagr": 0.0267,
+  "max_drawdown": -0.1011,
+  "n_trades": 95,
+  "h001_corr": 0.334,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.663,
+    1.334,
+    0.344,
+    0.738,
+    1.48,
+    0.566,
+    -0.911,
+    1.85,
+    -0.357,
+    1.273
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H023 (Nov-Apr) with TLT < 200MA macro confirmation. Skips winter entries when bonds in uptrend (risk-off).",
+  "canonical_params": {
+    "tlt_ma_period": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

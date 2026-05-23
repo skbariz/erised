@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H047",
+  "name": "pre-earnings-drift",
+  "strategy_class": "PreEarningsDrift",
+  "family": "calendar",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.234,
+  "ci_low": -0.1773,
+  "ci_high": 0.6381,
+  "cagr": 0.0109,
+  "max_drawdown": -0.2566,
+  "n_trades": 192,
+  "h001_corr": 0.1505,
+  "fold_sharpes": [
+    0.961,
+    -0.117,
+    0.218,
+    -0.483,
+    -0.146,
+    -1.197,
+    1.678,
+    -0.67,
+    -0.124,
+    0.684,
+    0.491,
+    1.353
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long first 5 trading days of Jan/Apr/Jul/Oct (earnings season open). Institutional pre-positioning distinct from H026 quarter-end window.",
+  "canonical_params": {
+    "n_days": 5,
+    "earnings_months": [
+      1,
+      4,
+      7,
+      10
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

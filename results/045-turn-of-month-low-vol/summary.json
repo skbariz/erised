@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H045",
+  "name": "turn-of-month-low-vol",
+  "strategy_class": "TurnOfMonthLowVol",
+  "family": "calendar-hybrid",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 0.4903,
+  "ci_low": 0.0798,
+  "ci_high": 0.903,
+  "cagr": 0.0308,
+  "max_drawdown": -0.1563,
+  "n_trades": 516,
+  "h001_corr": 0.371,
+  "fold_sharpes": [
+    -0.115,
+    0.754,
+    1.01,
+    1.441,
+    0.41,
+    -0.445,
+    0.066,
+    0.758,
+    -0.227,
+    1.048,
+    0.789,
+    1.039
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H024 (Turn-of-Month 3d, killed Sharpe 0.41) with VIX < 25 gate. Removes panic entries where window-dressing is overwhelmed by fear.",
+  "canonical_params": {
+    "n_days": 3,
+    "vix_threshold": 25.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

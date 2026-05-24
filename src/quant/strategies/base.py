@@ -3408,3 +3408,211 @@ class MonthlyRebalancingRiskParity(MultiAssetStrategy):
         w_tlt_m = w_tlt_m.ffill().fillna(0.0)
 
         return pd.DataFrame({"SPY": w_spy_m, "TLT": w_tlt_m}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# Batch 19 — H096–H098: Advanced Signal Construction
+# ---------------------------------------------------------------------------
+
+
+class PCARiskRegime(MultiAssetStrategy):
+    """H096: SPY-TLT-GLD principal component regime.
+
+    Fits rolling PCA to identify the dominant risk factor across SPY, TLT, GLD.
+    PC1 (forced positive SPY loading) captures risk-on/risk-off sentiment.
+    Signal = projected 21-day return onto PC1; positive → long SPY, negative → long TLT.
+    """
+
+    name = "pca_risk_regime"
+
+    def __init__(self, pca_lookback: int = 252, signal_days: int = 21) -> None:
+        self.pca_lookback = pca_lookback
+        self.signal_days = signal_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        has_gld = "gld_close" in prices.columns
+        gld_r = prices["gld_close"].pct_change() if has_gld else pd.Series(np.nan, index=prices.index)
+
+        spy_cum = prices["adj_close"].pct_change(self.signal_days)
+        tlt_cum = prices["tlt_close"].pct_change(self.signal_days)
+        gld_cum = prices["gld_close"].pct_change(self.signal_days) if has_gld else pd.Series(np.nan, index=prices.index)
+
+        n = len(prices)
+        score_arr = np.full(n, np.nan)
+
+        for i in range(self.pca_lookback + self.signal_days, n):
+            w_spy = spy_r.values[i - self.pca_lookback : i]
+            w_tlt = tlt_r.values[i - self.pca_lookback : i]
+            w_gld = gld_r.values[i - self.pca_lookback : i]
+
+            n_gld_valid = int(np.sum(~np.isnan(w_gld)))
+            if n_gld_valid > self.pca_lookback // 2:
+                ret_mat = np.column_stack([w_spy, w_tlt, w_gld])
+                sig = np.array([spy_cum.values[i - 1], tlt_cum.values[i - 1], gld_cum.values[i - 1]])
+            else:
+                ret_mat = np.column_stack([w_spy, w_tlt])
+                sig = np.array([spy_cum.values[i - 1], tlt_cum.values[i - 1]])
+
+            valid = ~np.isnan(ret_mat).any(axis=1)
+            clean = ret_mat[valid]
+            if len(clean) < 60 or np.isnan(sig).any():
+                continue
+
+            cov = np.cov(clean.T)
+            if cov.ndim < 2:
+                cov = np.array([[float(cov)]])
+            eigvals, eigvecs = np.linalg.eigh(cov)
+            pc1 = eigvecs[:, -1]
+            if pc1[0] < 0:
+                pc1 = -pc1
+
+            score_arr[i] = float(np.dot(sig, pc1))
+
+        scores = pd.Series(score_arr, index=prices.index).shift(1)
+        tlt_ok = prices["tlt_close"].notna()
+        valid_sig = scores.notna()
+
+        w_spy_out = pd.Series(0.0, index=prices.index)
+        w_tlt_out = pd.Series(0.0, index=prices.index)
+        w_spy_out[valid_sig & (scores > 0)] = 1.0
+        w_tlt_out[valid_sig & (scores <= 0) & tlt_ok] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy_out, "TLT": w_tlt_out}, index=prices.index)
+
+
+class CorrelationRiskParityHybrid(MultiAssetStrategy):
+    """H097: H034 correlation regime overlaid on H021 inverse-vol weights.
+
+    Normal: H021 inverse-vol weights.
+    Crisis: when rolling 60d SPY-TLT correlation turns positive → override to
+            crisis_spy / crisis_tlt split (default 10% / 90%).
+    """
+
+    name = "correlation_risk_parity_hybrid"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        corr_lookback: int = 60,
+        crisis_tlt: float = 0.90,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.corr_lookback = corr_lookback
+        self.crisis_tlt = crisis_tlt
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback).std()
+        tlt_vol = tlt_r.rolling(self.vol_lookback).std()
+
+        inv_spy = spy_vol.replace(0, np.nan).rdiv(1)
+        inv_tlt = tlt_vol.replace(0, np.nan).rdiv(1)
+        total = inv_spy + inv_tlt
+
+        w_spy_h021 = (inv_spy / total).fillna(0.5)
+        w_tlt_h021 = (inv_tlt / total).fillna(0.5)
+
+        # H034 signal: positive rolling correlation = crisis contagion
+        corr = spy_r.rolling(self.corr_lookback).corr(tlt_r).shift(1)
+        crisis = corr > 0
+
+        tlt_ok = prices["tlt_close"].notna()
+        crisis = crisis & tlt_ok
+
+        w_spy = w_spy_h021.where(~crisis, 1.0 - self.crisis_tlt)
+        w_tlt = w_tlt_h021.where(~crisis, self.crisis_tlt)
+
+        w_spy = w_spy.where(tlt_ok, 0.0)
+        w_tlt = w_tlt.where(tlt_ok, 0.0)
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class ReversionEntryRiskParity(MultiAssetStrategy):
+    """H098: H021 with contrarian heavy-TLT entry on SPY drawdown events.
+
+    Normal: H021 inverse-vol weights.
+    Entry: SPY drawdown from peak exceeds dd_trigger →
+           shift to crisis_tlt/crisis_spy for up to crisis_days bars.
+    Exit early: SPY recovers recovery% from crisis trough.
+    """
+
+    name = "reversion_entry_risk_parity"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        dd_trigger: float = 0.10,
+        crisis_tlt: float = 0.80,
+        crisis_days: int = 20,
+        recovery: float = 0.05,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.dd_trigger = dd_trigger
+        self.crisis_tlt = crisis_tlt
+        self.crisis_days = crisis_days
+        self.recovery = recovery
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy = prices["adj_close"]
+        tlt = prices["tlt_close"]
+        spy_r = spy.pct_change()
+        tlt_r = tlt.pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback).std()
+        tlt_vol = tlt_r.rolling(self.vol_lookback).std()
+        inv_spy = spy_vol.replace(0, np.nan).rdiv(1)
+        inv_tlt = tlt_vol.replace(0, np.nan).rdiv(1)
+        total = inv_spy + inv_tlt
+        w_spy_h021 = (inv_spy / total).fillna(0.5)
+        w_tlt_h021 = (inv_tlt / total).fillna(0.5)
+
+        spy_peak = spy.expanding(min_periods=1).max()
+        spy_dd = (spy / spy_peak - 1.0).fillna(0.0)
+
+        n = len(prices)
+        w_spy_out = pd.Series(0.0, index=prices.index)
+        w_tlt_out = pd.Series(0.0, index=prices.index)
+
+        in_crisis = False
+        days_left = 0
+        crisis_trough = np.inf
+
+        for i in range(n):
+            tlt_avail = not pd.isna(tlt.iloc[i])
+            dd_lag = spy_dd.iloc[i - 1] if i > 0 else 0.0
+            spy_lag = spy.iloc[i - 1] if i > 0 else spy.iloc[i]
+
+            if not tlt_avail:
+                in_crisis = False
+                days_left = 0
+                continue
+
+            if not in_crisis:
+                if dd_lag < -self.dd_trigger:
+                    in_crisis = True
+                    days_left = self.crisis_days
+                    crisis_trough = spy_lag
+            else:
+                if spy_lag < crisis_trough:
+                    crisis_trough = spy_lag
+                if spy_lag > crisis_trough * (1.0 + self.recovery):
+                    in_crisis = False
+                    days_left = 0
+                else:
+                    days_left -= 1
+                    if days_left <= 0:
+                        in_crisis = False
+
+            if in_crisis:
+                w_spy_out.iloc[i] = 1.0 - self.crisis_tlt
+                w_tlt_out.iloc[i] = self.crisis_tlt
+            else:
+                w_spy_out.iloc[i] = w_spy_h021.iloc[i]
+                w_tlt_out.iloc[i] = w_tlt_h021.iloc[i]
+
+        return pd.DataFrame({"SPY": w_spy_out, "TLT": w_tlt_out}, index=prices.index)

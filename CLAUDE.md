@@ -1,7 +1,7 @@
-﻿# Project
+# Project
 Python research repo for S&P 500 trading strategies. Erised trading models.
 
-Walk-forward OOS methodology: research period 1993-2022, holdout sealed.
+Walk-forward OOS methodology: research period 1993-2022, holdout sealed (spent after H100).
 Folds: 5-year train / 2-year test, 12 non-overlapping folds.
 Costs: 0.5 bps commission + 1.0 bps slippage.
 SPY benchmark: Sharpe 0.51 | CAGR 8.35% | Max DD -55.92%.
@@ -36,90 +36,147 @@ Never open equity curve files, raw trade logs, or parquet files unless explicitl
 Results folders use short names: results/021-risk-parity, results/007-ts-momentum.
 Not the full strategy description. Check actual folder names with rg or dir before referencing.
 
-# Current program state (as of H050 — PROGRAM COMPLETE)
-- Strategies tested: 50
-- Kept (ensemble candidates): H001 H007 H008 H016 H018 H019 H021 H022 H023 H025 H027 H031 H034 H035 H043 H046 (16 individual) + H048 H049 H050 (3 ensemble) = 19 total
-- Star strategy: H021 (RiskParity) — Sharpe 1.029, Max DD -18.41%
-- Target ensemble: H049 (MinCorrEnsemble) — Sharpe 0.959, CI [0.543, 1.357], Max DD -18.26%
-  Components: H021 (RiskParity) + H046 (HalloweenMomentumConfirm) + H019 (SPYGLDRotation) + H035 (GoldFearGauge)
-  All pairwise correlations < 0.50; this is the production-candidate portfolio.
-- Best Max DD kept: H043 (SellInMayBondConfirm) at -10.11%
-- Lowest H001 corr among kept: H043 (+0.334), H035 (+0.384)
-- Key finding: No strategy achieved H001 corr < 0.30. Ensemble decorrelation came from min-corr
-  subset selection (H049), not finding individually decorrelated strategies.
-- Goal trackers: ALL MET — OOS Sharpe >= 1.0 (H021: 1.03), Max DD < SPY (H043: -10.11%), strategies >= 50 (50 tested)
+# Current program state (PROGRAM COMPLETE — H001-H100)
+- Strategies tested: 100
+- Kept: 47 total
+  Individual (38): H001 H007 H008 H016 H018 H019 H021 H022 H023 H025 H027 H031 H034 H035 H043 H046
+                   H051 H060 H063 H065 H066 H068 H070 H076 H077 H078 H079 H080 H082 H084 H086 H087
+                   H088 H089 H090 H097 H098
+  Ensemble (9): H048 H049 H050 H091 H092 H093 H094 H095 H099
+- Program champion: H095 (MaxDiversificationPortfolio) — Sharpe 1.133, Max DD -7.16%
+- Best individual strategy: H086 (LowVolTargetPortfolio) — Sharpe 1.109, Max DD -9.93%
+- Star strategy (original): H021 (RiskParity) — Sharpe 1.029, Max DD -18.41%
+- Lowest H001 corr (kept): H078 (SeasonalRiskParity) +0.008, H098 (ReversionEntryRiskParity) +0.196
+- Holdout result (H100): H049 Sharpe 1.346 / Max DD -9.91% vs SPY 1.465 / -18.76% (2023-2026)
+  Holdout seal is now SPENT — do not run load_holdout() again for research purposes.
+- Goal trackers: ALL MET — Sharpe ≥ 1.0 (H095: 1.133), Max DD < SPY (H095: -7.16%), tested ≥ 100
 
-## Ensemble construction findings (critical for future work)
-- Equal-weight of 16 strategies (H048) lifts Sharpe from ~0.61 avg to 0.800 — noise reduction dominates
-- Sharpe-weighting (H050: 0.820) barely beats equal-weight (H048: 0.800) — not worth the complexity
-- Min-corr subset selection (H049: 0.959) beats both — selecting 4 orthogonal strategies outperforms
-  weighting 16 correlated ones
-- Contrarian strategies (H038-H042) achieved lowest H001 corr (+0.108 to +0.165) but were killed:
-  too few trades (N=6 to N=18 over 30 years) → unreliable OOS estimation
-- The correlation/activity tradeoff: strategies most decorrelated from H001 are those that trade
-  rarely (crisis buyers, long-term reversal) — too infrequently to clear the keep bar
+---
 
-# Strategy family performance summary (H001–H050)
+# Strategy family performance summary (H001–H100)
 
-What each family produced and why — essential context for H051+ design.
+What each family produced and why — distilled from the full 100-strategy program.
 
 ## Trend-following (H001, H007, H008, H009–H011, H013–H015, H016, H017, H027)
 - Long-only works (H001: 0.61, H007: 0.62, H008: 0.62). Long/short universally fails — shorting adds
-  whipsaw costs (1.5 bps/turn) without capturing enough bear-market alpha to compensate.
-- Vol-scaling (H016) improves Max DD to -26% but not Sharpe. Hybrid calendar+trend (H027) matches H001.
-- All trend signals have H001 corr > 0.70 — they're measuring the same underlying signal.
-- **Do not pursue more trend variants.** The family is saturated.
+  whipsaw costs (1.5 bps/turn) without enough bear-market alpha to compensate.
+- Vol-scaling (H016) improves Max DD to -26% but not Sharpe.
+- All trend signals have H001 corr > 0.70 — measuring the same underlying signal.
+- **Family saturated. Do not pursue more trend variants.**
 
-## Multi-asset rotation (H018–H022)
-- The highest-value family. Bonds and gold provide genuine crisis diversification.
-- RiskParity (H021) is the star of the program: Sharpe 1.03, Max DD -18.41%.
-- Rotation strategies (H018, H019) kept but still correlated with H001 (~0.69–0.79) — they hold SPY
-  most of the time and only rotate in crises.
-- TLT available from 2002, GLD from 2004. Early folds (1993–2002) starved — killed H020 (3-asset).
-- **High-value area for H051+:** adding more assets (e.g. commodities, EM bonds, real estate).
+## Multi-asset rotation (H018–H022, H051–H060)
+- H021 (RiskParity) is the foundation of the entire program.
+- Rotation strategies (H018, H019, H060) kept but correlated with H001 (~0.29–0.79).
+- TLT from 2002, GLD from 2004, DBC from 2006, HYG from 2007. Strategies using late-starting assets
+  incur 3-5 zero OOS folds and almost always fail the keep bar.
+- H051 (3-asset risk parity): Kept but MaxDD worse (-47.67%) than H021 due to GLD early-fold gaps.
+- H060 (Carry+momentum SPY/TLT): First kept strategy below H001 corr 0.30 (+0.294).
+- **Lesson:** More assets ≠ better. The GLD/DBC data-availability penalty typically outweighs any
+  diversification benefit unless the asset has data from ≥ 2000.
 
-## Calendar effects (H023–H027, H043–H047)
-- Confirmed real anomalies: Sell-in-May, January Barometer, Halloween effect all pass the keep bar.
-- H001 corr range: 0.33–0.71. Calendar signals are the lowest-corr family that reliably keeps.
-- Adding cross-asset confirmation (H043 TLT filter, H046 momentum filter) improves Max DD and Sharpe.
-- H043 (SellInMayBondConfirm) achieves the best Max DD in the program at -10.11%.
-- **Diminishing returns reached.** More calendar hybrids likely to be marginal.
+## Calendar effects (H023–H027, H043–H047, H071–H075, H078)
+- Confirmed anomalies: Sell-in-May, January Barometer, Halloween effect all pass the keep bar.
+- H001 corr range: 0.33–0.57. Best low-corr calendar family.
+- H043 (SellInMayBondConfirm): -10.11% MaxDD — first MaxDD record holder.
+- H078 (SeasonalRiskParity): H001 corr +0.008 (program all-time record). H021 in Nov-Apr,
+  100% TLT in May-Oct. Near-zero correlation with equity momentum — invaluable ensemble component.
+- H071-H075 (calendar extensions): All killed. H071 missed by 0.002, H072 had -9.82% MaxDD
+  but couldn't deliver Sharpe. Calendar signal saturation — no more alpha from seasonal timing alone.
+- **High-value for ensemble selection. H078 and H043 are irreplaceable diversifiers.**
 
-## VIX-based (H028–H032)
-- Only H031 (RealizedVsImpliedVol) kept. The vol risk premium (realized < implied = safe to be long)
-  is the only durable VIX signal. Pure VIX contrarian (spike entry, mean reversion) fails because
-  it enters during crash continuation, not after capitulation.
-- H030 (VIX trend L/S) proved negative H001 corr (-0.284) is possible but at negative Sharpe.
+## VIX-based and vol regime (H028–H032, H066–H070)
+- H031 (RealizedVsImpliedVol): Only pure VIX-based keeper. Vol risk premium is durable.
+- H066 (VIX risk parity enhanced): Sharpe 0.990 via VIX>35 crisis override to 80/20 TLT/SPY.
+- H070 (Multi-asset dynamic vol target): Sharpe 1.066, MaxDD -12.28%. New program star.
+  H021 weights × (min(1, target_vol/realized_vol)) — reduces exposure when market is stressed.
+- H067, H069: VIX-based regime filters killed (CI contains zero or barely positive; fold variance extreme).
+- **VIX as regime indicator works; VIX as timing signal fails.**
 
-## Cross-asset macro (H033–H037)
-- Bond trend (H034) and gold fear gauge (H035) kept. Both are slow-moving regime indicators.
-- H037 (dual safe-haven confirmation) achieved lowest H001 corr of any kept strategy (+0.264) but
-  was too restrictive: 5 zero-trade folds → killed.
-- H035 is an anchor of the target ensemble (H049) despite high H001 corr — pairwise corr with
-  H021 and H046 is low enough to add ensemble value.
+## Cross-asset macro / regime (H033–H037, H053–H059, H076–H080, H097–H098)
+- Bond trend (H034) and gold fear gauge (H035) kept (H001-H050 batch).
+- H053 (credit spread), H054 (yield curve), H056 (yield curve rotation): All killed due to data gaps
+  and CI-clips-zero. The 42d lookback versions of H054/H056 show promise but are post-OOS params.
+- H076 (4-asset parity SPY+TLT+GLD+DBC): Kept, 0.666. Folds 0-2 zero (pre-DBC).
+- H077 (risk parity + momentum filter): Kept, 0.683. Momentum gate adds value.
+- H079 (crisis protocol risk parity): Sharpe 0.952. Drawdown+VIX hysteresis works.
+- H080 (yield curve overlay): Sharpe 0.891. SHY>TLT inversion as SPY-weight reducer is effective.
+- H097 (correlation risk parity hybrid): Sharpe 0.992. Best regime-overlay approach:
+  positive 60d SPY-TLT rolling correlation → crisis override. Signal is always available, never gaps.
+- H098 (reversion entry risk parity): Sharpe 0.879, H001 corr +0.196. Drawdown-triggered entry
+  to heavy TLT. Low corr because it fires only in crashes.
+- **Regime overlays on H021 consistently produce Sharpe 0.85-0.99. The correlation regime (H097)
+  is the most reliable signal — it's always computable and has no data-gap risk.**
 
-## Contrarian / mean reversion (H038–H042)
-- ALL killed. Lowest H001 corr in the program (+0.108 to +0.165) but N=6–18 trades over 30 years.
-- The fundamental tradeoff: strategies that fire only in crises are most decorrelated but least
-  tradeable. No fix exists within this framework — more data or multi-market generalization needed.
-- **Do not pursue more contrarian signals** unless you have a mechanism to increase trade frequency.
+## Equity factors (H061–H065)
+- H063 (Defensive sector overlay, XLP/XLU via VIX+MA regime): Kept, 0.577.
+- H065 (Equal-weight defensive factor, SPY+XLP+XLU+IVE): Kept, 0.554.
+- H061 (value/growth rotation), H062 (small-cap), H064 (tech/defensive momentum): All killed.
+- MaxDD poor for kept strategies (-39% to -49%) — equity factors provide no downside protection.
+- **Equity factors add little beyond diversification noise. Not worth the complexity or MaxDD cost.**
 
-## Ensemble (H048–H050)
-- Min-corr subset (H049) at Sharpe 0.959 beats equal-weight (H048: 0.800) and Sharpe-weighted (H050: 0.820).
-- Key insight: 4 orthogonal strategies outperform 16 correlated ones. Variance reduction > quality-weighting.
+## Vol-control and drawdown management (H086–H090)
+- THE most important family discovered in H051-H100. All five strategies kept; four above Sharpe 0.87.
+- H086 (LowVolTargetPortfolio): Sharpe 1.109, MaxDD -9.93%. Program Sharpe record (individual).
+  Mechanism: H021 × min(1, 8%/realized_vol). Simple and powerful.
+- H087 (RatchetDrawdownProtection): Sharpe 1.010, MaxDD -10.93%.
+  Cuts exposure proportional to portfolio drawdown depth.
+- H088 (H001+H021 50/50 blend): Sharpe 0.871. High H001 corr (+0.924) limits usefulness.
+- H089 (H043+H021 50/50 blend): Sharpe 1.074, MaxDD -9.62%. Season+parity blend is excellent.
+  Low-corr components blend to sub-component MaxDD; both components needed.
+- H090 (Monthly rebalancing risk parity): Sharpe 1.020. Identical to H021 but rebalances monthly
+  (N=231 trades vs H021's daily). Robust finding: rebalance frequency doesn't matter much.
+- **Key lesson: Position-sizing overlays (vol-target, ratchet) reliably improve both Sharpe AND MaxDD
+  simultaneously. This is the primary lever for improving on H021.**
 
-# Research directions for H051+
+## Contrarian / mean reversion (H038–H042, H083)
+- ALL killed. Lowest H001 corr in the program (+0.073 to +0.165) but N=6-18 trades.
+- **Do not pursue more contrarian signals** without a mechanism to increase trade frequency.
 
-Ranked by expected information value (what we don't yet know):
+## Ensemble construction (H048–H050, H091–H095, H099)
+- **Method ranking (Sharpe):**
+  MDR (H095: 1.133) > H049+H078 (H094: 1.084) > Min-corr v2 (H091: 0.984) >
+  Regime-adaptive (H092: 0.964) > Batch19 min-corr (H099: 0.958) > H049 (0.959) >
+  Anti-momentum (H093: 0.852) > Sharpe-weighted (H050: 0.820) > Equal-weight (H048: 0.800)
+- H095 (MaxDiversificationPortfolio, SLSQP MDR): Sharpe 1.133, MaxDD -7.16% — program champion.
+  Concentrates on H043 (24%), H078 (20%), H035 (15%), H060 (13%), H025 (10%).
+  The MDR optimizer can assign fractional weights to calendar strategies that binary selection ignores.
+- H094 (H049+H078): Sharpe 1.084. Adding H078's zero-corr seasonal component to H049 is the
+  simplest ensemble improvement — one additional component, major MaxDD reduction.
+- Anti-momentum rebalancing (H093) destroys value: chasing recent underperformers punishes good
+  strategies when they have normal drawdowns. Do not implement "revert to mean" ensemble weighting.
+- Regime-adaptive weighting (H092) is marginal over equal-weight: daily regime signals are too noisy
+  to outweigh the variance penalty of unequal weights.
+- **The single most impactful ensemble insight: H078 (zero-corr seasonal parity) is a universal
+  diversifier. Adding it to any ensemble reduces MaxDD substantially at minimal Sharpe cost.**
 
-1. **Equity factors (value, quality, low-vol, size)** — SPY-only but signal is fundamentally different
-   from price momentum. Academic evidence strong. Expected H001 corr: 0.10–0.40.
-2. **Additional asset classes** — commodities index (DBC), real estate (VNQ), EM bonds (EMB) as
-   rotation candidates in multi-asset framework. Builds on H021's success.
-3. **Macro regime conditioning** — yield curve slope (10y−2y), credit spread (HYG−LQD) as overlay
-   signals. Turn off equity exposure when yield curve inverts or spreads spike.
-4. **Holdout evaluation** — Before H051, run H049 (the target ensemble) on the sealed 2023+ data
-   to get a true out-of-sample read on the program's flagship result.
+---
+
+# Definitive synthesis: what works in this market regime (1993-2026)
+
+## The dominant pattern
+H021 (risk parity) is the bedrock. Everything else is a modification of it.
+The best modifications, ranked by marginal Sharpe gain over H021 (1.029):
+1. Vol-scaling position sizing (H086): +0.080 Sharpe, -8.48% MaxDD
+2. Ratchet drawdown protection (H087): −0.019 Sharpe, -7.48% MaxDD
+3. MDR ensemble over 35 strategies (H095): +0.104 Sharpe, -11.25% MaxDD (ensemble context)
+4. Seasonal overlay H043+H021 (H089): +0.045 Sharpe, -8.79% MaxDD
+5. Correlation crisis override (H097): −0.037 Sharpe, -0.07% MaxDD (vs H021)
+
+## The H001 correlation floor
+- All 47 kept strategies have H001 corr between +0.008 (H078) and +0.924 (H088).
+- The floor for strategies that trade actively (>50 trades/30yr) is approximately +0.19 (H098).
+- Below +0.30: H078 (+0.008), H098 (+0.196), H079 (+0.254), H080 (+0.257), H060 (+0.294).
+- Strategies with H001 corr < 0.20 are the most valuable ensemble diversifiers.
+
+## Data availability constraints (immutable)
+- TLT: available from 2002 (folds 0-1 in 1993-2002 train period still use SPY-only)
+- GLD: available from 2004 (fold 2 test starts 2002 — GLD gaps are in train, not test)
+- DBC: available from 2006 → 3-4 zero OOS folds → almost always kills strategies
+- HYG/LQD: available from 2007 → same problem
+- VIX: no holdout parquet file (VIX_holdout.parquet does not exist)
+- Holdout parquet files available: SPY, TLT, GLD, SHY, IEF, LQD, HYG, DBC, VNQ, IVE, IVW, IWM, QQQ, XLP, XLU
+
+---
 
 # Trading rules
 - Always report: OOS Sharpe, 95% CI, CAGR, Max DD, H001 corr, trade count, fold Sharpe range.

@@ -1860,3 +1860,196 @@ class FiveAssetRotation(MultiAssetStrategy):
                 weights.at[weights.index[i], best] = 1.0
 
         return weights
+
+
+# ---------------------------------------------------------------------------
+# Batch 11 — H056–H060: Yield Curve & Credit Macro Timing
+# ---------------------------------------------------------------------------
+
+
+class YieldCurveRotation(MultiAssetStrategy):
+    """H056: Rotate SPY→TLT on yield curve inversion (SHY outperforms TLT).
+
+    Normal curve (TLT outperforms SHY): long SPY.
+    Inverted curve (SHY outperforms TLT): long TLT (flight-to-safety).
+    Before SHY/TLT data: flat.
+    """
+
+    name = "yield_curve_rotation"
+
+    def __init__(self, mom_days: int = 63) -> None:
+        self.mom_days = mom_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+
+        shy_r = shy.shift(1) / shy.shift(1 + self.mom_days) - 1
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.mom_days) - 1
+
+        valid = shy_r.notna() & tlt_r.notna()
+        inverted = valid & (shy_r > tlt_r)
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+        w_spy[valid & ~inverted] = 1.0
+        w_tlt[inverted] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class BondCreditDualConfirm(Strategy):
+    """H057: Long SPY when TLT below 200d MA AND HYG outperforms LQD.
+
+    Falls back to TLT-only filter when HYG/LQD data unavailable (pre-2007).
+    Both signals together block equity exposure during 2008-style crises.
+    """
+
+    def __init__(self, tlt_ma: int = 200, credit_days: int = 63) -> None:
+        self.tlt_ma = tlt_ma
+        self.credit_days = credit_days
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+        hyg = prices.get("hyg_close", pd.Series(np.nan, index=prices.index))
+        lqd = prices.get("lqd_close", pd.Series(np.nan, index=prices.index))
+
+        tlt_ma = tlt.shift(1).rolling(self.tlt_ma).mean()
+        tlt_signal = tlt.shift(1) < tlt_ma
+
+        hyg_r = hyg.shift(1) / hyg.shift(1 + self.credit_days) - 1
+        lqd_r = lqd.shift(1) / lqd.shift(1 + self.credit_days) - 1
+        credit_ok = hyg_r >= lqd_r
+
+        has_credit = hyg_r.notna() & lqd_r.notna()
+
+        pos = pd.Series(0.0, index=prices.index)
+        pos[tlt_signal & (~has_credit)] = 1.0
+        pos[tlt_signal & has_credit & credit_ok] = 1.0
+        return pos
+
+
+class InvertedCurveTreasuryLadder(MultiAssetStrategy):
+    """H058: 75% TLT + 25% IEF when yield curve inverted for 21+ days.
+
+    Sustained inversion (> sustain_days) signals a genuine recession risk.
+    Brief inversions (<= sustain_days) are noise — hold SPY.
+    Normal curve: 100% SPY.
+    """
+
+    name = "inverted_curve_treasury_ladder"
+
+    def __init__(self, mom_days: int = 63, sustain_days: int = 21) -> None:
+        self.mom_days = mom_days
+        self.sustain_days = sustain_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+        ief = prices.get("ief_close", pd.Series(np.nan, index=prices.index))
+
+        shy_r = shy.shift(1) / shy.shift(1 + self.mom_days) - 1
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.mom_days) - 1
+
+        valid = shy_r.notna() & tlt_r.notna()
+        raw_inv = valid & (shy_r > tlt_r)
+
+        # Count consecutive inversion days
+        inv_arr = raw_inv.to_numpy()
+        consec = np.zeros(len(inv_arr), dtype=int)
+        for i in range(1, len(inv_arr)):
+            consec[i] = (consec[i - 1] + 1) if inv_arr[i] else 0
+        sustained = pd.Series(consec >= self.sustain_days, index=prices.index)
+
+        has_ief = ief.notna()
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+        w_ief = pd.Series(0.0, index=prices.index)
+
+        w_spy[valid & ~sustained] = 1.0
+        w_tlt[sustained & has_ief] = 0.75
+        w_ief[sustained & has_ief] = 0.25
+        w_tlt[sustained & ~has_ief] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt, "IEF": w_ief}, index=prices.index)
+
+
+class MacroFearComposite(Strategy):
+    """H059: Position scaled by 4-signal macro fear composite.
+
+    Fear votes: VIX > vix_thresh, GLD above gld_ma, HYG < LQD momentum,
+    yield curve inverted (SHY > TLT on mom_days). Position = max(0, 1 - 2*score)
+    where score = fear_count / 4. Two or more fear signals → flat.
+    """
+
+    def __init__(
+        self,
+        vix_thresh: float = 25.0,
+        gld_ma: int = 50,
+        mom_days: int = 63,
+    ) -> None:
+        self.vix_thresh = vix_thresh
+        self.gld_ma = gld_ma
+        self.mom_days = mom_days
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        vix = prices.get("vix_close", pd.Series(np.nan, index=prices.index))
+        gld = prices.get("gld_close", pd.Series(np.nan, index=prices.index))
+        hyg = prices.get("hyg_close", pd.Series(np.nan, index=prices.index))
+        lqd = prices.get("lqd_close", pd.Series(np.nan, index=prices.index))
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+
+        fear = pd.DataFrame(0.0, index=prices.index, columns=["vix", "gld", "credit", "curve"])
+
+        vix_sig = vix.shift(1)
+        fear["vix"] = (vix_sig > self.vix_thresh).where(vix_sig.notna(), np.nan).fillna(0.0)
+
+        gld_ma = gld.shift(1).rolling(self.gld_ma).mean()
+        fear["gld"] = (gld.shift(1) > gld_ma).where(gld_ma.notna(), np.nan).fillna(0.0)
+
+        hyg_r = hyg.shift(1) / hyg.shift(1 + self.mom_days) - 1
+        lqd_r = lqd.shift(1) / lqd.shift(1 + self.mom_days) - 1
+        fear["credit"] = (hyg_r < lqd_r).where(hyg_r.notna() & lqd_r.notna(), np.nan).fillna(0.0)
+
+        shy_r = shy.shift(1) / shy.shift(1 + self.mom_days) - 1
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.mom_days) - 1
+        fear["curve"] = (shy_r > tlt_r).where(shy_r.notna() & tlt_r.notna(), np.nan).fillna(0.0)
+
+        return (1.0 - 2.0 * fear.mean(axis=1)).clip(lower=0.0)
+
+
+class CarryMomentumSPYTLT(MultiAssetStrategy):
+    """H060: SPY/TLT/flat with yield curve + SPY trend gate.
+
+    Curve steep (TLT > SHY on mom_days) AND SPY above spy_ma → 100% SPY.
+    Curve inverted (SHY > TLT on mom_days) → 100% TLT (defensive carry).
+    Otherwise (mixed signals or pre-data) → flat.
+    """
+
+    name = "carry_momentum_spy_tlt"
+
+    def __init__(self, mom_days: int = 63, spy_ma: int = 200) -> None:
+        self.mom_days = mom_days
+        self.spy_ma = spy_ma
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+
+        shy_r = shy.shift(1) / shy.shift(1 + self.mom_days) - 1
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.mom_days) - 1
+        spy_ma = prices["adj_close"].shift(1).rolling(self.spy_ma).mean()
+
+        valid = shy_r.notna() & tlt_r.notna()
+        inverted = valid & (shy_r > tlt_r)
+        spy_trend_up = prices["adj_close"].shift(1) > spy_ma
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+
+        w_spy[valid & ~inverted & spy_trend_up] = 1.0
+        w_tlt[inverted] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)

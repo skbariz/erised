@@ -2053,3 +2053,210 @@ class CarryMomentumSPYTLT(MultiAssetStrategy):
         w_tlt[inverted] = 1.0
 
         return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# Batch 12 — H061–H065: Equity Factor Rotation
+# ---------------------------------------------------------------------------
+
+
+class ValueGrowthRotation(MultiAssetStrategy):
+    """H061: Rotate IVW/IVE/SPY based on yield curve + SPY trend.
+
+    Normal curve (TLT > SHY mom) AND SPY uptrend → IVW (growth).
+    Inverted curve (SHY > TLT mom) → IVE (value/defensive).
+    Otherwise (no data or mixed) → SPY (baseline).
+    """
+
+    name = "value_growth_rotation"
+
+    def __init__(self, mom_days: int = 63, spy_ma: int = 200) -> None:
+        self.mom_days = mom_days
+        self.spy_ma = spy_ma
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt = prices.get("tlt_close", pd.Series(np.nan, index=prices.index))
+        ive = prices.get("ive_close", pd.Series(np.nan, index=prices.index))
+        ivw = prices.get("ivw_close", pd.Series(np.nan, index=prices.index))
+
+        shy_r = shy.shift(1) / shy.shift(1 + self.mom_days) - 1
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.mom_days) - 1
+        spy_ma = prices["adj_close"].shift(1).rolling(self.spy_ma).mean()
+
+        curve_valid = shy_r.notna() & tlt_r.notna()
+        inverted = curve_valid & (shy_r > tlt_r)
+        spy_up = prices["adj_close"].shift(1) > spy_ma
+
+        has_ivw = ivw.notna()
+        has_ive = ive.notna()
+
+        w_spy = pd.Series(1.0, index=prices.index)
+        w_ivw = pd.Series(0.0, index=prices.index)
+        w_ive = pd.Series(0.0, index=prices.index)
+
+        # Normal curve + SPY uptrend → IVW (if available, else SPY)
+        growth_regime = curve_valid & ~inverted & spy_up
+        w_spy[growth_regime & has_ivw] = 0.0
+        w_ivw[growth_regime & has_ivw] = 1.0
+
+        # Inverted curve → IVE (if available, else SPY)
+        w_spy[inverted & has_ive] = 0.0
+        w_ive[inverted & has_ive] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "IVW": w_ivw, "IVE": w_ive}, index=prices.index)
+
+
+class SmallCapCyclical(MultiAssetStrategy):
+    """H062: Long IWM when credit healthy AND IWM outperforms SPY on momentum.
+
+    Both conditions met → IWM; otherwise → SPY.
+    Falls back to SPY when HYG/LQD data unavailable.
+    """
+
+    name = "small_cap_cyclical"
+
+    def __init__(self, credit_days: int = 63, mom_days: int = 126) -> None:
+        self.credit_days = credit_days
+        self.mom_days = mom_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        hyg = prices.get("hyg_close", pd.Series(np.nan, index=prices.index))
+        lqd = prices.get("lqd_close", pd.Series(np.nan, index=prices.index))
+        iwm = prices.get("iwm_close", pd.Series(np.nan, index=prices.index))
+
+        hyg_r = hyg.shift(1) / hyg.shift(1 + self.credit_days) - 1
+        lqd_r = lqd.shift(1) / lqd.shift(1 + self.credit_days) - 1
+        spy_mom = prices["adj_close"].shift(1) / prices["adj_close"].shift(1 + self.mom_days) - 1
+        iwm_mom = iwm.shift(1) / iwm.shift(1 + self.mom_days) - 1
+
+        credit_ok = (hyg_r >= lqd_r) & hyg_r.notna() & lqd_r.notna()
+        size_ok = (iwm_mom >= spy_mom) & iwm_mom.notna()
+
+        w_spy = pd.Series(1.0, index=prices.index)
+        w_iwm = pd.Series(0.0, index=prices.index)
+
+        small_cap_regime = credit_ok & size_ok
+        w_spy[small_cap_regime] = 0.0
+        w_iwm[small_cap_regime] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "IWM": w_iwm}, index=prices.index)
+
+
+class DefensiveSectorOverlay(MultiAssetStrategy):
+    """H063: SPY/XLP rotation based on SPY trend + VIX stress level.
+
+    SPY above MA + VIX < vix_thresh → 100% SPY.
+    SPY above MA + VIX >= vix_thresh → 50% SPY + 50% XLP.
+    SPY below MA → 100% XLP.
+    Before VIX/XLP data: 100% SPY.
+    """
+
+    name = "defensive_sector_overlay"
+
+    def __init__(self, spy_ma: int = 200, vix_thresh: float = 25.0) -> None:
+        self.spy_ma = spy_ma
+        self.vix_thresh = vix_thresh
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        vix = prices.get("vix_close", pd.Series(np.nan, index=prices.index))
+        xlp = prices.get("xlp_close", pd.Series(np.nan, index=prices.index))
+
+        spy_ma = prices["adj_close"].shift(1).rolling(self.spy_ma).mean()
+        spy_up = prices["adj_close"].shift(1) > spy_ma
+
+        vix_calm = vix.shift(1) < self.vix_thresh
+        has_vix = vix.shift(1).notna()
+        has_xlp = xlp.notna()
+
+        w_spy = pd.Series(1.0, index=prices.index)
+        w_xlp = pd.Series(0.0, index=prices.index)
+
+        # SPY uptrend + VIX calm → 100% SPY (default, no change)
+        # SPY uptrend + VIX stressed → 50/50
+        stress = spy_ma.notna() & spy_up & has_vix & ~vix_calm & has_xlp
+        w_spy[stress] = 0.5
+        w_xlp[stress] = 0.5
+
+        # SPY downtrend → 100% XLP
+        bearish = spy_ma.notna() & ~spy_up & has_xlp
+        w_spy[bearish] = 0.0
+        w_xlp[bearish] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "XLP": w_xlp}, index=prices.index)
+
+
+class TechDefensiveMomentum(MultiAssetStrategy):
+    """H064: 12-1m cross-sectional momentum between QQQ (tech) and XLU (defensive).
+
+    Long QQQ if QQQ momentum > XLU momentum and QQQ > 0.
+    Long XLU if XLU momentum > QQQ momentum and XLU > 0.
+    Both negative → long SPY (neutral).
+    """
+
+    name = "tech_defensive_momentum"
+
+    def __init__(self, long_days: int = 252, skip_days: int = 21) -> None:
+        self.long_days = long_days
+        self.skip_days = skip_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        qqq = prices.get("qqq_close", pd.Series(np.nan, index=prices.index))
+        xlu = prices.get("xlu_close", pd.Series(np.nan, index=prices.index))
+
+        qqq_mom = qqq.shift(1 + self.skip_days) / qqq.shift(1 + self.long_days) - 1
+        xlu_mom = xlu.shift(1 + self.skip_days) / xlu.shift(1 + self.long_days) - 1
+        spy_mom = (
+            prices["adj_close"].shift(1 + self.skip_days)
+            / prices["adj_close"].shift(1 + self.long_days)
+            - 1
+        )
+
+        w_spy = pd.Series(0.0, index=prices.index)
+        w_qqq = pd.Series(0.0, index=prices.index)
+        w_xlu = pd.Series(0.0, index=prices.index)
+
+        both_valid = qqq_mom.notna() & xlu_mom.notna()
+        qqq_leads = both_valid & (qqq_mom >= xlu_mom) & (qqq_mom > 0)
+        xlu_leads = both_valid & (xlu_mom > qqq_mom) & (xlu_mom > 0)
+        both_neg = both_valid & (qqq_mom <= 0) & (xlu_mom <= 0)
+
+        w_qqq[qqq_leads] = 1.0
+        w_xlu[xlu_leads] = 1.0
+        # Both negative: fallback to SPY if SPY positive, else flat
+        w_spy[both_neg & (spy_mom > 0)] = 1.0
+
+        return pd.DataFrame({"SPY": w_spy, "QQQ": w_qqq, "XLU": w_xlu}, index=prices.index)
+
+
+class EqualWeightDefensiveFactor(MultiAssetStrategy):
+    """H065: Static 25/25/25/25 equal-weight SPY+XLP+XLU+IVE.
+
+    Pure factor quality tilt — no timing. Renormalizes when IVE
+    unavailable (pre-2000): equal-weight among available assets.
+    """
+
+    name = "equal_weight_defensive_factor"
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {
+            "SPY": "adj_close",
+            "XLP": "xlp_close",
+            "XLU": "xlu_close",
+            "IVE": "ive_close",
+        }
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        weights = pd.DataFrame(0.0, index=prices.index, columns=list(available.keys()))
+        for i, idx in enumerate(prices.index):
+            active = [
+                asset
+                for asset, col in available.items()
+                if col == "adj_close" or not np.isnan(prices[col].iloc[i])
+            ]
+            if active:
+                w = 1.0 / len(active)
+                for asset in active:
+                    weights.at[idx, asset] = w
+
+        return weights

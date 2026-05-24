@@ -2258,6 +2258,7 @@ class EqualWeightDefensiveFactor(MultiAssetStrategy):
                 w = 1.0 / len(active)
                 for asset in active:
                     weights.at[idx, asset] = w
+        return weights
 
 
 # ---------------------------------------------------------------------------

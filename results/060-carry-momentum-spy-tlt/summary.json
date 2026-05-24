@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H060",
+  "name": "carry-momentum-spy-tlt",
+  "strategy_class": "CarryMomentumSPYTLT",
+  "family": "multi-asset rotation",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.5313,
+  "ci_low": 0.1367,
+  "ci_high": 0.9342,
+  "cagr": 0.0521,
+  "max_drawdown": -0.2337,
+  "n_trades": 301,
+  "h001_corr": 0.2935,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.232,
+    1.031,
+    0.708,
+    0.167,
+    -0.391,
+    1.185,
+    0.159,
+    0.779,
+    1.008,
+    0.471
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H056 + SPY 200d MA gate; flat when curve steep but SPY below trend.",
+  "canonical_params": {
+    "mom_days": 63,
+    "spy_ma": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

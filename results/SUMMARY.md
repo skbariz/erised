@@ -67,6 +67,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 053 | Credit spread regime (HYG vs LQD) | cross-asset macro | killed | 0.337 | [−0.064, 0.754] | 2.57% | −42.98% | +0.401 | HYG data from 2007; fold 4 Sharpe −0.941; CI contains zero |
 | 054 | Yield curve proxy (TLT vs SHY) | cross-asset macro | killed | 0.409 | [−0.002, 0.810] | 5.02% | −41.31% | +0.474 | CI lower bound just −0.002; 42d lookback gives CI > 0 |
 | 055 | Five-asset rotation | multi-asset rotation | killed | 0.402 | [−0.007, 0.807] | 5.78% | −50.14% | +0.549 | CI clips zero; 5-asset dilution hurts vs focused rotation |
+| 056 | Yield curve rotation (SPY/TLT) | multi-asset rotation | killed | 0.419 | [−0.002, 0.822] | 5.65% | −52.77% | +0.377 | CI lower −0.002; 126d lookback gives 0.540 [0.127, 0.919] |
+| 057 | Bond + credit dual confirm | cross-asset macro | killed | 0.499 | [0.090, 0.904] | 3.17% | **−12.34%** | +0.430 | Sharpe 0.499 just misses 0.51 benchmark; MaxDD excellent; 150d MA gives 0.577 |
+| 058 | Inverted curve treasury ladder | multi-asset rotation | killed | 0.400 | [−0.015, 0.796] | 5.34% | −56.56% | +0.469 | CI clips zero; MaxDD worse than SPY; ladder to TLT+IEF doesn't protect |
+| 059 | Macro fear composite (4-signal) | cross-asset macro | killed | 0.321 | [−0.078, 0.723] | 2.56% | −47.79% | +0.547 | CI contains zero; composite noise outweighs signal aggregation benefit |
+| 060 | Carry+momentum SPY/TLT | multi-asset rotation | **kept** | **0.531** | **[0.137, 0.934]** | 5.21% | −23.37% | **+0.294** | **First kept strategy below +0.30 H001 corr; 126d lookback gives 0.632** |
 
 ---
 
@@ -76,8 +81,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 55 | **55** | in progress (Batch 10 complete) |
-| Strategies kept (ensemble) | 20 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051 + H048/H049/H050) | H049 is the target ensemble (Sharpe 0.959, MaxDD −18.26%) |
+| Strategies tested ≥ 60 | **60** | in progress (Batch 11 complete) |
+| Strategies kept (ensemble) | 21 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060 + H048/H049/H050) | H049 is the target ensemble; H060 first kept with H001 corr < +0.30 |
 
 ---
 

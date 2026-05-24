@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H057",
+  "name": "bond-credit-dual-confirm",
+  "strategy_class": "BondCreditDualConfirm",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4991,
+  "ci_low": 0.0898,
+  "ci_high": 0.9037,
+  "cagr": 0.0317,
+  "max_drawdown": -0.1234,
+  "n_trades": 179,
+  "h001_corr": 0.4295,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.658,
+    0.972,
+    0.313,
+    0.489,
+    1.173,
+    0.727,
+    0.041,
+    1.473,
+    -0.25,
+    0.926
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when TLT<200MA AND HYG outperforms LQD; H033 signal alone when pre-HYG.",
+  "canonical_params": {
+    "tlt_ma": 200,
+    "credit_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

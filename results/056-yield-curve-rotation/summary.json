@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H056",
+  "name": "yield-curve-rotation",
+  "strategy_class": "YieldCurveRotation",
+  "family": "multi-asset rotation",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4193,
+  "ci_low": -0.0018,
+  "ci_high": 0.8223,
+  "cagr": 0.0565,
+  "max_drawdown": -0.5277,
+  "n_trades": 261,
+  "h001_corr": 0.3772,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.901,
+    1.161,
+    0.643,
+    -0.609,
+    0.348,
+    1.275,
+    0.547,
+    1.136,
+    1.377,
+    0.368
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "SPY/TLT rotation on yield curve inversion; TLT in defensive regime vs flat in H054.",
+  "canonical_params": {
+    "mom_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H058",
+  "name": "inverted-curve-treasury-ladder",
+  "strategy_class": "InvertedCurveTreasuryLadder",
+  "family": "multi-asset rotation",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.3997,
+  "ci_low": -0.0152,
+  "ci_high": 0.7965,
+  "cagr": 0.0534,
+  "max_drawdown": -0.5656,
+  "n_trades": 45,
+  "h001_corr": 0.4686,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.831,
+    0.752,
+    0.916,
+    -0.576,
+    0.462,
+    1.762,
+    0.524,
+    1.393,
+    1.039,
+    0.102
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "75% TLT + 25% IEF on sustained inversion (21d+); noise filter vs raw H056.",
+  "canonical_params": {
+    "mom_days": 63,
+    "sustain_days": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

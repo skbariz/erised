@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H059",
+  "name": "macro-fear-composite",
+  "strategy_class": "MacroFearComposite",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.3212,
+  "ci_low": -0.0783,
+  "ci_high": 0.7232,
+  "cagr": 0.0256,
+  "max_drawdown": -0.4779,
+  "n_trades": 750,
+  "h001_corr": 0.5469,
+  "fold_sharpes": [
+    0.504,
+    -0.778,
+    0.167,
+    0.96,
+    1.446,
+    -0.928,
+    1.91,
+    1.271,
+    0.164,
+    0.812,
+    0.795,
+    0.635
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "4-signal composite (VIX, GLD, credit, yield curve); position = max(0, 1-2*fear).",
+  "canonical_params": {
+    "vix_thresh": 25,
+    "gld_ma": 50,
+    "mom_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

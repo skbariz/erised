@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H096",
+  "name": "pca-risk-regime",
+  "strategy_class": "PCARiskRegime",
+  "family": "regime",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.3229,
+  "ci_low": -0.0827,
+  "ci_high": 0.7188,
+  "cagr": 0.0349,
+  "max_drawdown": -0.3445,
+  "n_trades": 444,
+  "h001_corr": 0.1401,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.479,
+    0.312,
+    -0.162,
+    0.137,
+    0.716,
+    -0.168,
+    0.252,
+    0.572,
+    0.257,
+    1.0
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Rolling PCA on SPY/TLT/GLD daily returns; PC1 score = dot(21d-cum-ret, PC1). Score>0 \u2192 SPY, score<=0 \u2192 TLT. Binary regime switcher.",
+  "canonical_params": {
+    "pca_lookback": 252,
+    "signal_days": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

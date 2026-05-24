@@ -1,0 +1,49 @@
+{
+  "hypothesis": "H099",
+  "name": "batch19-augmented-min-corr",
+  "strategy_class": "Batch19AugmentedMinCorr",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9576,
+  "ci_low": 0.5554,
+  "ci_high": 1.3655,
+  "cagr": 0.0661,
+  "max_drawdown": -0.1797,
+  "n_trades": 0,
+  "h001_corr": 0.7244,
+  "fold_sharpes": [
+    1.215,
+    0.091,
+    1.105,
+    1.028,
+    0.724,
+    0.445,
+    1.542,
+    1.527,
+    0.58,
+    2.191,
+    0.606,
+    0.973
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Greedy min-corr (threshold=0.50) over 38 candidates (35 H001-H090 keepers + H096/H097/H098). Selected: ['H086', 'H046', 'H019', 'H035', 'H060', 'H096']. New Batch 19 entrants in selection: ['H096'].",
+  "canonical_params": {
+    "threshold": 0.5,
+    "n_candidates": 38,
+    "selected": [
+      "H086",
+      "H046",
+      "H019",
+      "H035",
+      "H060",
+      "H096"
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -30,7 +30,7 @@ from quant.strategies.base import (
     RiskParity,
     SPYGLDRotation,
 )
-from quant.validation.walk_forward import make_folds, walk_forward_multi
+from quant.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 
 SEP = "=" * 64
 
@@ -65,7 +65,7 @@ def apply_strategy_on_full_data(prices_research, prices_holdout, strat):
 
 
 def main():
-    print(f"H100: HoldoutEvaluation (H049 flagship ensemble)\n{SEP}")
+    print(f"H100: HoldoutEvaluation (H049 flagship ensemble)\n{SEP}")  # noqa: F541
     print(
         "WARNING: This is final evaluation. Results must not be used to guide further research.\n"
     )
@@ -74,16 +74,12 @@ def main():
     spy_r = load_research("SPY")
     tlt_r = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     gld_r = load_research("GLD")[["adj_close"]].rename(columns={"adj_close": "gld_close"})
-    vix_r = load_research("VIX")[["adj_close"]].rename(columns={"adj_close": "vix_close"})
     shy_r = load_research("SHY")[["adj_close"]].rename(columns={"adj_close": "shy_close"})
 
     prices_research = (
-        spy_r.join(tlt_r, how="left")
-        .join(gld_r, how="left")
-        .join(vix_r, how="left")
-        .join(shy_r, how="left")
+        spy_r.join(tlt_r, how="left").join(gld_r, how="left").join(shy_r, how="left")
     )
-    for col in ["tlt_close", "gld_close", "vix_close", "shy_close"]:
+    for col in ["tlt_close", "gld_close", "shy_close"]:
         prices_research[col] = prices_research[col].ffill()
 
     # Load holdout data
@@ -94,20 +90,12 @@ def main():
     gld_h = load_holdout("GLD", _i_understand_this_is_final_evaluation=True)[["adj_close"]].rename(
         columns={"adj_close": "gld_close"}
     )
-    vix_h = load_holdout("VIX", _i_understand_this_is_final_evaluation=True)[["adj_close"]].rename(
-        columns={"adj_close": "vix_close"}
-    )
     shy_h = load_holdout("SHY", _i_understand_this_is_final_evaluation=True)[["adj_close"]].rename(
         columns={"adj_close": "shy_close"}
     )
 
-    prices_holdout = (
-        spy_h.join(tlt_h, how="left")
-        .join(gld_h, how="left")
-        .join(vix_h, how="left")
-        .join(shy_h, how="left")
-    )
-    for col in ["tlt_close", "gld_close", "vix_close", "shy_close"]:
+    prices_holdout = spy_h.join(tlt_h, how="left").join(gld_h, how="left").join(shy_h, how="left")
+    for col in ["tlt_close", "gld_close", "shy_close"]:
         prices_holdout[col] = prices_holdout[col].ffill()
 
     holdout_start = prices_holdout.index[0]
@@ -126,9 +114,15 @@ def main():
 
     # OOS walk-forward on research as reference (should match H049 reported stats)
     folds = make_folds(spy_r, train_years=5, test_years=2)
+
+    def run_wf(prices, strat, folds):
+        if isinstance(strat, MultiAssetStrategy):
+            return walk_forward_multi(prices, lambda _, s=strat: s, folds=folds)
+        return walk_forward(prices, lambda _, s=strat: s, folds=folds)
+
     research_comp_rets = {}
     for name, strat in H049_COMPONENTS.items():
-        wf = walk_forward_multi(prices_research, lambda _, s=strat: s, folds=folds)
+        wf = run_wf(prices_research, strat, folds)
         research_comp_rets[name] = wf.combined_returns
 
     research_df = pd.DataFrame(research_comp_rets)
@@ -167,7 +161,7 @@ def main():
     print(f"  CAGR {c:.2%}  MaxDD {dd:.2%}  H001 corr: {corr:+.4f}")
 
     vs_spy = s - spy_s
-    print(f"\nVs SPY holdout: ΔSharpe {vs_spy:+.3f}  ΔMaxDD {dd - spy_dd:+.2%}")
+    print(f"\nVs SPY holdout: dSharpe {vs_spy:+.3f}  dMaxDD {dd - spy_dd:+.2%}")
 
     decision = "KEEP" if s > spy_s and lo > 0 else "kill"
     print(f"\nDecision: {decision}")
@@ -188,7 +182,7 @@ def main():
         decision=decision,
         notes=f"Final sealed holdout ({holdout_start.date()} to {holdout_end.date()}) evaluation of H049 "
         f"(H021+H046+H019+H035, equal-weight). SPY holdout: Sharpe {spy_s:.3f}, CAGR {spy_c:.2%}, MaxDD {spy_dd:.2%}. "
-        f"H049 vs SPY: ΔSharpe {vs_spy:+.3f}.",
+        f"H049 vs SPY: dSharpe {vs_spy:+.3f}.",
         canonical_params={
             "components": list(H049_COMPONENTS.keys()),
             "weights": list(H049_WEIGHTS),

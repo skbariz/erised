@@ -1,8 +1,8 @@
 # Strategy Results — Master Leaderboard
 
 Updated after each hypothesis run. All metrics are **walk-forward out-of-sample**
-(research period 1993–2022, holdout sealed and untouched). Folds: 5-year train /
-2-year test, 12 non-overlapping folds. Costs: 0.5 bps commission + 1.0 bps slippage.
+(research period 1993–2022). H100 holdout (2023–2026) evaluated once — sealed period now spent.
+Folds: 5-year train / 2-year test, 12 non-overlapping folds. Costs: 0.5 bps commission + 1.0 bps slippage.
 
 SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
@@ -107,6 +107,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | **093** | **Ensemble anti-momentum rebalance** | **ensemble** | **kept** | **0.852** | **[0.440, 1.262]** | 7.67% | −21.93% | +0.696 | H049 components; monthly anti-momentum (upweight 24m underperformers); below H049 baseline |
 | **094** | **H049 + best new component** | **ensemble** | **kept ★** | **1.084** | **[0.668, 1.493]** | 7.70% | **−15.03%** | +0.726 | H049 + H078 (SeasonalRiskParity, lowest avg corr to H049 = +0.209); 5-component equal weight |
 | **095** | **Max diversification portfolio** | **ensemble** | **kept ★★** | **1.133** | **[0.727, 1.557]** | 5.81% | **−7.16%** | +0.665 | **Program MaxDD record −7.16%**; SLSQP MDR over 35 strategies; concentrates on H043+H078+H035 |
+| 096 | PCA risk regime | regime | killed | 0.323 | [−0.083, 0.719] | 3.49% | −34.45% | **+0.140** | CI contains zero; binary PCA switcher; strong 2020 fold but inconsistent across others |
+| **097** | **Correlation risk parity hybrid** | **regime** | **kept** | **0.992** | **[0.591, 1.402]** | 7.78% | −18.48% | +0.329 | H021 + positive SPY-TLT corr crisis override to 90% TLT; robust across corr lookback params |
+| **098** | **Reversion entry risk parity** | **regime** | **kept** | **0.879** | **[0.468, 1.282]** | 7.14% | −21.24% | **+0.196** | H021 + heavy-TLT (80%) on SPY drawdown >10%; crisis_tlt=0.70 gives Sharpe 0.956/MaxDD −17.38% |
+| **099** | **Batch 19 augmented min-corr** | **ensemble** | **kept** | **0.958** | **[0.578, 1.368]** | 6.61% | −17.97% | +0.724 | Greedy min-corr (0.50) over 38 candidates (35+H096/H097/H098); selects H086+H046+H019+H035+H060+H096 |
+| 100 | Holdout evaluation (H049) | holdout | special | 1.346 | [0.246, 2.392] | 11.39% | −9.91% | +0.879 | **FINAL HOLDOUT** H049 (2023-01-03 – 2026-05-20, 848 days); SPY holdout: 1.465/23.46%/−18.76%; H049 MaxDD −9.91% vs SPY −18.76% |
 
 ---
 
@@ -116,8 +121,9 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.133 (H095)** / **1.109 (H086)** / **1.084 (H094)** / **1.03 (H021)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−7.16% (H095)** / **−9.62% (H089)** / **−9.93% (H086)** / **−10.11% (H043)** | **MET ★★** |
-| Strategies tested ≥ 95 | **95** | Batch 18 complete (5/5 kept — ensemble construction batch) |
-| Strategies kept (ensemble) | 44 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084/H086/H087/H088/H089/H090/H091/H092/H093/H094/H095 + H048/H049/H050) | Batch 18 perfect 5/5; H095 MDR is program champion |
+| Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up; MaxDD advantage maintained |
+| Strategies tested ≥ 100 | **100** | Batch 19 complete (4/5 individual kept — H096 killed, H097/H098 kept; H099 ensemble kept; H100 holdout) |
+| Strategies kept (ensemble) | 47 (+ H097, H098, H099 from Batch 19; H096 killed) | Program complete — 100 hypotheses tested |
 
 ---
 

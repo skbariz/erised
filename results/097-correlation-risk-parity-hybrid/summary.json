@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H097",
+  "name": "correlation-risk-parity-hybrid",
+  "strategy_class": "CorrelationRiskParityHybrid",
+  "family": "regime",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9916,
+  "ci_low": 0.5906,
+  "ci_high": 1.4018,
+  "cagr": 0.0778,
+  "max_drawdown": -0.1848,
+  "n_trades": 4202,
+  "h001_corr": 0.3286,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.271,
+    1.479,
+    1.39,
+    0.316,
+    2.088,
+    0.838,
+    1.006,
+    1.611,
+    1.398,
+    0.604
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 base weights; overridden to (0.10 SPY, 0.90 TLT) when 60d rolling SPY-TLT correlation turns positive (crisis signal from H034).",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "corr_lookback": 60,
+    "crisis_tlt": 0.9
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

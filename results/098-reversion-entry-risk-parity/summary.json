@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H098",
+  "name": "reversion-entry-risk-parity",
+  "strategy_class": "ReversionEntryRiskParity",
+  "family": "regime",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.879,
+  "ci_low": 0.4676,
+  "ci_high": 1.2818,
+  "cagr": 0.0714,
+  "max_drawdown": -0.2124,
+  "n_trades": 3127,
+  "h001_corr": 0.1955,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.288,
+    1.07,
+    0.956,
+    0.134,
+    1.209,
+    1.139,
+    0.916,
+    2.195,
+    1.404,
+    0.698
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 base; crisis entry (0.20 SPY / 0.80 TLT) when SPY drawdown > 10% from peak. Exits on 5% trough-recovery or 20 days max.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "dd_trigger": 0.1,
+    "crisis_tlt": 0.8,
+    "crisis_days": 20,
+    "recovery": 0.05
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

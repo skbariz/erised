@@ -1,0 +1,38 @@
+{
+  "hypothesis": "H100",
+  "name": "holdout-evaluation",
+  "strategy_class": "HoldoutEvaluation",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.3461,
+  "ci_low": 0.2462,
+  "ci_high": 2.3916,
+  "cagr": 0.1139,
+  "max_drawdown": -0.0991,
+  "n_trades": 0,
+  "h001_corr": 0.8789,
+  "fold_sharpes": [],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Final sealed holdout (2023-01-03 to 2026-05-20) evaluation of H049 (H021+H046+H019+H035, equal-weight). SPY holdout: Sharpe 1.465, CAGR 23.46%, MaxDD -18.76%. H049 vs SPY: dSharpe -0.119.",
+  "canonical_params": {
+    "components": [
+      "H021",
+      "H046",
+      "H019",
+      "H035"
+    ],
+    "weights": [
+      0.25,
+      0.25,
+      0.25,
+      0.25
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

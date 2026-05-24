@@ -52,16 +52,31 @@ def main() -> None:
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: MomentumLongOnly(),
+        lambda tp, tm: MomentumLongOnly(monthly_rebalance=True),
         folds=folds,
         spy_returns=spy_rets,
     )
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
 
-    print("\nH150 Canonical (long_days=252, skip_days=21, top_quantile=20%):")
+    print("\nH150 Canonical (12-1m, top 20%, monthly rebalance, 2.5bps/turn):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}")
+
+    # Rebalance frequency comparison
+    wf_daily = walk_forward_cross_sectional(
+        panel,
+        membership,
+        lambda tp, tm: MomentumLongOnly(monthly_rebalance=False),
+        folds=folds,
+        spy_returns=spy_rets,
+    )
+    print(
+        f"\nRebalance comparison:"
+        f"\n  Monthly: Sharpe {rep.sharpe:.3f}  MaxDD {rep.max_drawdown:.2%}"
+        f"\n  Daily:   Sharpe {wf_daily.combined_report.sharpe:.3f}"
+        f"  MaxDD {wf_daily.combined_report.max_drawdown:.2%}"
+    )
 
     print("\nSensitivity -- top_quantile:")
     for q in [0.10, 0.20, 0.30, 0.40]:
@@ -122,8 +137,13 @@ def main() -> None:
         h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results],
         decision=decision,
-        notes="Cross-sectional 12-1 momentum, top quintile, equal-weight, 2.5bps/turn.",
-        canonical_params={"long_days": 252, "skip_days": 21, "top_quantile": 0.20},
+        notes="Cross-sectional 12-1 momentum, top quintile, equal-weight, monthly rebalance, 2.5bps/turn.",
+        canonical_params={
+            "long_days": 252,
+            "skip_days": 21,
+            "top_quantile": 0.20,
+            "monthly_rebalance": True,
+        },
     )
 
 

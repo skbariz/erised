@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H094",
+  "name": "h049-plus-best-new",
+  "strategy_class": "H049PlusBestNew",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0845,
+  "ci_low": 0.668,
+  "ci_high": 1.4931,
+  "cagr": 0.077,
+  "max_drawdown": -0.1503,
+  "n_trades": 0,
+  "h001_corr": 0.7256,
+  "fold_sharpes": [
+    1.215,
+    0.091,
+    1.016,
+    1.116,
+    1.124,
+    0.586,
+    2.568,
+    1.5,
+    0.85,
+    2.739,
+    0.658,
+    0.703
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H049 + H078 (lowest avg corr to H049 components: +0.2090). 5-component equal weight.",
+  "canonical_params": {
+    "h049_components": [
+      "H021",
+      "H046",
+      "H019",
+      "H035"
+    ],
+    "best_new": "H078"
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

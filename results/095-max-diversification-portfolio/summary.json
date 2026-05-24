@@ -1,0 +1,52 @@
+{
+  "hypothesis": "H095",
+  "name": "max-diversification-portfolio",
+  "strategy_class": "MaxDiversificationPortfolio",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.1332,
+  "ci_low": 0.7268,
+  "ci_high": 1.5566,
+  "cagr": 0.0581,
+  "max_drawdown": -0.0716,
+  "n_trades": 0,
+  "h001_corr": 0.6645,
+  "fold_sharpes": [
+    1.039,
+    -0.088,
+    1.429,
+    1.398,
+    1.347,
+    0.578,
+    2.234,
+    1.597,
+    0.497,
+    2.265,
+    0.644,
+    1.045
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP maximisation of DR=sum(w*sigma)/port_sigma over 35 strategies. Top weights: {'H016': 0.062244041542329605, 'H025': 0.1026924584772742, 'H034': 0.024299566621817623, 'H035': 0.1517146216385228, 'H043': 0.24459816433463005, 'H060': 0.12894341912947113, 'H068': 0.03783737085236231, 'H078': 0.19840411549427542, 'H082': 0.04926624190931262}.",
+  "canonical_params": {
+    "n_strategies": 35,
+    "method": "SLSQP",
+    "top_weights": {
+      "H016": 0.062244041542329605,
+      "H025": 0.1026924584772742,
+      "H034": 0.024299566621817623,
+      "H035": 0.1517146216385228,
+      "H043": 0.24459816433463005,
+      "H060": 0.12894341912947113,
+      "H068": 0.03783737085236231,
+      "H078": 0.19840411549427542,
+      "H082": 0.04926624190931262
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

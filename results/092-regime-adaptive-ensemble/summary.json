@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H092",
+  "name": "regime-adaptive-ensemble",
+  "strategy_class": "RegimeAdaptiveEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9641,
+  "ci_low": 0.5525,
+  "ci_high": 1.3696,
+  "cagr": 0.0694,
+  "max_drawdown": -0.1997,
+  "n_trades": 0,
+  "h001_corr": 0.7496,
+  "fold_sharpes": [
+    1.045,
+    -0.005,
+    1.062,
+    0.955,
+    1.067,
+    0.303,
+    2.067,
+    1.59,
+    0.604,
+    2.565,
+    0.453,
+    0.832
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H049 components with daily regime weights: VIX+SHY/TLT curve signal. Calm: equity-heavy; risk-off: H021+H035 heavy.",
+  "canonical_params": {
+    "vix_calm": 15,
+    "vix_riskoff": 25,
+    "curve_lookback": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

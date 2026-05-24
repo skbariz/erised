@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H093",
+  "name": "ensemble-anti-momentum-rebalance",
+  "strategy_class": "EnsembleAntiMomentumRebalance",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8517,
+  "ci_low": 0.4402,
+  "ci_high": 1.2616,
+  "cagr": 0.0767,
+  "max_drawdown": -0.2193,
+  "n_trades": 0,
+  "h001_corr": 0.6958,
+  "fold_sharpes": [
+    1.215,
+    0.416,
+    0.261,
+    1.289,
+    0.646,
+    0.632,
+    1.276,
+    1.533,
+    0.535,
+    2.285,
+    0.229,
+    0.702
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H049 components. Monthly anti-momentum: weights proportional to (max_trailing_Sharpe - component_trailing_Sharpe). 24m lookback.",
+  "canonical_params": {
+    "components": [
+      "H021",
+      "H046",
+      "H019",
+      "H035"
+    ],
+    "lookback_months": 24
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,48 @@
+{
+  "hypothesis": "H091",
+  "name": "enhanced-min-corr-ensemble-v2",
+  "strategy_class": "EnhancedMinCorrEnsembleV2",
+  "family": "ensemble",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9844,
+  "ci_low": 0.5708,
+  "ci_high": 1.3907,
+  "cagr": 0.0708,
+  "max_drawdown": -0.1538,
+  "n_trades": 0,
+  "h001_corr": 0.7835,
+  "fold_sharpes": [
+    1.215,
+    0.091,
+    1.277,
+    1.109,
+    1.02,
+    0.488,
+    1.414,
+    1.764,
+    0.561,
+    2.339,
+    0.646,
+    0.718
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Greedy min-corr selection (threshold=0.5) over all 35 kept strategies H001-H090. Selected: ['H086', 'H046', 'H019', 'H035', 'H060'].",
+  "canonical_params": {
+    "threshold": 0.5,
+    "n_candidates": 35,
+    "selected": [
+      "H086",
+      "H046",
+      "H019",
+      "H035",
+      "H060"
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -102,6 +102,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | **088** | **H001+H021 direct blend** | **blend** | **kept** | **0.871** | **[0.453, 1.271]** | 7.86% | −21.61% | +0.924 | 50% H001 momentum + 50% H021 risk parity; high H001 corr from MA signal dominance |
 | **089** | **H043+H021 regime blend** | **blend** | **kept ★** | **1.074** | **[0.667, 1.478]** | 5.23% | **−9.62%** | +0.477 | 50% H043 seasonal + 50% H021 risk parity; **program MaxDD record −9.62%**; stable across blends |
 | **090** | **Monthly rebalancing risk parity** | **multi-asset** | **kept** | **1.020** | **[0.605, 1.425]** | 7.76% | −17.89% | +0.426 | H021 rebalanced monthly (N=231 trades); near-identical Sharpe to H021; robust across lookbacks |
+| **091** | **Enhanced min-corr ensemble v2** | **ensemble** | **kept** | **0.984** | **[0.571, 1.391]** | 7.08% | −15.38% | +0.784 | Greedy min-corr (0.50) over all 35 keepers; selects H086+H046+H019+H035+H060 (5 components) |
+| **092** | **Regime-adaptive ensemble** | **ensemble** | **kept** | **0.964** | **[0.553, 1.370]** | 6.94% | −19.97% | +0.750 | H049 components with daily VIX+curve regime weights; marginal over H049 equal-weight (0.959) |
+| **093** | **Ensemble anti-momentum rebalance** | **ensemble** | **kept** | **0.852** | **[0.440, 1.262]** | 7.67% | −21.93% | +0.696 | H049 components; monthly anti-momentum (upweight 24m underperformers); below H049 baseline |
+| **094** | **H049 + best new component** | **ensemble** | **kept ★** | **1.084** | **[0.668, 1.493]** | 7.70% | **−15.03%** | +0.726 | H049 + H078 (SeasonalRiskParity, lowest avg corr to H049 = +0.209); 5-component equal weight |
+| **095** | **Max diversification portfolio** | **ensemble** | **kept ★★** | **1.133** | **[0.727, 1.557]** | 5.81% | **−7.16%** | +0.665 | **Program MaxDD record −7.16%**; SLSQP MDR over 35 strategies; concentrates on H043+H078+H035 |
 
 ---
 
@@ -109,10 +114,10 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.109 (H086)** / **1.074 (H089)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−9.62% (H089)** / **−9.93% (H086)** / **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **MET ★★** |
-| Strategies tested ≥ 90 | **90** | Batch 17 complete (5/5 kept — vol scaling + drawdown control dominate) |
-| Strategies kept (ensemble) | 39 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084/H086/H087/H088/H089/H090 + H048/H049/H050) | Batch 17 perfect 5/5 — all drawdown-control variants of H021 |
+| OOS Sharpe ≥ 1.0 | **1.133 (H095)** / **1.109 (H086)** / **1.084 (H094)** / **1.03 (H021)** | **MET ★** |
+| Max DD < SPY (−55.92%) | **−7.16% (H095)** / **−9.62% (H089)** / **−9.93% (H086)** / **−10.11% (H043)** | **MET ★★** |
+| Strategies tested ≥ 95 | **95** | Batch 18 complete (5/5 kept — ensemble construction batch) |
+| Strategies kept (ensemble) | 44 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084/H086/H087/H088/H089/H090/H091/H092/H093/H094/H095 + H048/H049/H050) | Batch 18 perfect 5/5; H095 MDR is program champion |
 
 ---
 

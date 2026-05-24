@@ -1641,3 +1641,222 @@ class PreEarningsDrift(Strategy):
         pos = in_earnings_month * in_early_window
         pos.name = "position"
         return pos
+
+
+# ---------------------------------------------------------------------------
+# Batch 10 — H051–H055: New Asset Class Expansion
+# Extends the asset universe beyond SPY/TLT/GLD to include commodities,
+# credit markets, and yield-curve instruments.
+# ---------------------------------------------------------------------------
+
+
+class ThreeAssetRiskParity(MultiAssetStrategy):
+    """H051: Vol-equalized risk parity across SPY, TLT, and GLD.
+
+    Extends H021 (SPY+TLT) by adding GLD as a third asset. Each asset
+    receives weight = (1/realized_vol) / sum(1/realized_vol), normalized
+    to sum to 1.0. Daily rebalancing. Falls back to SPY+TLT when GLD
+    data is unavailable (folds 0-2, pre-2004).
+
+    Thesis: GLD diversifies a distinct regime — inflation/stagflation —
+    where SPY and TLT both suffer but gold holds. SPY+TLT handles
+    deflation crises; adding GLD covers inflationary crises.
+
+    Requires: tlt_close, gld_close columns.
+    """
+
+    name = "three_asset_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60):
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = (
+            prices["tlt_close"].pct_change()
+            if "tlt_close" in prices.columns
+            else pd.Series(np.nan, index=prices.index)
+        )
+        gld_r = (
+            prices["gld_close"].pct_change()
+            if "gld_close" in prices.columns
+            else pd.Series(np.nan, index=prices.index)
+        )
+
+        def _inv_vol(r: pd.Series) -> pd.Series:
+            v = r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+                1
+            ) * np.sqrt(252)
+            return (1.0 / v.replace(0, np.nan)).fillna(0.0)
+
+        inv_spy = _inv_vol(spy_r)
+        inv_tlt = _inv_vol(tlt_r)
+        inv_gld = _inv_vol(gld_r)
+
+        # Zero out assets whose price series is missing
+        if "tlt_close" not in prices.columns:
+            inv_tlt = pd.Series(0.0, index=prices.index)
+        if "gld_close" not in prices.columns:
+            inv_gld = pd.Series(0.0, index=prices.index)
+
+        # When GLD NaN (pre-2004), treat as 0 weight → falls back to SPY+TLT parity
+        inv_gld = inv_gld.where(
+            prices.get("gld_close", pd.Series(np.nan, index=prices.index)).notna(), 0.0
+        )
+
+        total = inv_spy + inv_tlt + inv_gld
+        valid = total > 0
+
+        w_spy = (inv_spy / total).where(valid, 0.0)
+        w_tlt = (inv_tlt / total).where(valid, 0.0)
+        w_gld = (inv_gld / total).where(valid, 0.0)
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt, "GLD": w_gld}, index=prices.index)
+
+
+class CommodityMomentumOverlay(Strategy):
+    """H052: Long SPY when DBC is below its MA (no commodity inflation regime).
+
+    Rising commodity prices signal an inflationary environment that historically
+    compresses equity multiples and triggers bond selloffs simultaneously.
+    When DBC trends above its MA, the inflation regime is active — reducing
+    equity exposure avoids the dual equity+bond drawdown of inflationary bears.
+
+    Long SPY when DBC < ma_period MA (no inflation pressure); flat otherwise.
+    When DBC data unavailable, defaults to long SPY.
+
+    Requires: dbc_close column.
+    """
+
+    def __init__(self, ma_period: int = 200):
+        self.ma_period = ma_period
+        self.name = f"commodity_momentum_{ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "dbc_close" not in prices.columns:
+            return pd.Series(1.0, index=prices.index, name="position")
+        dbc = prices["dbc_close"]
+        dbc_ma = dbc.rolling(self.ma_period, min_periods=self.ma_period).mean().shift(1)
+        no_inflation = dbc.shift(1) < dbc_ma
+        pos = no_inflation.astype(float)
+        pos = pos.where(dbc_ma.notna(), 0.0)
+        pos.name = "position"
+        return pos
+
+
+class CreditSpreadRegime(Strategy):
+    """H053: Long SPY when HYG outperforms LQD (healthy credit appetite).
+
+    Credit spread widening (HYG underperforming LQD) signals rising corporate
+    default risk — a leading indicator of equity stress. When high-yield bonds
+    are gaining relative to investment-grade, credit risk appetite is positive
+    and equity exposure is favorable.
+
+    Signal: long SPY when HYG momentum_days return > LQD momentum_days return.
+    Falls back to flat when HYG data unavailable (pre-2007).
+
+    Requires: hyg_close, lqd_close columns.
+    """
+
+    def __init__(self, momentum_days: int = 63):
+        self.momentum_days = momentum_days
+        self.name = f"credit_spread_regime_{momentum_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "hyg_close" not in prices.columns or "lqd_close" not in prices.columns:
+            return pd.Series(0.0, index=prices.index, name="position")
+        hyg = prices["hyg_close"]
+        lqd = prices["lqd_close"]
+        hyg_mom = hyg / hyg.shift(self.momentum_days) - 1
+        lqd_mom = lqd / lqd.shift(self.momentum_days) - 1
+        valid = hyg_mom.notna() & lqd_mom.notna()
+        pos = (hyg_mom >= lqd_mom).astype(float)
+        pos = pos.where(valid, 0.0)
+        pos.name = "position"
+        return pos
+
+
+class YieldCurveProxy(Strategy):
+    """H054: Long SPY when the yield curve is not inverted (SHY not outperforming TLT).
+
+    The yield curve slope (short vs. long rates) is the classic recession
+    predictor. Proxied via ETF relative performance: when SHY (1-3yr Treasury)
+    outperforms TLT (20yr Treasury) on a 3-month basis, short rates are rising
+    relative to long rates — a flattening/inverting yield curve signalling
+    recession risk.
+
+    Long SPY when TLT 3m return >= SHY 3m return (curve positive or steepening).
+    Flat when SHY outperforms (curve inverted). Defaults to long SPY when data
+    unavailable.
+
+    Requires: shy_close column. tlt_close column used if available.
+    """
+
+    def __init__(self, mom_days: int = 63):
+        self.mom_days = mom_days
+        self.name = f"yield_curve_proxy_{mom_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "shy_close" not in prices.columns:
+            return pd.Series(1.0, index=prices.index, name="position")
+        shy = prices["shy_close"]
+        tlt = prices["tlt_close"] if "tlt_close" in prices.columns else shy
+        shy_mom = shy / shy.shift(self.mom_days) - 1
+        tlt_mom = tlt / tlt.shift(self.mom_days) - 1
+        valid = shy_mom.notna() & tlt_mom.notna()
+        # Curve NOT inverted when TLT return >= SHY return (long duration not lagging short)
+        curve_ok = tlt_mom >= shy_mom
+        pos = curve_ok.astype(float)
+        pos = pos.where(valid, 0.0)
+        pos.name = "position"
+        return pos
+
+
+class FiveAssetRotation(MultiAssetStrategy):
+    """H055: Cross-sectional momentum rotation across SPY, TLT, GLD, DBC, VNQ.
+
+    Ranks all available assets by 12-1m momentum. Holds the top-ranked asset
+    if its momentum is positive; goes to cash if the top performer has negative
+    momentum (absolute momentum filter). Broadens H020 (3-asset) to 5 assets,
+    adding commodities (DBC) and real estate (VNQ).
+
+    Requires: tlt_close, gld_close, dbc_close, vnq_close columns.
+    Assets with unavailable data are excluded from ranking for that period.
+    """
+
+    name = "five_asset_rotation"
+
+    def __init__(self, long_days: int = 252, skip_days: int = 21):
+        self.long_days = long_days
+        self.skip_days = skip_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {
+            "SPY": "adj_close",
+            "TLT": "tlt_close",
+            "GLD": "gld_close",
+            "DBC": "dbc_close",
+            "VNQ": "vnq_close",
+        }
+        # Only include assets whose column exists
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        moms = pd.DataFrame(index=prices.index)
+        for asset, col in available.items():
+            px = prices[col]
+            moms[asset] = px.shift(self.skip_days) / px.shift(self.long_days) - 1
+
+        weights = pd.DataFrame(0.0, index=prices.index, columns=list(available.keys()))
+        valid_rows = moms.notna().any(axis=1)
+
+        for i in range(len(prices)):
+            if not valid_rows.iloc[i]:
+                continue
+            day_mom = moms.iloc[i].dropna()
+            if day_mom.empty:
+                continue
+            best = day_mom.idxmax()
+            if day_mom[best] > 0:
+                weights.at[weights.index[i], best] = 1.0
+
+        return weights

@@ -2932,3 +2932,227 @@ class RiskParityYieldCurveOverlay(MultiAssetStrategy):
         w_tlt_adj = w_tlt.where(~inverted, w_tlt + spy_cut)
 
         return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_adj}, index=prices.index)
+
+
+class DualFrequencyMomentum(Strategy):
+    """H081: Long SPY only when both 12-1m AND 1m momentum are positive.
+
+    12-1m (trend): return from 252 days ago to 21 days ago — confirms durable uptrend.
+    1m (short-term): return over last 21 days — avoids entry during pullbacks in uptrend.
+    Both must be positive to hold; flat when either is negative.
+    """
+
+    name = "dual_frequency_momentum"
+
+    def __init__(self, mom_long: int = 252, mom_skip: int = 21, mom_short: int = 21) -> None:
+        self.mom_long = mom_long
+        self.mom_skip = mom_skip
+        self.mom_short = mom_short
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        spy = prices["adj_close"]
+        # 12-1m: return from mom_long days ago to mom_skip days ago (skip recent month)
+        mom_long_sig = spy.shift(self.mom_skip) / spy.shift(self.mom_long) - 1
+        # 1m: return over last mom_short days (current short-term trend)
+        mom_short_sig = spy / spy.shift(self.mom_short) - 1
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        valid = mom_long_sig.notna() & mom_short_sig.notna()
+        pos[valid & (mom_long_sig > 0) & (mom_short_sig > 0)] = 1.0
+        return pos
+
+
+class RiskAdjustedMomentum(MultiAssetStrategy):
+    """H082: Long the SPY/TLT/GLD asset with highest (12-1m return / vol) score.
+
+    Risk-adjusts cross-sectional momentum to avoid picking high-vol winners that
+    have outsized drawdowns. Normalizes each asset's 12-1m return by its realized
+    vol over the same period. Flat if all scores non-positive.
+    """
+
+    name = "risk_adjusted_momentum"
+
+    def __init__(self, mom_days: int = 252, skip_days: int = 21, vol_days: int = 252) -> None:
+        self.mom_days = mom_days
+        self.skip_days = skip_days
+        self.vol_days = vol_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {"SPY": "adj_close", "TLT": "tlt_close", "GLD": "gld_close"}
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        scores: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            px = prices[col]
+            ret = px.pct_change()
+            mom = px.shift(1 + self.skip_days) / px.shift(1 + self.mom_days) - 1
+            vol = ret.rolling(self.vol_days, min_periods=self.vol_days).std().shift(1) * np.sqrt(
+                252
+            )
+            scores[asset] = (mom / vol.replace(0, np.nan)).shift(0)
+
+        score_df = pd.DataFrame(scores, index=prices.index)
+        weights = pd.DataFrame(0.0, index=prices.index, columns=list(available.keys()))
+        for i in range(len(prices)):
+            row = score_df.iloc[i]
+            valid = row.dropna()
+            if valid.empty or valid.max() <= 0:
+                continue
+            winner = valid.idxmax()
+            weights.loc[prices.index[i], winner] = 1.0
+
+        return weights
+
+
+class ContrarianMultiAssetRotation(MultiAssetStrategy):
+    """H083: Long the WORST 12-1m performer among SPY/TLT/GLD if its 3m trend reversed.
+
+    De Bondt-Thaler long-term reversal applied to ETFs: the worst-performing asset
+    over the prior year is a long candidate, but only when its 3m return turns positive
+    (reversal has started — avoids falling knives).
+    """
+
+    name = "contrarian_multi_asset_rotation"
+
+    def __init__(self, mom_days: int = 252, skip_days: int = 21, confirm_days: int = 63) -> None:
+        self.mom_days = mom_days
+        self.skip_days = skip_days
+        self.confirm_days = confirm_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {"SPY": "adj_close", "TLT": "tlt_close", "GLD": "gld_close"}
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        moms: dict[str, pd.Series] = {}
+        confirms: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            px = prices[col]
+            moms[asset] = px.shift(1 + self.skip_days) / px.shift(1 + self.mom_days) - 1
+            confirms[asset] = px.shift(1) / px.shift(1 + self.confirm_days) - 1
+
+        mom_df = pd.DataFrame(moms, index=prices.index)
+        confirm_df = pd.DataFrame(confirms, index=prices.index)
+        weights = pd.DataFrame(0.0, index=prices.index, columns=list(available.keys()))
+
+        for i in range(len(prices)):
+            m_row = mom_df.iloc[i].dropna()
+            c_row = confirm_df.iloc[i].dropna()
+            common = m_row.index.intersection(c_row.index)
+            if len(common) < 2:
+                continue
+            loser = m_row[common].idxmin()
+            if c_row[loser] > 0:
+                weights.loc[prices.index[i], loser] = 1.0
+
+        return weights
+
+
+class MomentumCarryBlend(MultiAssetStrategy):
+    """H084: 50% cross-sectional momentum + 50% carry (term premium proxy).
+
+    Momentum sub-signal: 100% in best 12-1m return asset (SPY/TLT/GLD) if positive.
+    Carry sub-signal: 100% TLT if TLT 12m return > SHY 12m return (positive term premium),
+    else 100% SPY. Average the two sub-portfolios 50/50.
+    """
+
+    name = "momentum_carry_blend"
+
+    def __init__(
+        self, mom_days: int = 252, skip_days: int = 21, carry_days: int = 252, blend: float = 0.5
+    ) -> None:
+        self.mom_days = mom_days
+        self.skip_days = skip_days
+        self.carry_days = carry_days
+        self.blend = blend
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {"SPY": "adj_close", "TLT": "tlt_close", "GLD": "gld_close"}
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        # Momentum sub-signal: top 12-1m return asset (if positive)
+        moms: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            px = prices[col]
+            moms[asset] = px.shift(1 + self.skip_days) / px.shift(1 + self.mom_days) - 1
+        mom_df = pd.DataFrame(moms, index=prices.index)
+
+        # Carry sub-signal: TLT if term premium positive (TLT return > SHY return)
+        tlt_ret = prices["tlt_close"].shift(1) / prices["tlt_close"].shift(1 + self.carry_days) - 1
+        shy_px = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        shy_ret = shy_px.shift(1) / shy_px.shift(1 + self.carry_days) - 1
+        term_premium = (tlt_ret > shy_ret) & tlt_ret.notna() & shy_ret.notna()
+
+        cols = list(available.keys())
+        w_mom = pd.DataFrame(0.0, index=prices.index, columns=cols)
+        w_carry = pd.DataFrame(0.0, index=prices.index, columns=cols)
+
+        idx_val = prices.index
+        for i in range(len(prices)):
+            row = mom_df.iloc[i].dropna()
+            if not row.empty and row.max() > 0:
+                w_mom.loc[idx_val[i], row.idxmax()] = 1.0
+            # Carry: TLT if term premium, else SPY (when both available)
+            if (
+                "TLT" in available
+                and "SPY" in available
+                and pd.notna(tlt_ret.iloc[i])
+                and pd.notna(shy_ret.iloc[i])
+            ):
+                if term_premium.iloc[i]:
+                    w_carry.loc[idx_val[i], "TLT"] = 1.0
+                else:
+                    w_carry.loc[idx_val[i], "SPY"] = 1.0
+
+        return self.blend * w_mom + (1.0 - self.blend) * w_carry
+
+
+class MomentumMacroGate(MultiAssetStrategy):
+    """H085: Cross-sectional momentum gated by yield curve inversion.
+
+    Normally: long the top 12-1m return asset among available SPY/TLT/GLD/DBC/VNQ.
+    During yield curve inversion (SHY 3m return > TLT 3m return): force 100% TLT
+    regardless of momentum ranking (macro override).
+    """
+
+    name = "momentum_macro_gate"
+
+    def __init__(self, mom_days: int = 252, skip_days: int = 21, curve_days: int = 63) -> None:
+        self.mom_days = mom_days
+        self.skip_days = skip_days
+        self.curve_days = curve_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {
+            "SPY": "adj_close",
+            "TLT": "tlt_close",
+            "GLD": "gld_close",
+            "DBC": "dbc_close",
+            "VNQ": "vnq_close",
+        }
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        moms: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            px = prices[col]
+            moms[asset] = px.shift(1 + self.skip_days) / px.shift(1 + self.mom_days) - 1
+        mom_df = pd.DataFrame(moms, index=prices.index)
+
+        tlt_px = prices["tlt_close"]
+        shy_px = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt_curve = tlt_px.shift(1) / tlt_px.shift(1 + self.curve_days) - 1
+        shy_curve = shy_px.shift(1) / shy_px.shift(1 + self.curve_days) - 1
+        inverted = (shy_curve > tlt_curve) & shy_curve.notna() & tlt_curve.notna()
+
+        cols = list(available.keys())
+        weights = pd.DataFrame(0.0, index=prices.index, columns=cols)
+
+        idx_val = prices.index
+        for i in range(len(prices)):
+            if inverted.iloc[i] and "TLT" in available:
+                weights.loc[idx_val[i], "TLT"] = 1.0
+                continue
+            row = mom_df.iloc[i].dropna()
+            if row.empty or row.max() <= 0:
+                continue
+            weights.loc[idx_val[i], row.idxmax()] = 1.0
+
+        return weights

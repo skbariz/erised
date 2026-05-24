@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H067",
+  "name": "vix-percentile-regime",
+  "strategy_class": "VixPercentileRegime",
+  "family": "vol regime",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.3048,
+  "ci_low": -0.0976,
+  "ci_high": 0.702,
+  "cagr": 0.0151,
+  "max_drawdown": -0.1892,
+  "n_trades": 284,
+  "h001_corr": 0.3646,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.667,
+    -0.035,
+    0.449,
+    0.0,
+    -0.239,
+    0.761,
+    -0.824,
+    2.122,
+    0.464,
+    -0.826
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Expanding-quantile adaptive VIX threshold. Long SPY when VIX < rolling 33rd percentile of all historical VIX.",
+  "canonical_params": {
+    "quantile": 0.33
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

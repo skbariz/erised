@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H069",
+  "name": "vix-term-structure-proxy",
+  "strategy_class": "VixTermStructureProxy",
+  "family": "vol regime",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4761,
+  "ci_low": 0.0652,
+  "ci_high": 0.8678,
+  "cagr": 0.0473,
+  "max_drawdown": -0.5141,
+  "n_trades": 110,
+  "h001_corr": 0.3607,
+  "fold_sharpes": [
+    0.742,
+    -0.839,
+    0.274,
+    -0.044,
+    -0.449,
+    0.337,
+    1.453,
+    0.676,
+    -0.262,
+    1.352,
+    1.893,
+    1.517
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "VIX/VIX_63d_MA ratio proxies futures term structure. Ratio<0.85\u2192long; >1.15\u2192flat; hysteresis in between.",
+  "canonical_params": {
+    "ma_days": 63,
+    "contango_thresh": 0.85,
+    "backwardation_thresh": 1.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

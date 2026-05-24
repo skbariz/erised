@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H066",
+  "name": "vix-risk-parity-enhanced",
+  "strategy_class": "VixRiskParityEnhanced",
+  "family": "vol regime",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.9903,
+  "ci_low": 0.5851,
+  "ci_high": 1.3913,
+  "cagr": 0.0764,
+  "max_drawdown": -0.1899,
+  "n_trades": 4534,
+  "h001_corr": 0.3184,
+  "fold_sharpes": [
+    0.351,
+    0.586,
+    1.532,
+    0.981,
+    0.93,
+    0.317,
+    1.842,
+    1.146,
+    0.954,
+    2.244,
+    1.431,
+    0.63
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 RiskParity + VIX spike override: VIX>35 \u2192 80/20 TLT/SPY; hysteresis resumes at VIX<30.",
+  "canonical_params": {
+    "vix_spike": 35,
+    "vix_resume": 30,
+    "crisis_tlt": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -77,6 +77,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 063 | Defensive sector overlay (XLP) | equity factor | **kept** | **0.577** | **[0.170, 0.972]** | 8.39% | −39.66% | +0.752 | VIX+SPY-MA regime overlay; MaxDD -39.66% significant improvement; robust across params |
 | 064 | Tech/defensive momentum (QQQ/XLU) | equity factor | killed | 0.406 | [−0.006, 0.800] | 6.05% | −45.59% | +0.640 | CI clips zero; canonical 252d lookback only N=10 trades; 126d gives 0.641 [0.270, 1.014] |
 | 065 | Equal-weight defensive factor | equity factor | **kept** | **0.554** | **[0.136, 0.948]** | 8.19% | −49.19% | +0.671 | Static 25/25/25/25 SPY+XLP+XLU+IVE; no timing; N=3 trades (buy-and-hold) |
+| **066** | **VIX risk parity enhanced** | **vol regime** | **kept** | **0.990** | **[0.585, 1.391]** | 7.64% | **−18.99%** | **+0.318** | H021 + VIX spike override (VIX>35→80/20 TLT/SPY); near-H021 Sharpe with low H001 corr |
+| 067 | VIX percentile regime | vol regime | killed | 0.305 | [−0.098, 0.702] | 1.51% | −18.92% | +0.365 | CI contains zero; quantile=40% gives 0.518 but post-OOS param; fold variance extreme |
+| **068** | **VRP + calendar hybrid** | **vol regime** | **kept** | **0.575** | **[0.166, 0.997]** | 6.07% | −27.13% | **+0.481** | H031 VRP × H043 Nov-Apr calendar; lower H001 corr than H031 (+0.693) as expected |
+| 069 | VIX term structure proxy | vol regime | killed | 0.476 | [0.065, 0.868] | 4.73% | −51.41% | +0.361 | Sharpe below 0.51 benchmark; MaxDD worse than SPY; slope signal too noisy as proxy |
+| **070** | **Multi-asset dynamic vol target** | **vol regime** | **kept ★★** | **1.066** | **[0.663, 1.476]** | 7.18% | **−12.28%** | +0.414 | **New program star: H021 weights × portfolio vol-scaling; beats H021 Sharpe+MaxDD** |
 
 ---
 
@@ -84,10 +89,10 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 60 | **65** | Batch 12 complete |
-| Strategies kept (ensemble) | 23 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065 + H048/H049/H050) | H049 is the target ensemble; equity factor batch adds H063/H065 |
+| OOS Sharpe ≥ 1.0 | **1.066 (H070)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
+| Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−12.28% (H070)** / **−18.26% (H049 ensemble)** | **met** |
+| Strategies tested ≥ 70 | **70** | Batch 13 complete |
+| Strategies kept (ensemble) | 27 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070 + H048/H049/H050) | H070 new star: Sharpe 1.066, MaxDD -12.28%; H066 second-lowest non-ensemble H001 corr |
 
 ---
 

@@ -3156,3 +3156,254 @@ class MomentumMacroGate(MultiAssetStrategy):
             weights.loc[idx_val[i], row.idxmax()] = 1.0
 
         return weights
+
+
+# ---------------------------------------------------------------------------
+# Batch 17 — H086–H090: Drawdown Control Strategies
+# ---------------------------------------------------------------------------
+
+
+class LowVolTargetPortfolio(MultiAssetStrategy):
+    """H086: H021 inverse-vol allocation with stricter 8% portfolio vol target.
+
+    Identical mechanism to H070 (MultiAssetDynamicVolTarget) but defaults to
+    vol_target=8% instead of 10%. Lower target means earlier de-risking and
+    smaller positions in high-vol regimes, trading CAGR for Max DD improvement.
+    """
+
+    name = "low_vol_target_portfolio"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        port_vol_lookback: int = 20,
+        vol_target: float = 0.08,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.port_vol_lookback = port_vol_lookback
+        self.vol_target = vol_target
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy = (inv_spy / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        port_r = w_spy.shift(1) * spy_r + w_tlt.shift(1) * tlt_r
+        port_vol = port_r.rolling(
+            self.port_vol_lookback, min_periods=self.port_vol_lookback
+        ).std().shift(1) * np.sqrt(252)
+        scale = (self.vol_target / port_vol).clip(upper=1.0)
+        scale = scale.where(port_vol.notna() & (port_vol > 0), 1.0)
+
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class RatchetDrawdownProtection(MultiAssetStrategy):
+    """H087: H021 weights scaled proportionally by portfolio drawdown from peak.
+
+    scale = max(0, 1 − portfolio_drawdown / drawdown_limit)
+    At 0% drawdown: full H021 allocation (scale=1.0).
+    At drawdown_limit: flat (scale=0.0).
+    Uses H021 unscaled portfolio returns to track the drawdown (no circularity).
+    """
+
+    name = "ratchet_drawdown_protection"
+
+    def __init__(self, vol_lookback: int = 60, drawdown_limit: float = 0.15) -> None:
+        self.vol_lookback = vol_lookback
+        self.drawdown_limit = drawdown_limit
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy = (inv_spy / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        # Simulate H021 portfolio cumulative return (using lagged weights → no lookahead)
+        port_r = w_spy.shift(1) * spy_r + w_tlt.shift(1) * tlt_r
+        port_cum = (1.0 + port_r.fillna(0.0)).cumprod()
+        rolling_peak = port_cum.expanding(min_periods=1).max()
+        dd = (port_cum / rolling_peak - 1.0).fillna(0.0)
+
+        # Ratchet scale based on yesterday's drawdown
+        scale = (1.0 + dd.shift(1).fillna(0.0) / self.drawdown_limit).clip(lower=0.0, upper=1.0)
+
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class H001H021DirectBlend(MultiAssetStrategy):
+    """H088: 50/50 blend of H001 (MA trend) and H021 (risk parity) daily.
+
+    H001 portion contributes pure SPY exposure (long or flat).
+    H021 portion contributes SPY+TLT via inverse-vol weights.
+    Combined: w_spy = 0.5*h001 + 0.5*w021_spy; w_tlt = 0.5*w021_tlt.
+    Inherits H001 bull participation and H021 crisis diversification.
+    """
+
+    name = "h001_h021_direct_blend"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        fast: int = 50,
+        slow: int = 200,
+        blend: float = 0.5,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.fast = fast
+        self.slow = slow
+        self.blend = blend
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy = prices["adj_close"]
+        spy_r = spy.pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        # H001: MA50/200 signal (shift 1 to avoid lookahead — MA uses current-day close)
+        fast_ma = spy.rolling(self.fast, min_periods=self.fast).mean()
+        slow_ma = spy.rolling(self.slow, min_periods=self.slow).mean()
+        h001_pos = (fast_ma > slow_ma).astype(float).shift(1).fillna(0.0)
+
+        # H021: inverse-vol weights
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_h021 = (inv_spy / total).fillna(0.0)
+        w_tlt_h021 = (inv_tlt / total).fillna(0.0)
+
+        w_spy = self.blend * h001_pos + (1.0 - self.blend) * w_spy_h021
+        w_tlt = (1.0 - self.blend) * w_tlt_h021
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class H043H021RegimeBlend(MultiAssetStrategy):
+    """H089: 50/50 blend of H043 (Sell-in-May bond confirm) and H021 (risk parity).
+
+    H043 is long SPY in Nov-Apr when TLT is NOT in uptrend, flat otherwise.
+    H021 runs continuously with inverse-vol SPY+TLT weights.
+    During May-Oct (H043 flat): portfolio is 50% H021 → 50% cash (natural de-risk).
+    Expected MaxDD between H043's -10% and H021's -18%.
+    """
+
+    name = "h043_h021_regime_blend"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        tlt_ma_period: int = 200,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+        blend: float = 0.5,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.tlt_ma_period = tlt_ma_period
+        self.favorable_months = frozenset(favorable_months)
+        self.blend = blend
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        tlt = prices["tlt_close"]
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = tlt.pct_change()
+
+        # H043 signal: Nov-Apr AND TLT NOT in uptrend (risk-on filter)
+        tlt_ma = tlt.rolling(self.tlt_ma_period, min_periods=self.tlt_ma_period).mean().shift(1)
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        bond_riskoff = (tlt.shift(1) > tlt_ma).astype(float)
+        h043_pos = in_season * (1.0 - bond_riskoff)
+        h043_pos = h043_pos.where(tlt_ma.notna(), 0.0)
+
+        # H021: inverse-vol weights
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_h021 = (inv_spy / total).fillna(0.0)
+        w_tlt_h021 = (inv_tlt / total).fillna(0.0)
+
+        w_spy = self.blend * h043_pos + (1.0 - self.blend) * w_spy_h021
+        w_tlt = (1.0 - self.blend) * w_tlt_h021
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class MonthlyRebalancingRiskParity(MultiAssetStrategy):
+    """H090: H021 risk parity with monthly (not daily) weight recalculation.
+
+    Computes H021 inverse-vol weights on the first trading day of each calendar
+    month and holds them constant until the next month-start. Reduces turnover
+    ~20× vs daily H021 (from ~4845 to ~240 rebalances/year) at the cost of
+    slower adaptation to volatility regime changes.
+    """
+
+    name = "monthly_rebalancing_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_daily = (inv_spy / total).fillna(0.0)
+        w_tlt_daily = (inv_tlt / total).fillna(0.0)
+
+        # Identify first trading day of each calendar month
+        idx = prices.index
+        month_starts = set()
+        seen: set = set()
+        for d in idx:
+            key = (d.year, d.month)
+            if key not in seen:
+                seen.add(key)
+                month_starts.add(d)
+
+        # Keep weights only at month-starts, forward-fill all other days
+        w_spy_m = w_spy_daily.copy().where(pd.Series(idx.isin(month_starts), index=idx), np.nan)
+        w_tlt_m = w_tlt_daily.copy().where(pd.Series(idx.isin(month_starts), index=idx), np.nan)
+        w_spy_m = w_spy_m.ffill().fillna(0.0)
+        w_tlt_m = w_tlt_m.ffill().fillna(0.0)
+
+        return pd.DataFrame({"SPY": w_spy_m, "TLT": w_tlt_m}, index=prices.index)

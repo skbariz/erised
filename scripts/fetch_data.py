@@ -24,9 +24,16 @@ logging.basicConfig(
 
 # Per-symbol start dates (limited by ETF inception; yfinance clips automatically)
 SYMBOLS = {
-    "SPY": "1993-01-01",   # inception 1993-01-22
-    "TLT": "2002-01-01",   # inception 2002-07-26
-    "GLD": "2004-01-01",   # inception 2004-11-18
+    "SPY": "1993-01-01",  # inception 1993-01-22
+    "TLT": "2002-01-01",  # inception 2002-07-26
+    "GLD": "2004-01-01",  # inception 2004-11-18
+    # Batch 10 additions
+    "SHY": "2002-01-01",  # 1-3yr Treasuries; inception 2002-07-26 — yield curve short end
+    "IEF": "2002-01-01",  # 7-10yr Treasuries; inception 2002-07-30 — yield curve mid
+    "LQD": "2002-01-01",  # IG Corporate bonds; inception 2002-07-02 — credit quality
+    "HYG": "2007-01-01",  # High Yield bonds; inception 2007-04-11 — credit risk
+    "DBC": "2006-01-01",  # Commodities index; inception 2006-02-06 — inflation hedge
+    "VNQ": "2004-01-01",  # REIT index; inception 2004-09-23 — real estate
 }
 
 

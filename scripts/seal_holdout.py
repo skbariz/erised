@@ -48,7 +48,7 @@ logger = logging.getLogger(__name__)
 #   - 2025-2026: whatever happens
 HOLDOUT_START = date(2023, 1, 1)
 
-SYMBOLS = ["SPY", "TLT", "GLD"]
+SYMBOLS = ["SPY", "TLT", "GLD", "SHY", "IEF", "LQD", "HYG", "DBC", "VNQ"]
 
 
 def seal_one(symbol: str, force: bool = False) -> dict:
@@ -124,7 +124,9 @@ def main() -> None:
     ]
     for r in reports:
         if r["status"] == "sealed":
-            lines.append(f"{r['symbol']}  sha256={r['holdout_sha256']}  rows={r['holdout_rows']}  range={r['holdout_start']}..{r['holdout_end']}")
+            lines.append(
+                f"{r['symbol']}  sha256={r['holdout_sha256']}  rows={r['holdout_rows']}  range={r['holdout_start']}..{r['holdout_end']}"
+            )
         elif r["status"] == "already_sealed":
             lines.append(f"{r['symbol']}  sha256={r['hash']}  (already sealed, not re-written)")
     hash_file.write_text("\n".join(lines) + "\n")

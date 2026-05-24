@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H071",
+  "name": "triple-confirm-calendar",
+  "strategy_class": "TripleConfirmCalendar",
+  "family": "calendar",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.508,
+  "ci_low": 0.096,
+  "ci_high": 0.918,
+  "cagr": 0.0224,
+  "max_drawdown": -0.1034,
+  "n_trades": 89,
+  "h001_corr": 0.3193,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.663,
+    1.334,
+    0.344,
+    0.68,
+    1.11,
+    0.566,
+    -0.999,
+    1.85,
+    -0.357,
+    1.273
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Triple filter: Nov-Jan when TLT<200MA; Feb-Apr only when also Jan return>0 (January Barometer).",
+  "canonical_params": {
+    "tlt_ma_period": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

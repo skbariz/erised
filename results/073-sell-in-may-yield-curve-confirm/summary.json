@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H073",
+  "name": "sell-in-may-yield-curve-confirm",
+  "strategy_class": "SellInMayYieldCurveConfirm",
+  "family": "calendar",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.351,
+  "ci_low": -0.0577,
+  "ci_high": 0.7511,
+  "cagr": 0.0062,
+  "max_drawdown": -0.0722,
+  "n_trades": 87,
+  "h001_corr": 0.1264,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.569,
+    0.0,
+    -0.134,
+    1.12,
+    2.186,
+    -0.402,
+    -0.982,
+    0.206,
+    0.023,
+    -0.344
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H043 (Sell-in-May+bond) gated by yield curve not-inverted (SHY_63d < TLT_63d). Stricter H043.",
+  "canonical_params": {
+    "tlt_ma": 200,
+    "curve_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

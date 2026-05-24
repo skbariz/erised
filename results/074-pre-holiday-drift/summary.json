@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H074",
+  "name": "pre-holiday-drift",
+  "strategy_class": "PreHolidayDrift",
+  "family": "calendar",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.1578,
+  "ci_low": -0.2616,
+  "ci_high": 0.5047,
+  "cagr": 0.0067,
+  "max_drawdown": -0.1164,
+  "n_trades": 482,
+  "h001_corr": 0.0976,
+  "fold_sharpes": [
+    0.492,
+    -0.574,
+    0.422,
+    0.298,
+    -0.642,
+    0.468,
+    0.368,
+    1.313,
+    -0.371,
+    0.595,
+    -0.155,
+    -0.45
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY on 1 trading day before each US federal holiday. ~8-10 active days/year.",
+  "canonical_params": {
+    "pre_days": 1
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

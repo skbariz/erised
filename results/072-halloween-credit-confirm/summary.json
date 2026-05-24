@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H072",
+  "name": "halloween-credit-confirm",
+  "strategy_class": "HalloweenCreditConfirm",
+  "family": "calendar",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4907,
+  "ci_low": 0.0788,
+  "ci_high": 0.8969,
+  "cagr": 0.0242,
+  "max_drawdown": -0.0982,
+  "n_trades": 143,
+  "h001_corr": 0.3662,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.9,
+    0.662,
+    1.389,
+    0.591,
+    -0.46,
+    1.967,
+    -0.089,
+    1.095
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H046 (Halloween+momentum) gated by HYG>LQD credit confirmation. Flat pre-2007 (no HYG).",
+  "canonical_params": {
+    "mom_days": 126,
+    "credit_days": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

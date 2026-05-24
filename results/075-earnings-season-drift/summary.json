@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H075",
+  "name": "earnings-season-drift",
+  "strategy_class": "EarningsSeasonDrift",
+  "family": "calendar",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.2882,
+  "ci_low": -0.1104,
+  "ci_high": 0.6792,
+  "cagr": 0.0235,
+  "max_drawdown": -0.4857,
+  "n_trades": 191,
+  "h001_corr": 0.262,
+  "fold_sharpes": [
+    0.685,
+    0.071,
+    -0.283,
+    -0.796,
+    -0.303,
+    -0.583,
+    2.141,
+    0.534,
+    0.386,
+    1.842,
+    0.9,
+    1.267
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY first 15 trading days of earnings months (Jan/Apr/Jul/Oct). ~60 active days/year.",
+  "canonical_params": {
+    "active_days": 15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

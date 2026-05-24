@@ -82,6 +82,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | **068** | **VRP + calendar hybrid** | **vol regime** | **kept** | **0.575** | **[0.166, 0.997]** | 6.07% | −27.13% | **+0.481** | H031 VRP × H043 Nov-Apr calendar; lower H001 corr than H031 (+0.693) as expected |
 | 069 | VIX term structure proxy | vol regime | killed | 0.476 | [0.065, 0.868] | 4.73% | −51.41% | +0.361 | Sharpe below 0.51 benchmark; MaxDD worse than SPY; slope signal too noisy as proxy |
 | **070** | **Multi-asset dynamic vol target** | **vol regime** | **kept ★★** | **1.066** | **[0.663, 1.476]** | 7.18% | **−12.28%** | +0.414 | **New program star: H021 weights × portfolio vol-scaling; beats H021 Sharpe+MaxDD** |
+| 071 | Triple confirm calendar | calendar | killed | 0.508 | [0.096, 0.918] | 2.24% | **−10.34%** | +0.319 | Sharpe 0.508 misses 0.51 by 0.002; CI solidly positive; near-H043 MaxDD record |
+| 072 | Halloween + credit confirm | calendar | killed | 0.491 | [0.079, 0.897] | 2.42% | **−9.82%** | +0.366 | Sharpe misses; MaxDD −9.82% (program best individual!); credit=90d gives 0.669 but post-OOS |
+| 073 | Sell-in-May + yield curve confirm | calendar | killed | 0.351 | [−0.058, 0.751] | 0.62% | **−7.22%** | **+0.126** | CI clips zero; **MaxDD −7.22% would be program best**; yield curve filter too restrictive |
+| 074 | Pre-holiday drift | calendar | killed | 0.158 | [−0.262, 0.505] | 0.67% | −11.64% | **+0.098** | **Lowest H001 corr in program (+0.098)**; CI contains zero; holiday alpha eaten by costs |
+| 075 | Earnings season drift | calendar | killed | 0.288 | [−0.110, 0.679] | 2.35% | −48.57% | +0.262 | CI contains zero; index-level earnings drift doesn't survive after costs |
 
 ---
 
@@ -91,8 +96,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.066 (H070)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−12.28% (H070)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 70 | **70** | Batch 13 complete |
-| Strategies kept (ensemble) | 27 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070 + H048/H049/H050) | H070 new star: Sharpe 1.066, MaxDD -12.28%; H066 second-lowest non-ensemble H001 corr |
+| Strategies tested ≥ 75 | **75** | Batch 14 complete (0/5 kept — calendar family exhausted) |
+| Strategies kept (ensemble) | 27 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070 + H048/H049/H050) | H073 killed with MaxDD −7.22% (best in program) — CI barrier prevents keep |
 
 ---
 

@@ -97,6 +97,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 083 | Contrarian multi-asset rotation | momentum | killed | 0.326 | [−0.071, 0.744] | 2.61% | −28.66% | **+0.073** | CI clips zero; H001 corr +0.073 (2nd lowest for kept class); fold 8 kills: −1.413 |
 | **084** | **Momentum + carry blend** | **momentum** | **kept** | **0.548** | **[0.140, 0.941]** | 6.15% | −29.43% | +0.337 | 50% top 12-1m momentum + 50% TLT carry (TLT>SHY return); stable across blends |
 | 085 | Momentum + macro gate | momentum | killed | 0.445 | [0.044, 0.855] | 6.24% | −41.59% | +0.364 | Sharpe below SPY benchmark; yield curve gate forces TLT at wrong times; MaxDD poor |
+| **086** | **Low-vol target portfolio** | **vol regime** | **kept ★★** | **1.109** | **[0.707, 1.519]** | 7.04% | **−9.93%** | +0.413 | H021 × vol scale (min(1, 8%/port_vol)); **program MaxDD record −9.93%**; robust across vol targets |
+| **087** | **Ratchet drawdown protection** | **drawdown control** | **kept** | **1.010** | **[0.608, 1.427]** | 5.94% | **−10.93%** | +0.417 | H021 × ratchet scale (1+dd/limit); cuts exposure proportional to portfolio drawdown depth |
+| **088** | **H001+H021 direct blend** | **blend** | **kept** | **0.871** | **[0.453, 1.271]** | 7.86% | −21.61% | +0.924 | 50% H001 momentum + 50% H021 risk parity; high H001 corr from MA signal dominance |
+| **089** | **H043+H021 regime blend** | **blend** | **kept ★** | **1.074** | **[0.667, 1.478]** | 5.23% | **−9.62%** | +0.477 | 50% H043 seasonal + 50% H021 risk parity; **program MaxDD record −9.62%**; stable across blends |
+| **090** | **Monthly rebalancing risk parity** | **multi-asset** | **kept** | **1.020** | **[0.605, 1.425]** | 7.76% | −17.89% | +0.426 | H021 rebalanced monthly (N=231 trades); near-identical Sharpe to H021; robust across lookbacks |
 
 ---
 
@@ -104,10 +109,10 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.066 (H070)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
-| Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−12.28% (H070)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 85 | **85** | Batch 16 complete (2/5 kept — momentum family harder than multi-asset RP) |
-| Strategies kept (ensemble) | 34 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084 + H048/H049/H050) | H083 killed H001 corr +0.073 is 2nd-lowest ever |
+| OOS Sharpe ≥ 1.0 | **1.109 (H086)** / **1.074 (H089)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
+| Max DD < SPY (−55.92%) | **−9.62% (H089)** / **−9.93% (H086)** / **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **MET ★★** |
+| Strategies tested ≥ 90 | **90** | Batch 17 complete (5/5 kept — vol scaling + drawdown control dominate) |
+| Strategies kept (ensemble) | 39 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084/H086/H087/H088/H089/H090 + H048/H049/H050) | Batch 17 perfect 5/5 — all drawdown-control variants of H021 |
 
 ---
 

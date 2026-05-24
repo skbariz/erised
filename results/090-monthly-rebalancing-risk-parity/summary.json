@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H090",
+  "name": "monthly-rebalancing-risk-parity",
+  "strategy_class": "MonthlyRebalancingRiskParity",
+  "family": "multi-asset",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0204,
+  "ci_low": 0.6053,
+  "ci_high": 1.4251,
+  "cagr": 0.0776,
+  "max_drawdown": -0.1789,
+  "n_trades": 231,
+  "h001_corr": 0.4263,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.4,
+    1.019,
+    1.014,
+    0.378,
+    2.109,
+    1.169,
+    1.16,
+    2.271,
+    1.384,
+    0.714
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 inverse-vol weights computed daily but only applied at month-starts; weights forward-filled within month.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

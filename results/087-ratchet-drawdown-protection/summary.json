@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H087",
+  "name": "ratchet-drawdown-protection",
+  "strategy_class": "RatchetDrawdownProtection",
+  "family": "drawdown control",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.01,
+  "ci_low": 0.6083,
+  "ci_high": 1.4266,
+  "cagr": 0.0594,
+  "max_drawdown": -0.1093,
+  "n_trades": 4830,
+  "h001_corr": 0.4167,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.747,
+    0.908,
+    0.854,
+    -0.096,
+    2.0,
+    1.075,
+    1.102,
+    2.223,
+    1.417,
+    0.507
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 weights \u00d7 ratchet scale: scale proportional to distance from peak. Cuts exposure as drawdown deepens.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "drawdown_limit": 0.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

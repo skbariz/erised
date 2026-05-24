@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H088",
+  "name": "h001-h021-direct-blend",
+  "strategy_class": "H001H021DirectBlend",
+  "family": "blend",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8711,
+  "ci_low": 0.4534,
+  "ci_high": 1.2712,
+  "cagr": 0.0786,
+  "max_drawdown": -0.2161,
+  "n_trades": 4851,
+  "h001_corr": 0.9235,
+  "fold_sharpes": [
+    0.555,
+    0.178,
+    1.529,
+    0.87,
+    0.781,
+    0.797,
+    0.862,
+    1.56,
+    0.575,
+    2.498,
+    0.969,
+    0.504
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Direct signal blend: blend*H001_position + (1-blend)*H021_weights. SPY momentum gate + risk parity TLT.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "fast": 50,
+    "slow": 200,
+    "blend": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

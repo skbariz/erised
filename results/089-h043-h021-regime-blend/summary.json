@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H089",
+  "name": "h043-h021-regime-blend",
+  "strategy_class": "H043H021RegimeBlend",
+  "family": "blend",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0736,
+  "ci_low": 0.6672,
+  "ci_high": 1.4783,
+  "cagr": 0.0523,
+  "max_drawdown": -0.0962,
+  "n_trades": 4845,
+  "h001_corr": 0.4767,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.612,
+    1.29,
+    0.92,
+    0.532,
+    2.297,
+    1.138,
+    0.622,
+    2.627,
+    0.523,
+    1.214
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Seasonal calendar blend: blend*H043_position + (1-blend)*H021_weights. Nov-Apr SPY + TLT bond confirmation.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "tlt_ma_period": 200,
+    "blend": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

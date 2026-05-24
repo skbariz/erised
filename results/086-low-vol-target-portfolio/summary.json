@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H086",
+  "name": "low-vol-target-portfolio",
+  "strategy_class": "LowVolTargetPortfolio",
+  "family": "vol regime",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.1085,
+  "ci_low": 0.7074,
+  "ci_high": 1.5187,
+  "cagr": 0.0704,
+  "max_drawdown": -0.0993,
+  "n_trades": 4845,
+  "h001_corr": 0.4131,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.726,
+    1.033,
+    0.91,
+    0.258,
+    2.097,
+    1.137,
+    1.159,
+    2.278,
+    1.481,
+    0.659
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 inverse-vol weights \u00d7 portfolio-level vol scale (min(1, vol_target/port_vol)). vol_target=8% default.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "port_vol_lookback": 20,
+    "vol_target": 0.08
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

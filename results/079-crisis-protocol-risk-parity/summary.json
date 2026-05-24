@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H079",
+  "name": "crisis-protocol-risk-parity",
+  "strategy_class": "CrisisProtocolRiskParity",
+  "family": "multi-asset",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.952,
+  "ci_low": 0.5544,
+  "ci_high": 1.3505,
+  "cagr": 0.0771,
+  "max_drawdown": -0.2118,
+  "n_trades": 4563,
+  "h001_corr": 0.2537,
+  "fold_sharpes": [
+    0.571,
+    0.571,
+    1.404,
+    0.981,
+    0.93,
+    0.373,
+    1.667,
+    1.146,
+    0.895,
+    2.244,
+    1.41,
+    0.691
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with hysteresis-based emergency override: 90/10 TLT/SPY when SPY drawdown<-10% AND VIX>35.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "drawdown_window": 20,
+    "crisis_dd": -0.1,
+    "vix_spike": 35.0,
+    "crisis_tlt": 0.9
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H077",
+  "name": "risk-parity-momentum-filter",
+  "strategy_class": "RiskParityMomentumFilter",
+  "family": "multi-asset",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.6832,
+  "ci_low": 0.2868,
+  "ci_high": 1.0847,
+  "cagr": 0.0801,
+  "max_drawdown": -0.2758,
+  "n_trades": 2357,
+  "h001_corr": 0.478,
+  "fold_sharpes": [
+    0.711,
+    -0.045,
+    -0.046,
+    0.621,
+    0.917,
+    0.596,
+    0.827,
+    1.613,
+    0.618,
+    1.999,
+    0.544,
+    0.794
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 parity with per-asset 6m momentum filter. Zero weight when momentum negative; goes cash if both negative.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "mom_days": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H080",
+  "name": "risk-parity-yield-curve-overlay",
+  "strategy_class": "RiskParityYieldCurveOverlay",
+  "family": "multi-asset",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8908,
+  "ci_low": 0.4715,
+  "ci_high": 1.2953,
+  "cagr": 0.0699,
+  "max_drawdown": -0.2258,
+  "n_trades": 4845,
+  "h001_corr": 0.2574,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.291,
+    1.095,
+    1.076,
+    0.053,
+    1.731,
+    0.961,
+    1.064,
+    1.558,
+    1.653,
+    0.591
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 parity with yield curve overlay: SHY>TLT (inverted) cuts SPY weight by spy_scale=50%.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "curve_days": 63,
+    "spy_scale": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

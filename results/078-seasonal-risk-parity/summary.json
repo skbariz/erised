@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H078",
+  "name": "seasonal-risk-parity",
+  "strategy_class": "SeasonalRiskParity",
+  "family": "calendar",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.7622,
+  "ci_low": 0.3596,
+  "ci_high": 1.1609,
+  "cagr": 0.0755,
+  "max_drawdown": -0.2066,
+  "n_trades": 2422,
+  "h001_corr": 0.0084,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.668,
+    0.887,
+    1.071,
+    0.439,
+    1.726,
+    0.222,
+    0.844,
+    1.455,
+    1.109,
+    0.295
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 risk parity in seasonal window (Nov-Apr); 100% TLT outside. Combines Sell-in-May with multi-asset allocation.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

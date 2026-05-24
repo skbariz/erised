@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H076",
+  "name": "four-asset-risk-parity",
+  "strategy_class": "FourAssetRiskParity",
+  "family": "multi-asset",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.6664,
+  "ci_low": 0.2519,
+  "ci_high": 1.0697,
+  "cagr": 0.0465,
+  "max_drawdown": -0.1927,
+  "n_trades": 3958,
+  "h001_corr": 0.3379,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.638,
+    0.307,
+    1.757,
+    -0.092,
+    -0.776,
+    2.159,
+    0.922,
+    1.079
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Inverse-vol parity across SPY+TLT+GLD+DBC (full macro quadrant). Degrades gracefully when assets unavailable.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,656 @@
+================================================================================
+THE 20 PAPERS AND IMPLEMENTATION LEARNINGS
+================================================================================
+
+01. Jegadeesh and Titman (1993)
+Title: Returns to Buying Winners and Selling Losers: Implications for Stock Market Efficiency
+Source: https://www.bauer.uh.edu/rsusmel/phd/jegadeesh-titman93.pdf
+Core idea:
+Past intermediate-term winners tend to keep outperforming past losers over 3- to 12-month
+horizons. The classic implementation ranks stocks by prior returns, often using 12-month
+return excluding the most recent month, then buys winners and shorts losers.
+Implementation translation:
+- Feature: momentum_12_1 = total_return(t-252 to t-21)
+- Rebalance monthly.
+- Rank stocks cross-sectionally within the S&P 500 point-in-time universe.
+- Variants: top/bottom deciles, quintiles, sector-neutral ranks, volatility-adjusted momentum,
+  residual momentum after market/sector regression.
+Useful S&P 500 algorithms:
+- Long top 50 momentum names, equal-weighted or inverse-vol weighted.
+- Long top quintile / short bottom quintile, beta-neutral.
+- Sector-neutral momentum: select top names within each sector.
+Main risks:
+- Momentum crashes after market rebounds.
+- High turnover and crowdedness.
+- Signal can overlap heavily with industry momentum and growth exposure.
+
+02. George and Hwang (2004)
+Title: The 52-Week High and Momentum Investing
+Source: https://www.bauer.uh.edu/TGeorge/papers/gh4-paper.pdf
+Core idea:
+The closeness of a stock's current price to its 52-week high captures an anchoring-related
+momentum effect. Stocks near their 52-week highs may continue to outperform.
+Implementation translation:
+- Feature: high_52w_ratio = current_price / rolling_252_day_high
+- Rank high_52w_ratio descending.
+- Use adjusted price series consistently, but avoid using future adjustment data incorrectly.
+Useful S&P 500 algorithms:
+- Long top 20% by 52-week-high ratio, avoid stocks that are extended on short-term reversal.
+- Combine with 12-1 momentum: buy stocks strong on both measures.
+- Sector-neutral 52-week-high rank to avoid concentration in one hot sector.
+Main risks:
+- Can load on high-beta growth regimes.
+- Can chase crowded breakouts if no volatility/risk control.
+
+03. Da, Gurun, and Warachka (2014)
+Title: Frog in the Pan: Continuous Information and Momentum
+Source: https://ideas.repec.org/a/oup/rfinst/v27y2014i7p2171-2218..html
+Core idea:
+Gradual, persistent price moves can produce stronger continuation than abrupt, jumpy moves.
+Investors may underreact more to slow information diffusion than to large discrete events.
+Implementation translation:
+- Feature: path_smoothness = fraction of positive daily returns during formation window,
+  or negative absolute daily jump concentration.
+- Combine with 12-1 momentum.
+- Prefer stocks with high cumulative momentum and smooth paths.
+Useful S&P 500 algorithms:
+- Smooth momentum: long stocks with strong 6- or 12-month return and many positive days.
+- Penalize stocks whose momentum came from one or two large jumps.
+- "Quiet trend" strategy: require low realized volatility and high trend consistency.
+Main risks:
+- Overfitting path definitions.
+- Can overlap with low-volatility and quality factors.
+
+04. De Bondt and Thaler (1985)
+Title: Does the Stock Market Overreact?
+Source: https://breesefine7110.tulane.edu/wp-content/uploads/sites/110/2015/10/Debondt-and-Thaler.pdf
+Core idea:
+Long-horizon losers may subsequently outperform long-horizon winners due to investor
+overreaction and reversal. This is different from intermediate-term momentum.
+Implementation translation:
+- Feature: long_term_reversal = negative prior 3- to 5-year return, optionally excluding
+  the most recent 12 months.
+- Combine with quality filters to avoid distressed value traps.
+Useful S&P 500 algorithms:
+- Long beaten-down large-cap stocks with improving fundamentals and positive recent trend.
+- Contrarian basket: bottom prior 3-year return, but only if balance sheet and margins are stable.
+- Pair with Piotroski/F-score or quality filter.
+Main risks:
+- Cheap losers can keep losing.
+- Needs drawdown control and careful sector constraints.
+
+05. Fama and French (1993)
+Title: Common Risk Factors in the Returns on Stocks and Bonds
+Source: https://www.aea.ru/data/pdf/fama1993.pdf
+Core idea:
+Market, size, and value factors explain much of the cross-section of stock returns.
+Value is commonly proxied with book-to-market, and size with market capitalization.
+Implementation translation:
+- Features: book_to_market, market_cap, market_beta.
+- Use as both strategy signals and risk controls.
+- Use factor regressions to understand whether an algorithm is just repackaged value/size.
+Useful S&P 500 algorithms:
+- Large-cap value tilt inside S&P 500: rank by book-to-market, earnings yield, cash-flow yield.
+- Multi-factor scoring baseline: value + size + market beta controls.
+- Factor-neutral portfolio construction.
+Main risks:
+- S&P 500 has limited size spread relative to all U.S. equities.
+- Value can underperform for long periods.
+- Accounting data timing matters.
+
+06. Fama and French (2015)
+Title: A Five-Factor Asset Pricing Model
+Source: https://ideas.repec.org/a/eee/jfinec/v116y2015i1p1-22.html
+Core idea:
+Adding profitability and investment factors improves the factor model. Firms with robust
+profitability and conservative investment tend to have higher expected returns in the model.
+Implementation translation:
+- Features: operating_profitability, asset_growth, investment_rate, book_to_market.
+- Use profitability and investment as quality/value companions.
+Useful S&P 500 algorithms:
+- Long high profitability + conservative investment names.
+- Avoid companies with aggressive asset growth and weak profitability.
+- Multi-factor: value + profitability + conservative investment + momentum.
+Main risks:
+- Accounting definitions vary by vendor.
+- Signal updates quarterly/annually; do not rebalance as if fundamentals update daily.
+
+07. Asness, Moskowitz, and Pedersen (2013)
+Title: Value and Momentum Everywhere
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1363476
+Core idea:
+Value and momentum both work across many markets and are often negatively correlated,
+making them useful diversifiers. Combining them can improve portfolio stability.
+Implementation translation:
+- Build independent value and momentum scores.
+- Combine scores instead of betting on only one factor.
+- Consider dynamic factor weights based on drawdowns/regimes only after baseline is proven.
+Useful S&P 500 algorithms:
+- Composite score = z(value) + z(momentum), sector-neutral.
+- Two-sleeve strategy: separate value and momentum portfolios, rebalance monthly.
+- Long stocks ranked high on both value and momentum; avoid value traps with bad momentum.
+Main risks:
+- Combining factors can hide turnover and crowding.
+- Value and momentum can both fail in certain regime transitions.
+
+08. Piotroski (2000)
+Title: Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=249455
+Core idea:
+Among value stocks, simple accounting strength signals can separate healthier value names
+from value traps. The F-score uses profitability, leverage/liquidity, and operating efficiency.
+Implementation translation:
+- Build a 0-9 F-score using lagged financial statements.
+- Apply it mainly within cheap/value stocks.
+- Do not use it as a daily trading signal; update when new financial statements are available.
+Useful S&P 500 algorithms:
+- Long high book-to-market stocks with F-score >= 7.
+- Avoid or short low F-score value traps.
+- Combine F-score with recent momentum to require both cheapness and improving perception.
+Main risks:
+- S&P 500 firms are larger and more covered than the original strongest anomaly universe.
+- Financial data lags and restatements are critical.
+
+09. Sloan (1996)
+Title: Do Stock Prices Fully Reflect Information in Accruals and Cash Flows About Future Earnings?
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2598
+Core idea:
+Earnings backed by cash flows are more persistent than earnings driven by accruals.
+Investors may overprice high-accrual firms and underprice low-accrual firms.
+Implementation translation:
+- Feature: accruals_to_assets = accounting accruals / total assets.
+- Rank low accruals as better, high accruals as worse.
+- Combine with profitability and quality.
+Useful S&P 500 algorithms:
+- Long low-accrual profitable firms.
+- Short high-accrual firms with weak cash conversion.
+- Quality composite: gross profitability + low accruals + stable margins.
+Main risks:
+- Accrual definitions vary.
+- Signal has weakened in some later samples and may be arbitraged/crowded.
+
+10. Novy-Marx (2013)
+Title: The Other Side of Value: Good Growth and the Gross Profitability Premium
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1598056
+Core idea:
+Gross profits scaled by assets is a simple and powerful predictor of stock returns.
+Profitability complements value because profitable firms are often not the cheapest firms.
+Implementation translation:
+- Feature: gross_profitability = (revenue - cost_of_goods_sold) / total_assets.
+- Rank high gross profitability as better.
+- Combine with value to find reasonably priced quality.
+Useful S&P 500 algorithms:
+- Long high gross-profitability names with reasonable valuation.
+- Quality-value portfolio: high gross profitability + high earnings yield/free cash flow yield.
+- Avoid firms with low gross profitability even if cheap.
+Main risks:
+- Industry differences are large; consider sector/industry neutralization.
+- Needs clean, lagged fundamentals.
+
+11. Asness, Frazzini, and Pedersen / related AQR research
+Title: Quality Minus Junk
+Source: https://www.aqr.com/insights/research/working-paper/quality-minus-junk
+Core idea:
+Quality can be modeled as profitability, growth, safety, and payout. High-quality stocks have
+historically delivered attractive risk-adjusted returns relative to low-quality stocks.
+Implementation translation:
+- Features: profitability, earnings stability, balance-sheet safety, payout/shareholder yield,
+  low leverage, low volatility, low beta, low accruals.
+- Build a composite quality score.
+Useful S&P 500 algorithms:
+- Long top-quality S&P 500 names, sector-neutral.
+- Long quality-value: high quality but not expensive.
+- Short "junk": low quality + expensive + negative momentum, if shorting is feasible.
+Main risks:
+- Quality is a broad concept; avoid overfitting too many sub-signals.
+- Some quality definitions overlap with low volatility and profitability.
+
+12. Frazzini and Pedersen (2014)
+Title: Betting Against Beta
+Source: https://www.nber.org/papers/w16601
+Core idea:
+Leverage-constrained investors may overpay for high-beta stocks and underpay for low-beta
+stocks. A BAB-style factor is long low-beta assets and short high-beta assets, with leverage
+used to balance market exposure.
+Implementation translation:
+- Feature: rolling_beta_to_spy, e.g., 1-year or 2-year daily regression beta.
+- Rank low beta as attractive, high beta as unattractive.
+- For long-only, tilt toward low beta and scale exposure if desired.
+Useful S&P 500 algorithms:
+- Low-beta defensive basket with volatility target.
+- Long low-beta/high-quality stocks, short high-beta/low-quality stocks.
+- Market exposure timing: reduce gross exposure when cross-sectional beta dispersion spikes.
+Main risks:
+- Pure BAB requires leverage and financing assumptions.
+- Low-beta stocks can lag badly in speculative bull markets.
+
+13. Moreira and Muir (2017)
+Title: Volatility-Managed Portfolios
+Source: https://www.nber.org/papers/w22208
+Core idea:
+Reducing exposure when realized volatility is high can improve Sharpe ratios because factor
+volatility varies more than expected returns. This applies to market and factor portfolios.
+Implementation translation:
+- Feature: realized_volatility, e.g., trailing 21-day or 63-day daily realized volatility.
+- Exposure multiplier roughly inverse to variance or volatility, with caps/floors.
+- Apply to SPY exposure, momentum sleeve, value sleeve, or combined factor portfolio.
+Useful S&P 500 algorithms:
+- Vol-targeted SPY strategy.
+- Vol-targeted long/short factor sleeves.
+- Reduce exposure when realized volatility is above percentile threshold.
+Main risks:
+- Can whipsaw during volatility spikes and rebounds.
+- Vol targeting increases turnover and may miss rebounds after crashes.
+
+14. Barroso and Santa-Clara (2015)
+Title: Momentum Has Its Moments
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2041429
+Core idea:
+Momentum has attractive returns but severe crash risk. Momentum volatility is time-varying
+and predictable; scaling momentum by its recent risk can reduce crashes.
+Implementation translation:
+- Estimate recent volatility of the momentum portfolio or momentum factor.
+- Scale momentum exposure down when momentum risk is high.
+- Combine with market trend filters after baseline.
+Useful S&P 500 algorithms:
+- Risk-managed cross-sectional momentum.
+- Momentum sleeve with volatility cap and drawdown circuit breaker.
+- Long-only momentum strategy that moves partially to cash when momentum-vol is high.
+Main risks:
+- Volatility scaling parameter selection can be overfit.
+- Requires a stable definition of the momentum sleeve return.
+
+15. Moskowitz, Ooi, and Pedersen (2012)
+Title: Time Series Momentum
+Source: https://w4.stern.nyu.edu/facdir/lpederse/papers/TimeSeriesMomentum.pdf
+Core idea:
+Assets with positive own past returns tend to continue rising, and assets with negative own
+past returns tend to continue falling. For S&P 500 work, this is most directly useful as a
+market-level trend overlay.
+Implementation translation:
+- Feature: SPY/SPX 12-month excess return or price above moving average.
+- If trend positive, allow equity exposure; if trend negative, reduce exposure or hedge.
+Useful S&P 500 algorithms:
+- SPY trend-following overlay on top of stock-selection strategies.
+- Market regime filter: only run high-beta longs when SPY 12-month trend is positive.
+- Dynamic net exposure based on index trend.
+Main risks:
+- Trend filters can underperform in choppy sideways markets.
+- Must specify cash return and tax assumptions if realistic.
+
+16. Jegadeesh and Livnat (2006)
+Title: Post-Earnings-Announcement Drift: The Role of Revenue Surprises
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=903767
+Core idea:
+Post-earnings drift is stronger when earnings surprise and revenue surprise point in the
+same direction. Revenue-confirmed earnings beats are more credible than expense-only beats.
+Implementation translation:
+- Features: standardized earnings surprise, revenue surprise, announcement return.
+- Enter after announcement, not before.
+- Hold for 20-60 trading days or until next earnings event.
+Useful S&P 500 algorithms:
+- Long positive earnings surprise + positive revenue surprise.
+- Short negative earnings surprise + negative revenue surprise.
+- Filter by liquidity, analyst coverage, and gap size.
+Main risks:
+- Requires precise earnings announcement timestamps.
+- Strategy may decay after costs and in highly covered large-cap stocks.
+
+17. Amihud (2002)
+Title: Illiquidity and Stock Returns: Cross-Section and Time-Series Effects
+Source: https://w4.stern.nyu.edu/finance/docs/WP/2000/pdf/wpa00041.pdf
+Core idea:
+Illiquidity is related to expected returns. Less liquid stocks may earn compensation, but
+liquidity also determines implementation costs and capacity.
+Implementation translation:
+- Feature: amihud_illiquidity = average(abs(return) / dollar_volume)
+- In S&P 500, use liquidity mainly as a cost/capacity/risk filter.
+- Avoid high-turnover strategies in names with poor dollar volume or wide spreads.
+Useful S&P 500 algorithms:
+- Liquidity-aware factor portfolios: penalize signals with high expected slippage.
+- Capacity model: max position as fraction of ADV.
+- Liquidity stress regime detector.
+Main risks:
+- S&P 500 is liquid overall, so cross-sectional return premium may be muted.
+- Illiquidity can be a risk, not a free alpha source.
+
+18. Gatev, Goetzmann, and Rouwenhorst (2006)
+Title: Pairs Trading: Performance of a Relative-Value Arbitrage Rule
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1095996
+Core idea:
+Pairs trading buys one stock and shorts a historically similar stock when their price spread
+diverges, betting on convergence.
+Implementation translation:
+- Pair formation: match stocks by normalized price history correlation/distance, ideally
+  within sector/industry.
+- Trading signal: z-score of spread vs rolling mean.
+- Enter when spread z-score exceeds threshold; exit at mean or time stop.
+Useful S&P 500 algorithms:
+- Sector-constrained pairs trading among highly correlated S&P 500 stocks.
+- Cluster-based relative value: pair each stock with industry basket.
+- Long cheap spread leg, short rich spread leg, beta/sector neutral.
+Main risks:
+- Correlations break during regime shifts.
+- Shorting, borrow, and transaction costs can erase returns.
+- Price-distance pairs can be less stable than cointegration/factor residual methods.
+
+19. Avellaneda and Lee (2010)
+Title: Statistical Arbitrage in the U.S. Equities Market
+Source: https://traders.berkeley.edu/papers/Statistical%20arbitrage%20in%20the%20US%20equities%20market.pdf
+Core idea:
+Model-driven statistical arbitrage can use PCA or ETF/factor regressions to isolate residual
+returns, then trade mean reversion in residuals.
+Implementation translation:
+- Fit factor model: stock returns explained by market/sector ETFs or principal components.
+- Compute residual return series and residual z-scores.
+- Trade mean reversion in residuals while keeping factor exposure neutral.
+Useful S&P 500 algorithms:
+- PCA residual mean-reversion on S&P 500 stocks.
+- Sector ETF residual mean-reversion.
+- Combine residual z-score with liquidity and short-term reversal filters.
+Main risks:
+- Crowding and factor crashes.
+- Model instability and lookahead in PCA fitting.
+- High turnover and cost sensitivity.
+
+20. Gu, Kelly, and Xiu (2020)
+Title: Empirical Asset Pricing via Machine Learning
+Source: https://academic.oup.com/rfs/article/33/5/2223/5758276
+Core idea:
+Machine learning methods can improve return prediction when using many firm characteristics,
+especially because relations are nonlinear and interactive. Tree-based models and neural
+networks can outperform simple linear models in some settings.
+Implementation translation:
+- Build a point-in-time feature matrix with returns, fundamentals, momentum, volatility,
+  liquidity, and interactions.
+- Use walk-forward training only.
+- Predict cross-sectional next-period returns or ranks, then form portfolios from predictions.
+Useful S&P 500 algorithms:
+- Gradient-boosted rank model for 1-month returns.
+- ML ensemble using only pre-approved paper-derived factors.
+- Meta-model that combines value, quality, momentum, volatility, and event features.
+Main risks:
+- Severe overfitting risk.
+- Feature leakage is easy.
+- Model interpretability and transaction costs must be monitored.
+
+================================================================================
+STRATEGY PRIMITIVES TO IMPLEMENT BEFORE THE 10 BATCHES
+================================================================================
+
+Data primitives:
+- Point-in-time S&P 500 membership table: date, ticker, perm_id/vendor_id, add_date, remove_date.
+- Daily adjusted OHLCV and total returns.
+- Corporate actions: splits, dividends, ticker changes, mergers, delistings.
+- Quarterly/annual fundamentals with filing dates and availability dates.
+- Earnings announcement calendar with timestamps.
+- Optional: analyst estimates, option implied volatility/skew, short interest, borrow costs.
+
+Feature primitives:
+- Cross-sectional ranks and z-scores by date.
+- Sector/industry-neutral ranks.
+- Winsorization and missing-value handling.
+- Momentum: 12-1, 6-1, 3-1, 1-month reversal.
+- 52-week-high ratio.
+- Path smoothness / trend consistency.
+- Value: book-to-market, earnings yield, free cash flow yield, EBITDA/EV.
+- Quality: gross profitability, operating profitability, accruals, margins, leverage, stability.
+- Investment: asset growth, capex growth, issuance/buyback proxies.
+- Risk: beta, realized volatility, idiosyncratic volatility, drawdown, skew.
+- Liquidity: ADV, turnover, Amihud illiquidity, spread proxy.
+- Event: earnings surprise, revenue surprise, earnings gap, post-earnings drift window.
+- Residuals: market/sector/PCA residual returns and z-scores.
+
+Portfolio primitives:
+- Equal weight.
+- Value weight.
+- Inverse volatility weight.
+- Risk parity by sleeve.
+- Sector-neutral weighting.
+- Beta-neutral long/short.
+- Dollar-neutral long/short.
+- Long-only with cash fallback.
+- Volatility-targeted exposure.
+- Turnover-constrained optimizer.
+
+Execution/cost primitives:
+- One-day signal delay by default.
+- Slippage in basis points by liquidity bucket.
+- Spread proxy and participation cap.
+- Borrow cost for shorts.
+- Financing/cash rate.
+- Max position percent of ADV.
+- Max gross and net exposure.
+
+Result artifacts:
+- results/latest_summary.json
+- results/runs/{run_id}/summary.json
+- results/runs/{run_id}/equity_curve.parquet
+- results/runs/{run_id}/positions.parquet
+- results/runs/{run_id}/trades.parquet
+- results/runs/{run_id}/config.yaml
+
+Recommended summary JSON schema:
+{
+  "run_id": "string",
+  "strategy": "string",
+  "batch": "string",
+  "source_papers": ["string"],
+  "universe": "sp500_point_in_time",
+  "period": "YYYY-MM-DD:YYYY-MM-DD",
+  "rebalance": "daily|weekly|monthly|quarterly",
+  "long_short": true,
+  "gross_exposure": 1.0,
+  "net_exposure": 0.0,
+  "costs": {"slippage_bps": 2.0, "commission_bps": 0.0, "borrow_bps_annual": 50.0},
+  "cagr": 0.0,
+  "volatility": 0.0,
+  "sharpe": 0.0,
+  "sortino": 0.0,
+  "max_drawdown": 0.0,
+  "calmar": 0.0,
+  "spy_beta": 0.0,
+  "alpha_annualized": 0.0,
+  "turnover_annualized": 0.0,
+  "trade_count": 0,
+  "avg_holding_days": 0.0,
+  "capacity_estimate_usd": 0.0,
+  "notes": "string"
+}
+
+================================================================================
+10 BATCHES OF ALGORITHMS TO DEVELOP
+================================================================================
+
+BATCH 1: Baseline Momentum and Trend
+Primary papers:
+- Jegadeesh and Titman (1993)
+- Moskowitz, Ooi, and Pedersen (2012)
+- George and Hwang (2004)
+Objective:
+Create robust price-based baselines before touching fundamentals or ML.
+Algorithms:
+1. Cross-sectional 12-1 momentum: monthly rebalance, long top quintile, optional short bottom quintile.
+2. 52-week-high momentum: monthly rebalance, long top quintile by price/high ratio.
+3. SPY trend overlay: allow long exposure only when SPY 12-month trend is positive.
+4. Momentum + trend filter: run cross-sectional momentum only when market trend is positive.
+Implementation notes:
+- Start long-only first to avoid borrow complications.
+- Then test beta-neutral long/short.
+- Compare equal weight vs inverse-vol weight.
+Validation:
+- Check turnover, crash periods, sector concentration, and beta.
+- Require one-day execution lag.
+
+BATCH 2: Smooth Momentum and Crash-Managed Momentum
+Primary papers:
+- Da, Gurun, and Warachka (2014)
+- Barroso and Santa-Clara (2015)
+- Moreira and Muir (2017)
+Objective:
+Improve the baseline momentum strategy's drawdown and crash behavior.
+Algorithms:
+1. Smooth momentum: high 12-1 momentum plus high fraction of positive days.
+2. Jump-penalized momentum: penalize stocks where most momentum came from a few large daily returns.
+3. Volatility-scaled momentum sleeve: reduce exposure when trailing momentum-portfolio vol is high.
+4. Momentum with drawdown circuit breaker: reduce exposure after sleeve drawdown breach.
+Implementation notes:
+- Compute momentum sleeve daily returns to estimate sleeve volatility.
+- Cap exposure scaling to avoid extreme leverage.
+Validation:
+- Focus on 2009 momentum crash, 2020 rebound, and 2022 drawdowns.
+- Compare Sharpe and max drawdown to unscaled momentum.
+
+BATCH 3: Value, Contrarian, and Reversal
+Primary papers:
+- Fama and French (1993)
+- De Bondt and Thaler (1985)
+- Asness, Moskowitz, and Pedersen (2013)
+Objective:
+Build value and contrarian baselines, then combine them with momentum to avoid value traps.
+Algorithms:
+1. Large-cap value: rank by book-to-market and earnings yield.
+2. Long-term reversal: buy prior 3-year losers with improving 6-month momentum.
+3. Value + momentum composite: z(value) + z(momentum).
+4. Sector-neutral value: rank within sectors and allocate equal sector risk.
+Implementation notes:
+- Use point-in-time book equity and lag fundamentals.
+- Treat negative book equity and financial-sector accounting carefully.
+Validation:
+- Watch 1999-2000, 2007-2009, 2017-2021 value drought, and 2022 value rebound.
+
+BATCH 4: Quality and Fundamental Strength
+Primary papers:
+- Piotroski (2000)
+- Novy-Marx (2013)
+- Quality Minus Junk
+- Sloan (1996)
+Objective:
+Create robust accounting-based quality strategies.
+Algorithms:
+1. Gross profitability rank: long high gross-profit/assets.
+2. Low accruals quality: long low accruals, short high accruals if feasible.
+3. Piotroski value quality: among cheap stocks, buy high F-score.
+4. Composite quality: profitability + safety + low accruals + payout/shareholder yield.
+Implementation notes:
+- Quarterly/annual update cadence only.
+- Use filing date plus lag if exact availability date is unknown.
+- Sector-neutralize gross profitability because industry structures differ.
+Validation:
+- Compare quality-only, value-only, and quality-value composite.
+- Track factor exposures to low beta and profitability.
+
+BATCH 5: Profitability, Investment, and Multi-Factor Asset Pricing
+Primary papers:
+- Fama and French (2015)
+- Hou/Xue/Zhang can be used later as an optional extension, but this batch is anchored on FF5.
+- Novy-Marx (2013)
+Objective:
+Build an interpretable multi-factor model with profitability and investment discipline.
+Algorithms:
+1. Robust profitability + conservative investment long portfolio.
+2. Avoid aggressive investment: underweight high asset-growth firms with weak profitability.
+3. FF5 composite: value + profitability + conservative investment + low beta + momentum.
+4. Factor-neutral alpha: residualize candidate scores against standard factor exposures.
+Implementation notes:
+- Asset growth and investment rate are slow-moving; monthly/quarterly rebalance is enough.
+- Use standardized ranks by sector.
+Validation:
+- Check whether alpha survives controlling for value, momentum, beta, and sector.
+
+BATCH 6: Low-Beta, Defensive, and Volatility-Managed Exposure
+Primary papers:
+- Frazzini and Pedersen (2014)
+- Moreira and Muir (2017)
+- Quality Minus Junk
+Objective:
+Build defensive strategies with lower drawdown and smoother exposure.
+Algorithms:
+1. Low-beta quality: long low-beta, high-quality names.
+2. BAB-inspired long/short: long low-beta, short high-beta, beta-neutral if feasible.
+3. Vol-managed SPY overlay: scale SPY exposure by trailing realized volatility.
+4. Defensive factor blend: quality + low beta + low idiosyncratic volatility.
+Implementation notes:
+- Estimate beta with rolling daily returns; test 1-year and 2-year windows.
+- Do not use unlimited leverage. Set exposure caps.
+Validation:
+- Compare lower drawdown vs lower CAGR tradeoff.
+- Stress test speculative bull markets where low beta lags.
+
+BATCH 7: Earnings Drift and Event Signals
+Primary papers:
+- Jegadeesh and Livnat (2006)
+- Sloan (1996)
+- Piotroski (2000)
+Objective:
+Build event-driven strategies around earnings announcements and post-announcement drift.
+Algorithms:
+1. Revenue-confirmed earnings drift: long positive EPS surprise + positive revenue surprise.
+2. Negative drift: short/avoid negative EPS surprise + negative revenue surprise.
+3. Earnings gap continuation: use announcement return as signal after event close.
+4. Fundamental confirmation: only trade PEAD when quality/accruals agree with surprise.
+Implementation notes:
+- Earnings timestamps are essential. Do not trade before information was public.
+- Use next open/close after announcement depending on timestamp.
+Validation:
+- Report pre-cost and post-cost returns.
+- Split by mega-cap vs smaller S&P 500 names; PEAD may be weaker in mega-caps.
+
+BATCH 8: Liquidity-Aware Short-Term Reversal and Execution-Constrained Alpha
+Primary papers:
+- Amihud (2002)
+- Avellaneda and Lee (2010)
+- Gatev, Goetzmann, and Rouwenhorst (2006)
+Objective:
+Build fast mean-reversion strategies while modeling liquidity and costs honestly.
+Algorithms:
+1. 1-week reversal among liquid S&P 500 names, sector-neutral.
+2. Residual short-term reversal after removing market and sector returns.
+3. Liquidity-filtered reversal: trade only names with low estimated slippage.
+4. Turnover-constrained reversal: optimizer penalizes excessive turnover.
+Implementation notes:
+- This batch is cost-sensitive. Assume pessimistic slippage first.
+- Use participation caps and skip illiquid names.
+Validation:
+- Run sensitivity table across slippage assumptions.
+- Require positive results after costs, not just before costs.
+
+BATCH 9: Relative Value, Pairs, and PCA Statistical Arbitrage
+Primary papers:
+- Gatev, Goetzmann, and Rouwenhorst (2006)
+- Avellaneda and Lee (2010)
+Objective:
+Develop market/sector-neutral relative value strategies.
+Algorithms:
+1. Classic distance pairs: pair stocks within sectors by normalized price history distance.
+2. Cointegration pairs: test stable pairs and trade z-score deviations.
+3. Sector ETF residual mean reversion: regress each stock on SPY + sector ETF, trade residual z-score.
+4. PCA residual mean reversion: fit PCA on rolling window, trade residual extremes.
+Implementation notes:
+- Fit pairs/PCA only using historical windows.
+- Refit on schedule; do not use full-sample PCA.
+- Enforce sector, beta, and dollar neutrality.
+Validation:
+- Monitor factor exposure, pair breakage, stop-loss frequency, and cost sensitivity.
+
+BATCH 10: Machine Learning Meta-Model and Ensemble Portfolio
+Primary papers:
+- Gu, Kelly, and Xiu (2020)
+- Asness, Moskowitz, and Pedersen (2013)
+- Fama and French (2015)
+Objective:
+Use ML only after interpretable factors are implemented and tested.
+Algorithms:
+1. Gradient-boosted rank model using paper-derived features only.
+2. Regularized linear model baseline: elastic net on standardized features.
+3. ML ensemble: combine value, momentum, quality, risk, liquidity, and event features.
+4. Meta-allocator: choose weights across already-built strategy sleeves using walk-forward data.
+Implementation notes:
+- Use expanding or rolling walk-forward training.
+- Predictions should be ranks or expected returns for next month.
+- Feature availability dates must be enforced.
+- Log every model version, feature set, and parameter grid.
+Validation:
+- Compare ML against simple equal-weight factor ensemble.
+- Require explainability: feature importance, monotonic sanity checks, and factor exposure report.
+- Evaluate turnover and degradation under higher costs.

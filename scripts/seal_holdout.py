@@ -48,7 +48,8 @@ logger = logging.getLogger(__name__)
 #   - 2025-2026: whatever happens
 HOLDOUT_START = date(2023, 1, 1)
 
-SYMBOLS = ["SPY", "TLT", "GLD", "SHY", "IEF", "LQD", "HYG", "DBC", "VNQ"]
+SYMBOLS = ["SPY", "TLT", "GLD", "SHY", "IEF", "LQD", "HYG", "DBC", "VNQ",
+           "IVE", "IVW", "IWM", "QQQ", "XLP", "XLU"]
 
 
 def seal_one(symbol: str, force: bool = False) -> dict:

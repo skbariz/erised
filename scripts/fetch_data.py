@@ -34,6 +34,13 @@ SYMBOLS = {
     "HYG": "2007-01-01",  # High Yield bonds; inception 2007-04-11 — credit risk
     "DBC": "2006-01-01",  # Commodities index; inception 2006-02-06 — inflation hedge
     "VNQ": "2004-01-01",  # REIT index; inception 2004-09-23 — real estate
+    # Batch 12 additions — equity factor ETFs
+    "IVE": "2000-01-01",  # iShares S&P 500 Value; inception 2000-05-22
+    "IVW": "2000-01-01",  # iShares S&P 500 Growth; inception 2000-05-22
+    "IWM": "2000-01-01",  # iShares Russell 2000 (small cap); inception 2000-05-22
+    "QQQ": "1999-01-01",  # Invesco Nasdaq-100 (growth/tech); inception 1999-03-10
+    "XLP": "1998-01-01",  # SPDR Consumer Staples; inception 1998-12-16
+    "XLU": "1998-01-01",  # SPDR Utilities; inception 1998-12-16
 }
 
 

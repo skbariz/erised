@@ -2259,4 +2259,229 @@ class EqualWeightDefensiveFactor(MultiAssetStrategy):
                 for asset in active:
                     weights.at[idx, asset] = w
 
-        return weights
+
+# ---------------------------------------------------------------------------
+# Batch 13 — H066–H070: Volatility Regime Advanced
+# ---------------------------------------------------------------------------
+
+
+class VixRiskParityEnhanced(MultiAssetStrategy):
+    """H066: H021 RiskParity with VIX spike override.
+
+    Normal: inverse-vol weights for SPY and TLT (identical to H021).
+    Crisis: when VIX > vix_spike, override to 80% TLT / 20% SPY.
+    Recovery: resume normal risk parity when VIX < vix_resume (hysteresis).
+    """
+
+    name = "vix_risk_parity_enhanced"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        vix_spike: float = 35.0,
+        vix_resume: float = 30.0,
+        crisis_tlt: float = 0.80,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.vix_spike = vix_spike
+        self.vix_resume = vix_resume
+        self.crisis_tlt = crisis_tlt
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_rp = (inv_spy / total).fillna(0.0)
+        w_tlt_rp = (inv_tlt / total).fillna(0.0)
+
+        vix = prices["vix_close"].shift(1)
+        w_spy = w_spy_rp.copy()
+        w_tlt = w_tlt_rp.copy()
+
+        # Hysteresis loop: crisis when VIX > spike, resume when VIX < resume
+        in_crisis = False
+        for i in range(len(prices)):
+            v = vix.iloc[i]
+            if np.isnan(v):
+                continue
+            if not in_crisis and v > self.vix_spike:
+                in_crisis = True
+            elif in_crisis and v < self.vix_resume:
+                in_crisis = False
+            if in_crisis:
+                w_spy.iloc[i] = 1.0 - self.crisis_tlt
+                w_tlt.iloc[i] = self.crisis_tlt
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class VixPercentileRegime(Strategy):
+    """H067: Expanding-quantile adaptive VIX threshold.
+
+    Long SPY when the current VIX is below its expanding (33rd percentile)
+    percentile of all historical VIX readings to date. Adapts to the
+    prevailing volatility regime unlike H029's fixed 20 threshold.
+    """
+
+    def __init__(self, quantile: float = 0.33) -> None:
+        self.quantile = quantile
+        self.name = f"vix_percentile_{int(quantile * 100)}"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VixPercentileRegime requires 'vix_close' column")
+        vix = prices["vix_close"]
+        # Expanding quantile of past VIX values; shift 1 to avoid lookahead
+        vix_thresh = vix.expanding(min_periods=63).quantile(self.quantile).shift(1)
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        valid = vix_thresh.notna()
+        pos[valid & (vix.shift(1) < vix_thresh)] = 1.0
+        return pos
+
+
+class VrpCalendarHybrid(Strategy):
+    """H068: Volatility Risk Premium (H031) gated by Nov-Apr calendar (H043).
+
+    Long SPY only when BOTH the VRP signal fires (VIX > realized vol) AND
+    the date falls in the seasonally favorable Nov-Apr window. The calendar
+    gate forces the strategy flat May-Oct, reducing H001 correlation.
+    """
+
+    def __init__(
+        self,
+        realized_window: int = 20,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+    ) -> None:
+        self.realized_window = realized_window
+        self.favorable_months = frozenset(favorable_months)
+        self.name = f"vrp_calendar_{realized_window}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VrpCalendarHybrid requires 'vix_close' column")
+        rets = prices["adj_close"].pct_change()
+        realized_vol = (
+            rets.rolling(self.realized_window, min_periods=self.realized_window).std().shift(1)
+            * np.sqrt(252)
+            * 100
+        )
+        vix = prices["vix_close"].shift(1)
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        vrp_signal = (vix > realized_vol) & realized_vol.notna() & vix.notna()
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        pos[vrp_signal & (in_season == 1.0)] = 1.0
+        return pos
+
+
+class VixTermStructureProxy(Strategy):
+    """H069: VIX term structure proxy via VIX/VIX_63d_MA ratio.
+
+    When VIX is depressed vs. its 63d average (ratio < 0.85), the term
+    structure is contango-like (calm) → long SPY.
+    When VIX is elevated vs. its average (ratio > 1.15), the term structure
+    resembles backwardation (crisis) → flat.
+    Between thresholds, hold the prior position (hysteresis).
+    """
+
+    def __init__(
+        self,
+        ma_days: int = 63,
+        contango_thresh: float = 0.85,
+        backwardation_thresh: float = 1.15,
+    ) -> None:
+        self.ma_days = ma_days
+        self.contango_thresh = contango_thresh
+        self.backwardation_thresh = backwardation_thresh
+        self.name = (
+            f"vix_term_{ma_days}d_{int(contango_thresh * 100)}_{int(backwardation_thresh * 100)}"
+        )
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "vix_close" not in prices.columns:
+            raise ValueError("VixTermStructureProxy requires 'vix_close' column")
+        vix = prices["vix_close"]
+        vix_ma = vix.rolling(self.ma_days, min_periods=self.ma_days).mean().shift(1)
+        vix_lagged = vix.shift(1)
+        ratio = vix_lagged / vix_ma.replace(0, np.nan)
+
+        pos_arr = np.zeros(len(prices))
+        current = 0.0
+        for i in range(len(prices)):
+            r = ratio.iloc[i]
+            if np.isnan(r):
+                pos_arr[i] = 0.0
+                continue
+            if r < self.contango_thresh:
+                current = 1.0
+            elif r > self.backwardation_thresh:
+                current = 0.0
+            # else: hold prior
+            pos_arr[i] = current
+
+        return pd.Series(pos_arr, index=prices.index, name="position")
+
+
+class MultiAssetDynamicVolTarget(MultiAssetStrategy):
+    """H070: H021 risk-parity allocation scaled by portfolio-level vol targeting.
+
+    Two-layer risk management: H021 sets the SPY/TLT mix via inverse-vol
+    weights (asset-level risk parity). A second layer then scales the TOTAL
+    portfolio exposure down when 20d realized portfolio vol exceeds vol_target.
+    Exposure is capped at 1.0 (no leverage).
+    """
+
+    name = "multi_asset_dynamic_vol_target"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        port_vol_lookback: int = 20,
+        vol_target: float = 0.10,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.port_vol_lookback = port_vol_lookback
+        self.vol_target = vol_target
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        # H021-style inverse-vol weights
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy = (inv_spy / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        # Portfolio realized returns using prior-day weights (shift 1 to avoid lookahead)
+        port_r = w_spy.shift(1) * spy_r + w_tlt.shift(1) * tlt_r
+        port_vol = port_r.rolling(
+            self.port_vol_lookback, min_periods=self.port_vol_lookback
+        ).std().shift(1) * np.sqrt(252)
+
+        # Scale total exposure; cap at 1.0
+        scale = (self.vol_target / port_vol).clip(upper=1.0)
+        scale = scale.where(port_vol.notna() & (port_vol > 0), 1.0)
+
+        w_spy_scaled = w_spy * scale
+        w_tlt_scaled = w_tlt * scale
+
+        return pd.DataFrame({"SPY": w_spy_scaled, "TLT": w_tlt_scaled}, index=prices.index)

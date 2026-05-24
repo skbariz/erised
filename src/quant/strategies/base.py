@@ -2679,3 +2679,256 @@ class EarningsSeasonDrift(Strategy):
         pos = in_earnings * in_window
         pos.name = "position"
         return pos
+
+
+# ---------------------------------------------------------------------------
+# Batch 15 — H076–H080: Multi-Asset Risk Parity Extensions
+# ---------------------------------------------------------------------------
+
+
+class FourAssetRiskParity(MultiAssetStrategy):
+    """H076: SPY+TLT+GLD+DBC inverse-vol risk parity (full macro quadrant).
+
+    SPY (growth), TLT (deflation), GLD (stagflation/fear), DBC (inflation).
+    Weights each available asset by inverse realized vol, normalized to 1.
+    Gracefully degrades to fewer assets when data unavailable.
+    """
+
+    name = "four_asset_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {
+            "SPY": "adj_close",
+            "TLT": "tlt_close",
+            "GLD": "gld_close",
+            "DBC": "dbc_close",
+        }
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        vols: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            r = prices[col].pct_change()
+            vols[asset] = r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+                1
+            ) * np.sqrt(252)
+
+        inv_vols = {a: (1.0 / v.replace(0, np.nan)) for a, v in vols.items()}
+        total = sum(inv_vols.values())
+        weights = pd.DataFrame(index=prices.index, columns=list(available.keys()), dtype=float)
+        for asset in available:
+            weights[asset] = (inv_vols[asset] / total).fillna(0.0)
+
+        return weights
+
+
+class RiskParityMomentumFilter(MultiAssetStrategy):
+    """H077: H021 risk parity with per-asset 6m momentum filter.
+
+    Each asset's weight is zeroed if its 6m return is negative; the freed
+    risk budget is reallocated to remaining positive-momentum assets.
+    If all assets have negative 6m momentum, goes to cash (all weights zero).
+    """
+
+    name = "risk_parity_momentum_filter"
+
+    def __init__(self, vol_lookback: int = 60, mom_days: int = 126) -> None:
+        self.vol_lookback = vol_lookback
+        self.mom_days = mom_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        spy_mom = prices["adj_close"].shift(1) / prices["adj_close"].shift(1 + self.mom_days) - 1
+        tlt_mom = prices["tlt_close"].shift(1) / prices["tlt_close"].shift(1 + self.mom_days) - 1
+
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+
+        # Zero out assets with negative or unavailable momentum
+        spy_ok = (spy_mom > 0) & spy_mom.notna()
+        tlt_ok = (tlt_mom > 0) & tlt_mom.notna()
+        inv_spy_filtered = inv_spy.where(spy_ok, 0.0)
+        inv_tlt_filtered = inv_tlt.where(tlt_ok, 0.0)
+
+        total = inv_spy_filtered + inv_tlt_filtered
+        w_spy = (inv_spy_filtered / total.replace(0, np.nan)).fillna(0.0)
+        w_tlt = (inv_tlt_filtered / total.replace(0, np.nan)).fillna(0.0)
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class SeasonalRiskParity(MultiAssetStrategy):
+    """H078: H021 risk parity Nov-Apr; 100% TLT May-Oct.
+
+    Combines H021's asset allocation with H043's seasonal insight.
+    In the favorable seasonal window (Nov-Apr), standard inverse-vol
+    weighting between SPY and TLT. In the unfavorable window (May-Oct),
+    full defensive rotation into TLT — no cash drag, no equity exposure.
+    """
+
+    name = "seasonal_risk_parity"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.favorable_months = frozenset(favorable_months)
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_rp = (inv_spy / total).fillna(0.0)
+        w_tlt_rp = (inv_tlt / total).fillna(0.0)
+
+        in_season = pd.Series(prices.index.month.isin(self.favorable_months), index=prices.index)
+        # May-Oct: 100% TLT (when TLT data available)
+        tlt_avail = tlt_vol.notna()
+        w_spy = w_spy_rp.where(in_season, 0.0)
+        w_tlt = w_tlt_rp.where(in_season, tlt_avail.astype(float))
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class CrisisProtocolRiskParity(MultiAssetStrategy):
+    """H079: H021 risk parity with VIX+drawdown emergency override.
+
+    Normal: inverse-vol weights (identical to H021).
+    Crisis: when SPY drawdown from 20d high < crisis_dd AND VIX > vix_spike,
+    override to crisis_tlt% TLT + (1-crisis_tlt)% SPY.
+    Resume normal when drawdown recovers past resume_dd AND VIX < vix_resume.
+    Uses hysteresis to prevent rapid toggling.
+    """
+
+    name = "crisis_protocol_risk_parity"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        drawdown_window: int = 20,
+        crisis_dd: float = -0.10,
+        resume_dd: float = -0.07,
+        vix_spike: float = 35.0,
+        vix_resume: float = 30.0,
+        crisis_tlt: float = 0.90,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.drawdown_window = drawdown_window
+        self.crisis_dd = crisis_dd
+        self.resume_dd = resume_dd
+        self.vix_spike = vix_spike
+        self.vix_resume = vix_resume
+        self.crisis_tlt = crisis_tlt
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy_rp = (inv_spy / total).fillna(0.0)
+        w_tlt_rp = (inv_tlt / total).fillna(0.0)
+
+        # SPY drawdown from rolling high (shift 1 to avoid lookahead)
+        spy_px = prices["adj_close"].shift(1)
+        rolling_high = spy_px.rolling(self.drawdown_window, min_periods=1).max()
+        drawdown = (spy_px / rolling_high - 1).fillna(0.0)
+        vix = prices["vix_close"].shift(1)
+
+        w_spy = w_spy_rp.copy()
+        w_tlt = w_tlt_rp.copy()
+
+        in_crisis = False
+        for i in range(len(prices)):
+            dd = drawdown.iloc[i]
+            v = vix.iloc[i] if not np.isnan(vix.iloc[i]) else 0.0
+            if not in_crisis and dd < self.crisis_dd and v > self.vix_spike:
+                in_crisis = True
+            elif in_crisis and dd > self.resume_dd and v < self.vix_resume:
+                in_crisis = False
+            if in_crisis:
+                w_spy.iloc[i] = 1.0 - self.crisis_tlt
+                w_tlt.iloc[i] = self.crisis_tlt
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+class RiskParityYieldCurveOverlay(MultiAssetStrategy):
+    """H080: H021 risk parity with yield-curve inversion overlay.
+
+    Normal: H021 standard inverse-vol weights.
+    Curve inverted (SHY curve_days return > TLT curve_days return):
+    multiply SPY weight by spy_scale (0.50) and redistribute freed weight
+    to TLT. Adds macro recession awareness on top of vol-based allocation.
+    """
+
+    name = "risk_parity_yield_curve_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        curve_days: int = 63,
+        spy_scale: float = 0.50,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.curve_days = curve_days
+        self.spy_scale = spy_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_spy + inv_tlt
+        w_spy = (inv_spy / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt_px = prices["tlt_close"]
+        shy_ret = shy.shift(1) / shy.shift(1 + self.curve_days) - 1
+        tlt_ret = tlt_px.shift(1) / tlt_px.shift(1 + self.curve_days) - 1
+        inverted = (shy_ret > tlt_ret) & shy_ret.notna() & tlt_ret.notna()
+
+        # When inverted: scale SPY weight down, redistribute to TLT
+        spy_cut = w_spy * (1.0 - self.spy_scale)
+        w_spy_adj = w_spy.where(~inverted, w_spy - spy_cut)
+        w_tlt_adj = w_tlt.where(~inverted, w_tlt + spy_cut)
+
+        return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_adj}, index=prices.index)

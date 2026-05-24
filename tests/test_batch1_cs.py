@@ -113,6 +113,18 @@ def test_h150_no_lookahead(synthetic_panel):
     pd.testing.assert_series_equal(w_full.loc[date], w_trunc.loc[date], check_names=False)
 
 
+def test_h150_monthly_rebalance_stable_intramonth(synthetic_panel):
+    panel, membership = synthetic_panel
+    strat = MomentumLongOnly(long_days=60, skip_days=5, monthly_rebalance=True)
+    weights = strat.generate_weights(panel, membership)
+    # Within any single calendar month, all rows must have identical weights
+    months = weights.index.to_series().dt.to_period("M")
+    for _month, grp in weights.groupby(months):
+        first_row = grp.iloc[0]
+        for _, row in grp.iterrows():
+            pd.testing.assert_series_equal(row, first_row, check_names=False)
+
+
 # ---------------------------------------------------------------------------
 # H151: MomentumMarketNeutral
 # ---------------------------------------------------------------------------

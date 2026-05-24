@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H063",
+  "name": "defensive-sector-overlay",
+  "strategy_class": "DefensiveSectorOverlay",
+  "family": "equity factor",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.5772,
+  "ci_low": 0.1696,
+  "ci_high": 0.9717,
+  "cagr": 0.0839,
+  "max_drawdown": -0.3966,
+  "n_trades": 277,
+  "h001_corr": 0.7519,
+  "fold_sharpes": [
+    0.768,
+    0.153,
+    0.033,
+    0.605,
+    0.151,
+    0.147,
+    0.851,
+    1.476,
+    0.63,
+    2.509,
+    0.379,
+    0.657
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SPY uptrend+VIX calm\u2192100% SPY; uptrend+VIX stressed\u219250/50; downtrend\u2192100% XLP.",
+  "canonical_params": {
+    "spy_ma": 200,
+    "vix_thresh": 25
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

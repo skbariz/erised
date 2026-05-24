@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H061",
+  "name": "value-growth-rotation",
+  "strategy_class": "ValueGrowthRotation",
+  "family": "equity factor",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4702,
+  "ci_low": 0.0453,
+  "ci_high": 0.8503,
+  "cagr": 0.077,
+  "max_drawdown": -0.5845,
+  "n_trades": 136,
+  "h001_corr": 0.6876,
+  "fold_sharpes": [
+    0.935,
+    -0.307,
+    0.094,
+    0.524,
+    0.337,
+    -0.017,
+    0.811,
+    1.447,
+    0.378,
+    2.57,
+    0.566,
+    0.561
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "IVW in growth regime (curve steep+SPY up); IVE in inversion; SPY otherwise.",
+  "canonical_params": {
+    "mom_days": 63,
+    "spy_ma": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

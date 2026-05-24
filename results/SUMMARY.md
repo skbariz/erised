@@ -72,6 +72,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | 058 | Inverted curve treasury ladder | multi-asset rotation | killed | 0.400 | [−0.015, 0.796] | 5.34% | −56.56% | +0.469 | CI clips zero; MaxDD worse than SPY; ladder to TLT+IEF doesn't protect |
 | 059 | Macro fear composite (4-signal) | cross-asset macro | killed | 0.321 | [−0.078, 0.723] | 2.56% | −47.79% | +0.547 | CI contains zero; composite noise outweighs signal aggregation benefit |
 | 060 | Carry+momentum SPY/TLT | multi-asset rotation | **kept** | **0.531** | **[0.137, 0.934]** | 5.21% | −23.37% | **+0.294** | **First kept strategy below +0.30 H001 corr; 126d lookback gives 0.632** |
+| 061 | Value/growth rotation (IVW/IVE) | equity factor | killed | 0.470 | [0.045, 0.850] | 7.70% | −58.45% | +0.688 | Sharpe below benchmark; MaxDD worse than SPY; curve regime signal too coarse |
+| 062 | Small-cap cyclical (IWM) | equity factor | killed | 0.494 | [0.066, 0.882] | 8.36% | −56.78% | +0.696 | Sharpe 0.494 just misses 0.51; credit+momentum filters still mostly SPY-correlated |
+| 063 | Defensive sector overlay (XLP) | equity factor | **kept** | **0.577** | **[0.170, 0.972]** | 8.39% | −39.66% | +0.752 | VIX+SPY-MA regime overlay; MaxDD -39.66% significant improvement; robust across params |
+| 064 | Tech/defensive momentum (QQQ/XLU) | equity factor | killed | 0.406 | [−0.006, 0.800] | 6.05% | −45.59% | +0.640 | CI clips zero; canonical 252d lookback only N=10 trades; 126d gives 0.641 [0.270, 1.014] |
+| 065 | Equal-weight defensive factor | equity factor | **kept** | **0.554** | **[0.136, 0.948]** | 8.19% | −49.19% | +0.671 | Static 25/25/25/25 SPY+XLP+XLU+IVE; no timing; N=3 trades (buy-and-hold) |
 
 ---
 
@@ -81,8 +86,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 60 | **60** | in progress (Batch 11 complete) |
-| Strategies kept (ensemble) | 21 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060 + H048/H049/H050) | H049 is the target ensemble; H060 first kept with H001 corr < +0.30 |
+| Strategies tested ≥ 60 | **65** | Batch 12 complete |
+| Strategies kept (ensemble) | 23 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065 + H048/H049/H050) | H049 is the target ensemble; equity factor batch adds H063/H065 |
 
 ---
 

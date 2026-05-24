@@ -1,0 +1,38 @@
+{
+  "hypothesis": "H065",
+  "name": "equal-weight-defensive-factor",
+  "strategy_class": "EqualWeightDefensiveFactor",
+  "family": "equity factor",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.5539,
+  "ci_low": 0.1364,
+  "ci_high": 0.9479,
+  "cagr": 0.0819,
+  "max_drawdown": -0.4919,
+  "n_trades": 3,
+  "h001_corr": 0.6711,
+  "fold_sharpes": [
+    0.584,
+    0.084,
+    0.103,
+    1.153,
+    0.654,
+    -0.077,
+    0.787,
+    1.458,
+    0.691,
+    2.106,
+    1.028,
+    0.567
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Static 25/25/25/25 SPY+XLP+XLU+IVE. No timing. Pure factor quality tilt.",
+  "canonical_params": {},
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

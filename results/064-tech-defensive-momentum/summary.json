@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H064",
+  "name": "tech-defensive-momentum",
+  "strategy_class": "TechDefensiveMomentum",
+  "family": "equity factor",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.406,
+  "ci_low": -0.0063,
+  "ci_high": 0.8002,
+  "cagr": 0.0605,
+  "max_drawdown": -0.4559,
+  "n_trades": 10,
+  "h001_corr": 0.6403,
+  "fold_sharpes": [
+    0.0,
+    -0.596,
+    0.91,
+    0.803,
+    -0.193,
+    -0.174,
+    0.691,
+    0.804,
+    0.745,
+    1.567,
+    0.559,
+    0.889
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "12-1m momentum rotation: QQQ (tech) vs XLU (utilities); SPY when both negative.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H081",
+  "name": "dual-frequency-momentum",
+  "strategy_class": "DualFrequencyMomentum",
+  "family": "momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.2376,
+  "ci_low": -0.1641,
+  "ci_high": 0.6378,
+  "cagr": 0.0178,
+  "max_drawdown": -0.2461,
+  "n_trades": 506,
+  "h001_corr": 0.5523,
+  "fold_sharpes": [
+    0.091,
+    -0.575,
+    0.792,
+    0.545,
+    -0.407,
+    -0.328,
+    0.057,
+    1.155,
+    0.23,
+    1.28,
+    0.063,
+    0.438
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when both 12-1m (trend) AND 1m (short-term) momentum positive. Avoids pullback entries.",
+  "canonical_params": {
+    "mom_long": 252,
+    "mom_skip": 21,
+    "mom_short": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

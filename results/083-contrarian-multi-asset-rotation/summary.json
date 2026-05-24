@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H083",
+  "name": "contrarian-multi-asset-rotation",
+  "strategy_class": "ContrarianMultiAssetRotation",
+  "family": "momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.3257,
+  "ci_low": -0.0713,
+  "ci_high": 0.7437,
+  "cagr": 0.0261,
+  "max_drawdown": -0.2866,
+  "n_trades": 172,
+  "h001_corr": 0.0732,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.408,
+    0.842,
+    0.41,
+    0.508,
+    1.257,
+    0.089,
+    -1.413,
+    0.625,
+    0.686,
+    -0.168
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long worst 12m performer (SPY/TLT/GLD) only when 3m reversal confirms. De Bondt-Thaler applied to ETFs.",
+  "canonical_params": {
+    "mom_days": 252,
+    "skip_days": 21,
+    "confirm_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

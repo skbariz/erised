@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H084",
+  "name": "momentum-carry-blend",
+  "strategy_class": "MomentumCarryBlend",
+  "family": "momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.5481,
+  "ci_low": 0.1396,
+  "ci_high": 0.9414,
+  "cagr": 0.0615,
+  "max_drawdown": -0.2943,
+  "n_trades": 315,
+  "h001_corr": 0.3374,
+  "fold_sharpes": [
+    0.935,
+    0.07,
+    0.909,
+    0.82,
+    0.891,
+    -0.058,
+    0.783,
+    1.073,
+    0.272,
+    0.578,
+    0.446,
+    0.607
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "50% top 12-1m momentum (SPY/TLT/GLD) + 50% carry (TLT>SHY\u2192TLT, else SPY). Blends trend and income signals.",
+  "canonical_params": {
+    "blend": 0.5,
+    "mom_days": 252,
+    "carry_days": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

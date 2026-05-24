@@ -92,6 +92,11 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | **078** | **Seasonal risk parity** | **calendar** | **kept ★★** | **0.762** | **[0.360, 1.161]** | 7.55% | −20.66% | **+0.008** | **Program record H001 corr +0.008**; H021 Nov-Apr + 100% TLT May-Oct |
 | **079** | **Crisis protocol risk parity** | **multi-asset** | **kept** | **0.952** | **[0.554, 1.350]** | 7.71% | −21.18% | +0.254 | H021 + drawdown+VIX hysteresis override to 90/10 TLT/SPY in crises |
 | **080** | **Risk parity yield curve overlay** | **multi-asset** | **kept** | **0.891** | **[0.472, 1.295]** | 6.99% | −22.58% | +0.257 | H021 + SHY>TLT inversion cuts SPY weight by 50%; spy_scale=0.75 gives 0.975 |
+| 081 | Dual-frequency momentum | momentum | killed | 0.238 | [−0.164, 0.638] | 1.78% | −24.61% | +0.552 | CI negative lower; 1m filter adds whipsaw vs H007; mom_short=42 gives 0.567 but post-OOS |
+| **082** | **Risk-adjusted momentum** | **momentum** | **kept** | **0.616** | **[0.217, 1.013]** | 9.10% | −38.33% | +0.475 | Highest risk-adj score (return/vol) wins SPY/TLT/GLD; MaxDD high but Sharpe/CI pass |
+| 083 | Contrarian multi-asset rotation | momentum | killed | 0.326 | [−0.071, 0.744] | 2.61% | −28.66% | **+0.073** | CI clips zero; H001 corr +0.073 (2nd lowest for kept class); fold 8 kills: −1.413 |
+| **084** | **Momentum + carry blend** | **momentum** | **kept** | **0.548** | **[0.140, 0.941]** | 6.15% | −29.43% | +0.337 | 50% top 12-1m momentum + 50% TLT carry (TLT>SHY return); stable across blends |
+| 085 | Momentum + macro gate | momentum | killed | 0.445 | [0.044, 0.855] | 6.24% | −41.59% | +0.364 | Sharpe below SPY benchmark; yield curve gate forces TLT at wrong times; MaxDD poor |
 
 ---
 
@@ -101,8 +106,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | **1.066 (H070)** / **1.03 (H021)** / **0.959 (H049 ensemble)** | **MET ★** |
 | Max DD < SPY (−55.92%) | **−10.11% (H043)** / **−12.28% (H070)** / **−18.26% (H049 ensemble)** | **met** |
-| Strategies tested ≥ 80 | **80** | Batch 15 complete (5/5 kept — multi-asset RP extensions all pass) |
-| Strategies kept (ensemble) | 32 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080 + H048/H049/H050) | H078 sets new H001 corr record (+0.008) |
+| Strategies tested ≥ 85 | **85** | Batch 16 complete (2/5 kept — momentum family harder than multi-asset RP) |
+| Strategies kept (ensemble) | 34 (H001/H007/H008/H016/H018/H019/H021/H022/H023/H025/H027/H031/H034/H035/H043/H046/H051/H060/H063/H065/H066/H068/H070/H076/H077/H078/H079/H080/H082/H084 + H048/H049/H050) | H083 killed H001 corr +0.073 is 2nd-lowest ever |
 
 ---
 

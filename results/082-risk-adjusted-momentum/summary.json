@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H082",
+  "name": "risk-adjusted-momentum",
+  "strategy_class": "RiskAdjustedMomentum",
+  "family": "momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.6164,
+  "ci_low": 0.2167,
+  "ci_high": 1.0125,
+  "cagr": 0.091,
+  "max_drawdown": -0.3833,
+  "n_trades": 163,
+  "h001_corr": 0.4749,
+  "fold_sharpes": [
+    0.935,
+    0.07,
+    1.047,
+    1.031,
+    0.696,
+    0.204,
+    0.936,
+    1.299,
+    0.133,
+    0.235,
+    0.71,
+    0.696
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long highest (12-1m return / vol) asset among SPY/TLT/GLD. Risk-normalizes cross-sectional momentum.",
+  "canonical_params": {
+    "mom_days": 252,
+    "skip_days": 21,
+    "vol_days": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

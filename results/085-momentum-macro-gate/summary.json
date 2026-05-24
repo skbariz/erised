@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H085",
+  "name": "momentum-macro-gate",
+  "strategy_class": "MomentumMacroGate",
+  "family": "momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.4452,
+  "ci_low": 0.0439,
+  "ci_high": 0.8547,
+  "cagr": 0.0624,
+  "max_drawdown": -0.4159,
+  "n_trades": 174,
+  "h001_corr": 0.3639,
+  "fold_sharpes": [
+    0.935,
+    0.07,
+    0.633,
+    0.813,
+    0.309,
+    -0.086,
+    0.419,
+    0.8,
+    0.413,
+    0.304,
+    0.83,
+    0.527
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "5-asset cross-sectional momentum (SPY/TLT/GLD/DBC/VNQ) with yield curve macro gate: SHY>TLT (3m) forces TLT.",
+  "canonical_params": {
+    "mom_days": 252,
+    "skip_days": 21,
+    "curve_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

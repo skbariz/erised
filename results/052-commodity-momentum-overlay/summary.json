@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H052",
+  "name": "commodity-momentum-overlay",
+  "strategy_class": "CommodityMomentumOverlay",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.2713,
+  "ci_low": -0.1517,
+  "ci_high": 0.6685,
+  "cagr": 0.028,
+  "max_drawdown": -0.4601,
+  "n_trades": 126,
+  "h001_corr": 0.3686,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.842,
+    -0.157,
+    0.587,
+    1.339,
+    0.054,
+    1.272,
+    0.69,
+    0.357
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when DBC below 200d MA (low inflation regime); flat otherwise.",
+  "canonical_params": {
+    "ma_period": 200
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

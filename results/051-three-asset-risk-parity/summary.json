@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H051",
+  "name": "three-asset-risk-parity",
+  "strategy_class": "ThreeAssetRiskParity",
+  "family": "risk parity",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.6255,
+  "ci_low": 0.2273,
+  "ci_high": 1.0377,
+  "cagr": 0.0733,
+  "max_drawdown": -0.4767,
+  "n_trades": 4846,
+  "h001_corr": 0.4773,
+  "fold_sharpes": [
+    0.935,
+    -0.307,
+    -0.065,
+    1.427,
+    1.549,
+    0.589,
+    2.136,
+    0.186,
+    0.494,
+    1.967,
+    1.298,
+    0.889
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Extension of H021 (SPY+TLT) adding GLD as third risk-parity asset.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

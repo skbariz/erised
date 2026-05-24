@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H055",
+  "name": "five-asset-rotation",
+  "strategy_class": "FiveAssetRotation",
+  "family": "multi-asset rotation",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.4016,
+  "ci_low": -0.0068,
+  "ci_high": 0.8071,
+  "cagr": 0.0578,
+  "max_drawdown": -0.5014,
+  "n_trades": 162,
+  "h001_corr": 0.5487,
+  "fold_sharpes": [
+    0.935,
+    0.046,
+    0.894,
+    0.723,
+    0.379,
+    -0.237,
+    1.232,
+    0.975,
+    -0.17,
+    0.283,
+    0.082,
+    0.253
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Cross-sectional 12-1m momentum across SPY/TLT/GLD/DBC/VNQ; cash when all negative.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

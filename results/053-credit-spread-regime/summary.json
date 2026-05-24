@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H053",
+  "name": "credit-spread-regime",
+  "strategy_class": "CreditSpreadRegime",
+  "family": "cross-asset macro",
+  "run_date": "2026-05-23",
+  "oos_sharpe": 0.337,
+  "ci_low": -0.0642,
+  "ci_high": 0.7536,
+  "cagr": 0.0257,
+  "max_drawdown": -0.4298,
+  "n_trades": 273,
+  "h001_corr": 0.4013,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.941,
+    -0.153,
+    1.139,
+    0.666,
+    0.449,
+    1.473,
+    0.03,
+    1.049
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Long SPY when HYG outperforms LQD (healthy credit appetite); flat otherwise.",
+  "canonical_params": {
+    "momentum_days": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

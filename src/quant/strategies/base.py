@@ -2485,3 +2485,197 @@ class MultiAssetDynamicVolTarget(MultiAssetStrategy):
         w_tlt_scaled = w_tlt * scale
 
         return pd.DataFrame({"SPY": w_spy_scaled, "TLT": w_tlt_scaled}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# Batch 14 — H071–H075: Advanced Calendar Hybrids
+# ---------------------------------------------------------------------------
+
+
+class TripleConfirmCalendar(Strategy):
+    """H071: Sell-in-May + bond confirm + January Barometer (three filters).
+
+    Nov-Jan: long when TLT < tlt_ma_period MA (H043 filter).
+    Feb-Apr: long when TLT < tlt_ma_period MA AND January return was positive.
+    May-Oct: always flat.
+
+    The January Barometer gates the Feb-Apr window only — it is resolved
+    at the end of January, so no lookahead when applied from February.
+    """
+
+    def __init__(
+        self,
+        tlt_ma_period: int = 200,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+    ) -> None:
+        self.tlt_ma_period = tlt_ma_period
+        self.favorable_months = frozenset(favorable_months)
+        self.feb_apr = frozenset([2, 3, 4])
+        self.name = f"triple_confirm_calendar_{tlt_ma_period}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns:
+            raise ValueError("TripleConfirmCalendar requires 'tlt_close' column")
+        tlt = prices["tlt_close"]
+        tlt_ma = tlt.rolling(self.tlt_ma_period, min_periods=self.tlt_ma_period).mean().shift(1)
+        bond_ok = (tlt.shift(1) < tlt_ma) & tlt_ma.notna()
+
+        # January return per year, resolved at month end → safe to use from Feb
+        px = prices["adj_close"]
+        jan_positive = pd.Series(False, index=prices.index)
+        for year in sorted(px.index.year.unique()):
+            jan_px = px[(px.index.year == year) & (px.index.month == 1)]
+            if len(jan_px) < 2:
+                continue
+            jan_ret = jan_px.iloc[-1] / jan_px.iloc[0] - 1
+            feb_apr_mask = (prices.index.year == year) & prices.index.month.isin(self.feb_apr)
+            jan_positive[feb_apr_mask] = jan_ret > 0
+
+        in_season = prices.index.month.isin(self.favorable_months)
+        in_feb_apr = prices.index.month.isin(self.feb_apr)
+
+        nov_jan_long = pd.Series(in_season & ~in_feb_apr, index=prices.index) & bond_ok
+        feb_apr_long = (
+            pd.Series(in_season & in_feb_apr, index=prices.index) & bond_ok & jan_positive
+        )
+
+        pos = (nov_jan_long | feb_apr_long).astype(float)
+        pos.name = "position"
+        return pos
+
+
+class HalloweenCreditConfirm(Strategy):
+    """H072: Halloween (Nov-Apr) + SPY momentum + credit spread confirm.
+
+    Long SPY in Nov-Apr ONLY when: (1) 6m SPY momentum positive (H046 filter)
+    AND (2) HYG 60d return > LQD 60d return (credit healthy). Flat otherwise.
+    Falls back to flat (not just momentum) when HYG/LQD unavailable — the
+    extra filter is not applied if credit data is missing.
+    """
+
+    def __init__(
+        self,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+        mom_days: int = 126,
+        credit_days: int = 60,
+    ) -> None:
+        self.favorable_months = frozenset(favorable_months)
+        self.mom_days = mom_days
+        self.credit_days = credit_days
+        self.name = f"halloween_credit_{mom_days}d_{credit_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        px = prices["adj_close"]
+        mom = (px / px.shift(self.mom_days) - 1).shift(1)
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        mom_ok = (mom > 0) & mom.notna()
+
+        hyg = prices.get("hyg_close", pd.Series(np.nan, index=prices.index))
+        lqd = prices.get("lqd_close", pd.Series(np.nan, index=prices.index))
+        hyg_r = hyg.shift(1) / hyg.shift(1 + self.credit_days) - 1
+        lqd_r = lqd.shift(1) / lqd.shift(1 + self.credit_days) - 1
+        credit_ok = (hyg_r > lqd_r) & hyg_r.notna() & lqd_r.notna()
+
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        pos[(in_season == 1.0) & mom_ok & credit_ok] = 1.0
+        return pos
+
+
+class SellInMayYieldCurveConfirm(Strategy):
+    """H073: Sell-in-May + bond trend + yield-curve-not-inverted (three filters).
+
+    Long Nov-Apr when: (1) TLT < tlt_ma MA (H043 bond filter) AND
+    (2) SHY curve_days return < TLT curve_days return (curve not inverted).
+    Always flat May-Oct. Falls back to flat pre-2002 when TLT/SHY unavailable.
+    """
+
+    def __init__(
+        self,
+        tlt_ma: int = 200,
+        curve_days: int = 63,
+        favorable_months: tuple = (11, 12, 1, 2, 3, 4),
+    ) -> None:
+        self.tlt_ma = tlt_ma
+        self.curve_days = curve_days
+        self.favorable_months = frozenset(favorable_months)
+        self.name = f"sell_in_may_yield_curve_{tlt_ma}d_{curve_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        if "tlt_close" not in prices.columns:
+            raise ValueError("SellInMayYieldCurveConfirm requires 'tlt_close' column")
+        tlt = prices["tlt_close"]
+        tlt_ma_val = tlt.rolling(self.tlt_ma, min_periods=self.tlt_ma).mean().shift(1)
+        bond_ok = (tlt.shift(1) < tlt_ma_val) & tlt_ma_val.notna()
+
+        shy = prices.get("shy_close", pd.Series(np.nan, index=prices.index))
+        tlt_r = tlt.shift(1) / tlt.shift(1 + self.curve_days) - 1
+        shy_r = shy.shift(1) / shy.shift(1 + self.curve_days) - 1
+        not_inverted = (shy_r < tlt_r) & shy_r.notna() & tlt_r.notna()
+
+        in_season = pd.Series(
+            prices.index.month.isin(self.favorable_months).astype(float), index=prices.index
+        )
+        pos = pd.Series(0.0, index=prices.index, name="position")
+        pos[(in_season == 1.0) & bond_ok & not_inverted] = 1.0
+        return pos
+
+
+class PreHolidayDrift(Strategy):
+    """H074: Long SPY on the N trading days before each US market holiday.
+
+    Pre-holiday effect: short-covering and reduced order flow generate
+    positive drift before the market closes. Uses the US Federal Holiday
+    calendar as a proxy for NYSE holidays.
+    """
+
+    def __init__(self, pre_days: int = 1) -> None:
+        self.pre_days = pre_days
+        self.name = f"pre_holiday_drift_{pre_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        from pandas.tseries.holiday import USFederalHolidayCalendar
+
+        cal = USFederalHolidayCalendar()
+        holidays = cal.holidays(start=prices.index.min(), end=prices.index.max())
+        trading_days = prices.index
+        pre_holiday_set: set = set()
+        for h in holidays:
+            prev = trading_days[trading_days < h]
+            for d in range(1, self.pre_days + 1):
+                if len(prev) >= d:
+                    pre_holiday_set.add(prev[-d])
+
+        return pd.Series(
+            prices.index.isin(pre_holiday_set).astype(float), index=prices.index, name="position"
+        )
+
+
+class EarningsSeasonDrift(Strategy):
+    """H075: Long SPY during first N trading days of each earnings month.
+
+    Earnings months: Jan, Apr, Jul, Oct. Index-level flow effect from
+    positive earnings surprises attracting retail buying. Structurally
+    different from H047 (pre-earnings 5 days) — this tests the full
+    first half of each earnings month (15 trading days ≈ 3 calendar weeks).
+    """
+
+    def __init__(
+        self,
+        active_days: int = 15,
+        earnings_months: tuple = (1, 4, 7, 10),
+    ) -> None:
+        self.active_days = active_days
+        self.earnings_months = frozenset(earnings_months)
+        self.name = f"earnings_season_drift_{active_days}d"
+
+    def generate_positions(self, prices: pd.DataFrame) -> pd.Series:
+        rank_start, _ = _calendar_month_ranks(prices.index)
+        in_earnings = pd.Series(
+            prices.index.month.isin(self.earnings_months).astype(float), index=prices.index
+        )
+        in_window = (rank_start < self.active_days).astype(float)
+        pos = in_earnings * in_window
+        pos.name = "position"
+        return pos

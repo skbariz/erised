@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H156",
+  "name": "jump-penalized-momentum",
+  "strategy_class": "JumpPenalizedMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9486,
+  "ci_low": 0.5522,
+  "ci_high": 1.3648,
+  "cagr": 0.2034,
+  "max_drawdown": -0.547,
+  "n_trades": 1,
+  "h001_corr": 0.7061,
+  "fold_sharpes": [
+    1.721,
+    0.926,
+    1.264,
+    1.512,
+    1.048,
+    -0.217,
+    0.656,
+    2.311,
+    0.882,
+    1.411,
+    0.96,
+    1.008
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1m trimmed return (exclude top/bottom 5 daily returns). Rewards steady-trend stocks.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "trim_days": 5,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

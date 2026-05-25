@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H170",
+  "name": "ff5-investment-factor",
+  "strategy_class": "FF5InvestmentFactor",
+  "family": "cross-sectional investment (FF5 CMA)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7214,
+  "ci_low": 0.3216,
+  "ci_high": 1.1308,
+  "cagr": 0.0843,
+  "max_drawdown": -0.3841,
+  "n_trades": 1,
+  "h001_corr": 0.5746,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.68,
+    2.027,
+    0.851,
+    1.867,
+    0.711,
+    0.891
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long bottom 20% by 1-yr total asset growth within each GICS sector. Conservative investment = higher expected return. Cooper et al. 2008 / FF CMA.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "growth_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

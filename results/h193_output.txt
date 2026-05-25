@@ -1,0 +1,35 @@
+H193: LongShortMomentum (market-neutral L/S, long top / short bottom)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H193 Canonical (sector-neutral, mom_window=252d, skip=21d, monthly rebalance):
+  Sharpe -0.157  CI [-0.546, 0.245]
+  CAGR -1.22%  MaxDD -41.27%
+
+H150 baseline (long-only): Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- mom_window:
+  mom_window=126d  Sharpe -0.099  CI [-0.489, 0.312]  MaxDD -35.34%
+  mom_window=189d  Sharpe -0.021  CI [-0.417, 0.383]  MaxDD -35.34%
+  mom_window=252d  Sharpe -0.157  CI [-0.551, 0.226]  MaxDD -41.27%
+
+Per-fold Sharpe:
+  Fold  0: +1.022  (1998-01-04 -- 2000-01-04)
+  Fold  1: -0.873  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.017  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.611  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.664  (2006-01-02 -- 2008-01-02)
+  Fold  5: -1.625  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.304  (2010-01-01 -- 2012-01-01)
+  Fold  7: +0.720  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.948  (2013-12-31 -- 2015-12-31)
+  Fold  9: -0.797  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.359  (2017-12-30 -- 2019-12-30)
+  Fold 11: -0.338  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.1161
+Decision: kill
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\193-long-short-momentum\summary.json

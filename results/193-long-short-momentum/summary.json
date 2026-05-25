@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H193",
+  "name": "long-short-momentum",
+  "strategy_class": "LongShortMomentum",
+  "family": "cross-sectional market-neutral momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": -0.1574,
+  "ci_low": -0.5463,
+  "ci_high": 0.2451,
+  "cagr": -0.0122,
+  "max_drawdown": -0.4127,
+  "n_trades": 1,
+  "h001_corr": 0.1161,
+  "fold_sharpes": [
+    1.022,
+    -0.873,
+    0.017,
+    0.611,
+    0.664,
+    -1.625,
+    0.304,
+    0.72,
+    0.948,
+    -0.797,
+    0.359,
+    -0.338
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Market-neutral L/S: long top-20% momentum, short bottom-20%, sector-neutral. Extends H150 MomentumLongOnly with short leg. Monthly rebalance, gross exposure=1.0.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,35 @@
+H190: SectorPairsTrading (Gatev min-distance pairs, long-short)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H190 Canonical (n_pairs_per_sector=5, zscore_window=126, entry_z=2.0):
+  Sharpe 0.206  CI [-0.183, 0.608]
+  CAGR 1.27%  MaxDD -38.35%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- entry_z:
+  entry_z=1.5  Sharpe 0.204  CI [-0.164, 0.617]  MaxDD -25.28%
+  entry_z=2.0  Sharpe 0.206  CI [-0.191, 0.626]  MaxDD -38.35%
+  entry_z=2.5  Sharpe 0.158  CI [-0.235, 0.559]  MaxDD -33.35%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: -0.075  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.820  (2004-01-03 -- 2006-01-02)
+  Fold  4: -0.132  (2006-01-02 -- 2008-01-02)
+  Fold  5: +1.521  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.610  (2010-01-01 -- 2012-01-01)
+  Fold  7: -1.191  (2012-01-01 -- 2013-12-31)
+  Fold  8: -0.355  (2013-12-31 -- 2015-12-31)
+  Fold  9: -0.039  (2015-12-31 -- 2017-12-30)
+  Fold 10: -0.749  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.431  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.0425
+Decision: kill
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\190-sector-pairs-trading\summary.json

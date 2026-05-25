@@ -34,4 +34,14 @@ If Sharpe ≤ 0.51 or CI clips zero: within-sector pairs in S&P 500 don't reliab
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: kill**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.206 |
+| 95% CI | [-0.183, 0.608] |
+| CAGR | 1.27% |
+| Max DD | -38.35% |
+| H001 corr | +0.042 |
+
+CI spans zero. Fold Sharpes erratic: 7 of 12 negative including fold 7 at -1.191. H001 corr +0.042 confirms true market-neutrality — but alpha is absent. Classic Gatev pairs is too efficiently arbitraged in S&P 500 large-caps. Sensitivity flat and universally weak. Short-term reversal (H185) is a strictly superior mean-reversion vehicle.

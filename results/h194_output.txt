@@ -1,0 +1,35 @@
+H194: LongShortReversal (market-neutral L/S, long losers / short winners)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H194 Canonical (sector-neutral, reversal_window=5d, weekly rebalance):
+  Sharpe 0.829  CI [0.439, 1.214]
+  CAGR 4.39%  MaxDD -18.33%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- reversal_window:
+  reversal_window=3d  Sharpe 1.019  CI [0.630, 1.394]  MaxDD -19.62%
+  reversal_window=5d  Sharpe 0.829  CI [0.443, 1.212]  MaxDD -18.33%
+  reversal_window=10d  Sharpe 0.932  CI [0.581, 1.313]  MaxDD -20.04%
+
+Per-fold Sharpe:
+  Fold  0: +3.681  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.615  (2000-01-04 -- 2002-01-03)
+  Fold  2: -0.144  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.899  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.070  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.617  (2008-01-02 -- 2010-01-01)
+  Fold  6: +1.365  (2010-01-01 -- 2012-01-01)
+  Fold  7: +0.892  (2012-01-01 -- 2013-12-31)
+  Fold  8: -0.482  (2013-12-31 -- 2015-12-31)
+  Fold  9: +0.549  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.158  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.621  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.1457
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\194-long-short-reversal\summary.json

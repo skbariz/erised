@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H190",
+  "name": "sector-pairs-trading",
+  "strategy_class": "SectorPairsTrading",
+  "family": "cross-sectional pairs / stat arb",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.2055,
+  "ci_low": -0.1827,
+  "ci_high": 0.6082,
+  "cagr": 0.0127,
+  "max_drawdown": -0.3835,
+  "n_trades": 578,
+  "h001_corr": 0.0425,
+  "fold_sharpes": [
+    0.0,
+    -0.075,
+    0.0,
+    0.82,
+    -0.132,
+    1.521,
+    0.61,
+    -1.191,
+    -0.355,
+    -0.039,
+    -0.749,
+    0.431
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Gatev et al. (2006) minimum-SSD pairs within GICS sector. Long-short: enter when log-spread z-score > entry_z=2.0 vs 126-day history.",
+  "canonical_params": {
+    "n_pairs_per_sector": 5,
+    "zscore_window": 126,
+    "entry_z": 2.0,
+    "exit_z": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

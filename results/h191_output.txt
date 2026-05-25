@@ -1,0 +1,35 @@
+H191: PCAResidualReversal (K-factor PCA residuals + 5d reversal)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H191 Canonical (n_components=10, reversal_window=5d, weekly rebalance):
+  Sharpe 1.135  CI [0.733, 1.553]
+  CAGR 24.75%  MaxDD -48.11%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- n_components:
+  n_components=5  Sharpe 1.138  CI [0.747, 1.541]  MaxDD -49.82%
+  n_components=10  Sharpe 1.135  CI [0.739, 1.531]  MaxDD -48.11%
+  n_components=20  Sharpe 1.138  CI [0.730, 1.530]  MaxDD -50.70%
+
+Per-fold Sharpe:
+  Fold  0: +2.425  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.705  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.025  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.973  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.357  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.381  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.897  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.274  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.702  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.783  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.040  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.103  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6191
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\191-pca-residual-reversal\summary.json

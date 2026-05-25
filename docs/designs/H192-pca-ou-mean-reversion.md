@@ -30,4 +30,14 @@ If H192 Sharpe ≤ H189 Sharpe (1.025), the additional PCA factors add noise rat
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.175 |
+| 95% CI | [0.776, 1.592] |
+| CAGR | 27.53% |
+| Max DD | -50.69% |
+| H001 corr | +0.567 |
+
+Batch 9 champion. Beats H191 PCA reversal (1.175 vs 1.135) and H189 single-factor OU (1.025). 12/12 folds positive. CAGR 27.53% is highest in the entire H150-H199 program. H001 corr +0.567 is lower than H191 (+0.619) — OU threshold provides better factor isolation. Sensitivity: entry_z=-1.5 optimal; -2.0 drops to 0.993 (too few trades). The OU formalism combined with PCA multi-factor residuals is the most principled mean-reversion approach tested.

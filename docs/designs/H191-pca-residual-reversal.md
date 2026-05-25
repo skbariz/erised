@@ -30,4 +30,14 @@ If H191 Sharpe ≤ H186 Sharpe (1.095), adding more PCA factors beyond market be
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.135 |
+| 95% CI | [0.733, 1.553] |
+| CAGR | 24.75% |
+| Max DD | -48.11% |
+| H001 corr | +0.619 |
+
+Beats H186 single-factor (1.135 vs 1.095). 12/12 folds positive including GFC (fold 5: +0.381). Stunning finding: n_components sensitivity is completely flat (K=5: 1.138, K=10: 1.135, K=20: 1.138) — the number of PCA factors stripped is irrelevant. The residual reversal signal is robust regardless of factor structure. H192 (with OU threshold) is slightly better at 1.175.

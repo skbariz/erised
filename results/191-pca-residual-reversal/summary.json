@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H191",
+  "name": "pca-residual-reversal",
+  "strategy_class": "PCAResidualReversal",
+  "family": "cross-sectional PCA stat arb",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1354,
+  "ci_low": 0.7332,
+  "ci_high": 1.5529,
+  "cagr": 0.2475,
+  "max_drawdown": -0.4811,
+  "n_trades": 1,
+  "h001_corr": 0.6191,
+  "fold_sharpes": [
+    2.425,
+    1.705,
+    1.025,
+    1.973,
+    1.357,
+    0.381,
+    0.897,
+    2.274,
+    0.702,
+    1.783,
+    1.04,
+    1.103
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Multi-factor H186: fit K=10 PCA components on training returns, strip factor exposure, apply 5-day reversal on residuals. Sector-neutral top 20%, weekly rebalance.",
+  "canonical_params": {
+    "n_components": 10,
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

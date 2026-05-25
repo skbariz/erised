@@ -34,4 +34,14 @@ If Sharpe ≤ 0 or CI includes strongly negative values: the short leg reverses 
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.829 |
+| 95% CI | [0.439, 1.214] |
+| CAGR | 4.39% |
+| Max DD | **-18.33%** |
+| H001 corr | +0.145 |
+
+MaxDD -18.33% is the best in the entire H150-H199 program by a wide margin. The market hedge (short winners) reduces equity beta dramatically — H001 corr only +0.145. Reversal L/S works because reversal is naturally anti-momentum: when markets crash, reversal positions (long recent losers, short recent winners) partially hedge the portfolio. Sensitivity: 3d window (1.019) slightly better than canonical 5d (0.829). The exceptional MaxDD makes this highly valuable for the H200 MDR ensemble despite lower Sharpe than long-only H185 (1.103).

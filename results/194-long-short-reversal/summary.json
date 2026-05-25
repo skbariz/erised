@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H194",
+  "name": "long-short-reversal",
+  "strategy_class": "LongShortReversal",
+  "family": "cross-sectional market-neutral reversal",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8293,
+  "ci_low": 0.4393,
+  "ci_high": 1.2145,
+  "cagr": 0.0439,
+  "max_drawdown": -0.1833,
+  "n_trades": 1,
+  "h001_corr": 0.1457,
+  "fold_sharpes": [
+    3.681,
+    1.615,
+    -0.144,
+    0.899,
+    1.07,
+    0.617,
+    1.365,
+    0.892,
+    -0.482,
+    0.549,
+    0.158,
+    0.621
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Market-neutral L/S: long top-20% prior-5d losers, short top-20% winners, sector-neutral. Extends H185 with short leg. Weekly rebalance, gross exposure=1.0.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

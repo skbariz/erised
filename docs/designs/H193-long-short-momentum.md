@@ -38,4 +38,14 @@ If Sharpe < H150 Sharpe (0.981): the short leg either adds no alpha (S&P 500 los
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: kill**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | -0.157 |
+| 95% CI | [-0.546, 0.245] |
+| CAGR | -1.22% |
+| Max DD | -41.27% |
+| H001 corr | +0.116 |
+
+Negative Sharpe. L/S momentum is destroyed by momentum crashes: fold 5 (GFC 2008-2010) is -1.625. The short leg (short recent losers) amplifies losses when momentum crashes — both legs go against the strategy simultaneously. This confirms the H001-H100 finding: long-short with equity factors adds crash risk rather than hedge value. Long-only H150 (Sharpe 0.981) is far superior.

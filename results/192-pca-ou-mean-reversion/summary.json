@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H192",
+  "name": "pca-ou-mean-reversion",
+  "strategy_class": "PCAOUMeanReversion",
+  "family": "cross-sectional PCA stat arb",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1746,
+  "ci_low": 0.7764,
+  "ci_high": 1.5916,
+  "cagr": 0.2753,
+  "max_drawdown": -0.5069,
+  "n_trades": 1,
+  "h001_corr": 0.5666,
+  "fold_sharpes": [
+    2.639,
+    1.768,
+    1.713,
+    1.391,
+    0.625,
+    0.516,
+    0.943,
+    1.862,
+    0.566,
+    1.646,
+    0.693,
+    1.085
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Multi-factor H189: fit K=10 PCA components on training returns, apply OU z-score on 5d cumulative residuals. Entry z < -1.5, sector-neutral top 20%, weekly rebalance.",
+  "canonical_params": {
+    "n_components": 10,
+    "ou_window": 252,
+    "entry_z": -1.5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

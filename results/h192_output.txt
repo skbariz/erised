@@ -1,0 +1,35 @@
+H192: PCAOUMeanReversion (K-factor PCA residuals + OU z-score entry)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H192 Canonical (n_components=10, ou_window=252d, entry_z=-1.5):
+  Sharpe 1.175  CI [0.776, 1.592]
+  CAGR 27.53%  MaxDD -50.69%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- entry_z:
+  entry_z=-1.0  Sharpe 1.144  CI [0.760, 1.540]  MaxDD -48.64%
+  entry_z=-1.5  Sharpe 1.175  CI [0.793, 1.576]  MaxDD -50.69%
+  entry_z=-2.0  Sharpe 0.993  CI [0.611, 1.378]  MaxDD -51.40%
+
+Per-fold Sharpe:
+  Fold  0: +2.639  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.768  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.713  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.391  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.625  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.516  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.943  (2010-01-01 -- 2012-01-01)
+  Fold  7: +1.862  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.566  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.646  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.693  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.085  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5666
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\192-pca-ou-mean-reversion\summary.json

@@ -180,6 +180,17 @@ def test_h152_weights_non_negative(synthetic_panel):
     assert (weights >= -1e-9).all().all()
 
 
+def test_h152_monthly_rebalance_stable_intramonth(synthetic_panel):
+    panel, membership = synthetic_panel
+    strat = HighWaterMomentum(lookback=60, top_quantile=0.3, monthly_rebalance=True)
+    weights = strat.generate_weights(panel, membership)
+    months = weights.index.to_series().dt.to_period("M")
+    for _month, grp in weights.groupby(months):
+        first_row = grp.iloc[0]
+        for _, row in grp.iterrows():
+            pd.testing.assert_series_equal(row, first_row, check_names=False)
+
+
 # ---------------------------------------------------------------------------
 # H153: SectorNeutralMomentum
 # ---------------------------------------------------------------------------
@@ -194,6 +205,22 @@ def test_h153_weights_sum_leq_one(synthetic_panel):
     weights = strat.generate_weights(panel, membership)
     assert (weights.sum(axis=1) <= 1.0 + 1e-6).all()
     assert (weights >= -1e-9).all().all()
+
+
+def test_h153_equal_sector_weights(synthetic_panel):
+    panel, membership = synthetic_panel
+    tickers = panel.columns.tolist()
+    sector_map = pd.Series(["SectorA"] * 5 + ["SectorB"] * 5, index=tickers, name="sector")
+    strat = SectorNeutralMomentum(sector_map=sector_map, long_days=60, skip_days=5)
+    weights = strat.generate_weights(panel, membership)
+    # On active rows, each sector's total weight should be approximately equal
+    active_rows = weights.sum(axis=1) > 1e-6
+    if active_rows.any():
+        sector_a_total = weights.loc[active_rows, tickers[:5]].sum(axis=1)
+        sector_b_total = weights.loc[active_rows, tickers[5:]].sum(axis=1)
+        # Both sectors get equal weight (0.5 each when both active)
+        diff = (sector_a_total - sector_b_total).abs()
+        assert (diff < 1e-9).all(), "Sector weights must be equal"
 
 
 # ---------------------------------------------------------------------------
@@ -231,3 +258,13 @@ def test_h154_full_exposure_above_ma(synthetic_panel, spy_prices):
         check_like=True,
         atol=1e-9,
     )
+
+
+def test_h154_internal_trend_no_spy(synthetic_panel):
+    panel, membership = synthetic_panel
+    # Without spy_prices, should use equal-weight S&P 500 index internally
+    strat = TrendGatedMomentum(long_days=60, skip_days=5, ma_long=50)
+    weights = strat.generate_weights(panel, membership)
+    # Weights must be valid (non-negative, sum ≤ 1)
+    assert (weights >= -1e-9).all().all()
+    assert (weights.sum(axis=1) <= 1.0 + 1e-9).all()

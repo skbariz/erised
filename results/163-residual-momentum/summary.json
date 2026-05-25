@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H163",
+  "name": "residual-momentum",
+  "strategy_class": "ResidualMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9613,
+  "ci_low": 0.5632,
+  "ci_high": 1.3803,
+  "cagr": 0.2124,
+  "max_drawdown": -0.6008,
+  "n_trades": 3,
+  "h001_corr": 0.6486,
+  "fold_sharpes": [
+    1.847,
+    0.981,
+    1.151,
+    1.716,
+    1.003,
+    -0.057,
+    0.846,
+    2.437,
+    1.037,
+    1.389,
+    1.041,
+    1.022
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Cumulative CAPM residual (stock return minus beta*SPY). Removes market-beta loading from momentum.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

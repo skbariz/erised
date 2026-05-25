@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H161",
+  "name": "five-year-reversal",
+  "strategy_class": "FiveYearReversal",
+  "family": "cross-sectional contrarian/reversal",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8495,
+  "ci_low": 0.4458,
+  "ci_high": 1.2532,
+  "cagr": 0.1832,
+  "max_drawdown": -0.5502,
+  "n_trades": 5,
+  "h001_corr": 0.5618,
+  "fold_sharpes": [
+    0.968,
+    1.877,
+    1.133,
+    1.139,
+    0.96,
+    0.501,
+    0.58,
+    1.962,
+    0.499,
+    1.784,
+    0.545,
+    0.746
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Buy 5-year losers (De Bondt-Thaler long-horizon variant). 60-month formation.",
+  "canonical_params": {
+    "long_days": 1260,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

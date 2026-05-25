@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H160",
+  "name": "long-term-reversal",
+  "strategy_class": "LongTermReversal",
+  "family": "cross-sectional contrarian/reversal",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8755,
+  "ci_low": 0.4732,
+  "ci_high": 1.285,
+  "cagr": 0.2008,
+  "max_drawdown": -0.5865,
+  "n_trades": 7,
+  "h001_corr": 0.539,
+  "fold_sharpes": [
+    1.3,
+    2.009,
+    0.991,
+    0.928,
+    0.82,
+    0.542,
+    0.574,
+    2.209,
+    0.618,
+    1.94,
+    0.818,
+    0.808
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Buy 3-year losers (De Bondt-Thaler 1985). Skips last month to avoid momentum contamination.",
+  "canonical_params": {
+    "long_days": 756,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

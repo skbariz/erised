@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H162",
+  "name": "composite-value-momentum",
+  "strategy_class": "CompositeValueMomentum",
+  "family": "cross-sectional contrarian/reversal",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9055,
+  "ci_low": 0.5028,
+  "ci_high": 1.3192,
+  "cagr": 0.176,
+  "max_drawdown": -0.4851,
+  "n_trades": 3,
+  "h001_corr": 0.6803,
+  "fold_sharpes": [
+    1.615,
+    1.427,
+    1.077,
+    1.21,
+    0.681,
+    0.045,
+    0.545,
+    2.453,
+    0.981,
+    1.529,
+    0.926,
+    0.78
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "50/50 z-score blend: 12-1m momentum + negated 36m return (Asness-Moskowitz-Pedersen 2013 style).",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "reversal_days": 756,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

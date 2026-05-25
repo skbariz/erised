@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H164",
+  "name": "near-52wk-low",
+  "strategy_class": "NearFiftyTwoWeekLow",
+  "family": "cross-sectional contrarian/reversal",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8845,
+  "ci_low": 0.489,
+  "ci_high": 1.2938,
+  "cagr": 0.1707,
+  "max_drawdown": -0.4817,
+  "n_trades": 5,
+  "h001_corr": 0.5643,
+  "fold_sharpes": [
+    0.777,
+    1.46,
+    0.864,
+    1.52,
+    1.002,
+    0.318,
+    0.799,
+    2.141,
+    0.935,
+    1.834,
+    0.983,
+    0.581
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Buy stocks nearest to 52-week low (price/rolling_min). Contrarian to H152 52-week high momentum.",
+  "canonical_params": {
+    "window": 252,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

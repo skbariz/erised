@@ -1,0 +1,35 @@
+H176: LowVolatilityAnomaly (sector-neutral, realized vol 252d)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H176 Canonical (sector-neutral, within_sector_quantile=20%, vol_window=252):
+  Sharpe 0.877  CI [0.466, 1.293]
+  CAGR 13.35%  MaxDD -40.48%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- vol_window:
+  vol_window=63d  Sharpe 0.885  CI [0.481, 1.285]  MaxDD -41.41%
+  vol_window=126d  Sharpe 0.884  CI [0.476, 1.276]  MaxDD -42.16%
+  vol_window=252d  Sharpe 0.877  CI [0.460, 1.286]  MaxDD -40.48%
+
+Per-fold Sharpe:
+  Fold  0: +1.007  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.515  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.690  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.382  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.285  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.066  (2008-01-02 -- 2010-01-01)
+  Fold  6: +1.036  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.082  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.863  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.681  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.079  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.623  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6604
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\176-low-volatility-anomaly\summary.json

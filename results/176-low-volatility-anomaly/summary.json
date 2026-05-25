@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H176",
+  "name": "low-volatility-anomaly",
+  "strategy_class": "LowVolatilityAnomaly",
+  "family": "cross-sectional low-volatility",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8767,
+  "ci_low": 0.4662,
+  "ci_high": 1.2933,
+  "cagr": 0.1335,
+  "max_drawdown": -0.4048,
+  "n_trades": 1,
+  "h001_corr": 0.6604,
+  "fold_sharpes": [
+    1.007,
+    1.515,
+    0.69,
+    1.382,
+    1.285,
+    0.066,
+    1.036,
+    2.082,
+    0.863,
+    1.681,
+    1.079,
+    0.623
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long bottom 20% by 252d realized vol within each GICS sector. Baker-Bradley-Wurgler (2011) low-vol anomaly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "vol_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

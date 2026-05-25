@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H161",
+  "name": "quality-filtered-reversal",
+  "strategy_class": "QualityFilteredReversal",
+  "family": "cross-sectional contrarian/reversal",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7257,
+  "ci_low": 0.3201,
+  "ci_high": 1.1384,
+  "cagr": 0.0863,
+  "max_drawdown": -0.3763,
+  "n_trades": 1,
+  "h001_corr": 0.6451,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.018,
+    0.617,
+    2.06,
+    0.83,
+    1.797,
+    0.892,
+    1.018
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "5-yr price losers + quality gate (OCF>0, current ratio>1, 6m recovery). De Bondt-Thaler upgraded.",
+  "canonical_params": {
+    "long_days": 1260,
+    "skip_days": 21,
+    "recovery_days": 126,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,4 +1,4 @@
-"""H161: FiveYearReversal — buy 5-year losers (long-horizon contrarian).
+"""H161: QualityFilteredReversal — 5-year losers with quality gate.
 
 Run: uv run python scripts/run_h161.py
 """
@@ -13,18 +13,19 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from write_summary import write_summary
 
+from quant.data.fundamentals import load_fundamentals_panel
 from quant.data.loader import load_research
 from quant.data.stocks import get_all_historical_tickers, load_sp500_members, load_stocks_panel
 from quant.metrics.performance import bootstrap_sharpe_ci, sharpe
 from quant.strategies.base import MovingAverageCrossover
-from quant.strategies.cross_sectional import FiveYearReversal, LongTermReversal, MomentumLongOnly
+from quant.strategies.cross_sectional import MomentumLongOnly, QualityFilteredReversal
 from quant.validation.walk_forward import make_folds, walk_forward, walk_forward_cross_sectional
 
 SEP = "=" * 64
 
 
 def main() -> None:
-    print(f"H161: FiveYearReversal (60-month price reversal, buy losers)\n{SEP}")
+    print(f"H161: QualityFilteredReversal (5-yr losers + quality gate)\n{SEP}")
 
     membership = load_sp500_members()
     tickers = get_all_historical_tickers()
@@ -42,17 +43,27 @@ def main() -> None:
     print(f"Data: {panel.shape[0]} days, {panel.shape[1]} tickers")
     print(f"Folds: {len(folds)}")
 
+    print("Loading fundamental data (operating_cf, current_assets, current_liabilities)...")
+    panel_tickers = panel.columns.tolist()
+    operating_cf = load_fundamentals_panel(panel_tickers, "operating_cf", panel.index)
+    current_assets = load_fundamentals_panel(panel_tickers, "current_assets", panel.index)
+    current_liabilities = load_fundamentals_panel(panel_tickers, "current_liabilities", panel.index)
+
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: FiveYearReversal(monthly_rebalance=True),
+        lambda tp, tm: QualityFilteredReversal(
+            operating_cf=operating_cf,
+            current_assets=current_assets,
+            current_liabilities=current_liabilities,
+        ),
         folds=folds,
         spy_returns=spy_rets,
     )
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
 
-    print("\nH161 Canonical (long_days=1260, skip_days=21, top_quantile=20%):")
+    print("\nH161 Canonical (long_days=1260, recovery_days=126, quality gate):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}")
 
@@ -63,36 +74,30 @@ def main() -> None:
         folds=folds,
         spy_returns=spy_rets,
     )
-    wf_h160 = walk_forward_cross_sectional(
-        panel,
-        membership,
-        lambda tp, tm: LongTermReversal(),
-        folds=folds,
-        spy_returns=spy_rets,
-    )
     print(
         f"\nH150 baseline: Sharpe {wf_h150.combined_report.sharpe:.3f}"
         f"  MaxDD {wf_h150.combined_report.max_drawdown:.2%}"
     )
-    print(
-        f"H160 (3yr reversal): Sharpe {wf_h160.combined_report.sharpe:.3f}"
-        f"  MaxDD {wf_h160.combined_report.max_drawdown:.2%}"
-    )
 
-    print("\nSensitivity -- long_days:")
+    print("\nSensitivity -- long_days (reversal horizon):")
     for ld in [756, 1008, 1260]:
         w = walk_forward_cross_sectional(
             panel,
             membership,
-            lambda tp, tm, _ld=ld: FiveYearReversal(long_days=_ld),
+            lambda tp, tm, _ld=ld: QualityFilteredReversal(
+                operating_cf=operating_cf,
+                current_assets=current_assets,
+                current_liabilities=current_liabilities,
+                long_days=_ld,
+            ),
             folds=folds,
             spy_returns=spy_rets,
         )
-        lo_t, hi_t = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
+        lo_l, hi_l = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
         months = ld // 21
         print(
             f"  long_days={ld} (~{months}m)  Sharpe {w.combined_report.sharpe:.3f}"
-            f"  CI [{lo_t:.3f}, {hi_t:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}"
+            f"  CI [{lo_l:.3f}, {hi_l:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}"
         )
 
     print("\nPer-fold Sharpe:")
@@ -112,8 +117,8 @@ def main() -> None:
 
     write_summary(
         hypothesis_id="161",
-        name="five-year-reversal",
-        strategy_class="FiveYearReversal",
+        name="quality-filtered-reversal",
+        strategy_class="QualityFilteredReversal",
         family="cross-sectional contrarian/reversal",
         sharpe=rep.sharpe,
         ci_low=lo,
@@ -124,10 +129,11 @@ def main() -> None:
         h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results],
         decision=decision,
-        notes="Buy 5-year losers (De Bondt-Thaler long-horizon variant). 60-month formation.",
+        notes="5-yr price losers + quality gate (OCF>0, current ratio>1, 6m recovery). De Bondt-Thaler upgraded.",
         canonical_params={
             "long_days": 1260,
             "skip_days": 21,
+            "recovery_days": 126,
             "top_quantile": 0.20,
             "monthly_rebalance": True,
         },

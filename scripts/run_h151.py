@@ -57,7 +57,7 @@ def main() -> None:
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: MomentumMarketNeutral(),
+        lambda tp, tm: MomentumMarketNeutral(monthly_rebalance=True),
         folds=folds,
         spy_returns=spy_rets,
     )
@@ -120,7 +120,12 @@ def main() -> None:
         fold_sharpes=[float(sharpe(apply_borrow_cost(f.net_returns))) for f in wf.fold_results],
         decision=decision,
         notes="L/S 0.5 gross each leg. After 50bps/yr borrow + 2.5bps/turn. ~zero market beta.",
-        canonical_params={"top_quantile": 0.20, "bottom_quantile": 0.20, "borrow_bps_annual": 50},
+        canonical_params={
+            "top_quantile": 0.20,
+            "bottom_quantile": 0.20,
+            "monthly_rebalance": True,
+            "borrow_bps_annual": 50,
+        },
     )
 
 

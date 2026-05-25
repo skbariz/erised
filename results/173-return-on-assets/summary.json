@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H173",
+  "name": "return-on-assets",
+  "strategy_class": "ReturnOnAssets",
+  "family": "cross-sectional quality (ROA)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.785,
+  "ci_low": 0.3817,
+  "ci_high": 1.1876,
+  "cagr": 0.0931,
+  "max_drawdown": -0.3582,
+  "n_trades": 1,
+  "h001_corr": 0.6341,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.522,
+    0.769,
+    2.007,
+    0.882,
+    1.71,
+    1.046,
+    1.033
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long top 20% by NI/TA within each GICS sector. Net income captures post-tax earnings efficiency vs GP/TA gross pricing power.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

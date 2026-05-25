@@ -2656,3 +2656,334 @@ class ResidualOUMeanReversion(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# Batch 9 helpers
+# ---------------------------------------------------------------------------
+
+
+def _form_min_distance_pairs(
+    train_prices: pd.DataFrame,
+    sectors: pd.Series,
+    n_pairs_per_sector: int,
+) -> list[tuple[str, str]]:
+    """Gatev et al.: find top-N pairs within each sector by normalized-price SSD."""
+    import itertools
+
+    norm = train_prices.ffill().bfill()
+    first_valid = norm.apply(lambda col: col.dropna().iloc[0] if col.notna().any() else 1.0)
+    norm = norm.divide(first_valid)
+
+    pairs: list[tuple[str, str]] = []
+    for sector in sectors.dropna().unique():
+        sec_tickers = [t for t in sectors[sectors == sector].index if t in train_prices.columns]
+        if len(sec_tickers) < 2:
+            continue
+        sub = norm[sec_tickers].fillna(0.0).values  # (n_days, n_tickers)
+        n = len(sec_tickers)
+        ssd = np.full((n, n), np.inf)
+        for i, j in itertools.combinations(range(n), 2):
+            diff = sub[:, i] - sub[:, j]
+            ssd[i, j] = (diff**2).mean()
+            ssd[j, i] = ssd[i, j]
+        flat_idx = np.argsort(ssd.ravel())
+        seen: set[frozenset[int]] = set()
+        for idx in flat_idx:
+            if len(seen) >= n_pairs_per_sector:
+                break
+            i, j = divmod(int(idx), n)
+            if i == j:
+                continue
+            key = frozenset({i, j})
+            if key not in seen:
+                seen.add(key)
+                pairs.append((sec_tickers[i], sec_tickers[j]))
+    return pairs
+
+
+def _fit_pca_components(
+    train_prices: pd.DataFrame,
+    n_components: int,
+) -> pd.DataFrame:
+    """PCA on training returns via SVD. Returns (n_components, n_tickers) DataFrame."""
+    rets = train_prices.pct_change().dropna(how="all").fillna(0.0)
+    mat = rets.values - rets.values.mean(axis=0)
+    _, _, vt = np.linalg.svd(mat, full_matrices=False)
+    return pd.DataFrame(vt[:n_components], columns=rets.columns)
+
+
+def _long_short_normalize(
+    long_w: pd.DataFrame,
+    short_w: pd.DataFrame,
+) -> pd.DataFrame:
+    """Combine long/short legs into dollar-neutral weights (abs sum = 1.0)."""
+    combined = long_w * 0.5 - short_w * 0.5
+    abs_sum = combined.abs().sum(axis=1).replace(0, np.nan)
+    return combined.div(abs_sum, axis=0).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H190: SectorPairsTrading (Gatev, Goetzmann, Rouwenhorst 2006)
+# ---------------------------------------------------------------------------
+
+
+class SectorPairsTrading(CrossSectionalStrategy):
+    """H190: Long-short pairs trading within GICS sectors.
+
+    Training period: identify minimum-SSD pairs of normalized price series
+    within each sector (Gatev et al. 2006).
+    Test period: monitor log-spread z-score; enter when |z| > entry_z.
+    Self-financing: long underperformer, short overperformer.
+    """
+
+    name = "sector_pairs_trading"
+
+    def __init__(
+        self,
+        train_prices: pd.DataFrame,
+        sectors: pd.Series,
+        n_pairs_per_sector: int = 5,
+        zscore_window: int = 126,
+        entry_z: float = 2.0,
+        exit_z: float = 0.5,
+    ):
+        self.sectors = sectors
+        self.zscore_window = zscore_window
+        self.entry_z = entry_z
+        self.exit_z = exit_z
+        self.pairs = _form_min_distance_pairs(train_prices, sectors, n_pairs_per_sector)
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        weights = pd.DataFrame(0.0, index=prices_panel.index, columns=prices_panel.columns)
+        log_p = np.log(prices_panel.replace(0.0, np.nan))
+
+        for a, b in self.pairs:
+            if a not in prices_panel.columns or b not in prices_panel.columns:
+                continue
+            spread = log_p[a] - log_p[b]
+            mu = spread.rolling(self.zscore_window, min_periods=self.zscore_window // 2).mean()
+            sd = (
+                spread.rolling(self.zscore_window, min_periods=self.zscore_window // 2)
+                .std()
+                .replace(0, np.nan)
+            )
+            z = (spread - mu) / sd
+            long_a = (z < -self.entry_z).astype(float)
+            long_b = (z > self.entry_z).astype(float)
+            weights[a] += long_a - long_b
+            weights[b] += long_b - long_a
+
+        abs_sum = weights.abs().sum(axis=1).replace(0, np.nan)
+        return weights.div(abs_sum, axis=0).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H191: PCAResidualReversal (multi-factor extension of H186)
+# ---------------------------------------------------------------------------
+
+
+class PCAResidualReversal(CrossSectionalStrategy):
+    """H191: Short-term reversal on PCA factor residuals.
+
+    Extends H186 (single-factor beta-stripped reversal) to K PCA factors.
+    Training: fit PCA on daily returns to extract dominant risk factors.
+    Test: compute multi-factor residuals, apply 5-day reversal signal.
+    """
+
+    name = "pca_residual_reversal"
+
+    def __init__(
+        self,
+        train_prices: pd.DataFrame,
+        sectors: pd.Series,
+        n_components: int = 10,
+        reversal_window: int = 5,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.sectors = sectors
+        self.n_components = n_components
+        self.reversal_window = reversal_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+        self.components_df = _fit_pca_components(train_prices, n_components)
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        common = prices_panel.columns.intersection(self.components_df.columns)
+        daily_rets = prices_panel[common].pct_change().fillna(0.0)
+        comps = self.components_df[common].values  # (k, n_common)
+
+        mat = daily_rets.values  # (n_days, n_common)
+        factor_rets = mat @ comps.T  # (n_days, k)
+        reconstruction = factor_rets @ comps  # (n_days, n_common)
+        residuals = pd.DataFrame(mat - reconstruction, index=daily_rets.index, columns=common)
+        resid_5d = residuals.rolling(
+            self.reversal_window, min_periods=self.reversal_window // 2 + 1
+        ).sum()
+        score = -resid_5d
+
+        mem_cs = membership.reindex(columns=prices_panel.columns)
+        daily_w = _sector_neutral_weights(
+            score, mem_cs, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H192: PCAOUMeanReversion (multi-factor Avellaneda-Lee)
+# ---------------------------------------------------------------------------
+
+
+class PCAOUMeanReversion(CrossSectionalStrategy):
+    """H192: OU z-score entry on PCA factor residuals.
+
+    Extends H189 (single-factor OU) to K PCA factors. Uses training period
+    to fit PCA components, then monitors residual OU z-score during test.
+    Entry: z-score < entry_z (abnormally low idiosyncratic position).
+    """
+
+    name = "pca_ou_mean_reversion"
+
+    def __init__(
+        self,
+        train_prices: pd.DataFrame,
+        sectors: pd.Series,
+        n_components: int = 10,
+        ou_window: int = 252,
+        entry_z: float = -1.5,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.sectors = sectors
+        self.n_components = n_components
+        self.ou_window = ou_window
+        self.entry_z = entry_z
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+        self.components_df = _fit_pca_components(train_prices, n_components)
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        common = prices_panel.columns.intersection(self.components_df.columns)
+        daily_rets = prices_panel[common].pct_change().fillna(0.0)
+        comps = self.components_df[common].values
+
+        mat = daily_rets.values
+        factor_rets = mat @ comps.T
+        reconstruction = factor_rets @ comps
+        residuals = pd.DataFrame(mat - reconstruction, index=daily_rets.index, columns=common)
+        resid_5d = residuals.rolling(5, min_periods=3).sum()
+        mu = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).mean()
+        sd = (
+            resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2)
+            .std()
+            .replace(0, np.nan)
+        )
+        z_score = (resid_5d - mu) / sd
+        score = -z_score.where(z_score < self.entry_z)
+
+        mem_cs = membership.reindex(columns=prices_panel.columns)
+        daily_w = _sector_neutral_weights(
+            score, mem_cs, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H193: LongShortMomentum (true market-neutral L/S, extends H150)
+# ---------------------------------------------------------------------------
+
+
+class LongShortMomentum(CrossSectionalStrategy):
+    """H193: Market-neutral long-short momentum.
+
+    Long top-quintile momentum stocks, short bottom-quintile, sector-neutral.
+    Tests whether the short leg adds alpha over long-only MomentumLongOnly.
+    Monthly rebalance; gross exposure = 1.0 (50% long, 50% short).
+    """
+
+    name = "long_short_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.pct_change(self.mom_window).shift(self.skip_window)
+        long_w = _sector_neutral_weights(
+            mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        short_w = _sector_neutral_weights(
+            -mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        combined = _long_short_normalize(long_w, short_w)
+        return _periodic_rebalance(combined, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H194: LongShortReversal (true market-neutral L/S, extends H185)
+# ---------------------------------------------------------------------------
+
+
+class LongShortReversal(CrossSectionalStrategy):
+    """H194: Market-neutral long-short weekly reversal.
+
+    Long prior-5-day sector losers, short prior-5-day sector winners.
+    Tests whether the short leg adds alpha over long-only WeeklyReversalSectorNeutral.
+    Weekly rebalance; gross exposure = 1.0 (50% long, 50% short).
+    """
+
+    name = "long_short_reversal"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        reversal_window: int = 5,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ret_5d = prices_panel.pct_change(self.reversal_window)
+        long_w = _sector_neutral_weights(
+            -ret_5d, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        short_w = _sector_neutral_weights(
+            ret_5d, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        combined = _long_short_normalize(long_w, short_w)
+        return _periodic_rebalance(combined, self.rebalance_period)

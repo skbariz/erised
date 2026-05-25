@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H167",
+  "name": "piotroski-high-bar",
+  "strategy_class": "PiotroskiValueScreen",
+  "family": "cross-sectional value (quality-filtered)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.5912,
+  "ci_low": 0.2011,
+  "ci_high": 0.997,
+  "cagr": 0.0988,
+  "max_drawdown": -0.5568,
+  "n_trades": 5,
+  "h001_corr": 0.372,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.208,
+    1.0,
+    1.875,
+    -0.125,
+    1.336
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Top B/M quintile filtered by Piotroski F-score >= 7 (strict bar). Variation of H164 testing tighter quality gate.",
+  "canonical_params": {
+    "bm_quantile": 0.2,
+    "min_fscore": 7.0,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

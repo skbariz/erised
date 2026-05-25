@@ -697,3 +697,232 @@ class SmoothVolTargetMomentum(CrossSectionalStrategy):
             port_rets, self.vol_target, self.vol_window, self.vol_min, self.vol_max
         )
         return base_w.mul(scale, axis=0)
+
+
+# ---------------------------------------------------------------------------
+# H160: Long-Term Reversal (De Bondt-Thaler 36-month contrarian)
+# ---------------------------------------------------------------------------
+
+
+class LongTermReversal(CrossSectionalStrategy):
+    """H160: Buy 3-year losers — long bottom quintile by 36-month past return.
+
+    Skips the last month (skip_days=21) to avoid momentum contamination.
+    ascending=True so the most negative return ranks first.
+    """
+
+    name = "long_term_reversal"
+
+    def __init__(
+        self,
+        long_days: int = 756,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        reversal = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        daily_w = _equal_weight_top_quantile(
+            reversal, membership, self.top_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H161: Five-Year Reversal (60-month formation)
+# ---------------------------------------------------------------------------
+
+
+class FiveYearReversal(CrossSectionalStrategy):
+    """H161: Buy 5-year losers — same mechanism as H160 but 60-month lookback."""
+
+    name = "five_year_reversal"
+
+    def __init__(
+        self,
+        long_days: int = 1260,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        reversal = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        daily_w = _equal_weight_top_quantile(
+            reversal, membership, self.top_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H162: Composite Value-Momentum (12-1m momentum + 3yr reversal z-score blend)
+# ---------------------------------------------------------------------------
+
+
+class CompositeValueMomentum(CrossSectionalStrategy):
+    """H162: 50/50 cross-sectional z-score blend of momentum and long-term reversal.
+
+    score = 0.5 * z(12-1m return) + 0.5 * z(−36m return)
+    Negative sign on 36m makes losers score positively (value component).
+    """
+
+    name = "composite_value_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        reversal_days: int = 756,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.reversal_days = reversal_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        rev = prices_panel.shift(self.skip_days) / prices_panel.shift(self.reversal_days) - 1
+
+        def _cs_zscore(df: pd.DataFrame) -> pd.DataFrame:
+            mu = df.mean(axis=1)
+            sd = df.std(axis=1).replace(0, np.nan)
+            return df.sub(mu, axis=0).div(sd, axis=0)
+
+        mom_z = _cs_zscore(mom)
+        rev_z = _cs_zscore(-rev)  # negate: loser → high z-score
+        score = 0.5 * mom_z + 0.5 * rev_z
+
+        daily_w = _equal_weight_top_quantile(score, membership, self.top_quantile, ascending=False)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H163: Residual Momentum (CAPM-adjusted market-neutral momentum)
+# ---------------------------------------------------------------------------
+
+
+class ResidualMomentum(CrossSectionalStrategy):
+    """H163: Rank by cumulative CAPM-residual return over the formation window.
+
+    score_i = sum(r_i,t - beta_i * r_mkt,t) for t in [T-long, T-skip].
+    beta_i estimated via rolling cov/var over the same window.
+    Market proxy: spy_rets if provided, else equal-weight panel average.
+    """
+
+    name = "residual_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+        spy_rets: pd.Series | None = None,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+        self.spy_rets = spy_rets
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        window = self.long_days - self.skip_days
+
+        if self.spy_rets is not None:
+            mkt_r = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        else:
+            mem_f = membership.reindex_like(daily_rets).fillna(False)
+            mkt_r = daily_rets.where(mem_f).mean(axis=1).fillna(0.0)
+
+        # Rolling beta = cov(stock, mkt) / var(mkt)
+        cov_sm = daily_rets.rolling(window, min_periods=window // 2).cov(mkt_r)
+        var_m = mkt_r.rolling(window, min_periods=window // 2).var()
+        beta = cov_sm.div(var_m, axis=0)
+
+        stock_sum = daily_rets.rolling(window, min_periods=window // 2).sum()
+        mkt_sum = mkt_r.rolling(window, min_periods=window // 2).sum()
+
+        # Residual momentum shifted by skip_days for lookahead safety
+        residual_mom = (stock_sum - beta.mul(mkt_sum, axis=0)).shift(self.skip_days)
+
+        daily_w = _equal_weight_top_quantile(
+            residual_mom, membership, self.top_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H164: Near 52-Week Low (contrarian low-proximity reversal)
+# ---------------------------------------------------------------------------
+
+
+class NearFiftyTwoWeekLow(CrossSectionalStrategy):
+    """H164: Buy stocks nearest to their 52-week low (contrarian reversal).
+
+    Signal: current_price / rolling_min_price over `window` days.
+    Ratio close to 1.0 = trading near 52-week low = most beaten-down.
+    ascending=True so the lowest ratio (nearest low) ranks first.
+    """
+
+    name = "near_52wk_low"
+
+    def __init__(
+        self,
+        window: int = 252,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.window = window
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        roll_min = prices_panel.rolling(self.window, min_periods=self.window // 2).min()
+        # Proximity to 52-week low: lower ratio = closer to 52-week low
+        score = prices_panel / roll_min
+        # ascending=True → lowest ratio (closest to 52-week low) ranks first
+        daily_w = _equal_weight_top_quantile(score, membership, self.top_quantile, ascending=True)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)

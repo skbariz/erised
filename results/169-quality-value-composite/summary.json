@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H169",
+  "name": "quality-value-composite",
+  "strategy_class": "QualityValueComposite",
+  "family": "cross-sectional quality+value (composite)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.839,
+  "ci_low": 0.433,
+  "ci_high": 1.2495,
+  "cagr": 0.1032,
+  "max_drawdown": -0.3711,
+  "n_trades": 1,
+  "h001_corr": 0.6281,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.782,
+    0.892,
+    2.159,
+    0.735,
+    1.925,
+    1.008,
+    1.079
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(1/3)*z(B/M) + (1/3)*z(GP/A) + (1/3)*z(-accruals). Combines value, profitability, and earnings quality. Sector-neutral.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

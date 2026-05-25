@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H151",
+  "name": "momentum-market-neutral",
+  "strategy_class": "MomentumMarketNeutral",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.0993,
+  "ci_low": -0.3011,
+  "ci_high": 0.5081,
+  "cagr": 0.0046,
+  "max_drawdown": -0.7066,
+  "n_trades": 0,
+  "h001_corr": 0.2351,
+  "fold_sharpes": [
+    1.748,
+    1.032,
+    1.263,
+    1.527,
+    0.958,
+    -1.335,
+    -0.316,
+    0.161,
+    0.619,
+    -0.755,
+    0.146,
+    -0.298
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "L/S 0.5 gross each leg. After 50bps/yr borrow + 2.5bps/turn. ~zero market beta.",
+  "canonical_params": {
+    "top_quantile": 0.2,
+    "bottom_quantile": 0.2,
+    "monthly_rebalance": true,
+    "borrow_bps_annual": 50
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H171",
+  "name": "operating-profitability-ff5",
+  "strategy_class": "OperatingProfitabilityFF5",
+  "family": "cross-sectional quality (FF5 RMW)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8637,
+  "ci_low": 0.4465,
+  "ci_high": 1.2714,
+  "cagr": 0.1083,
+  "max_drawdown": -0.3629,
+  "n_trades": 1,
+  "h001_corr": 0.6212,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.592,
+    0.806,
+    2.046,
+    1.054,
+    2.087,
+    1.189,
+    1.042
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long top 20% by GP/BE within each GICS sector. FF2015 RMW (robust-minus-weak) factor variant. Sector-neutral.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

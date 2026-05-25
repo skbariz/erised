@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H172",
+  "name": "ff5-composite",
+  "strategy_class": "FF5Composite",
+  "family": "cross-sectional multi-factor (FF5)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7569,
+  "ci_low": 0.3534,
+  "ci_high": 1.1702,
+  "cagr": 0.0945,
+  "max_drawdown": -0.3903,
+  "n_trades": 1,
+  "h001_corr": 0.617,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.61,
+    0.842,
+    1.985,
+    0.714,
+    1.956,
+    0.895,
+    0.877
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(1/3)*z(B/M) + (1/3)*z(GP/BE) + (1/3)*z(-delta_TA/TA). Combines FF5 HML+RMW+CMA signals. Sector-neutral.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "growth_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

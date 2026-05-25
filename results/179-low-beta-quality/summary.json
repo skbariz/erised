@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H179",
+  "name": "low-beta-quality",
+  "strategy_class": "LowBetaQuality",
+  "family": "cross-sectional low-beta + quality",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1985,
+  "ci_low": 0.7876,
+  "ci_high": 1.6095,
+  "cagr": 0.1816,
+  "max_drawdown": -0.4044,
+  "n_trades": 1,
+  "h001_corr": 0.6441,
+  "fold_sharpes": [
+    1.258,
+    2.242,
+    1.477,
+    2.169,
+    1.27,
+    0.073,
+    1.158,
+    2.596,
+    1.05,
+    2.048,
+    1.22,
+    1.047
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(1/2)*z(-beta) + (1/2)*z(GP/A), sector-neutral. Combines BAB (Frazzini-Pedersen 2014) with gross profitability (Novy-Marx 2013).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "beta_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

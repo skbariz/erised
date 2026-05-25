@@ -1,0 +1,37 @@
+H179: LowBetaQuality (low-beta + GP/A intersection, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (gross_profit, total_assets)...
+Gross profit coverage: 3379/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H179 Canonical (sector-neutral, within_sector_quantile=20%, beta_window=252):
+  Sharpe 1.199  CI [0.788, 1.609]
+  CAGR 18.16%  MaxDD -40.44%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 1.284  CI [0.887, 1.654]  MaxDD -41.58%
+  within_sector_quantile=20%  Sharpe 1.199  CI [0.789, 1.592]  MaxDD -40.44%
+  within_sector_quantile=30%  Sharpe 1.119  CI [0.696, 1.498]  MaxDD -40.37%
+
+Per-fold Sharpe:
+  Fold  0: +1.258  (1998-01-04 -- 2000-01-04)
+  Fold  1: +2.242  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.477  (2002-01-03 -- 2004-01-03)
+  Fold  3: +2.169  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.270  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.073  (2008-01-02 -- 2010-01-01)
+  Fold  6: +1.158  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.596  (2012-01-01 -- 2013-12-31)
+  Fold  8: +1.050  (2013-12-31 -- 2015-12-31)
+  Fold  9: +2.048  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.220  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.047  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6441
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\179-low-beta-quality\summary.json

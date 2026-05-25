@@ -34,4 +34,14 @@ If Sharpe ≤ max(H180, H150), the signals are either redundant or the combinati
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.992 |
+| 95% CI | [0.593, 1.400] |
+| CAGR | 18.66% |
+| Max DD | -46.21% |
+| H001 corr | +0.687 |
+
+Strongly beats both parents: H180 (0.715) and H150 MomentumLongOnly (0.981). Chan et al. complementarity validated — price momentum fills the pre-EDGAR gap (folds 0-4 all positive), while earnings momentum adds signal post-2009. 12/12 folds positive. Sensitivity: longer mom_window improves (21d: 0.854 → 63d: 0.992 → 126d: 1.020). H001 corr +0.687 elevated due to momentum component.

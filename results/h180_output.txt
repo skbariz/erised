@@ -1,0 +1,37 @@
+H180: EarningsTrendLong (YoY NI growth, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income)...
+Net income coverage: 3385/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H180 Canonical (sector-neutral, within_sector_quantile=20%, yoy_window=252):
+  Sharpe 0.715  CI [0.311, 1.125]
+  CAGR 8.31%  MaxDD -37.19%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- yoy_window:
+  yoy_window=126d  Sharpe 0.700  CI [0.300, 1.099]  MaxDD -38.43%
+  yoy_window=189d  Sharpe 0.689  CI [0.290, 1.071]  MaxDD -39.05%
+  yoy_window=252d  Sharpe 0.715  CI [0.318, 1.098]  MaxDD -37.19%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.000  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.370  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.034  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.874  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.757  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.995  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.937  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5810
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\180-earnings-trend-long\summary.json

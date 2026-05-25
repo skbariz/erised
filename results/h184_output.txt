@@ -1,0 +1,36 @@
+H184: EarningsMomentumComposite (z_SUE + z_mom_63d) / 2
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income)...
+Sector data: 503 tickers, 11 sectors
+
+H184 Canonical (sector-neutral, within_sector_quantile=20%, mom_window=63d):
+  Sharpe 0.992  CI [0.593, 1.400]
+  CAGR 18.66%  MaxDD -46.21%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- mom_window:
+  mom_window=21d  Sharpe 0.854  CI [0.475, 1.248]  MaxDD -47.24%
+  mom_window=63d  Sharpe 0.992  CI [0.613, 1.385]  MaxDD -46.21%
+  mom_window=126d  Sharpe 1.020  CI [0.627, 1.417]  MaxDD -46.80%
+
+Per-fold Sharpe:
+  Fold  0: +1.378  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.810  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.961  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.597  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.571  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.154  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.780  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.145  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.938  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.514  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.059  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.111  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6866
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\184-earnings-momentum-composite\summary.json

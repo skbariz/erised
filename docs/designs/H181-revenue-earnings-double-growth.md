@@ -35,4 +35,14 @@ If Sharpe ≤ H180 Sharpe, the dual-positive filter adds no value over pure NI g
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.762 |
+| 95% CI | [0.355, 1.172] |
+| CAGR | 8.70% |
+| Max DD | -36.80% |
+| H001 corr | +0.586 |
+
+Beats H180 (0.762 vs 0.715) — Jegadeesh-Livnat dual-filter validated. Folds 0-5 zero (pre-EDGAR). Folds 6-11 all positive (0.535–2.119). Sensitivity flat across quantile thresholds. MaxDD -36.80% slightly better than H180.

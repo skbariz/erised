@@ -34,4 +34,14 @@ If positive filing-date gaps do not continue over 20 days, the EDGAR filing itse
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.623 |
+| 95% CI | [0.224, 1.027] |
+| CAGR | 8.69% |
+| Max DD | -42.49% |
+| H001 corr | +0.538 |
+
+Weakest earnings drift strategy. Folds 0-4 zero (pre-EDGAR). Folds 5-11 all positive; fold 7 exceptional at 2.125. Sensitivity decreasing with threshold: 1% (0.630) > 2% (0.623) > 3% (0.559) — larger gaps are less common and less persistent. CI lower bound just above zero (0.224).

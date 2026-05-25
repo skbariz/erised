@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H182",
+  "name": "filing-date-gap-continuation",
+  "strategy_class": "FilingDateGapContinuation",
+  "family": "cross-sectional earnings drift / event",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.6229,
+  "ci_low": 0.2242,
+  "ci_high": 1.0274,
+  "cagr": 0.0869,
+  "max_drawdown": -0.4249,
+  "n_trades": 19,
+  "h001_corr": 0.5383,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.662,
+    0.123,
+    2.125,
+    0.675,
+    0.096,
+    1.296,
+    0.995
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long stocks with positive price reaction (>2%) on EDGAR filing dates, held for 20 days. Filing detected as NI panel value change.",
+  "canonical_params": {
+    "gap_threshold": 0.02,
+    "hold_days": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

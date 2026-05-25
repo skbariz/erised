@@ -36,4 +36,14 @@ If cash-backed earnings drift produces equal or worse Sharpe than H180, the accr
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.687 |
+| 95% CI | [0.287, 1.094] |
+| CAGR | 7.86% |
+| Max DD | -36.66% |
+| H001 corr | +0.578 |
+
+Cash quality filter does NOT improve over H180 (0.687 vs 0.715) — falsification condition triggered. The accrual quality screen adds no alpha within S&P 500; high-quality membership may already screen out worst accrual manipulators. Sensitivity completely flat across cash_ratio_min values. Kept due to positive CI and good MaxDD (-36.66%), but H180 is the preferred earnings drift vehicle.

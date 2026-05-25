@@ -1,0 +1,36 @@
+H183: CashEarningsDrift (NI growth + cash quality filter)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income, operating_cf)...
+Sector data: 503 tickers, 11 sectors
+
+H183 Canonical (sector-neutral, cash_ratio_min=0.5):
+  Sharpe 0.687  CI [0.287, 1.094]
+  CAGR 7.86%  MaxDD -36.66%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- cash_ratio_min:
+  cash_ratio_min=0.3  Sharpe 0.687  CI [0.282, 1.071]  MaxDD -36.94%
+  cash_ratio_min=0.5  Sharpe 0.687  CI [0.285, 1.071]  MaxDD -36.66%
+  cash_ratio_min=0.7  Sharpe 0.680  CI [0.275, 1.069]  MaxDD -36.60%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.000  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.299  (2010-01-01 -- 2012-01-01)
+  Fold  7: +1.829  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.844  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.760  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.987  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.954  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5784
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\183-cash-earnings-drift\summary.json

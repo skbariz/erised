@@ -1,0 +1,35 @@
+H182: FilingDateGapContinuation (positive price reaction on EDGAR filing dates)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income for filing detection)...
+
+H182 Canonical (gap_threshold=2%, hold_days=20):
+  Sharpe 0.623  CI [0.224, 1.027]
+  CAGR 8.69%  MaxDD -42.49%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- gap_threshold:
+  gap_threshold=1%  Sharpe 0.630  CI [0.255, 1.020]  MaxDD -40.64%
+  gap_threshold=2%  Sharpe 0.623  CI [0.236, 1.017]  MaxDD -42.49%
+  gap_threshold=3%  Sharpe 0.559  CI [0.138, 0.987]  MaxDD -42.90%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.662  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.123  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.125  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.675  (2013-12-31 -- 2015-12-31)
+  Fold  9: +0.096  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.296  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.995  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5383
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\182-filing-date-gap-continuation\summary.json

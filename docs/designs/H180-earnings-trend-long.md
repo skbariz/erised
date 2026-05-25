@@ -36,4 +36,14 @@ If the SUE proxy (YoY NI growth) produces Sharpe ≤ 0.51 or CI clips zero, this
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.715 |
+| 95% CI | [0.311, 1.125] |
+| CAGR | 8.31% |
+| Max DD | -37.19% |
+| H001 corr | +0.581 |
+
+Folds 0-5 zero (pre-EDGAR + GFC-era coverage gap). Folds 6-11 all positive, ranging 0.370–2.034. Sensitivity flat across yoy_window values (126d/189d/252d all ~0.70). MaxDD -37.19% is meaningfully better than SPY (-55.92%).

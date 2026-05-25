@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H181",
+  "name": "revenue-earnings-double-growth",
+  "strategy_class": "RevenueEarningsDoubleGrowth",
+  "family": "cross-sectional earnings drift",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7616,
+  "ci_low": 0.3554,
+  "ci_high": 1.1724,
+  "cagr": 0.087,
+  "max_drawdown": -0.368,
+  "n_trades": 1,
+  "h001_corr": 0.586,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.535,
+    2.119,
+    0.867,
+    1.644,
+    1.033,
+    1.055
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Jegadeesh-Livnat proxy: both NI and revenue grew YoY. Signal = (z_ni_growth + z_rev_growth)/2 where both > 0.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "yoy_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

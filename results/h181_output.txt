@@ -1,0 +1,36 @@
+H181: RevenueEarningsDoubleGrowth (both NI and revenue grew YoY)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income, revenue)...
+Sector data: 503 tickers, 11 sectors
+
+H181 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 0.762  CI [0.355, 1.172]
+  CAGR 8.70%  MaxDD -36.80%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 0.755  CI [0.344, 1.157]  MaxDD -37.08%
+  within_sector_quantile=20%  Sharpe 0.762  CI [0.347, 1.148]  MaxDD -36.80%
+  within_sector_quantile=30%  Sharpe 0.741  CI [0.334, 1.132]  MaxDD -38.07%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.000  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.535  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.119  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.867  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.644  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.033  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.055  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5860
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\181-revenue-earnings-double-growth\summary.json

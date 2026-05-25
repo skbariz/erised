@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H184",
+  "name": "earnings-momentum-composite",
+  "strategy_class": "EarningsMomentumComposite",
+  "family": "cross-sectional earnings drift + momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9918,
+  "ci_low": 0.5935,
+  "ci_high": 1.3999,
+  "cagr": 0.1866,
+  "max_drawdown": -0.4621,
+  "n_trades": 1,
+  "h001_corr": 0.6866,
+  "fold_sharpes": [
+    1.378,
+    0.81,
+    0.961,
+    1.597,
+    1.571,
+    0.154,
+    0.78,
+    2.145,
+    0.938,
+    1.514,
+    1.059,
+    1.111
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(z_SUE + z_mom_63d)/2 sector-neutral. SUE proxy = YoY NI growth rate. Combines fundamental drift with price trend.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "yoy_window": 252,
+    "mom_window": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

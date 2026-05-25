@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H154",
+  "name": "trend-gated-momentum",
+  "strategy_class": "TrendGatedMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.9616,
+  "ci_low": 0.5683,
+  "ci_high": 1.3675,
+  "cagr": 0.1484,
+  "max_drawdown": -0.274,
+  "n_trades": 210,
+  "h001_corr": 0.7226,
+  "fold_sharpes": [
+    1.619,
+    0.738,
+    1.572,
+    1.0,
+    0.015,
+    1.094,
+    0.182,
+    2.167,
+    0.441,
+    1.798,
+    0.864,
+    1.037
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H150 momentum gated by equal-weight S&P 500 index MA200 (full)/MA100 (50%)/below (flat). Pure S&P 500 strategy \u2014 no external SPY data.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "ma_long": 200,
+    "ma_short": 100
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,101 @@
+H200: CrossProgramMDRPortfolio
+================================================================
+Loading S&P 500 stock panel...
+  Panel: 7555 days, 516 tickers
+Loading fundamental data (net_income for H199)...
+
+Folds (AA): 12  |  Folds (CS): 12
+
+Running 37 H001-H100 strategies...
+  H001: Sharpe 0.614
+  H007: Sharpe 0.620
+  H008: Sharpe 0.622
+  H016: Sharpe 0.555
+  H018: Sharpe 0.575
+  H019: Sharpe 0.628
+  H021: Sharpe 1.029
+  H022: Sharpe 0.678
+  H023: Sharpe 0.535
+  H025: Sharpe 0.529
+  H027: Sharpe 0.609
+  H031: Sharpe 0.578
+  H034: Sharpe 0.549
+  H035: Sharpe 0.568
+  H043: Sharpe 0.577
+  H046: Sharpe 0.707
+  H051: Sharpe 0.626
+  H060: Sharpe 0.531
+  H063: Sharpe 0.577
+  H065: Sharpe 0.554
+  H066: Sharpe 0.990
+  H068: Sharpe 0.575
+  H070: Sharpe 1.066
+  H076: Sharpe 0.666
+  H077: Sharpe 0.683
+  H078: Sharpe 0.762
+  H079: Sharpe 0.952
+  H080: Sharpe 0.891
+  H082: Sharpe 0.616
+  H084: Sharpe 0.548
+  H086: Sharpe 1.109
+  H087: Sharpe 1.010
+  H088: Sharpe 0.871
+  H089: Sharpe 1.074
+  H090: Sharpe 1.020
+  H097: Sharpe 0.992
+  H098: Sharpe 0.879
+
+Running 9 H150-H199 cross-sectional strategies...
+  H157... Sharpe 1.079
+  H175... Sharpe 1.088
+  H185... Sharpe 1.103
+  H186... Sharpe 1.095
+  H189... Sharpe 1.025
+  H191... Sharpe 1.135
+  H192... Sharpe 1.175
+  H194... Sharpe 0.829
+  H199... Sharpe 1.020
+
+Equal-weight baseline (46 strategies): Sharpe 1.134  MaxDD -20.65%
+
+Solving MDR optimisation...
+
+Optimal MDR weights (> 0.5%):
+  H194: 0.2981
+  H043: 0.1970
+  H078: 0.1386
+  H035: 0.1055
+  H060: 0.0969
+  H025: 0.0681
+  H016: 0.0476
+  H082: 0.0329
+  H068: 0.0086
+  H034: 0.0067
+
+Cross-Program MDR Portfolio:
+  Sharpe 1.350  CI [0.941, 1.737]
+  CAGR 5.36%  MaxDD -8.83%
+
+Sensitivity -- H150+ component count:
+  top_3_cs  Sharpe 1.247  CI [0.825, 1.656]  MaxDD -7.74%
+  top_6_cs  Sharpe 1.247  CI [0.825, 1.656]  MaxDD -7.74%
+  top_9_cs  Sharpe 1.350  CI [0.937, 1.741]  MaxDD -8.83%
+
+H001 correlation: +0.6224
+
+Per-fold Sharpe:
+  Fold  0: +2.452  (1998-01-29 -- 2000-01-29)
+  Fold  1: +1.193  (2000-01-29 -- 2002-01-28)
+  Fold  2: +0.967  (2002-01-28 -- 2004-01-28)
+  Fold  3: +1.634  (2004-01-28 -- 2006-01-27)
+  Fold  4: +1.569  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.889  (2008-01-27 -- 2010-01-26)
+  Fold  6: +2.380  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.745  (2012-01-26 -- 2014-01-25)
+  Fold  8: +0.245  (2014-01-25 -- 2016-01-25)
+  Fold  9: +2.313  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.569  (2018-01-24 -- 2020-01-24)
+  Fold 11: +1.431  (2020-01-24 -- 2022-01-23)
+
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\200-cross-program-mdr-portfolio\summary.json

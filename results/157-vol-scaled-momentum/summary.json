@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H157",
+  "name": "vol-scaled-momentum",
+  "strategy_class": "VolScaledMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0788,
+  "ci_low": 0.685,
+  "ci_high": 1.4946,
+  "cagr": 0.1415,
+  "max_drawdown": -0.2539,
+  "n_trades": 5868,
+  "h001_corr": 0.6996,
+  "fold_sharpes": [
+    1.878,
+    0.791,
+    1.248,
+    1.467,
+    1.026,
+    -0.04,
+    0.885,
+    1.978,
+    0.631,
+    1.275,
+    0.846,
+    0.984
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H150 + Barroso & Santa-Clara vol-target overlay. H086 mechanism on CS momentum sleeve.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "vol_target": 0.12,
+    "vol_window": 21,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

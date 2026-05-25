@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H174",
+  "name": "cash-operating-profitability",
+  "strategy_class": "CashOperatingProfitability",
+  "family": "cross-sectional quality (cash profitability)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7664,
+  "ci_low": 0.3654,
+  "ci_high": 1.1764,
+  "cagr": 0.0932,
+  "max_drawdown": -0.3886,
+  "n_trades": 1,
+  "h001_corr": 0.6259,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.45,
+    0.745,
+    2.103,
+    0.701,
+    1.867,
+    0.884,
+    1.035
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long top 20% by OCF/BE within each GICS sector. Cash-based OP filters accruals, more predictive than accruals-based OP. Ball et al. 2016.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

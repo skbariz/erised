@@ -1,6 +1,9 @@
 # Data
 data/*.parquet
 data/raw/
+data/fundamentals/
+data/stocks/
+data/sp500_tickers.txt
 !data/HOLDOUT_HASH.txt
 !data/.gitkeep
 

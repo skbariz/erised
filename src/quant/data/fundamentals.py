@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA_DIR = Path(__file__).resolve().parents[4] / "data"
+DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 FUNDAMENTALS_DIR = DATA_DIR / "fundamentals"
 
 VALID_FIELDS = [

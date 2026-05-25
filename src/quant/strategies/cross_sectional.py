@@ -1,4 +1,4 @@
-"""Cross-sectional (stock-selection) strategies for H150-H159.
+"""Cross-sectional (stock-selection) strategies for H150-H164.
 
 Interface contract:
   generate_weights(prices_panel, membership) -> pd.DataFrame
@@ -923,6 +923,367 @@ class NearFiftyTwoWeekLow(CrossSectionalStrategy):
         score = prices_panel / roll_min
         # ascending=True → lowest ratio (closest to 52-week low) ranks first
         daily_w = _equal_weight_top_quantile(score, membership, self.top_quantile, ascending=True)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Shared helpers for fundamental-data strategies (H160-H164)
+# ---------------------------------------------------------------------------
+
+
+def _cs_rank_norm(df: pd.DataFrame) -> pd.DataFrame:
+    """Cross-sectional rank normalised to [0, 1] each row (NaN kept as NaN)."""
+    n = df.notna().sum(axis=1).replace(0, np.nan)
+    return df.rank(axis=1, ascending=True, na_option="keep").div(n, axis=0)
+
+
+def _cs_zscore(df: pd.DataFrame) -> pd.DataFrame:
+    """Cross-sectional z-score each row (NaN kept as NaN)."""
+    mu = df.mean(axis=1)
+    sd = df.std(axis=1).replace(0, np.nan)
+    return df.sub(mu, axis=0).div(sd, axis=0)
+
+
+def _align_fund(fund_panel: pd.DataFrame, prices_panel: pd.DataFrame) -> pd.DataFrame:
+    """Reindex fundamental panel to prices_panel index and columns."""
+    return fund_panel.reindex(index=prices_panel.index, columns=prices_panel.columns)
+
+
+# ---------------------------------------------------------------------------
+# H160: Large-Cap Value (Book-to-Market + Earnings Yield)
+# ---------------------------------------------------------------------------
+
+
+class LargeCapValue(CrossSectionalStrategy):
+    """H160: Long top quintile by composite value: 0.5×rank(B/M) + 0.5×rank(E/P).
+
+    B/M = book_equity / (price × shares_outstanding).
+    E/P = net_income / (price × shares_outstanding). NaN for negative earnings.
+    Fundamental panels are point-in-time (filed_date forward-fill).
+    """
+
+    name = "large_cap_value"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.shares_outstanding = shares_outstanding
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)  # exclude negative book equity
+        ep = (ni / mktcap).where(ni > 0)  # exclude negative earnings
+
+        composite = 0.5 * _cs_rank_norm(bm) + 0.5 * _cs_rank_norm(ep)
+        daily_w = _equal_weight_top_quantile(
+            composite, membership, self.top_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H161: Quality-Filtered Long-Term Reversal (De Bondt-Thaler upgraded)
+# ---------------------------------------------------------------------------
+
+
+class QualityFilteredReversal(CrossSectionalStrategy):
+    """H161: Buy 5-year losers that pass a quality filter.
+
+    Base signal: negative 60-month price return (buy biggest losers).
+    Quality gate (all must be True to enter portfolio):
+      - 6-month price return > 0 (recovery trend has started)
+      - operating_cf > 0 (cash-generative, not financially distressed)
+      - current_ratio > 1.0 (solvent — current_assets > current_liabilities)
+    """
+
+    name = "quality_filtered_reversal"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        long_days: int = 1260,
+        skip_days: int = 21,
+        recovery_days: int = 126,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.operating_cf = operating_cf
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.recovery_days = recovery_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # 5-year reversal signal (ascending=True → buy lowest returns)
+        reversal = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+
+        # Quality gates (all must be True)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+
+        recovery = prices_panel / prices_panel.shift(self.recovery_days) - 1
+        gate = (
+            (recovery > 0)  # positive 6-month price return (recovery started)
+            & (ocf > 0)  # positive operating cash flow
+            & (ca > cl)  # current ratio > 1
+        )
+        # Apply quality gate: set reversal score to NaN for stocks that fail
+        gated_reversal = reversal.where(gate)
+
+        daily_w = _equal_weight_top_quantile(
+            gated_reversal, membership, self.top_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H162: Value + Momentum Composite (Asness, Moskowitz & Pedersen 2013)
+# ---------------------------------------------------------------------------
+
+
+class ValueMomentumComposite(CrossSectionalStrategy):
+    """H162: 50/50 z-score blend of value (B/M + E/P) and 12-1m momentum.
+
+    composite = 0.5 × z(value_rank) + 0.5 × z(momentum)
+    Value component updates quarterly (on filing dates).
+    Momentum component updates daily. Portfolio rebalances monthly.
+    """
+
+    name = "value_momentum_composite"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.shares_outstanding = shares_outstanding
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)
+        ep = (ni / mktcap).where(ni > 0)
+        value_composite = 0.5 * _cs_rank_norm(bm) + 0.5 * _cs_rank_norm(ep)
+
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+
+        score = 0.5 * _cs_zscore(value_composite) + 0.5 * _cs_zscore(mom)
+        daily_w = _equal_weight_top_quantile(score, membership, self.top_quantile, ascending=False)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H163: Sector-Neutral Value + Momentum
+# ---------------------------------------------------------------------------
+
+
+class SectorNeutralValueMomentum(CrossSectionalStrategy):
+    """H163: Value+Momentum composite (H162) ranked within GICS sectors.
+
+    For each of the 11 GICS sectors: rank stocks by the composite z-score
+    within the sector, select top 30% within sector, scale each sector to
+    equal weight in the portfolio.
+
+    sectors: pd.Series, index=ticker, values=GICS sector string.
+    """
+
+    name = "sector_neutral_value_momentum"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        long_days: int = 252,
+        skip_days: int = 21,
+        within_sector_quantile: float = 0.30,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)
+        ep = (ni / mktcap).where(ni > 0)
+        value_composite = 0.5 * _cs_rank_norm(bm) + 0.5 * _cs_rank_norm(ep)
+
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        score = 0.5 * _cs_zscore(value_composite) + 0.5 * _cs_zscore(mom)
+
+        mem_f = membership.reindex_like(score).fillna(False)
+        unique_sectors = self.sectors.dropna().unique()
+        sector_weights = pd.DataFrame(0.0, index=prices_panel.index, columns=prices_panel.columns)
+
+        for sector in unique_sectors:
+            sec_tickers = self.sectors[self.sectors == sector].index.tolist()
+            sec_tickers = [t for t in sec_tickers if t in score.columns]
+            if not sec_tickers:
+                continue
+            sec_score = score[sec_tickers]
+            sec_mem = mem_f[sec_tickers]
+            sec_w = _equal_weight_top_quantile(
+                sec_score, sec_mem, self.within_sector_quantile, ascending=False
+            )
+            sector_weights[sec_tickers] = sec_w
+
+        # Scale so all sectors contribute equally: divide each sector's weights
+        # by the number of active sectors on each date
+        sec_totals: dict[str, pd.Series] = {}
+        for sector in unique_sectors:
+            sec_tickers = [
+                t
+                for t in self.sectors[self.sectors == sector].index.tolist()
+                if t in sector_weights.columns
+            ]
+            sec_totals[sector] = sector_weights[sec_tickers].sum(axis=1)
+
+        n_active = sum((st > 0).astype(int) for st in sec_totals.values())
+        n_active = n_active.replace(0, np.nan)
+
+        for sector in unique_sectors:
+            sec_tickers = [
+                t
+                for t in self.sectors[self.sectors == sector].index.tolist()
+                if t in sector_weights.columns
+            ]
+            st = sec_totals[sector].replace(0, np.nan)
+            scale = (1.0 / n_active) / st
+            sector_weights[sec_tickers] = sector_weights[sec_tickers].mul(scale, axis=0)
+
+        daily_w = sector_weights.fillna(0.0)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H164: Piotroski Value Screen (high B/M filtered by F-score ≥ 6)
+# ---------------------------------------------------------------------------
+
+
+class PiotroskiValueScreen(CrossSectionalStrategy):
+    """H164: Among top-quintile B/M stocks, buy only those with F-score ≥ min_fscore.
+
+    Step 1: rank by book-to-market, identify top quintile (cheap stocks).
+    Step 2: within that set, keep only stocks with Piotroski F-score >= min_fscore.
+    Step 3: equal-weight the survivors.
+
+    fscore_panel: pre-computed daily F-score panel (rows=dates, cols=tickers).
+    """
+
+    name = "piotroski_value_screen"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        fscore_panel: pd.DataFrame,
+        bm_quantile: float = 0.20,
+        min_fscore: float = 6.0,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.shares_outstanding = shares_outstanding
+        self.fscore_panel = fscore_panel
+        self.bm_quantile = bm_quantile
+        self.min_fscore = min_fscore
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        fs = _align_fund(self.fscore_panel, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)
+
+        # Identify top-quintile by B/M (highest B/M = cheapest)
+        mem_f = membership.reindex_like(bm).fillna(False)
+        masked_bm = bm.where(mem_f)
+        ranks = masked_bm.rank(axis=1, ascending=False, na_option="keep")
+        n_members = mem_f.sum(axis=1)
+        threshold = (n_members * self.bm_quantile).clip(lower=1)
+        in_value_quintile = ranks.le(threshold, axis=0) & ranks.notna()
+
+        # Apply F-score gate
+        passes_fscore = fs >= self.min_fscore
+        selected = in_value_quintile & passes_fscore & mem_f
+
+        count = selected.sum(axis=1).replace(0, np.nan)
+        daily_w = selected.astype(float).div(count, axis=0).fillna(0.0)
         if not self.monthly_rebalance:
             return daily_w
         return _monthly_rebalance(daily_w, prices_panel)

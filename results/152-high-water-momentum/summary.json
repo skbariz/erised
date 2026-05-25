@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H152",
+  "name": "high-water-momentum",
+  "strategy_class": "HighWaterMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 0.8501,
+  "ci_low": 0.4468,
+  "ci_high": 1.2531,
+  "cagr": 0.136,
+  "max_drawdown": -0.4603,
+  "n_trades": 3,
+  "h001_corr": 0.7102,
+  "fold_sharpes": [
+    1.214,
+    0.903,
+    0.683,
+    1.485,
+    1.234,
+    -0.346,
+    0.795,
+    2.089,
+    0.804,
+    1.466,
+    0.845,
+    1.065
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "price/52w-high anchoring signal. George & Hwang (2004). Compare to H150.",
+  "canonical_params": {
+    "lookback": 252,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

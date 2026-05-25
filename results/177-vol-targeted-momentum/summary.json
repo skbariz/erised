@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H177",
+  "name": "vol-targeted-momentum",
+  "strategy_class": "VolTargetedMomentum",
+  "family": "cross-sectional momentum (vol-managed)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9371,
+  "ci_low": 0.5352,
+  "ci_high": 1.3458,
+  "cagr": 0.1786,
+  "max_drawdown": -0.4953,
+  "n_trades": 3,
+  "h001_corr": 0.7271,
+  "fold_sharpes": [
+    1.5,
+    1.145,
+    1.193,
+    1.534,
+    0.953,
+    -0.262,
+    0.735,
+    2.213,
+    1.051,
+    1.428,
+    0.917,
+    0.787
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1 month momentum with per-stock vol-targeting: weight *= min(1, target_vol/realized_vol). Moreira-Muir (2017) applied cross-sectionally.",
+  "canonical_params": {
+    "top_quantile": 0.2,
+    "target_vol": 0.2,
+    "vol_window": 63,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

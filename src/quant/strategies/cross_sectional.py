@@ -1854,3 +1854,296 @@ class CashOperatingProfitability(CrossSectionalStrategy):
         if not self.monthly_rebalance:
             return daily_w
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H175: Betting Against Beta (long-only low-beta, Frazzini-Pedersen 2014)
+# ---------------------------------------------------------------------------
+
+
+class BettingAgainstBeta(CrossSectionalStrategy):
+    """H175: Long bottom quintile by rolling 252d beta vs SPY (long-only BAB).
+
+    Frazzini-Pedersen (2014): low-beta stocks earn higher risk-adjusted returns.
+    Low beta is empirically associated with outperformance on a risk-adjusted basis.
+    Sector-neutral to avoid sector concentration.
+    """
+
+    name = "betting_against_beta"
+
+    def __init__(
+        self,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        beta_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.beta_window = beta_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+
+        cov_sm = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov_sm.div(var_m, axis=0)
+
+        # ascending=True: low beta selected (BAB long leg)
+        daily_w = _sector_neutral_weights(
+            beta, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H176: Low Volatility Anomaly (long lowest realized vol quintile)
+# ---------------------------------------------------------------------------
+
+
+class LowVolatilityAnomaly(CrossSectionalStrategy):
+    """H176: Long bottom quintile by 252d realized volatility.
+
+    Baker, Bradley, Wurgler (2011): low-volatility stocks outperform high-volatility
+    stocks on a risk-adjusted basis. Sector-neutral selection.
+    """
+
+    name = "low_volatility_anomaly"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        vol_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.vol_window = vol_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        min_p = self.vol_window // 2
+        realized_vol = daily_rets.rolling(self.vol_window, min_periods=min_p).std()
+
+        # ascending=True: low vol selected
+        daily_w = _sector_neutral_weights(
+            realized_vol, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H177: Vol-Targeted Momentum (12-1m momentum with stock-level vol scaling)
+# ---------------------------------------------------------------------------
+
+
+class VolTargetedMomentum(CrossSectionalStrategy):
+    """H177: 12-1 month momentum with per-stock vol-targeting overlay.
+
+    Moreira-Muir (2017): scale each stock's weight inversely to its recent variance.
+    Selects top `top_quantile` by momentum score, then scales each stock's weight
+    by (target_vol / realized_vol) capped at 1.0.
+    """
+
+    name = "vol_targeted_momentum"
+
+    def __init__(
+        self,
+        top_quantile: float = 0.20,
+        momentum_skip: int = 21,
+        momentum_window: int = 252,
+        vol_window: int = 63,
+        target_vol: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.top_quantile = top_quantile
+        self.momentum_skip = momentum_skip
+        self.momentum_window = momentum_window
+        self.vol_window = vol_window
+        self.target_vol = target_vol
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # 12-1 month momentum
+        mom = prices_panel.pct_change(self.momentum_window - self.momentum_skip).shift(
+            self.momentum_skip
+        )
+        base_w = _equal_weight_top_quantile(mom, membership, self.top_quantile, ascending=False)
+
+        # Per-stock vol scaling (annualized)
+        daily_rets = prices_panel.pct_change()
+        annual_vol = daily_rets.rolling(
+            self.vol_window, min_periods=self.vol_window // 2
+        ).std() * np.sqrt(252)
+        annual_vol = annual_vol.replace(0, np.nan)
+
+        # Scale: target_vol / realized_vol, capped at 1.0
+        scale = (self.target_vol / annual_vol).clip(upper=1.0).fillna(1.0)
+
+        # Apply scale and renormalize to sum to 1
+        scaled = base_w * scale
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        daily_w = scaled.div(row_sum, axis=0).fillna(0.0)
+
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H178: Defensive Quality + Momentum Composite
+# ---------------------------------------------------------------------------
+
+
+class DefensiveQualityMomentum(CrossSectionalStrategy):
+    """H178: (1/2)*z(quality_composite) + (1/2)*z(12-1m momentum), sector-neutral.
+
+    Quality composite = avg z(GP/A, -beta_252d) — simplified defensive quality.
+    Momentum = 12-1 month price return.
+    Sector-neutral selection of top `within_sector_quantile`.
+    """
+
+    name = "defensive_quality_momentum"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        beta_window: int = 252,
+        momentum_skip: int = 21,
+        momentum_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.beta_window = beta_window
+        self.momentum_skip = momentum_skip
+        self.momentum_window = momentum_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # Quality: GP/A z-score + low beta z-score
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gpa = (gp / ta).where(ta > 0)
+
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov_sm = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov_sm.div(var_m, axis=0)
+
+        quality = (
+            _cs_zscore(gpa).fillna(0.0)
+            + _cs_zscore(-beta).fillna(0.0)  # negate: low beta = high quality
+        ) / 2.0
+
+        # Momentum: 12-1 month
+        mom = prices_panel.pct_change(self.momentum_window - self.momentum_skip).shift(
+            self.momentum_skip
+        )
+
+        composite = (_cs_zscore(quality).fillna(0.0) + _cs_zscore(mom).fillna(0.0)) / 2.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H179: Low Beta Quality (BAB + quality intersection)
+# ---------------------------------------------------------------------------
+
+
+class LowBetaQuality(CrossSectionalStrategy):
+    """H179: Intersection of low beta and high quality (GP/A), sector-neutral.
+
+    Composite = (1/2)*z(-beta) + (1/2)*z(GP/A).
+    Combines Frazzini-Pedersen (2014) BAB signal with Novy-Marx (2013) profitability.
+    Low beta + high quality = defensive quality = should outperform in risk-off regimes.
+    """
+
+    name = "low_beta_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        beta_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.beta_window = beta_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gpa = (gp / ta).where(ta > 0)
+
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov_sm = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov_sm.div(var_m, axis=0)
+
+        composite = (
+            _cs_zscore(-beta).fillna(0.0)  # low beta = good
+            + _cs_zscore(gpa).fillna(0.0)  # high GP/A = good
+        ) / 2.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)

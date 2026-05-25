@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H163",
+  "name": "sector-neutral-value-momentum",
+  "strategy_class": "SectorNeutralValueMomentum",
+  "family": "cross-sectional value+momentum (sector-neutral)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7429,
+  "ci_low": 0.3448,
+  "ci_high": 1.1538,
+  "cagr": 0.0934,
+  "max_drawdown": -0.4033,
+  "n_trades": 1,
+  "h001_corr": 0.6281,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.219,
+    0.776,
+    2.058,
+    0.994,
+    1.645,
+    0.9,
+    0.961
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sector-neutral B/M+E/P+12-1m momentum composite. Top 30% per GICS sector. Israel-Moskowitz 2013.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "within_sector_quantile": 0.3,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

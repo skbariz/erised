@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H164",
+  "name": "piotroski-value-screen",
+  "strategy_class": "PiotroskiValueScreen",
+  "family": "cross-sectional value (quality-filtered)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7719,
+  "ci_low": 0.3641,
+  "ci_high": 1.2012,
+  "cagr": 0.1029,
+  "max_drawdown": -0.5258,
+  "n_trades": 1,
+  "h001_corr": 0.5001,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    2.14,
+    1.271,
+    1.977,
+    1.155,
+    0.873
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Top B/M quintile filtered by Piotroski F-score >= 6. Combines deep-value with quality screen. Piotroski 2000.",
+  "canonical_params": {
+    "bm_quantile": 0.2,
+    "min_fscore": 6.0,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

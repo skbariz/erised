@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H195",
+  "name": "fifty-two-week-high-momentum",
+  "strategy_class": "FiftyTwoWeekHighMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8777,
+  "ci_low": 0.475,
+  "ci_high": 1.2858,
+  "cagr": 0.1443,
+  "max_drawdown": -0.4583,
+  "n_trades": 1,
+  "h001_corr": 0.6916,
+  "fold_sharpes": [
+    1.23,
+    0.574,
+    0.77,
+    1.555,
+    1.317,
+    -0.253,
+    0.967,
+    2.062,
+    1.045,
+    1.654,
+    1.165,
+    0.957
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "George-Hwang (2004): price/52w-high ratio as momentum signal. Anchor bias: investors anchor to recent high and under-react to further gains. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "high_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

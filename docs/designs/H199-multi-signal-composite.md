@@ -27,3 +27,13 @@ Reversal signal uses -pct_change(5) so that recent underperformers score positiv
 - `reversal_window`: 5 days (canonical)
 - `yoy_window`: 252 days
 - `within_sector_quantile`: 0.20
+
+## Results (OOS 1993-2021, 12 folds)
+- **Decision: KEEP**
+- OOS Sharpe: 1.020  CI [0.622, 1.427]
+- CAGR: 20.68%  Max DD: -51.39%
+- H001 corr: +0.668
+- Fold Sharpes: 1.88, 1.21, 1.02, 1.94, 1.18, -0.03, 0.82, 2.18, 0.92, 1.59, 1.10, 1.05
+- Sensitivity: reversal_window 3-10d all Sharpe 1.02-1.08 — very robust
+- Best strategy in Batch 10; z-score blending of 3 signals delivers Sharpe >1.0
+- Signal blending worked: H199 (1.020) > H150 (0.981) > any individual component from H195-H197

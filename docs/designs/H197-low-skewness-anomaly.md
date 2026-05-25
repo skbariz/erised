@@ -22,3 +22,12 @@ Bali, Cakici, and Whitelaw (2011) document that investors overpay for lottery-li
 - `skew_window`: 252 days (canonical)
 - `within_sector_quantile`: 0.20
 - `rebalance_period`: 21 days
+
+## Results (OOS 1993-2021, 12 folds)
+- **Decision: KEEP**
+- OOS Sharpe: 0.879  CI [0.477, 1.287]
+- CAGR: 16.97%  Max DD: -51.84%
+- H001 corr: +0.612 (lower than most momentum strategies)
+- Fold Sharpes: 0.92, 1.43, 0.83, 1.56, 1.19, 0.24, 0.66, 1.98, 0.65, 2.08, 1.05, 0.90
+- Sensitivity: 126d skew_window best (0.959) — shorter window captures more recent lottery demand
+- H001 corr of +0.612 is notable — lower than H195/H196 (~0.69), consistent with different signal type

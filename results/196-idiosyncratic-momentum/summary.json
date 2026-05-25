@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H196",
+  "name": "idiosyncratic-momentum",
+  "strategy_class": "IdiosyncraticMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9304,
+  "ci_low": 0.5264,
+  "ci_high": 1.3427,
+  "cagr": 0.1808,
+  "max_drawdown": -0.5097,
+  "n_trades": 1,
+  "h001_corr": 0.6901,
+  "fold_sharpes": [
+    1.449,
+    0.959,
+    1.213,
+    1.499,
+    1.118,
+    -0.233,
+    0.735,
+    2.316,
+    0.994,
+    1.622,
+    1.083,
+    0.886
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Idiosyncratic momentum = 12-1m stock return minus sector-average 12-1m return. Strips systematic sector component. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

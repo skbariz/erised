@@ -23,3 +23,12 @@ Standard 12-1m momentum conflates stock-specific skill with sector-level trends.
 - `skip_window`: 21 days
 - `within_sector_quantile`: 0.20
 - `rebalance_period`: 21 days
+
+## Results (OOS 1993-2021, 12 folds)
+- **Decision: KEEP**
+- OOS Sharpe: 0.930  CI [0.526, 1.343]
+- CAGR: 18.08%  Max DD: -50.97%
+- H001 corr: +0.690
+- Fold Sharpes: 1.45, 0.96, 1.21, 1.50, 1.12, -0.23, 0.74, 2.32, 0.99, 1.62, 1.08, 0.89
+- Sensitivity: 126d window actually superior (1.000 Sharpe) — sector adjustment less helpful with shorter window
+- Sector adjustment provides marginal improvement over H150 (0.981); both are very correlated

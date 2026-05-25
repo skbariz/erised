@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H197",
+  "name": "low-skewness-anomaly",
+  "strategy_class": "LowSkewnessAnomaly",
+  "family": "cross-sectional risk anomaly",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8791,
+  "ci_low": 0.4767,
+  "ci_high": 1.2871,
+  "cagr": 0.1697,
+  "max_drawdown": -0.5184,
+  "n_trades": 1,
+  "h001_corr": 0.6122,
+  "fold_sharpes": [
+    0.92,
+    1.43,
+    0.83,
+    1.557,
+    1.187,
+    0.238,
+    0.664,
+    1.977,
+    0.651,
+    2.078,
+    1.051,
+    0.903
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Bali, Cakici, Whitelaw (2011): long low-skewness stocks (investors overpay for lottery-like positively-skewed stocks). Signal = -rolling_skewness(252d). Sector-neutral top 20%.",
+  "canonical_params": {
+    "skew_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

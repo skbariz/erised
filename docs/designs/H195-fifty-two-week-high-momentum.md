@@ -22,3 +22,12 @@ George and Hwang (2004) show that the ratio of a stock's current price to its 52
 - `high_window`: 252 days (canonical)
 - `within_sector_quantile`: 0.20
 - `rebalance_period`: 21 days
+
+## Results (OOS 1993-2021, 12 folds)
+- **Decision: KEEP**
+- OOS Sharpe: 0.878  CI [0.475, 1.286]
+- CAGR: 14.43%  Max DD: -45.83%
+- H001 corr: +0.692
+- Fold Sharpes: 1.23, 0.57, 0.77, 1.56, 1.32, -0.25, 0.97, 2.06, 1.05, 1.65, 1.17, 0.96
+- Sensitivity: high_window 126-252d all Sharpe 0.85-0.88 — stable
+- Beats H150 (0.981) on MaxDD (-45.8% vs -52.1%) but lower Sharpe; anchoring adds some DD protection

@@ -26,3 +26,13 @@ The first derivative of earnings (YoY NI growth) is tested in H180. The second d
 - `yoy_window`: 252 days
 - `accel_window`: 63 days (canonical)
 - `within_sector_quantile`: 0.20
+
+## Results (OOS 1993-2021, 12 folds)
+- **Decision: KEEP**
+- OOS Sharpe: 0.681  CI [0.283, 1.089]  (wide CI due to EDGAR gap folds)
+- CAGR: 7.60%  Max DD: -36.08%
+- H001 corr: +0.584 (lowest in Batch 10 — earnings-based signal is genuinely different)
+- Fold Sharpes: 0, 0, 0, 0, 0, 0, 0.40, 1.86, 0.82, 1.56, 0.93, 0.90 (6 zero folds)
+- Sensitivity: 42-126d accel_window all Sharpe 0.67-0.68 — insensitive to window length
+- Notable: lowest MaxDD in Batch 10 (-36.1%); acceleration second derivative provides DD protection
+- The 6 zero-weight EDGAR folds hurt Sharpe but the 6 active folds average +1.09

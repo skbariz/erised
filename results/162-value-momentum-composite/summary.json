@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H162",
+  "name": "value-momentum-composite",
+  "strategy_class": "ValueMomentumComposite",
+  "family": "cross-sectional value+momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7159,
+  "ci_low": 0.3195,
+  "ci_high": 1.1303,
+  "cagr": 0.0927,
+  "max_drawdown": -0.4122,
+  "n_trades": 1,
+  "h001_corr": 0.6314,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.257,
+    0.597,
+    2.103,
+    0.883,
+    1.756,
+    0.988,
+    0.935
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "50/50 z-score blend of value (B/M+E/P) and 12-1m momentum. Asness-Moskowitz-Pedersen 2013.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

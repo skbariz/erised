@@ -1287,3 +1287,570 @@ class PiotroskiValueScreen(CrossSectionalStrategy):
         if not self.monthly_rebalance:
             return daily_w
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Shared helper for Batch 4 sector-neutral strategies
+# ---------------------------------------------------------------------------
+
+
+def _sector_neutral_weights(
+    score: pd.DataFrame,
+    membership: pd.DataFrame,
+    sectors: pd.Series,
+    within_sector_quantile: float,
+    ascending: bool = False,
+) -> pd.DataFrame:
+    """Select top `within_sector_quantile` within each GICS sector by score.
+
+    Each active sector contributes equal weight to the portfolio.
+    ascending=False means high score is best (profitability, quality).
+    ascending=True means low score is best (accruals).
+    """
+    mem_f = membership.reindex_like(score).fillna(False)
+    unique_sectors = sectors.dropna().unique()
+    weights = pd.DataFrame(0.0, index=score.index, columns=score.columns)
+
+    for sector in unique_sectors:
+        sec_tickers = [t for t in sectors[sectors == sector].index if t in score.columns]
+        if not sec_tickers:
+            continue
+        sec_w = _equal_weight_top_quantile(
+            score[sec_tickers], mem_f[sec_tickers], within_sector_quantile, ascending=ascending
+        )
+        weights[sec_tickers] = sec_w
+
+    # Equal sector allocation
+    sec_totals: dict[str, pd.Series] = {}
+    for sector in unique_sectors:
+        sec_tickers = [t for t in sectors[sectors == sector].index if t in weights.columns]
+        sec_totals[sector] = weights[sec_tickers].sum(axis=1)
+
+    n_active = sum((st > 0).astype(int) for st in sec_totals.values())
+    n_active = n_active.replace(0, np.nan)
+
+    for sector in unique_sectors:
+        sec_tickers = [t for t in sectors[sectors == sector].index if t in weights.columns]
+        st = sec_totals[sector].replace(0, np.nan)
+        scale = (1.0 / n_active) / st
+        weights[sec_tickers] = weights[sec_tickers].mul(scale, axis=0)
+
+    return weights.fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H165: Gross Profitability Rank (Novy-Marx 2013)
+# ---------------------------------------------------------------------------
+
+
+class GrossProfitabilityRank(CrossSectionalStrategy):
+    """H165: Long top quintile by gross profitability = gross_profit / total_assets.
+
+    Sector-neutral: select top `within_sector_quantile` within each GICS sector.
+    High GP/A = durable pricing power = better expected return (Novy-Marx 2013).
+    """
+
+    name = "gross_profitability_rank"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        gpa = (gp / ta).where(ta > 0)  # exclude non-positive total assets
+        daily_w = _sector_neutral_weights(
+            gpa, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H166: Low Accruals Quality (Sloan 1996)
+# ---------------------------------------------------------------------------
+
+
+class LowAccrualsQuality(CrossSectionalStrategy):
+    """H166: Long bottom quintile by accruals = (net_income - operating_cf) / total_assets.
+
+    Low accruals (cash-driven earnings) signal higher earnings quality.
+    ascending=True so the lowest accruals rank first.
+    """
+
+    name = "low_accruals_quality"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        # accruals = (net_income - operating_cf) / |total_assets|
+        accruals = ((ni - ocf) / ta.abs()).where(ta.abs() > 0)
+        # ascending=True: low accruals = high quality = selected
+        daily_w = _equal_weight_top_quantile(
+            accruals, membership, self.top_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H168: Composite Quality Score (QMJ-Inspired)
+# ---------------------------------------------------------------------------
+
+
+class CompositeQualityScore(CrossSectionalStrategy):
+    """H168: Multi-dimensional quality composite (QMJ-inspired).
+
+    Three equally-weighted quality dimensions (all sector-neutral z-scored):
+      1. Profitability: avg z(GP/A, ROE, cash ROE)
+      2. Growth: z(1-yr change in GP/A)
+      3. Safety: avg z(-beta_252d, -LTD/TA, current_ratio)
+
+    Long top `within_sector_quantile` within each GICS sector.
+    spy_rets required for rolling beta computation.
+    """
+
+    name = "composite_quality_score"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        within_sector_quantile: float = 0.20,
+        beta_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.book_equity = book_equity
+        self.long_term_debt = long_term_debt
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.within_sector_quantile = within_sector_quantile
+        self.beta_window = beta_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel).fillna(0.0)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+
+        # Dimension 1: Profitability
+        gpa = (gp / ta).where(ta > 0)
+        roe = (ni / be).where(be > 0)
+        cash_roe = (ocf / be).where(be > 0)
+        profitability = (
+            _cs_zscore(gpa).fillna(0.0)
+            + _cs_zscore(roe).fillna(0.0)
+            + _cs_zscore(cash_roe).fillna(0.0)
+        ) / 3.0
+
+        # Dimension 2: Growth (1-yr change in GP/A)
+        gpa_lag = gpa.shift(252)
+        gpa_growth = (gpa - gpa_lag).where(gpa.notna() & gpa_lag.notna())
+        growth = _cs_zscore(gpa_growth)
+
+        # Dimension 3: Safety
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov_sm = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov_sm.div(var_m, axis=0)
+        leverage = (ltd / ta).where(ta > 0).fillna(0.0)
+        curr_ratio = (ca / cl.replace(0, np.nan)).where(ca.notna() & cl.notna())
+        safety = (
+            _cs_zscore(-beta).fillna(0.0)
+            + _cs_zscore(-leverage).fillna(0.0)
+            + _cs_zscore(curr_ratio).fillna(0.0)
+        ) / 3.0
+
+        # Composite: equal-weight of three dimensions
+        composite = (
+            _cs_zscore(profitability).fillna(0.0)
+            + _cs_zscore(growth).fillna(0.0)
+            + _cs_zscore(safety).fillna(0.0)
+        ) / 3.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H169: Quality-Value Composite (Low Accruals + Gross Profitability + Value)
+# ---------------------------------------------------------------------------
+
+
+class QualityValueComposite(CrossSectionalStrategy):
+    """H169: (1/3)*z(B/M) + (1/3)*z(GP/A) + (1/3)*z(-accruals), sector-neutral.
+
+    Combines value (book-to-market), quality (gross profitability),
+    and earnings quality (low accruals) into one composite.
+    Sector-neutral selection of top `within_sector_quantile`.
+    """
+
+    name = "quality_value_composite"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.shares_outstanding = shares_outstanding
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)
+        gpa = (gp / ta).where(ta > 0)
+        accruals = ((ni - ocf) / ta.abs()).where(ta.abs() > 0)
+
+        composite = (
+            _cs_zscore(bm).fillna(0.0)
+            + _cs_zscore(gpa).fillna(0.0)
+            + _cs_zscore(-accruals).fillna(0.0)  # negate: low accruals = high quality
+        ) / 3.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H170: FF5 Investment Factor (low asset growth = conservative = higher return)
+# ---------------------------------------------------------------------------
+
+
+class FF5InvestmentFactor(CrossSectionalStrategy):
+    """H170: Long bottom quintile by 1-year total-asset growth rate.
+
+    Low asset growth = conservative investment = higher expected return.
+    Cooper et al. (2008); Fama-French (2015) CMA factor.
+    Sector-neutral selection.
+    """
+
+    name = "ff5_investment_factor"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        growth_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.growth_window = growth_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_lag = ta.shift(self.growth_window)
+        asset_growth = (ta - ta_lag) / ta_lag.where(ta_lag > 0)
+
+        # ascending=True: low asset growth selected (conservative investing)
+        daily_w = _sector_neutral_weights(
+            asset_growth, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H171: Operating Profitability — FF2015 RMW variant (GP / book equity)
+# ---------------------------------------------------------------------------
+
+
+class OperatingProfitabilityFF5(CrossSectionalStrategy):
+    """H171: Long top quintile by gross profit / book equity (FF2015 RMW variant).
+
+    GP/BE is the RMW (robust-minus-weak) profitability signal.
+    Distinct from H165 (GP/TA): uses book equity, capturing return on equity capital.
+    Sector-neutral selection.
+    """
+
+    name = "operating_profitability_ff5"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.gross_profit = gross_profit
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+
+        op = (gp / be).where(be > 0)
+        daily_w = _sector_neutral_weights(
+            op, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H172: FF5 Composite (B/M + GP/BE + low asset growth)
+# ---------------------------------------------------------------------------
+
+
+class FF5Composite(CrossSectionalStrategy):
+    """H172: (1/3)*z(B/M) + (1/3)*z(GP/BE) + (1/3)*z(-delta_TA/TA), sector-neutral.
+
+    Combines the three non-market FF5 signals: value (HML), profitability (RMW),
+    and investment (CMA, negated so low growth ranks high).
+    """
+
+    name = "ff5_composite"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        growth_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.book_equity = book_equity
+        self.shares_outstanding = shares_outstanding
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.growth_window = growth_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        mktcap = prices_panel * sh
+        bm = (be / mktcap).where(be > 0)
+        op = (gp / be).where(be > 0)
+
+        ta_lag = ta.shift(self.growth_window)
+        asset_growth = (ta - ta_lag) / ta_lag.where(ta_lag > 0)
+
+        composite = (
+            _cs_zscore(bm).fillna(0.0)
+            + _cs_zscore(op).fillna(0.0)
+            + _cs_zscore(-asset_growth).fillna(0.0)  # negate: low growth ranks high
+        ) / 3.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H173: Return on Assets (NI / TA)
+# ---------------------------------------------------------------------------
+
+
+class ReturnOnAssets(CrossSectionalStrategy):
+    """H173: Long top quintile by return on assets = net_income / total_assets.
+
+    Distinct from H165 (gross profitability GP/TA): net income is post-tax and post-SGA,
+    so it captures overall earnings efficiency rather than just pricing power.
+    Sector-neutral selection.
+    """
+
+    name = "return_on_assets"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        roa = (ni / ta).where(ta > 0)
+        daily_w = _sector_neutral_weights(
+            roa, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H174: Cash Operating Profitability (OCF / book equity)
+# ---------------------------------------------------------------------------
+
+
+class CashOperatingProfitability(CrossSectionalStrategy):
+    """H174: Long top quintile by cash operating profitability = operating_cf / book_equity.
+
+    Ball et al. (2016): cash-based OP filters out accruals and is more predictive
+    than standard earnings-based OP. Sector-neutral selection.
+    """
+
+    name = "cash_operating_profitability"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.operating_cf = operating_cf
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+
+        cop = (ocf / be).where(be > 0)
+        daily_w = _sector_neutral_weights(
+            cop, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)

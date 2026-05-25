@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H178",
+  "name": "defensive-quality-momentum",
+  "strategy_class": "DefensiveQualityMomentum",
+  "family": "cross-sectional quality+momentum (composite)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1251,
+  "ci_low": 0.7206,
+  "ci_high": 1.539,
+  "cagr": 0.1911,
+  "max_drawdown": -0.4695,
+  "n_trades": 1,
+  "h001_corr": 0.6644,
+  "fold_sharpes": [
+    1.543,
+    1.458,
+    1.392,
+    2.225,
+    1.34,
+    -0.092,
+    0.875,
+    2.461,
+    1.278,
+    2.037,
+    1.334,
+    0.88
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(1/2)*z(GP/A + low-beta composite) + (1/2)*z(12-1m momentum). Defensive quality + price momentum. Sector-neutral.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "beta_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

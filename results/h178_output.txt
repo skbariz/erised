@@ -1,0 +1,37 @@
+H178: DefensiveQualityMomentum (quality + momentum composite, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (gross_profit, total_assets)...
+Gross profit coverage: 3379/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H178 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 1.125  CI [0.721, 1.539]
+  CAGR 19.11%  MaxDD -46.95%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 1.193  CI [0.793, 1.591]  MaxDD -45.29%
+  within_sector_quantile=20%  Sharpe 1.125  CI [0.724, 1.517]  MaxDD -46.95%
+  within_sector_quantile=30%  Sharpe 1.075  CI [0.667, 1.463]  MaxDD -46.24%
+
+Per-fold Sharpe:
+  Fold  0: +1.543  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.458  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.392  (2002-01-03 -- 2004-01-03)
+  Fold  3: +2.225  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.340  (2006-01-02 -- 2008-01-02)
+  Fold  5: -0.092  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.875  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.461  (2012-01-01 -- 2013-12-31)
+  Fold  8: +1.278  (2013-12-31 -- 2015-12-31)
+  Fold  9: +2.037  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.334  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.880  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6644
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\178-defensive-quality-momentum\summary.json

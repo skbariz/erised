@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H159",
+  "name": "smooth-vol-target-momentum",
+  "strategy_class": "SmoothVolTargetMomentum",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0722,
+  "ci_low": 0.6759,
+  "ci_high": 1.4849,
+  "cagr": 0.1405,
+  "max_drawdown": -0.2523,
+  "n_trades": 5871,
+  "h001_corr": 0.7005,
+  "fold_sharpes": [
+    1.819,
+    0.746,
+    1.23,
+    1.429,
+    1.056,
+    -0.02,
+    0.839,
+    1.949,
+    0.617,
+    1.284,
+    0.91,
+    1.024
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H155 smooth signal + H157 vol-target. Dual protection: signal quality + exposure mgmt.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "vol_target": 0.12,
+    "vol_window": 21,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

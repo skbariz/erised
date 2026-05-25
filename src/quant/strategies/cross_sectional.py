@@ -2987,3 +2987,243 @@ class LongShortReversal(CrossSectionalStrategy):
         )
         combined = _long_short_normalize(long_w, short_w)
         return _periodic_rebalance(combined, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H195: FiftyTwoWeekHighMomentum (George-Hwang 2004)
+# ---------------------------------------------------------------------------
+
+
+class FiftyTwoWeekHighMomentum(CrossSectionalStrategy):
+    """H195: 52-week high proximity as momentum signal.
+
+    George and Hwang (2004): ratio of current price to 52-week rolling maximum
+    predicts future returns. Stocks near their 52w high have strong momentum
+    (anchor-bias inhibits full price adjustment). Sector-neutral top 20%.
+    """
+
+    name = "fifty_two_week_high_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        high_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.high_window = high_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        high_52w = prices_panel.rolling(self.high_window, min_periods=self.high_window // 2).max()
+        score = prices_panel / high_52w.replace(0, np.nan)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H196: IdiosyncraticMomentum (sector-adjusted 12-1 momentum)
+# ---------------------------------------------------------------------------
+
+
+class IdiosyncraticMomentum(CrossSectionalStrategy):
+    """H196: Idiosyncratic (sector-adjusted) momentum.
+
+    Momentum = stock_12m_return - sector_equal_weight_12m_return.
+    Removes the systematic sector component to isolate stock-specific momentum.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "idiosyncratic_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.pct_change(self.mom_window).shift(self.skip_window)
+        sector_avg = pd.DataFrame(np.nan, index=mom.index, columns=mom.columns)
+        for sector in self.sectors.dropna().unique():
+            sec_tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in mom.columns
+            ]
+            if sec_tickers:
+                avg = mom[sec_tickers].mean(axis=1)
+                sector_avg[sec_tickers] = np.tile(avg.values[:, None], len(sec_tickers))
+        idio_mom = mom - sector_avg
+        daily_w = _sector_neutral_weights(
+            idio_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H197: LowSkewnessAnomaly (Bali, Cakici, Whitelaw 2011)
+# ---------------------------------------------------------------------------
+
+
+class LowSkewnessAnomaly(CrossSectionalStrategy):
+    """H197: Low historical return skewness predicts outperformance.
+
+    Bali et al. (2011): investors overpay for lottery-like (positively skewed)
+    stocks. Low-skewness stocks are underpriced and outperform.
+    Signal = -rolling_skewness. Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "low_skewness_anomaly"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        skew_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.skew_window = skew_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        skew = daily_rets.rolling(self.skew_window, min_periods=self.skew_window // 2).skew()
+        score = -skew  # negate: low skewness = high score
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H198: EarningsAcceleration (second derivative of NI growth)
+# ---------------------------------------------------------------------------
+
+
+class EarningsAcceleration(CrossSectionalStrategy):
+    """H198: Earnings acceleration -- change in YoY NI growth rate.
+
+    Signal = sue_t - sue_{t - accel_window} where sue = YoY NI growth rate.
+    Stocks with accelerating earnings growth (increasing SUE) should outperform.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "earnings_acceleration"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        yoy_window: int = 252,
+        accel_window: int = 63,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.yoy_window = yoy_window
+        self.accel_window = accel_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        acceleration = sue - sue.shift(self.accel_window)
+        daily_w = _sector_neutral_weights(
+            acceleration,
+            membership,
+            self.sectors,
+            self.within_sector_quantile,
+            ascending=False,
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H199: MultiSignalComposite (momentum + reversal + earnings z-score blend)
+# ---------------------------------------------------------------------------
+
+
+class MultiSignalComposite(CrossSectionalStrategy):
+    """H199: Equal-weight z-score composite of momentum, reversal, and earnings.
+
+    Blends three orthogonal signals:
+      1. 12-1 month price momentum (H150 signal)
+      2. 5-day short-term reversal negated (H185 signal, aligned: losers = positive)
+      3. YoY NI growth SUE proxy (H180 signal)
+
+    Each z-scored cross-sectionally before blending. NaN signals drop gracefully.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "multi_signal_composite"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        reversal_window: int = 5,
+        yoy_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.reversal_window = reversal_window
+        self.yoy_window = yoy_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        z_mom = _cs_zscore(prices_panel.pct_change(self.mom_window).shift(self.skip_window))
+        z_rev = _cs_zscore(-prices_panel.pct_change(self.reversal_window))
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        z_sue = _cs_zscore(sue)
+
+        composite = z_mom.add(z_rev, fill_value=0.0).add(z_sue.fillna(0.0), fill_value=0.0)
+        n_signals = (
+            z_mom.notna().astype(float) + z_rev.notna().astype(float) + z_sue.notna().astype(float)
+        )
+        composite = composite / n_signals.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

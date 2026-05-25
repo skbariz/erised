@@ -1,4 +1,4 @@
-"""H154: TrendGatedMomentum — H150 momentum with SPY 200MA exposure gate.
+"""H154: TrendGatedMomentum — H150 momentum gated by S&P 500 equal-weight index trend.
 
 Run: uv run python scripts/run_h154.py
 """
@@ -24,7 +24,7 @@ SEP = "=" * 64
 
 
 def main() -> None:
-    print(f"H154: TrendGatedMomentum (SPY 200MA gate on H150 portfolio)\n{SEP}")
+    print(f"H154: TrendGatedMomentum (equal-weight S&P 500 200MA gate on H150)\n{SEP}")
 
     membership = load_sp500_members()
     tickers = get_all_historical_tickers()
@@ -46,14 +46,14 @@ def main() -> None:
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: TrendGatedMomentum(spy_prices=spy_prices),
+        lambda tp, tm: TrendGatedMomentum(),
         folds=folds,
         spy_returns=spy_rets,
     )
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
 
-    print("\nH154 Canonical (SPY MA200/100 gate):")
+    print("\nH154 Canonical (equal-weight S&P 500 index MA200/100 gate):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}")
 
@@ -75,7 +75,7 @@ def main() -> None:
         w = walk_forward_cross_sectional(
             panel,
             membership,
-            lambda tp, tm, m=ma: TrendGatedMomentum(spy_prices=spy_prices, ma_long=m),
+            lambda tp, tm, m=ma: TrendGatedMomentum(ma_long=m),
             folds=folds,
             spy_returns=spy_rets,
         )
@@ -114,7 +114,7 @@ def main() -> None:
         h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results],
         decision=decision,
-        notes="H150 momentum gated by SPY MA200 (full)/MA100 (50%)/below (flat). Reduces crash exposure.",
+        notes="H150 momentum gated by equal-weight S&P 500 index MA200 (full)/MA100 (50%)/below (flat). Pure S&P 500 strategy — no external SPY data.",
         canonical_params={
             "long_days": 252,
             "skip_days": 21,

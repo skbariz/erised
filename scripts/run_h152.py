@@ -45,7 +45,7 @@ def main() -> None:
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: HighWaterMomentum(),
+        lambda tp, tm: HighWaterMomentum(monthly_rebalance=True),
         folds=folds,
         spy_returns=spy_rets,
     )
@@ -114,7 +114,7 @@ def main() -> None:
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results],
         decision=decision,
         notes="price/52w-high anchoring signal. George & Hwang (2004). Compare to H150.",
-        canonical_params={"lookback": 252, "top_quantile": 0.20},
+        canonical_params={"lookback": 252, "top_quantile": 0.20, "monthly_rebalance": True},
     )
 
 

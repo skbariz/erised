@@ -55,7 +55,7 @@ def main() -> None:
     wf = walk_forward_cross_sectional(
         panel,
         membership,
-        lambda tp, tm: SectorNeutralMomentum(sector_map=sectors),
+        lambda tp, tm: SectorNeutralMomentum(sector_map=sectors, monthly_rebalance=True),
         folds=folds,
         spy_returns=spy_rets,
     )
@@ -124,7 +124,12 @@ def main() -> None:
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results],
         decision=decision,
         notes="12-1m momentum ranked within GICS sector; top 30% per sector; equal sector weight.",
-        canonical_params={"long_days": 252, "skip_days": 21, "top_quantile": 0.30},
+        canonical_params={
+            "long_days": 252,
+            "skip_days": 21,
+            "top_quantile": 0.30,
+            "monthly_rebalance": True,
+        },
     )
 
 

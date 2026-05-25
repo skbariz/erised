@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H165",
+  "name": "gross-profitability-rank",
+  "strategy_class": "GrossProfitabilityRank",
+  "family": "cross-sectional quality (profitability)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8785,
+  "ci_low": 0.4692,
+  "ci_high": 1.2874,
+  "cagr": 0.1103,
+  "max_drawdown": -0.3446,
+  "n_trades": 1,
+  "h001_corr": 0.6199,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.485,
+    0.838,
+    2.059,
+    1.01,
+    2.039,
+    1.2,
+    1.154
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long top 20% by GP/A within each GICS sector. Novy-Marx (2013): gross profitability is a durable quality signal.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

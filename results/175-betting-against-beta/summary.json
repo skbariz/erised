@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H175",
+  "name": "betting-against-beta",
+  "strategy_class": "BettingAgainstBeta",
+  "family": "cross-sectional low-beta (BAB)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.0878,
+  "ci_low": 0.6808,
+  "ci_high": 1.4973,
+  "cagr": 0.1632,
+  "max_drawdown": -0.4075,
+  "n_trades": 1,
+  "h001_corr": 0.6384,
+  "fold_sharpes": [
+    1.161,
+    1.815,
+    1.375,
+    2.24,
+    1.296,
+    0.123,
+    1.075,
+    2.343,
+    0.945,
+    1.992,
+    1.252,
+    0.816
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long bottom 20% by rolling 252d beta vs SPY within each GICS sector. Frazzini-Pedersen (2014) BAB long-only leg.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "beta_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

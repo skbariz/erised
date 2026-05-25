@@ -1,0 +1,35 @@
+H175: BettingAgainstBeta (low-beta long-only, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H175 Canonical (sector-neutral, within_sector_quantile=20%, beta_window=252):
+  Sharpe 1.088  CI [0.681, 1.497]
+  CAGR 16.32%  MaxDD -40.75%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- beta_window:
+  beta_window=126d  Sharpe 1.093  CI [0.693, 1.481]  MaxDD -41.77%
+  beta_window=252d  Sharpe 1.088  CI [0.669, 1.475]  MaxDD -40.75%
+  beta_window=504d  Sharpe 1.107  CI [0.707, 1.504]  MaxDD -40.92%
+
+Per-fold Sharpe:
+  Fold  0: +1.161  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.815  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.375  (2002-01-03 -- 2004-01-03)
+  Fold  3: +2.240  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.296  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.123  (2008-01-02 -- 2010-01-01)
+  Fold  6: +1.075  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.343  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.945  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.992  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.252  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.816  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6384
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\175-betting-against-beta\summary.json

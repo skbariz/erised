@@ -150,6 +150,17 @@ def test_h151_net_exposure_near_zero(synthetic_panel):
         assert net[active].abs().max() < 0.1
 
 
+def test_h151_monthly_rebalance_stable_intramonth(synthetic_panel):
+    panel, membership = synthetic_panel
+    strat = MomentumMarketNeutral(long_days=60, skip_days=5, monthly_rebalance=True)
+    weights = strat.generate_weights(panel, membership)
+    months = weights.index.to_series().dt.to_period("M")
+    for _month, grp in weights.groupby(months):
+        first_row = grp.iloc[0]
+        for _, row in grp.iterrows():
+            pd.testing.assert_series_equal(row, first_row, check_names=False)
+
+
 # ---------------------------------------------------------------------------
 # H152: HighWaterMomentum
 # ---------------------------------------------------------------------------
@@ -209,7 +220,8 @@ def test_h154_full_exposure_above_ma(synthetic_panel, spy_prices):
     spy_up = pd.Series(np.linspace(100, 10000, len(dates)), index=dates)
     strat = TrendGatedMomentum(spy_prices=spy_up, long_days=60, skip_days=5, ma_long=50)
     w_gated = strat.generate_weights(panel, membership)
-    strat_base = MomentumLongOnly(long_days=60, skip_days=5)
+    # Use daily rebalance for direct signal comparison (TrendGatedMomentum is daily)
+    strat_base = MomentumLongOnly(long_days=60, skip_days=5, monthly_rebalance=False)
     w_base = strat_base.generate_weights(panel, membership)
     # Post-warmup, gated should match base
     post = slice(55, None)

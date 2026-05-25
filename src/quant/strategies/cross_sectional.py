@@ -196,9 +196,15 @@ class HighWaterMomentum(CrossSectionalStrategy):
 
     name = "high_water_momentum"
 
-    def __init__(self, lookback: int = 252, top_quantile: float = 0.20):
+    def __init__(
+        self,
+        lookback: int = 252,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
         self.lookback = lookback
         self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
 
     def generate_weights(
         self,
@@ -207,9 +213,18 @@ class HighWaterMomentum(CrossSectionalStrategy):
     ) -> pd.DataFrame:
         rolling_high = prices_panel.rolling(self.lookback, min_periods=self.lookback // 2).max()
         ratio = prices_panel / rolling_high
-        # Shift by 1 day so today's price isn't used to compute today's signal
         ratio = ratio.shift(1)
-        return _equal_weight_top_quantile(ratio, membership, self.top_quantile, ascending=False)
+        daily_w = _equal_weight_top_quantile(ratio, membership, self.top_quantile, ascending=False)
+        if not self.monthly_rebalance:
+            return daily_w
+        is_month_start = prices_panel.index.to_series().dt.month.diff().ne(0)
+        out = daily_w.copy()
+        prev = pd.Series(dtype=object)
+        for date, is_start in is_month_start.items():
+            if is_start or prev.empty:
+                prev = daily_w.loc[date]
+            out.loc[date] = prev
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -233,11 +248,13 @@ class SectorNeutralMomentum(CrossSectionalStrategy):
         long_days: int = 252,
         skip_days: int = 21,
         top_quantile: float = 0.30,
+        monthly_rebalance: bool = True,
     ):
         self.sector_map = sector_map  # index=ticker, values=sector string
         self.long_days = long_days
         self.skip_days = skip_days
         self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
 
     def generate_weights(
         self,
@@ -247,25 +264,48 @@ class SectorNeutralMomentum(CrossSectionalStrategy):
         mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
         mem = membership.reindex_like(mom).fillna(False)
 
-        # Map tickers to sectors
         tickers = prices_panel.columns.tolist()
         sectors = self.sector_map.reindex(tickers).fillna("Unknown")
         unique_sectors = sectors.unique()
 
-        # For each sector, compute intra-sector momentum rank
+        # Compute equal-weight intra-sector weights; each sector sums to 1
         sector_weights = pd.DataFrame(0.0, index=prices_panel.index, columns=tickers)
-
         for sector in unique_sectors:
             sector_tickers = sectors[sectors == sector].index.tolist()
             if not sector_tickers:
                 continue
-            sec_mom = mom[sector_tickers]
-            sec_mem = mem[sector_tickers]
-            sec_w = _equal_weight_top_quantile(sec_mom, sec_mem, self.top_quantile, ascending=False)
+            sec_w = _equal_weight_top_quantile(
+                mom[sector_tickers], mem[sector_tickers], self.top_quantile, ascending=False
+            )
             sector_weights[sector_tickers] = sec_w.values
 
-        row_sum = sector_weights.sum(axis=1).replace(0, np.nan)
-        return sector_weights.div(row_sum, axis=0).fillna(0.0)
+        # Equal sector allocation: each active sector gets weight 1/N_sectors
+        # Compute sector totals and active-sector count without deprecated groupby(axis=1)
+        sec_totals = {}
+        for sector in unique_sectors:
+            sec_t = sectors[sectors == sector].index.tolist()
+            sec_totals[sector] = sector_weights[sec_t].sum(axis=1)
+
+        n_active = sum((st > 0).astype(int) for st in sec_totals.values())
+        n_active = n_active.replace(0, np.nan)
+
+        for sector in unique_sectors:
+            sector_tickers = sectors[sectors == sector].index.tolist()
+            st = sec_totals[sector].replace(0, np.nan)
+            scale = (1.0 / n_active) / st
+            sector_weights[sector_tickers] = sector_weights[sector_tickers].mul(scale, axis=0)
+
+        daily_w = sector_weights.fillna(0.0)
+        if not self.monthly_rebalance:
+            return daily_w
+        is_month_start = prices_panel.index.to_series().dt.month.diff().ne(0)
+        out = daily_w.copy()
+        prev = pd.Series(dtype=object)
+        for date, is_start in is_month_start.items():
+            if is_start or prev.empty:
+                prev = daily_w.loc[date]
+            out.loc[date] = prev
+        return out
 
 
 # ---------------------------------------------------------------------------
@@ -274,56 +314,59 @@ class SectorNeutralMomentum(CrossSectionalStrategy):
 
 
 class TrendGatedMomentum(CrossSectionalStrategy):
-    """H154: H150 momentum with a SPY moving-average gate.
+    """H154: H150 momentum gated by the S&P 500 equal-weight index trend.
 
-    When SPY is above its 200-day MA: full momentum portfolio.
-    When SPY is between 100- and 200-day MA: 50% exposure (rest cash).
-    When SPY is below 200-day MA: 0% (flat).
+    When the equal-weight index is above its 200-day MA: full exposure.
+    When between 100- and 200-day MA: 50% exposure (rest cash).
+    When below both MAs: 0% (flat).
 
-    Requires spy_prices: pd.Series of SPY adj_close.
+    Trend signal is computed internally from prices_panel (equal-weight
+    average of all members), so no external SPY data is required.
+    spy_prices kept for backward compatibility with tests; if provided it
+    overrides the internal equal-weight index.
     """
 
     name = "trend_gated_momentum"
 
     def __init__(
         self,
-        spy_prices: pd.Series,
         long_days: int = 252,
         skip_days: int = 21,
         top_quantile: float = 0.20,
         ma_long: int = 200,
         ma_short: int = 100,
+        spy_prices: pd.Series | None = None,
     ):
-        self.spy_prices = spy_prices
         self.long_days = long_days
         self.skip_days = skip_days
         self.top_quantile = top_quantile
         self.ma_long = ma_long
         self.ma_short = ma_short
+        self.spy_prices = spy_prices
 
     def generate_weights(
         self,
         prices_panel: pd.DataFrame,
         membership: pd.DataFrame,
     ) -> pd.DataFrame:
-        # Build base momentum portfolio
         mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
         base_weights = _equal_weight_top_quantile(
             mom, membership, self.top_quantile, ascending=False
         )
 
-        # Compute SPY MA regime (shift(1) so today's signal uses yesterday's price)
-        spy = self.spy_prices.reindex(prices_panel.index).ffill()
-        ma_l = spy.rolling(self.ma_long, min_periods=self.ma_long).mean().shift(1)
-        ma_s = spy.rolling(self.ma_short, min_periods=self.ma_short).mean().shift(1)
-        spy_prev = spy.shift(1)
+        # Trend index: external spy_prices if provided, else equal-weight S&P 500
+        if self.spy_prices is not None:
+            index_prices = self.spy_prices.reindex(prices_panel.index).ffill()
+        else:
+            mem = membership.reindex_like(prices_panel).fillna(False)
+            index_prices = prices_panel.where(mem).mean(axis=1).ffill()
 
-        full = spy_prev >= ma_l
-        half = (spy_prev >= ma_s) & (spy_prev < ma_l)
-        # below ma_s or ma_l not yet available -> scale = 0
+        ma_l = index_prices.rolling(self.ma_long, min_periods=self.ma_long).mean().shift(1)
+        ma_s = index_prices.rolling(self.ma_short, min_periods=self.ma_short).mean().shift(1)
+        idx_prev = index_prices.shift(1)
 
         scale = pd.Series(0.0, index=prices_panel.index)
-        scale[full] = 1.0
-        scale[half] = 0.5
+        scale[idx_prev >= ma_l] = 1.0
+        scale[(idx_prev >= ma_s) & (idx_prev < ma_l)] = 0.5
 
         return base_weights.mul(scale, axis=0)

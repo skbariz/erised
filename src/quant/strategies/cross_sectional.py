@@ -1,4 +1,4 @@
-"""Cross-sectional (stock-selection) strategies for H150-H154.
+"""Cross-sectional (stock-selection) strategies for H150-H159.
 
 Interface contract:
   generate_weights(prices_panel, membership) -> pd.DataFrame
@@ -370,3 +370,331 @@ class TrendGatedMomentum(CrossSectionalStrategy):
         scale[(idx_prev >= ma_s) & (idx_prev < ma_l)] = 0.5
 
         return base_weights.mul(scale, axis=0)
+
+
+# ---------------------------------------------------------------------------
+# Batch 2 shared utilities
+# ---------------------------------------------------------------------------
+
+
+def _monthly_rebalance(daily_w: pd.DataFrame, prices_panel: pd.DataFrame) -> pd.DataFrame:
+    """Hold weights constant within each calendar month; only update on month-start dates."""
+    is_month_start = prices_panel.index.to_series().dt.month.diff().ne(0)
+    out = daily_w.copy()
+    prev: pd.Series = pd.Series(dtype=float)
+    for date, is_start in is_month_start.items():
+        if is_start or prev.empty:
+            prev = daily_w.loc[date]
+        out.loc[date] = prev
+    return out
+
+
+def _portfolio_returns(weights: pd.DataFrame, prices_panel: pd.DataFrame) -> pd.Series:
+    """Implied daily portfolio returns from a weights frame (1-day lagged weights)."""
+    return (prices_panel.pct_change() * weights.shift(1)).sum(axis=1)
+
+
+def _vol_target_scale(
+    port_rets: pd.Series,
+    vol_target: float,
+    vol_window: int,
+    vol_min: float,
+    vol_max: float,
+) -> pd.Series:
+    """Exposure multiplier = clip(target / realized_vol, vol_min, vol_max).
+
+    Uses trailing `vol_window`-day realized daily vol of `port_rets`.
+    Returns 1.0 during warm-up (insufficient history).
+    """
+    realized = port_rets.rolling(vol_window, min_periods=5).std() * np.sqrt(252)
+    return (vol_target / realized).clip(vol_min, vol_max).fillna(1.0)
+
+
+# ---------------------------------------------------------------------------
+# H155: Smooth Momentum (Da, Gurun & Warachka 2014)
+# ---------------------------------------------------------------------------
+
+
+class SmoothMomentum(CrossSectionalStrategy):
+    """H155: 12-1 momentum × fraction of positive days in formation window.
+
+    Stocks with smooth upward paths (many small positive days) have more
+    durable momentum than stocks whose gain came from a few gap-up events.
+    """
+
+    name = "smooth_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        formation = self.long_days - self.skip_days
+        daily_rets = prices_panel.pct_change()
+
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        fraction_pos = (
+            daily_rets.rolling(formation, min_periods=formation // 2)
+            .apply(lambda x: float(np.mean(x > 0)), raw=True)
+            .shift(self.skip_days)
+        )
+        smooth_score = mom * fraction_pos
+        daily_w = _equal_weight_top_quantile(smooth_score, membership, self.top_quantile)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H156: Jump-Penalized Momentum
+# ---------------------------------------------------------------------------
+
+
+class JumpPenalizedMomentum(CrossSectionalStrategy):
+    """H156: 12-1 momentum computed after removing top/bottom extreme daily returns.
+
+    Trimming the `trim_days` largest and smallest daily returns from the formation
+    window removes event-driven jumps and rewards steady trend momentum.
+    """
+
+    name = "jump_penalized_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        trim_days: int = 5,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.trim_days = trim_days
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        formation = self.long_days - self.skip_days
+        daily_rets = prices_panel.pct_change()
+        _n = self.trim_days
+
+        trimmed_mom = (
+            daily_rets.rolling(formation, min_periods=formation // 2)
+            .apply(
+                lambda x: float(np.sort(x)[_n:-_n].sum()) if len(x) > 2 * _n else np.nan,
+                raw=True,
+            )
+            .shift(self.skip_days)
+        )
+        daily_w = _equal_weight_top_quantile(trimmed_mom, membership, self.top_quantile)
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H157: Volatility-Scaled Momentum (Barroso & Santa-Clara 2015)
+# ---------------------------------------------------------------------------
+
+
+class VolScaledMomentum(CrossSectionalStrategy):
+    """H157: H150 portfolio with vol-target exposure scaling.
+
+    Stock selection updates monthly (H150 signal). Total exposure scales daily:
+    multiplier = clip(vol_target / realized_21d_vol, vol_min, vol_max).
+    Applies the H086 mechanism to cross-sectional momentum.
+    """
+
+    name = "vol_scaled_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        vol_target: float = 0.12,
+        vol_window: int = 21,
+        vol_min: float = 0.2,
+        vol_max: float = 1.5,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.vol_target = vol_target
+        self.vol_window = vol_window
+        self.vol_min = vol_min
+        self.vol_max = vol_max
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        daily_w = _equal_weight_top_quantile(mom, membership, self.top_quantile)
+        base_w = _monthly_rebalance(daily_w, prices_panel) if self.monthly_rebalance else daily_w
+
+        port_rets = _portfolio_returns(base_w, prices_panel)
+        scale = _vol_target_scale(
+            port_rets, self.vol_target, self.vol_window, self.vol_min, self.vol_max
+        )
+        return base_w.mul(scale, axis=0)
+
+
+# ---------------------------------------------------------------------------
+# H158: Drawdown Circuit Breaker
+# ---------------------------------------------------------------------------
+
+
+class DrawdownCircuitBreaker(CrossSectionalStrategy):
+    """H158: H150 portfolio with hysteresis-based drawdown circuit breaker.
+
+    Tracks trailing 252-day drawdown of the unscaled H150 portfolio.
+    dd < dd_soft  → reduce to scale_soft (default 50%).
+    dd < dd_hard  → reduce to scale_hard (default 25%).
+    Resume full exposure only when dd recovers above dd_resume (default -5%).
+    """
+
+    name = "drawdown_circuit_breaker"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        dd_soft: float = -0.10,
+        dd_hard: float = -0.15,
+        dd_resume: float = -0.05,
+        scale_soft: float = 0.5,
+        scale_hard: float = 0.25,
+        lookback: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.dd_soft = dd_soft
+        self.dd_hard = dd_hard
+        self.dd_resume = dd_resume
+        self.scale_soft = scale_soft
+        self.scale_hard = scale_hard
+        self.lookback = lookback
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        daily_w = _equal_weight_top_quantile(mom, membership, self.top_quantile)
+        base_w = _monthly_rebalance(daily_w, prices_panel) if self.monthly_rebalance else daily_w
+
+        # Implied equity curve of unscaled portfolio
+        port_rets = _portfolio_returns(base_w, prices_panel)
+        equity = (1 + port_rets).cumprod()
+        rolling_high = equity.rolling(self.lookback, min_periods=1).max()
+        dd = (equity / rolling_high - 1).shift(1)  # lag 1: use yesterday's drawdown
+
+        # Hysteresis scale — iterate to maintain state
+        scale = pd.Series(1.0, index=prices_panel.index)
+        state = 1.0
+        for date in prices_panel.index:
+            d = dd.loc[date]
+            if pd.isna(d):
+                pass
+            elif state < 1.0:
+                if d >= self.dd_resume:
+                    state = 1.0
+                elif d < self.dd_hard:
+                    state = self.scale_hard
+                else:
+                    state = self.scale_soft
+            else:
+                if d < self.dd_hard:
+                    state = self.scale_hard
+                elif d < self.dd_soft:
+                    state = self.scale_soft
+            scale.loc[date] = state
+
+        return base_w.mul(scale, axis=0)
+
+
+# ---------------------------------------------------------------------------
+# H159: Smooth Momentum + Vol-Target Composite
+# ---------------------------------------------------------------------------
+
+
+class SmoothVolTargetMomentum(CrossSectionalStrategy):
+    """H159: H155 smooth signal for stock selection + H157 vol-target for portfolio exposure.
+
+    Addresses two momentum failure modes simultaneously:
+    - Bad stock selection: selects smooth-path stocks (not event-driven jumpers)
+    - Bad timing: reduces total exposure in high-vol regimes
+    """
+
+    name = "smooth_vol_target_momentum"
+
+    def __init__(
+        self,
+        long_days: int = 252,
+        skip_days: int = 21,
+        top_quantile: float = 0.20,
+        vol_target: float = 0.12,
+        vol_window: int = 21,
+        vol_min: float = 0.2,
+        vol_max: float = 1.5,
+        monthly_rebalance: bool = True,
+    ):
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.top_quantile = top_quantile
+        self.vol_target = vol_target
+        self.vol_window = vol_window
+        self.vol_min = vol_min
+        self.vol_max = vol_max
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        formation = self.long_days - self.skip_days
+        daily_rets = prices_panel.pct_change()
+
+        # H155 smooth momentum signal
+        mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
+        fraction_pos = (
+            daily_rets.rolling(formation, min_periods=formation // 2)
+            .apply(lambda x: float(np.mean(x > 0)), raw=True)
+            .shift(self.skip_days)
+        )
+        smooth_score = mom * fraction_pos
+        daily_w = _equal_weight_top_quantile(smooth_score, membership, self.top_quantile)
+        base_w = _monthly_rebalance(daily_w, prices_panel) if self.monthly_rebalance else daily_w
+
+        # H157 vol-target scaling on unscaled portfolio returns
+        port_rets = _portfolio_returns(base_w, prices_panel)
+        scale = _vol_target_scale(
+            port_rets, self.vol_target, self.vol_window, self.vol_min, self.vol_max
+        )
+        return base_w.mul(scale, axis=0)

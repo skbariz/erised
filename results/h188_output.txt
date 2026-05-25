@@ -1,0 +1,35 @@
+H188: MonthlyReversalLong (21-day reversal, monthly rebalance)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H188 Canonical (sector-neutral, reversal_window=21d, monthly rebalance):
+  Sharpe 0.949  CI [0.550, 1.363]
+  CAGR 20.82%  MaxDD -55.66%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- reversal_window:
+  reversal_window=10d  Sharpe 1.046  CI [0.646, 1.443]  MaxDD -52.39%
+  reversal_window=21d  Sharpe 0.949  CI [0.541, 1.351]  MaxDD -55.66%
+  reversal_window=42d  Sharpe 0.997  CI [0.589, 1.399]  MaxDD -56.58%
+
+Per-fold Sharpe:
+  Fold  0: +1.443  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.506  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.887  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.900  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.022  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.361  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.759  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.240  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.638  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.553  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.977  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.882  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5890
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\188-monthly-reversal-long\summary.json

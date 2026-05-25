@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H185",
+  "name": "weekly-reversal-sector-neutral",
+  "strategy_class": "WeeklyReversalSectorNeutral",
+  "family": "cross-sectional short-term reversal",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1033,
+  "ci_low": 0.7025,
+  "ci_high": 1.5171,
+  "cagr": 0.2488,
+  "max_drawdown": -0.5076,
+  "n_trades": 1,
+  "h001_corr": 0.6128,
+  "fold_sharpes": [
+    2.409,
+    1.468,
+    0.98,
+    2.018,
+    1.487,
+    0.44,
+    0.903,
+    2.289,
+    0.586,
+    1.738,
+    0.925,
+    1.047
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long prior 5-day losers within sector, weekly rebalance. Liquidity-provision reversal (Lehmann 1990, Amihud 2002).",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,35 @@
+H185: WeeklyReversalSectorNeutral (5-day reversal, weekly rebalance)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H185 Canonical (sector-neutral, reversal_window=5d, within_sector_quantile=20%):
+  Sharpe 1.103  CI [0.703, 1.517]
+  CAGR 24.88%  MaxDD -50.76%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- reversal_window:
+  reversal_window=3d  Sharpe 1.087  CI [0.702, 1.486]  MaxDD -49.64%
+  reversal_window=5d  Sharpe 1.103  CI [0.713, 1.506]  MaxDD -50.76%
+  reversal_window=10d  Sharpe 1.096  CI [0.712, 1.496]  MaxDD -54.14%
+
+Per-fold Sharpe:
+  Fold  0: +2.409  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.468  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.980  (2002-01-03 -- 2004-01-03)
+  Fold  3: +2.018  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.487  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.440  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.903  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.289  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.586  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.738  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.925  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.047  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6128
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\185-weekly-reversal-sector-neutral\summary.json

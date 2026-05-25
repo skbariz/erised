@@ -32,4 +32,14 @@ If H187 Sharpe ≤ H185, the illiquidity filter either: (a) doesn't correctly id
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.068 |
+| 95% CI | [0.666, 1.483] |
+| CAGR | 25.64% |
+| Max DD | -53.17% |
+| H001 corr | +0.600 |
+
+Liquidity filter does NOT improve over H185 (1.068 vs 1.103). Concentrating in high-vol names reduces Sharpe slightly. Sensitivity: illiq_quantile=70% (1.084) > 50% (1.068) > 30% (1.009) — more concentration marginally helps but MaxDD worsens. Highest CAGR in batch (25.64%) but worse Sharpe due to higher volatility. H185 preferred.

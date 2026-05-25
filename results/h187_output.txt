@@ -1,0 +1,35 @@
+H187: LiquidityFilteredReversal (reversal in high-vol names)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H187 Canonical (illiq_quantile=50%, vol_window=21d, reversal_window=5d):
+  Sharpe 1.068  CI [0.666, 1.483]
+  CAGR 25.64%  MaxDD -53.17%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- illiq_quantile:
+  illiq_quantile=30%  Sharpe 1.009  CI [0.604, 1.400]  MaxDD -54.88%
+  illiq_quantile=50%  Sharpe 1.068  CI [0.672, 1.465]  MaxDD -53.17%
+  illiq_quantile=70%  Sharpe 1.084  CI [0.699, 1.485]  MaxDD -52.10%
+
+Per-fold Sharpe:
+  Fold  0: +2.233  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.420  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.969  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.890  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.324  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.460  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.798  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.476  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.535  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.647  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.883  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.063  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6003
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\187-liquidity-filtered-reversal\summary.json

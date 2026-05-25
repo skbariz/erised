@@ -1,0 +1,35 @@
+H186: ResidualWeeklyReversal (idiosyncratic 5-day return reversal)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Sector data: 503 tickers, 11 sectors
+
+H186 Canonical (sector-neutral, reversal_window=5d, beta_window=252d):
+  Sharpe 1.095  CI [0.696, 1.513]
+  CAGR 24.20%  MaxDD -51.71%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- beta_window:
+  beta_window=126d  Sharpe 1.106  CI [0.719, 1.500]  MaxDD -50.78%
+  beta_window=252d  Sharpe 1.095  CI [0.713, 1.502]  MaxDD -51.71%
+  beta_window=504d  Sharpe 1.071  CI [0.683, 1.483]  MaxDD -51.73%
+
+Per-fold Sharpe:
+  Fold  0: +2.377  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.464  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.004  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.952  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.483  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.401  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.962  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.174  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.551  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.655  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.036  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.044  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6125
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\186-residual-weekly-reversal\summary.json

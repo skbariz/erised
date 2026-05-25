@@ -33,4 +33,14 @@ If H186 Sharpe ≤ H185 Sharpe, beta-stripping adds no value over raw reversal w
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.095 |
+| 95% CI | [0.696, 1.513] |
+| CAGR | 24.20% |
+| Max DD | -51.71% |
+| H001 corr | +0.613 |
+
+Beta-stripping adds negligible value over H185 (1.095 vs 1.103). The market beta component of 5-day returns contributes slightly to the reversal signal. Sensitivity: shorter beta_window marginally better (126d: 1.106 > 252d: 1.095 > 504d: 1.071). H185 preferred due to simplicity at equivalent performance.

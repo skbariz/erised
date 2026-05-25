@@ -37,4 +37,14 @@ If Sharpe < H185 Sharpe AND Sharpe < 0.51, the 21-day signal is weaker than the 
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.949 |
+| 95% CI | [0.550, 1.363] |
+| CAGR | 20.82% |
+| Max DD | -55.66% |
+| H001 corr | +0.589 |
+
+Monthly rebalance is worse than weekly (0.949 vs H185 1.103). The weekly signal is fresher and worth the extra cost (~104 bps/yr additional turnover). MaxDD -55.66% nearly matches SPY (-55.92%). Sensitivity: 10d window (1.046) > 42d (0.997) > 21d (0.949) — unexpected non-monotonic result at canonical 21d window. H185 is the preferred reversal vehicle.

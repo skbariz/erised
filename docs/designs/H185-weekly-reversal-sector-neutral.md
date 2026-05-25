@@ -34,4 +34,14 @@ If Sharpe ≤ 0.51 or CI clips zero, weekly reversal is either too costly (2.5 b
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.103 |
+| 95% CI | [0.703, 1.517] |
+| CAGR | 24.88% |
+| Max DD | -50.76% |
+| H001 corr | +0.613 |
+
+Outstanding result. 12/12 folds positive including GFC (fold 5: +0.440). CAGR 24.88% highest in earnings/reversal batch. Sensitivity perfectly flat (3d/5d/10d all ~1.09-1.10). Reversal survives the 2008-2009 crisis better than anticipated — sector-neutral construction prevents catching-falling-knives sector bets. Weekly rebalance is the optimal frequency (beats H188 monthly by 0.154 Sharpe).

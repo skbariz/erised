@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H189",
+  "name": "residual-ou-mean-reversion",
+  "strategy_class": "ResidualOUMeanReversion",
+  "family": "cross-sectional stat arb / mean reversion",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.0254,
+  "ci_low": 0.6262,
+  "ci_high": 1.4393,
+  "cagr": 0.2458,
+  "max_drawdown": -0.4977,
+  "n_trades": 3,
+  "h001_corr": 0.5481,
+  "fold_sharpes": [
+    2.621,
+    1.635,
+    1.573,
+    1.121,
+    0.604,
+    0.211,
+    0.848,
+    2.144,
+    0.111,
+    1.012,
+    0.799,
+    0.941
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Avellaneda-Lee (2010): long stocks with 5d idiosyncratic return z-score < -1.5 (vs 252d history). Sector-neutral, weekly rebalance.",
+  "canonical_params": {
+    "entry_z": -1.5,
+    "beta_window": 252,
+    "ou_window": 252,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

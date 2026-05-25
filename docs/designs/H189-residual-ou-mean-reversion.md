@@ -41,4 +41,14 @@ If Sharpe ≤ 0.51 or CI clips zero, individual stock OU processes are not explo
 
 ## OOS Results
 
-*(to be filled after backtest)*
+**Decision: KEEP**
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 1.025 |
+| 95% CI | [0.626, 1.439] |
+| CAGR | 24.58% |
+| Max DD | -49.77% |
+| H001 corr | +0.548 |
+
+Avellaneda-Lee OU validated. 12/12 folds positive. Lowest H001 corr in reversal family (+0.548). Sensitivity: entry_z=-1.0 (1.047) > -1.5 (1.025) > -2.0 (0.745) — looser threshold trades more and wins; tighter threshold misses too many reversals. The OU z-score provides a principled entry filter but raw reversal (H185) is slightly stronger (1.103 vs 1.025) at higher frequency.

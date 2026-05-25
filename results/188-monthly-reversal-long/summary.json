@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H188",
+  "name": "monthly-reversal-long",
+  "strategy_class": "MonthlyReversalLong",
+  "family": "cross-sectional short-term reversal",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9488,
+  "ci_low": 0.5499,
+  "ci_high": 1.363,
+  "cagr": 0.2082,
+  "max_drawdown": -0.5566,
+  "n_trades": 1,
+  "h001_corr": 0.589,
+  "fold_sharpes": [
+    1.443,
+    1.506,
+    0.887,
+    1.9,
+    1.022,
+    0.361,
+    0.759,
+    2.24,
+    0.638,
+    1.553,
+    0.977,
+    0.882
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Prior-month losers sector-neutral, monthly rebalance. 10x lower cost than H185 weekly. Tests if reversal survives lower frequency.",
+  "canonical_params": {
+    "reversal_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

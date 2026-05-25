@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H187",
+  "name": "liquidity-filtered-reversal",
+  "strategy_class": "LiquidityFilteredReversal",
+  "family": "cross-sectional short-term reversal",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.0681,
+  "ci_low": 0.6663,
+  "ci_high": 1.4834,
+  "cagr": 0.2564,
+  "max_drawdown": -0.5317,
+  "n_trades": 1,
+  "h001_corr": 0.6003,
+  "fold_sharpes": [
+    2.233,
+    1.42,
+    0.969,
+    1.89,
+    1.324,
+    0.46,
+    0.798,
+    2.476,
+    0.535,
+    1.647,
+    0.883,
+    1.063
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H185 reversal applied to top-50% by realized vol (illiquidity proxy, Amihud 2002). Reversal premium larger in less liquid names.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "vol_window": 21,
+    "illiq_quantile": 0.5,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -124,6 +124,7 @@ class MomentumLongOnly(CrossSectionalStrategy):
 class MomentumMarketNeutral(CrossSectionalStrategy):
     """H151: Long top quintile, short bottom quintile; gross exposure = 1.0.
 
+    Each leg is 0.5 gross; net ≈ 0. Rebalances monthly by default.
     Borrow cost for the short leg is modelled separately in the runner
     (50 bps/year applied as an additional drag to net_returns).
     """
@@ -136,11 +137,13 @@ class MomentumMarketNeutral(CrossSectionalStrategy):
         skip_days: int = 21,
         top_quantile: float = 0.20,
         bottom_quantile: float = 0.20,
+        monthly_rebalance: bool = True,
     ):
         self.long_days = long_days
         self.skip_days = skip_days
         self.top_quantile = top_quantile
         self.bottom_quantile = bottom_quantile
+        self.monthly_rebalance = monthly_rebalance
 
     def generate_weights(
         self,
@@ -165,8 +168,18 @@ class MomentumMarketNeutral(CrossSectionalStrategy):
         # Each leg gets 0.5 gross exposure → total gross = 1.0
         long_w = long_mask.astype(float).div(long_count, axis=0).fillna(0.0) * 0.5
         short_w = short_mask.astype(float).div(short_count, axis=0).fillna(0.0) * 0.5
+        daily_w = long_w - short_w
 
-        return long_w - short_w
+        if not self.monthly_rebalance:
+            return daily_w
+        is_month_start = prices_panel.index.to_series().dt.month.diff().ne(0)
+        out = daily_w.copy()
+        prev = pd.Series(dtype=object)
+        for date, is_start in is_month_start.items():
+            if is_start or prev.empty:
+                prev = daily_w.loc[date]
+            out.loc[date] = prev
+        return out
 
 
 # ---------------------------------------------------------------------------

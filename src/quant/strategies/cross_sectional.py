@@ -445,11 +445,11 @@ class SmoothMomentum(CrossSectionalStrategy):
         daily_rets = prices_panel.pct_change()
 
         mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
-        fraction_pos = (
-            daily_rets.rolling(formation, min_periods=formation // 2)
-            .apply(lambda x: float(np.mean(x > 0)), raw=True)
-            .shift(self.skip_days)
-        )
+        # Vectorized: count positive days via rolling sum on bool indicator (avoids Python callbacks)
+        pos = (daily_rets > 0).astype(float)
+        count_pos = pos.rolling(formation, min_periods=formation // 2).sum()
+        count_all = daily_rets.rolling(formation, min_periods=formation // 2).count()
+        fraction_pos = (count_pos / count_all).shift(self.skip_days)
         smooth_score = mom * fraction_pos
         daily_w = _equal_weight_top_quantile(smooth_score, membership, self.top_quantile)
         if not self.monthly_rebalance:
@@ -681,13 +681,12 @@ class SmoothVolTargetMomentum(CrossSectionalStrategy):
         formation = self.long_days - self.skip_days
         daily_rets = prices_panel.pct_change()
 
-        # H155 smooth momentum signal
+        # H155 smooth momentum signal (vectorized fraction-positive)
         mom = prices_panel.shift(self.skip_days) / prices_panel.shift(self.long_days) - 1
-        fraction_pos = (
-            daily_rets.rolling(formation, min_periods=formation // 2)
-            .apply(lambda x: float(np.mean(x > 0)), raw=True)
-            .shift(self.skip_days)
-        )
+        pos = (daily_rets > 0).astype(float)
+        count_pos = pos.rolling(formation, min_periods=formation // 2).sum()
+        count_all = daily_rets.rolling(formation, min_periods=formation // 2).count()
+        fraction_pos = (count_pos / count_all).shift(self.skip_days)
         smooth_score = mom * fraction_pos
         daily_w = _equal_weight_top_quantile(smooth_score, membership, self.top_quantile)
         base_w = _monthly_rebalance(daily_w, prices_panel) if self.monthly_rebalance else daily_w

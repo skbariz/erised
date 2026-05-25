@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H168",
+  "name": "composite-quality-score",
+  "strategy_class": "CompositeQualityScore",
+  "family": "cross-sectional quality (composite)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 1.1812,
+  "ci_low": 0.7726,
+  "ci_high": 1.5943,
+  "cagr": 0.1855,
+  "max_drawdown": -0.4044,
+  "n_trades": 1,
+  "h001_corr": 0.6596,
+  "fold_sharpes": [
+    1.258,
+    2.242,
+    1.477,
+    2.169,
+    1.27,
+    0.081,
+    0.969,
+    2.428,
+    1.037,
+    2.189,
+    1.231,
+    1.03
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "QMJ-inspired composite: profitability (GP/A, ROE, cash-ROE), growth (1yr GP/A change), safety (beta, leverage, current ratio). Sector-neutral.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "beta_window": 252,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

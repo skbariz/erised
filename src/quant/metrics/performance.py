@@ -128,7 +128,7 @@ def bootstrap_sharpe_ci(
     swap in a stationary block bootstrap later.
     """
     rng = np.random.default_rng(seed)
-    arr = returns.to_numpy()
+    arr = returns.dropna().to_numpy()
     n = len(arr)
     if n < 30:
         return float("nan"), float("nan")
@@ -157,7 +157,7 @@ def report(
     if positions is None:
         positions = pd.Series(index=returns.index, dtype=float)
         tov = float("nan")
-        n_trades = int(0)
+        n_trades = 0
     else:
         tov = turnover(positions)
         # Count trades as position changes that cross zero or change sign

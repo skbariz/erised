@@ -2147,3 +2147,512 @@ class LowBetaQuality(CrossSectionalStrategy):
         if not self.monthly_rebalance:
             return daily_w
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Shared helper: periodic (e.g. weekly) rebalance
+# ---------------------------------------------------------------------------
+
+
+def _periodic_rebalance(weights: pd.DataFrame, period: int = 5) -> pd.DataFrame:
+    """Hold weights for `period` trading days; rebalance on days 0, period, 2*period, ..."""
+    rebal_mask = pd.Series(False, index=weights.index)
+    rebal_mask.iloc[::period] = True
+    masked = weights.where(rebal_mask)
+    return masked.ffill().fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H180: EarningsTrendLong (YoY net income growth, sector-neutral)
+# ---------------------------------------------------------------------------
+
+
+class EarningsTrendLong(CrossSectionalStrategy):
+    """H180: Long top quintile by YoY net income growth rate, sector-neutral.
+
+    SUE proxy = (NI_t - NI_{t-252bd}) / |NI_{t-252bd}|. Uses EDGAR filing-date
+    forward-filled data (point-in-time). Captures post-filing earnings drift.
+    """
+
+    name = "earnings_trend_long"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        daily_w = _sector_neutral_weights(
+            sue, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H181: RevenueEarningsDoubleGrowth (both NI and revenue grew YoY)
+# ---------------------------------------------------------------------------
+
+
+class RevenueEarningsDoubleGrowth(CrossSectionalStrategy):
+    """H181: Long stocks where BOTH net income AND revenue grew YoY.
+
+    Jegadeesh-Livnat double-confirmation proxy using EDGAR data.
+    Signal = (z_ni_growth + z_rev_growth)/2, applied only where both > 0.
+    """
+
+    name = "revenue_earnings_double_growth"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+
+        ni_lag = ni.shift(self.yoy_window)
+        rev_lag = rev.shift(self.yoy_window)
+        ni_growth = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        rev_growth = (rev - rev_lag) / rev_lag.abs().replace(0, np.nan)
+
+        # Only score stocks where both components grew
+        both_pos = (ni_growth > 0) & (rev_growth > 0)
+        composite = ((_cs_zscore(ni_growth) + _cs_zscore(rev_growth)) / 2.0).where(both_pos)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H182: FilingDateGapContinuation (price reaction on EDGAR filing dates)
+# ---------------------------------------------------------------------------
+
+
+class FilingDateGapContinuation(CrossSectionalStrategy):
+    """H182: Long stocks with a positive price reaction on a recent EDGAR filing date.
+
+    Detects new filings as the day net_income first changes in the PIT panel.
+    If the price returned > gap_threshold on that day, holds the stock for
+    hold_days trading days (post-filing drift).
+    """
+
+    name = "filing_date_gap_continuation"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        gap_threshold: float = 0.02,
+        hold_days: int = 20,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.gap_threshold = gap_threshold
+        self.hold_days = hold_days
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        # Filing days: value changed from prior day or first appearance
+        is_new_filing = (ni.diff().abs() > 0) | (ni.notna() & ni.shift(1).isna())
+        daily_rets = prices_panel.pct_change()
+        # Price return on filing day; NaN on non-filing days
+        filing_rets = daily_rets.where(is_new_filing)
+        # Positive filing reaction in last hold_days days
+        has_pos = (filing_rets > self.gap_threshold).rolling(self.hold_days, min_periods=1).max()
+        # Equal weight all stocks with recent positive filing reaction
+        mem = membership.reindex_like(filing_rets).fillna(False)
+        selected = (has_pos > 0) & mem
+        count = selected.sum(axis=1).replace(0, np.nan)
+        return selected.astype(float).div(count, axis=0).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H183: CashEarningsDrift (NI growth + cash-backed quality filter)
+# ---------------------------------------------------------------------------
+
+
+class CashEarningsDrift(CrossSectionalStrategy):
+    """H183: NI YoY growth, filtered to stocks with cash-backed earnings.
+
+    Quality gate: operating_cf / net_income > cash_ratio_min.
+    Stocks with accrual-heavy earnings are excluded (Sloan 1996 inspired).
+    """
+
+    name = "cash_earnings_drift"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+        cash_ratio_min: float = 0.5,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+        self.cash_ratio_min = cash_ratio_min
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+
+        # Cash quality: OCF / |NI| > threshold (exclude accrual-heavy earnings)
+        cash_ratio = ocf / ni.abs().replace(0, np.nan)
+        cash_backed = cash_ratio > self.cash_ratio_min
+
+        composite = sue.where(cash_backed & (sue > 0))
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H184: EarningsMomentumComposite (SUE proxy + 63d price momentum)
+# ---------------------------------------------------------------------------
+
+
+class EarningsMomentumComposite(CrossSectionalStrategy):
+    """H184: (z_SUE + z_mom_63d) / 2, sector-neutral.
+
+    Combines earnings trend (fundamental) with price momentum (technical).
+    Both signals in the same direction = stronger, more durable drift.
+    """
+
+    name = "earnings_momentum_composite"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+        mom_window: int = 63,
+        monthly_rebalance: bool = True,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+        self.mom_window = mom_window
+        self.monthly_rebalance = monthly_rebalance
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+
+        mom = prices_panel.pct_change(self.mom_window)
+        composite = (_cs_zscore(sue).fillna(0.0) + _cs_zscore(mom).fillna(0.0)) / 2.0
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        if not self.monthly_rebalance:
+            return daily_w
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H185: WeeklyReversalSectorNeutral (5-day reversal, sector-neutral)
+# ---------------------------------------------------------------------------
+
+
+class WeeklyReversalSectorNeutral(CrossSectionalStrategy):
+    """H185: Long prior 5-day losers within each sector; rebalance weekly.
+
+    Liquidity-provision reversal: stocks that fall on stock-specific selling
+    pressure tend to bounce back in the following week.
+    """
+
+    name = "weekly_reversal_sector_neutral"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        reversal_window: int = 5,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ret_5d = prices_panel.pct_change(self.reversal_window)
+        score = -ret_5d  # negate: want losers (bottom quintile by return)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H186: ResidualWeeklyReversal (reversal of idiosyncratic 5-day return)
+# ---------------------------------------------------------------------------
+
+
+class ResidualWeeklyReversal(CrossSectionalStrategy):
+    """H186: Reverse the idiosyncratic (market-stripped) 5-day return.
+
+    Residual = 5d_return - beta * SPY_5d_return. Trades the stock-specific
+    move only, removing market-wide effects.
+    """
+
+    name = "residual_weekly_reversal"
+
+    def __init__(
+        self,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        reversal_window: int = 5,
+        beta_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.beta_window = beta_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov.div(var, axis=0)
+        # 5-day residual return
+        spy_5d = spy.rolling(self.reversal_window).sum()
+        rets_5d = prices_panel.pct_change(self.reversal_window)
+        residual_5d = rets_5d.sub(beta.mul(spy_5d, axis=0))
+        # Reverse residual: long biggest negative idiosyncratic movers
+        score = -residual_5d
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H187: LiquidityFilteredReversal (reversal concentrated in high-vol stocks)
+# ---------------------------------------------------------------------------
+
+
+class LiquidityFilteredReversal(CrossSectionalStrategy):
+    """H187: 5-day reversal applied only to stocks with high realized volatility.
+
+    High realized vol proxies for illiquidity within the S&P 500. The reversal
+    premium is larger in less liquid names; the vol filter concentrates the signal.
+    """
+
+    name = "liquidity_filtered_reversal"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        reversal_window: int = 5,
+        vol_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        illiq_quantile: float = 0.50,
+        rebalance_period: int = 5,
+    ):
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+        self.illiq_quantile = illiq_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        illiq = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 2).std()
+        mem = membership.reindex_like(illiq).fillna(False)
+        n_mem = mem.sum(axis=1)
+        thresh = (n_mem * self.illiq_quantile).clip(lower=1)
+        illiq_rank = illiq.where(mem).rank(axis=1, ascending=False, na_option="keep")
+        high_illiq = illiq_rank.le(thresh, axis=0) & illiq_rank.notna()
+
+        ret_5d = prices_panel.pct_change(self.reversal_window)
+        score = (-ret_5d).where(high_illiq)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H188: MonthlyReversalLong (21-day reversal, monthly rebalance, low cost)
+# ---------------------------------------------------------------------------
+
+
+class MonthlyReversalLong(CrossSectionalStrategy):
+    """H188: Long prior-month losers within sector; monthly rebalance.
+
+    Lower cost than weekly reversal (~10x fewer rebalances). Tests if the
+    reversal signal survives at monthly holding frequency.
+    """
+
+    name = "monthly_reversal_long"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        reversal_window: int = 21,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ret_21d = prices_panel.pct_change(self.reversal_window)
+        score = -ret_21d  # negate: losers get high score
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H189: ResidualOUMeanReversion (Avellaneda-Lee OU process, z-score entry)
+# ---------------------------------------------------------------------------
+
+
+class ResidualOUMeanReversion(CrossSectionalStrategy):
+    """H189: Long stocks with deeply negative idiosyncratic 5-day return z-score.
+
+    Avellaneda-Lee (2010): idiosyncratic return follows an OU process.
+    Stocks with z-score < entry_z (relative to 252-day history) are in extreme
+    negative deviation and should mean-revert.
+    """
+
+    name = "residual_ou_mean_reversion"
+
+    def __init__(
+        self,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        beta_window: int = 252,
+        ou_window: int = 252,
+        entry_z: float = -1.5,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ):
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.beta_window = beta_window
+        self.ou_window = ou_window
+        self.entry_z = entry_z
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = cov.div(var, axis=0)
+        residual = daily_rets.sub(beta.mul(spy, axis=0))
+        # 5-day cumulative idiosyncratic return
+        resid_5d = residual.rolling(5, min_periods=3).sum()
+        # Z-score vs. trailing ou_window distribution
+        mu = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).mean()
+        sd = (
+            resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2)
+            .std()
+            .replace(0, np.nan)
+        )
+        z_score = (resid_5d - mu) / sd
+        # Long stocks with deeply negative z-score (mean-reversion entry)
+        # Negate so most negative = highest rank in sector-neutral selection
+        score = -z_score.where(z_score < self.entry_z)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

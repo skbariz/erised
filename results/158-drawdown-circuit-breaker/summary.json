@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H158",
+  "name": "drawdown-circuit-breaker",
+  "strategy_class": "DrawdownCircuitBreaker",
+  "family": "cross-sectional momentum",
+  "run_date": "2026-05-24",
+  "oos_sharpe": 1.0773,
+  "ci_low": 0.681,
+  "ci_high": 1.4868,
+  "cagr": 0.1744,
+  "max_drawdown": -0.2755,
+  "n_trades": 119,
+  "h001_corr": 0.748,
+  "fold_sharpes": [
+    1.942,
+    0.67,
+    1.257,
+    1.559,
+    0.924,
+    -0.283,
+    0.638,
+    2.211,
+    0.872,
+    1.495,
+    1.01,
+    0.995
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H150 + hysteresis drawdown circuit breaker. H087 mechanism applied to CS momentum.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "top_quantile": 0.2,
+    "dd_soft": -0.1,
+    "dd_hard": -0.15,
+    "dd_resume": -0.05,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

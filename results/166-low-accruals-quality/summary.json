@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H166",
+  "name": "low-accruals-quality",
+  "strategy_class": "LowAccrualsQuality",
+  "family": "cross-sectional quality (accruals)",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8243,
+  "ci_low": 0.4246,
+  "ci_high": 1.2376,
+  "cagr": 0.1054,
+  "max_drawdown": -0.3452,
+  "n_trades": 1,
+  "h001_corr": 0.6336,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.128,
+    0.755,
+    2.095,
+    0.918,
+    1.837,
+    1.087,
+    1.211
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long bottom 20% by accruals = (NI - OCF) / |TA|. Low accruals = cash-driven earnings = higher quality. Sloan (1996).",
+  "canonical_params": {
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

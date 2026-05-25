@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H160",
+  "name": "large-cap-value",
+  "strategy_class": "LargeCapValue",
+  "family": "cross-sectional value",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.73,
+  "ci_low": 0.3329,
+  "ci_high": 1.1376,
+  "cagr": 0.0976,
+  "max_drawdown": -0.4351,
+  "n_trades": 1,
+  "h001_corr": 0.6054,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.257,
+    0.574,
+    2.026,
+    0.766,
+    2.089,
+    1.042,
+    0.976
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "B/M + E/P composite value. Point-in-time EDGAR XBRL fundamentals. Coverage ~2009+.",
+  "canonical_params": {
+    "top_quantile": 0.2,
+    "monthly_rebalance": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

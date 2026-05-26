@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H218",
+  "name": "intangible-return-reversal",
+  "strategy_class": "IntangibleReturnReversal",
+  "family": "residual momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8967,
+  "ci_low": 0.4939,
+  "ci_high": 1.3074,
+  "cagr": 0.1911,
+  "max_drawdown": -0.5647,
+  "n_trades": 1,
+  "h001_corr": -0.0014,
+  "fold_sharpes": [
+    0.995,
+    1.508,
+    0.816,
+    1.549,
+    1.051,
+    0.541,
+    0.764,
+    1.888,
+    0.775,
+    1.785,
+    1.018,
+    0.98
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "intangible_return = 12m price return - YoY NI growth (clipped [-1,2]). Low intangible return = price grounded in fundamentals. Fade hype-driven returns not backed by earnings. Sector-neutral bottom 20%.",
+  "canonical_params": {
+    "price_window": 252,
+    "skip_window": 21,
+    "yoy_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

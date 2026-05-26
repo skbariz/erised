@@ -235,6 +235,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 214 | Gross margin momentum | accruals / earnings quality (CS) | **kept** | 0.690 | [0.282, 1.099] | 8.52% | −34.55% | −0.014 | 12-1m mom gated by improving gross margin; 504d window stronger (0.907) |
 | 215 | Fundamental reversal | accruals / earnings quality (CS) | **kept** | 0.718 | [0.318, 1.122] | 9.44% | −43.10% | −0.015 | Monthly reversal gated by NI>0 AND OCF>0; avoids value traps |
 
+### Batch 4: Residual Momentum Variants (H216–H220)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| **216** | **Sector residual momentum** | **residual momentum (CS)** | **kept ★** | **0.983** | **[0.581, 1.395]** | 19.92% | −51.97% | **+0.002** | **Strip market + sector beta; matches H163 Sharpe; batch star** |
+| 217 | Residual mom vol-scaled | residual momentum (CS) | **kept** | 0.936 | [0.532, 1.353] | 17.76% | −51.41% | +0.001 | H163 + idiosyncratic vol-target; MaxDD sensitivity flat across target_vol |
+| 218 | Intangible return reversal | residual momentum (CS) | **kept** | 0.897 | [0.494, 1.307] | 19.11% | −56.47% | −0.001 | Fade price>fundamental; MaxDD −56.47% slightly worse than SPY |
+| 219 | Fundamental momentum | residual momentum (CS) | **kept** | 0.729 | [0.329, 1.139] | 8.56% | −39.05% | −0.021 | Pure accounting growth: no price signal; H001 corr −0.021 |
+| 220 | Residual mom quality | residual momentum (CS) | **kept** | 0.958 | [0.558, 1.369] | 19.11% | −51.94% | +0.001 | H163 + low-accruals gate; slightly below H216 but stable sensitivity |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

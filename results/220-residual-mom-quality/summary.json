@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H220",
+  "name": "residual-mom-quality",
+  "strategy_class": "ResidualMomQuality",
+  "family": "residual momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9578,
+  "ci_low": 0.5579,
+  "ci_high": 1.3685,
+  "cagr": 0.1911,
+  "max_drawdown": -0.5194,
+  "n_trades": 1,
+  "h001_corr": 0.0012,
+  "fold_sharpes": [
+    1.599,
+    1.015,
+    1.231,
+    1.597,
+    1.229,
+    -0.12,
+    0.785,
+    2.328,
+    0.966,
+    1.599,
+    1.012,
+    0.84
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H163 CAPM-residual momentum gated by balance-sheet accruals quality. Zero weight for top 20% accruals stocks (worst quality). Residual momentum + earnings quality filter. Sector-neutral top 20%.",
+  "canonical_params": {
+    "long_days": 252,
+    "skip_days": 21,
+    "accrual_window": 252,
+    "accrual_exclude_quantile": 0.2,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

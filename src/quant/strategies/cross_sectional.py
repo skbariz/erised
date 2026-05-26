@@ -3694,3 +3694,255 @@ class CapitalDiscipline(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 3: Accruals & Earnings Quality (H211-H215)
+# ---------------------------------------------------------------------------
+
+
+class BalanceSheetAccruals(CrossSectionalStrategy):
+    """H211: Long bottom quintile by balance-sheet accruals.
+
+    Balance-sheet accruals = Δ(NWC) / avg_TA where NWC = current_assets - current_liabilities.
+    Sloan (1996) original balance-sheet approach: NWC growth signals low earnings quality.
+    Distinct from H166 (LowAccrualsQuality) which uses the cash-flow approach (NI-OCF)/TA.
+    Sector-neutral bottom 20%, monthly rebalance.
+    """
+
+    name = "balance_sheet_accruals"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        accrual_window: int = 252,
+    ):
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.accrual_window = accrual_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        nwc = ca - cl
+        nwc_lag = nwc.shift(self.accrual_window)
+        avg_ta = (ta + ta.shift(self.accrual_window)) / 2
+        accruals = (nwc - nwc_lag) / avg_ta.where(avg_ta > 0)
+
+        daily_w = _sector_neutral_weights(
+            accruals, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class DualMomentumEarnings(CrossSectionalStrategy):
+    """H212: Long stocks in top quantile of BOTH price momentum AND earnings momentum.
+
+    AND condition (not composite): stock must rank in top quantile on both signals.
+    Fewer but higher-conviction positions. Monthly rebalance.
+    """
+
+    name = "dual_momentum_earnings"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        yoy_window: int = 252,
+        top_quantile: float = 0.30,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.yoy_window = yoy_window
+        self.top_quantile = top_quantile
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        price_mom = prices_panel.pct_change(self.mom_window).shift(self.skip_window)
+
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        sue = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+
+        # Rank within cross-section (pct=True gives 0..1 where 1=highest)
+        price_rank = price_mom.rank(axis=1, ascending=True, na_option="keep", pct=True)
+        sue_rank = sue.rank(axis=1, ascending=True, na_option="keep", pct=True)
+
+        # Both must be in the top fraction
+        both_top = (price_rank >= (1 - self.top_quantile)) & (sue_rank >= (1 - self.top_quantile))
+
+        composite = price_mom.where(both_top, np.nan)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class EarningsQualityMomentum(CrossSectionalStrategy):
+    """H213: z(-balance_sheet_accruals) + z(12-1m price momentum) composite.
+
+    Low accruals (high earnings quality) + strong price momentum.
+    Combines Sloan (1996) balance-sheet accruals with Jegadeesh-Titman momentum.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "earnings_quality_momentum"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        accrual_window: int = 252,
+        mom_window: int = 252,
+        skip_window: int = 21,
+    ):
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.accrual_window = accrual_window
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        nwc = ca - cl
+        nwc_lag = nwc.shift(self.accrual_window)
+        avg_ta = (ta + ta.shift(self.accrual_window)) / 2
+        accruals = (nwc - nwc_lag) / avg_ta.where(avg_ta > 0)
+
+        z_accruals = _cs_zscore(-accruals)
+        z_mom = _cs_zscore(prices_panel.pct_change(self.mom_window).shift(self.skip_window))
+
+        composite = z_accruals.add(z_mom, fill_value=0.0)
+        n = z_accruals.notna().astype(float) + z_mom.notna().astype(float)
+        composite = composite / n.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class GrossMarginMomentum(CrossSectionalStrategy):
+    """H214: 12-1m momentum gated by improving gross margin.
+
+    Filter: gross_margin_t > gross_margin_{t-252} (YoY improvement in GP/revenue).
+    Only buy momentum stocks with expanding gross margins.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "gross_margin_momentum"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        margin_window: int = 252,
+        mom_window: int = 252,
+        skip_window: int = 21,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.margin_window = margin_window
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+
+        gross_margin = gp / rev.where(rev > 0)
+        margin_improving = gross_margin > gross_margin.shift(self.margin_window)
+
+        price_mom = prices_panel.pct_change(self.mom_window).shift(self.skip_window)
+        gated_mom = price_mom.where(margin_improving, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            gated_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class FundamentalReversal(CrossSectionalStrategy):
+    """H215: Monthly price reversal gated by fundamental stability.
+
+    Buy oversold stocks (bottom quintile by 21d return) where NI > 0 AND OCF > 0.
+    Avoids fundamental deterioration traps in short-term reversal.
+    Sector-neutral bottom 20% by 21d return within qualifying stocks, monthly rebalance.
+    """
+
+    name = "fundamental_reversal"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        reversal_window: int = 21,
+    ):
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.reversal_window = reversal_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        quality_ok = (ni > 0) & (ocf > 0)
+        reversal = prices_panel.pct_change(self.reversal_window)
+        gated_reversal = reversal.where(quality_ok, np.nan)
+
+        # ascending=True: buy the biggest losers among quality-stable stocks
+        daily_w = _sector_neutral_weights(
+            gated_reversal, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

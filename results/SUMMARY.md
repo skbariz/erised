@@ -307,4 +307,45 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 
 ---
 
+## H201–H250 Synthesis
+
+| Target | Result |
+|--------|--------|
+| CS fundamental strategies tested | 50 (H201–H250) |
+| CS fundamental strategies kept | **50/50 (100% keep rate)** |
+| Best individual Sharpe | H216 SectorResidualMomentum — 0.983 |
+| Best MaxDD | H243 GrossProfitGrowth — −34.90% |
+| Worst MaxDD | H216 SectorResidualMomentum — −51.97% (full equity exposure) |
+| H001 corr range | −0.012 to −0.023 (universally near-zero / slightly negative) |
+| EDGAR active folds | Folds 6–11 only (2010–2022); folds 0–5 = 0.000 for all pure fundamental strategies |
+| GitHub issues | #149–#207 |
+
+### Signal family quality (approximate avg Sharpe, active folds)
+
+| Family | Best strategy | Best Sharpe | Notes |
+|--------|--------------|-------------|-------|
+| Residual momentum (B4) | H216 SectorResidualMomentum | 0.983 | Full 12-fold coverage (price-based) |
+| Gross profit family (B6+B8+B10) | H248 IntangibleQuality | 0.864 | GP/TA, GP/revenue, GP/BE all 0.861–0.879 |
+| Composite quality+momentum (B3+B7) | H213 EarningsQualityMomentum | 0.907 | 2-factor composites consistently strong |
+| Capital discipline (B2) | H209 BuybackMomentum | 0.930 | Only full-12-fold fundamental strategy |
+| Solvency + profitability (B8) | H239 GrossMarginLevel | 0.861 | Level beats change in same family |
+| Market value + cash flow (B9) | H243 GrossProfitGrowth | 0.791 | Flat window sensitivity = structural signal |
+| Structural + terminal (B10) | H248 IntangibleQuality | 0.864 | 5-factor terminal composite underperforms |
+
+### Key design lessons (H201–H250)
+
+1. **Residual momentum is the strongest price-based signal.** H216 (0.983): strip market and sector beta before ranking. Full 12-fold coverage vs 6-fold for pure fundamentals. Best cross-sectional strategy in H201–H250.
+
+2. **Buyback momentum (H209) is the only fundamental strategy with full 12-fold coverage.** Combining shares_outstanding change (buyback signal) with 12-1m price momentum means the price component fills pre-EDGAR folds. Any composite adding a price momentum component gains full coverage.
+
+3. **Level-based profitability signals outperform change-based signals in the same family.** GP/revenue level (H239: 0.861) beats GP/revenue change gate (H214: 0.690). GP/TA level (H227: 0.879) outperforms operating leverage change (H229: 0.764). Persistent quality is a more stable predictor than recent improvement.
+
+4. **Composite signals degrade above 2–3 factors.** 2-factor composites (H231 QualityMomentum: 0.870, H213 EarningsQualityMomentum: 0.907) consistently outperform 4–5-factor composites (H250 GrandFundamentalComposite: 0.742). EDGAR timing differences across sources cause fold-6 near-zero in multi-source composites.
+
+5. **Flat sensitivity table = structural signal.** When Sharpe barely changes across 126/252/504d windows (e.g., H243 GrossProfitGrowth: 0.813/0.791/0.814), the signal is not parameter-sensitive and the canonical choice is justified without tuning risk.
+
+6. **Market-cap linked signals have higher MaxDD.** FCFYield (H241, OCF/market_cap): MaxDD −42.31% vs GrossMarginLevel (H239, accounting-only): MaxDD −34.59%. Combining price with fundamentals introduces valuation-driven drawdowns absent from pure accounting signals.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

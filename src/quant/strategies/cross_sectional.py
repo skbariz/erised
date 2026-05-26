@@ -3946,3 +3946,316 @@ class FundamentalReversal(CrossSectionalStrategy):
             gated_reversal, membership, self.sectors, self.within_sector_quantile, ascending=True
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 4: Residual Momentum Variants (H216-H220)
+# ---------------------------------------------------------------------------
+
+
+class SectorResidualMomentum(CrossSectionalStrategy):
+    """H216: Residual momentum stripping both market AND sector beta.
+
+    Extension of H163: after stripping SPY beta, also subtract the equal-weight
+    sector-average residual. Pure idiosyncratic momentum: stock return unexplained
+    by both market and sector factors. Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "sector_residual_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        long_days: int = 252,
+        skip_days: int = 21,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        window = self.long_days - self.skip_days
+        mkt_r = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # Step 1: strip market beta (same as H163)
+        cov_sm = daily_rets.rolling(window, min_periods=window // 2).cov(mkt_r)
+        var_m = mkt_r.rolling(window, min_periods=window // 2).var()
+        beta_mkt = cov_sm.div(var_m, axis=0)
+        daily_resid1 = daily_rets - beta_mkt.mul(mkt_r, axis=0)
+
+        # Step 2: subtract equal-weight sector-average market-residual
+        mem_f = membership.reindex_like(daily_rets).fillna(False)
+        sec_map = self.sectors.reindex(prices_panel.columns)
+        sector_avg = pd.DataFrame(np.nan, index=prices_panel.index, columns=prices_panel.columns)
+        for sec in sec_map.dropna().unique():
+            tickers = sec_map[sec_map == sec].index.tolist()
+            tickers = [t for t in tickers if t in daily_resid1.columns]
+            if not tickers:
+                continue
+            mask = mem_f[tickers]
+            sec_ret = daily_resid1[tickers].where(mask).mean(axis=1)
+            for t in tickers:
+                sector_avg[t] = sec_ret
+
+        pure_resid = daily_resid1 - sector_avg.fillna(0.0)
+
+        # Cumulate over window, shift by skip_days
+        residual_mom = (
+            pure_resid.rolling(window, min_periods=window // 2).sum().shift(self.skip_days)
+        )
+
+        daily_w = _sector_neutral_weights(
+            residual_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ResidualMomVolScaled(CrossSectionalStrategy):
+    """H217: H163-style residual momentum with idiosyncratic vol-target scaling.
+
+    Each stock's weight is scaled by min(1, target_vol / realized_idiosyncratic_vol).
+    Reduces exposure during high-volatility periods, same mechanism as H086 on H021.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "residual_mom_vol_scaled"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        long_days: int = 252,
+        skip_days: int = 21,
+        vol_lookback: int = 60,
+        target_vol: float = 0.12,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.vol_lookback = vol_lookback
+        self.target_vol = target_vol
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        window = self.long_days - self.skip_days
+        mkt_r = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # CAPM residual (same as H163)
+        cov_sm = daily_rets.rolling(window, min_periods=window // 2).cov(mkt_r)
+        var_m = mkt_r.rolling(window, min_periods=window // 2).var()
+        beta_mkt = cov_sm.div(var_m, axis=0)
+        daily_resid = daily_rets - beta_mkt.mul(mkt_r, axis=0)
+
+        residual_mom = (
+            daily_resid.rolling(window, min_periods=window // 2).sum().shift(self.skip_days)
+        )
+
+        # Idiosyncratic realized vol (vol of residuals)
+        resid_vol = (
+            daily_resid.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2)
+            .std()
+            .mul(np.sqrt(252))
+        )
+        # Annual target vol (default 12%)
+        vol_scalar = (self.target_vol / resid_vol).clip(upper=1.0)
+
+        # Scale ranking signal before sector-neutral selection
+        scaled_score = residual_mom * vol_scalar
+
+        daily_w = _sector_neutral_weights(
+            scaled_score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class IntangibleReturnReversal(CrossSectionalStrategy):
+    """H218: Fade stocks with high intangible return = price > fundamental return.
+
+    intangible_return = 12m price return - fundamental_return_proxy.
+    fundamental_return_proxy = YoY NI growth (clipped to [-1, 2]).
+    High intangible return stocks are hype-driven; fade (short-term reversal in disguise).
+    Sector-neutral bottom quintile by intangible return, monthly rebalance.
+    """
+
+    name = "intangible_return_reversal"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        price_window: int = 252,
+        skip_window: int = 21,
+        yoy_window: int = 252,
+    ):
+        self.net_income = net_income
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.price_window = price_window
+        self.skip_window = skip_window
+        self.yoy_window = yoy_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # Price return (12m, skip 1m)
+        price_return = prices_panel.pct_change(self.price_window).shift(self.skip_window)
+
+        # Fundamental return proxy: YoY NI growth clipped to [-1, 2]
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_lag = ni.shift(self.yoy_window)
+        ni_growth = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        ni_growth = ni_growth.clip(-1.0, 2.0)
+
+        # Intangible return = price driven by non-fundamental factors
+        intangible = price_return - ni_growth.fillna(0.0)
+
+        # Low intangible return = price grounded in fundamentals = buy
+        daily_w = _sector_neutral_weights(
+            intangible, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class FundamentalMomentum(CrossSectionalStrategy):
+    """H219: Pure fundamental momentum -- no price signal.
+
+    Composite of YoY growth in NI, gross profit, and OCF.
+    z(NI_growth) + z(GP_growth) + z(OCF_growth).
+    No price signal: tests whether accounting momentum predicts price returns.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "fundamental_momentum"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+    ):
+        self.net_income = net_income
+        self.gross_profit = gross_profit
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        def _yoy_growth(panel: pd.DataFrame) -> pd.DataFrame:
+            lag = panel.shift(self.yoy_window)
+            return ((panel - lag) / lag.abs().replace(0, np.nan)).clip(-2.0, 3.0)
+
+        ni = _align_fund(self.net_income, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        z_ni = _cs_zscore(_yoy_growth(ni))
+        z_gp = _cs_zscore(_yoy_growth(gp))
+        z_ocf = _cs_zscore(_yoy_growth(ocf))
+
+        composite = z_ni.add(z_gp, fill_value=0.0).add(z_ocf.fillna(0.0), fill_value=0.0)
+        n = z_ni.notna().astype(float) + z_gp.notna().astype(float) + z_ocf.notna().astype(float)
+        composite = composite / n.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ResidualMomQuality(CrossSectionalStrategy):
+    """H220: H163 residual momentum with high-accruals stocks zeroed out.
+
+    Balance-sheet accruals quality gate: zero weight for stocks in top quintile
+    of delta(NWC)/avg_TA (highest accruals = lowest quality = excluded).
+    Sector-neutral top 20% of qualifying residual momentum, monthly rebalance.
+    """
+
+    name = "residual_mom_quality"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        long_days: int = 252,
+        skip_days: int = 21,
+        accrual_window: int = 252,
+        accrual_exclude_quantile: float = 0.20,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.long_days = long_days
+        self.skip_days = skip_days
+        self.accrual_window = accrual_window
+        self.accrual_exclude_quantile = accrual_exclude_quantile
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        window = self.long_days - self.skip_days
+        mkt_r = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # CAPM residual momentum (H163 logic)
+        cov_sm = daily_rets.rolling(window, min_periods=window // 2).cov(mkt_r)
+        var_m = mkt_r.rolling(window, min_periods=window // 2).var()
+        beta_mkt = cov_sm.div(var_m, axis=0)
+        daily_resid = daily_rets - beta_mkt.mul(mkt_r, axis=0)
+        residual_mom = (
+            daily_resid.rolling(window, min_periods=window // 2).sum().shift(self.skip_days)
+        )
+
+        # Balance-sheet accruals quality gate
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        nwc = ca - cl
+        avg_ta = (ta + ta.shift(self.accrual_window)) / 2
+        accruals = (nwc - nwc.shift(self.accrual_window)) / avg_ta.where(avg_ta > 0)
+
+        # Exclude top accrual_exclude_quantile (worst quality)
+        accrual_rank = accruals.rank(axis=1, ascending=False, na_option="keep", pct=True)
+        high_accrual = accrual_rank <= self.accrual_exclude_quantile
+
+        gated_mom = residual_mom.where(~high_accrual, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            gated_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

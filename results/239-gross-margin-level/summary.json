@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H239",
+  "name": "gross-margin-level",
+  "strategy_class": "GrossMarginLevel",
+  "family": "solvency factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8611,
+  "ci_low": 0.4568,
+  "ci_high": 1.2693,
+  "cagr": 0.1078,
+  "max_drawdown": -0.3459,
+  "n_trades": 1,
+  "h001_corr": -0.0118,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.432,
+    0.827,
+    2.218,
+    1.053,
+    1.957,
+    1.216,
+    1.037
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Persistent gross margin quality: GP/revenue level (no change). High gross margin = pricing power, moat, structural competitive advantage. Distinct from H214 (gate) and H229 (change). Tests if margin LEVEL predicts. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

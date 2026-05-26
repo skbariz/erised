@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H240",
+  "name": "roa-momentum",
+  "strategy_class": "ROAMomentum",
+  "family": "solvency factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7509,
+  "ci_low": 0.3394,
+  "ci_high": 1.1668,
+  "cagr": 0.0866,
+  "max_drawdown": -0.3654,
+  "n_trades": 1,
+  "h001_corr": -0.0199,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.449,
+    1.816,
+    0.974,
+    1.806,
+    1.21,
+    0.997
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY improvement in Return on Assets: ROA_t - ROA_{t-1y}. ROA = NI / avg_total_assets. DuPont: combines net margin + asset turnover. Distinct from ROEMomentum (H221, equity-relative) and AssetTurnover (H230, efficiency only). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

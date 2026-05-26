@@ -275,6 +275,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 234 | Multi-factor composite | composite factors (CS) | **kept** | 0.857 | [0.442, 1.266] | 10.48% | −35.76% | −0.013 | z(mom)+z(GP/TA)+z(-accruals)+z(-asset_growth); 4-factor composite |
 | 235 | Efficient growth | composite factors (CS) | **kept** | 0.766 | [0.362, 1.170] | 8.79% | −34.51% | −0.022 | z(rev_growth)+z(OCF/TA); cash-backed growth; fold 11 strong 1.284 |
 
+### Batch 8: Solvency & Profitability Factors (H236–H240)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 236 | Liquidity momentum | solvency factors (CS) | **kept** | 0.815 | [0.404, 1.229] | 9.51% | −36.93% | −0.016 | YoY current ratio (CA/CL) improvement; folds 0-5 zero; fold 7 Sharpe 2.14 |
+| 237 | Debt coverage | solvency factors (CS) | **kept** | 0.729 | [0.329, 1.139] | 9.04% | −36.18% | −0.020 | OCF/LTD solvency ratio; zero-debt firms NaN; fold 7 Sharpe 2.06 |
+| 238 | Net profit margin | solvency factors (CS) | **kept** | 0.696 | [0.293, 1.095] | 8.00% | −37.21% | −0.020 | YoY NI/revenue improvement; bottom-line efficiency trend; folds 0-5 zero |
+| **239** | **Gross margin level** | **solvency factors (CS)** | **kept ★** | **0.861** | **[0.457, 1.269]** | 10.78% | **−34.59%** | **−0.012** | **Persistent GP/revenue level; pricing power/moat proxy; batch star** |
+| 240 | ROA momentum | solvency factors (CS) | **kept** | 0.751 | [0.339, 1.167] | 8.66% | −36.54% | −0.020 | YoY ROA (NI/avg_TA) improvement; DuPont: margin × turnover; folds 0-5 zero |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

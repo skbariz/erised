@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H209",
+  "name": "buyback-momentum",
+  "strategy_class": "BuybackMomentum",
+  "family": "asset growth / capital discipline",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9304,
+  "ci_low": 0.5275,
+  "ci_high": 1.344,
+  "cagr": 0.1803,
+  "max_drawdown": -0.4988,
+  "n_trades": 1,
+  "h001_corr": 0.0023,
+  "fold_sharpes": [
+    1.41,
+    0.898,
+    1.173,
+    1.608,
+    1.111,
+    -0.15,
+    0.634,
+    2.306,
+    0.93,
+    1.585,
+    1.069,
+    0.98
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Management confidence + market confirmation: z(-net_issuance_252) + z(12-1m momentum). Stocks both buying back shares AND with strong price momentum. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "issuance_window": 252,
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

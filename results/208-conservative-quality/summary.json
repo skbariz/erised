@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H208",
+  "name": "conservative-quality",
+  "strategy_class": "ConservativeQuality",
+  "family": "asset growth / capital discipline",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7616,
+  "ci_low": 0.3618,
+  "ci_high": 1.1742,
+  "cagr": 0.0919,
+  "max_drawdown": -0.3597,
+  "n_trades": 1,
+  "h001_corr": -0.0204,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.519,
+    0.699,
+    1.903,
+    0.715,
+    1.986,
+    0.847,
+    1.079
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-signal capital discipline composite: z(-asset_growth_252) + z(-net_issuance_252) + z(OCF/TA). Combines H206+H207+accruals-quality. Top 20% = firms avoiding asset bloat, share dilution, and generating strong OCF.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

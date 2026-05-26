@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H210",
+  "name": "capital-discipline",
+  "strategy_class": "CapitalDiscipline",
+  "family": "asset growth / capital discipline",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7327,
+  "ci_low": 0.3292,
+  "ci_high": 1.1414,
+  "cagr": 0.0844,
+  "max_drawdown": -0.3764,
+  "n_trades": 1,
+  "h001_corr": -0.0194,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.641,
+    2.006,
+    0.91,
+    1.904,
+    0.798,
+    0.896
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-way capital allocation composite: z(-asset_growth) + z(-net_issuance) + z(-leverage_change). Leverage change = \u0394(LTD/TA) YoY. Firms avoiding asset growth, share dilution, and debt-financed expansion.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

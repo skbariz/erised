@@ -206,6 +206,7 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 
 ### Batch 1: Industry/Sector Momentum (H201–H205)
 
+
 | # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
 |---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
 | 201 | Sector ETF momentum | sector momentum (AA) | **kept** | 0.654 | [0.273, 1.057] | 7.24% | −38.99% | +0.068 | Top-3 equity ETFs by 126d return, risk-parity weighted; TLT fallback |
@@ -213,6 +214,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 203 | Sector-leader long-only | sector/industry momentum (CS) | **kept** | 0.915 | [0.518, 1.325] | 15.30% | −46.69% | +0.001 | Top-2 GICS sectors by 126d return, equal-weight within; H001 corr ~0 |
 | 204 | Industry relative strength | sector/industry momentum (CS) | **kept** | 0.824 | [0.421, 1.233] | 15.43% | −52.86% | +0.004 | 21d stock return minus sector-avg 21d return; sector-neutral top 20% |
 | 205 | Sector-momentum risk parity | sector momentum (AA) | killed | 0.399 | [−0.004, 0.802] | 4.22% | −54.16% | +0.047 | Top-1 ETF + TLT risk parity; CI clips zero, MaxDD −54% unacceptable |
+
+### Batch 2: Asset Growth & Net Share Issuance (H206–H210)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 206 | Low asset growth | asset growth (CS) | **kept** | 0.709 | [0.306, 1.123] | 7.97% | −39.25% | −0.019 | 2-yr TA growth; folds 0-5 zero (EDGAR ~2009+); H001 corr negative |
+| 207 | Shareholder yield | capital discipline (CS) | **kept** | 0.768 | [0.360, 1.170] | 8.92% | −38.07% | −0.022 | Share count reduction (buyback) YoY; best MaxDD in batch; H001 corr −0.022 |
+| 208 | Conservative quality | capital discipline (CS) | **kept** | 0.762 | [0.362, 1.174] | 9.19% | −35.97% | −0.020 | z(-asset_growth)+z(-net_issuance)+z(OCF/TA); fold 5 active, best MaxDD |
+| **209** | **Buyback momentum** | **capital discipline+momentum (CS)** | **kept ★** | **0.930** | **[0.527, 1.344]** | 18.03% | −49.88% | **+0.002** | **z(-net_issuance)+z(12-1m mom); full 12-fold coverage; batch star** |
+| 210 | Capital discipline | capital discipline (CS) | **kept** | 0.733 | [0.329, 1.141] | 8.44% | −37.64% | −0.019 | z(-asset_growth)+z(-net_issuance)+z(-leverage_change); 6 active folds |
 
 ---
 

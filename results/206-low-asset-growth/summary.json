@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H206",
+  "name": "low-asset-growth",
+  "strategy_class": "LowAssetGrowth",
+  "family": "asset growth / capital discipline",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7094,
+  "ci_low": 0.3064,
+  "ci_high": 1.1231,
+  "cagr": 0.0797,
+  "max_drawdown": -0.3925,
+  "n_trades": 1,
+  "h001_corr": -0.0186,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.227,
+    2.122,
+    0.893,
+    2.128,
+    0.818,
+    0.872
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Cooper et al. (2008) extended: 2-year (504d) total-asset growth rate. Low sustained asset growth = conservative capital allocation = higher expected return. Variant of H170 (FF5InvestmentFactor) testing 2-year horizon.",
+  "canonical_params": {
+    "growth_window": 504,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

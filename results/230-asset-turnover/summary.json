@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H230",
+  "name": "asset-turnover",
+  "strategy_class": "AssetTurnover",
+  "family": "value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.741,
+  "ci_low": 0.3343,
+  "ci_high": 1.1495,
+  "cagr": 0.0852,
+  "max_drawdown": -0.3632,
+  "n_trades": 1,
+  "h001_corr": -0.0206,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.618,
+    2.043,
+    0.743,
+    1.69,
+    0.934,
+    1.036
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY improvement in asset turnover: (rev/TA) - (rev/TA).shift(252). Companies generating more revenue per dollar of assets are improving efficiency. DuPont decomposition: asset turnover is the efficiency component of ROE. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

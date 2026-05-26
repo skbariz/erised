@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H227",
+  "name": "gross-profitability",
+  "strategy_class": "GrossProfitability",
+  "family": "value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8785,
+  "ci_low": 0.4692,
+  "ci_high": 1.2874,
+  "cagr": 0.1103,
+  "max_drawdown": -0.3446,
+  "n_trades": 1,
+  "h001_corr": -0.0173,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.485,
+    0.838,
+    2.059,
+    1.01,
+    2.039,
+    1.2,
+    1.154
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Novy-Marx (2013) gross profitability: GP/TA. The most profitable companies (relative to assets) outperform. Level-based factor, not change-based. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

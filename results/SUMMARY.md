@@ -255,6 +255,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 224 | Piotroski F-score | quality factors (CS) | **kept** | 0.752 | [0.346, 1.162] | 8.53% | −37.02% | −0.022 | 9-component binary quality score; folds 0-5 zero; consistent folds 6-11 |
 | 225 | Earnings consistency | quality factors (CS) | **kept** | 0.692 | [0.288, 1.104] | 7.73% | −37.42% | −0.017 | z(1yr NI growth)+z(2yr NI growth); folds 0-5 zero; consistent growers |
 
+### Batch 6: Value & Efficiency Factors (H226–H230)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 226 | Book-to-market momentum | value factors (CS) | **kept** | 0.766 | [0.364, 1.176] | 9.77% | −38.18% | −0.015 | z(BE/price)+z(12-1m mom); fold 5 active; value+momentum composite |
+| **227** | **Gross profitability** | **value factors (CS)** | **kept ★** | **0.879** | **[0.469, 1.287]** | 11.03% | **−34.46%** | **−0.017** | **Novy-Marx (2013) GP/TA; top 10% quantile 0.922/−29.29%; batch star** |
+| 228 | Revenue growth | value factors (CS) | **kept** | 0.760 | [0.357, 1.170] | 8.93% | −36.62% | −0.023 | YoY revenue growth; folds 0-5 zero; H001 corr −0.023 (strongest in batch) |
+| 229 | Operating leverage | value factors (CS) | **kept** | 0.764 | [0.350, 1.178] | 9.00% | −34.79% | −0.016 | GP_growth−rev_growth; 504d window stronger (0.834); MaxDD −34.79% |
+| 230 | Asset turnover | value factors (CS) | **kept** | 0.741 | [0.334, 1.149] | 8.52% | −36.32% | −0.021 | YoY rev/TA improvement; DuPont efficiency component; folds 0-5 zero |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

@@ -3616,3 +3616,156 @@ class ReversionEntryRiskParity(MultiAssetStrategy):
                 w_tlt_out.iloc[i] = w_tlt_h021.iloc[i]
 
         return pd.DataFrame({"SPY": w_spy_out, "TLT": w_tlt_out}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# H201: SectorETFMomentum
+# ---------------------------------------------------------------------------
+
+
+class SectorETFMomentum(MultiAssetStrategy):
+    """H201: Rotate into top-N equity ETFs by 6m momentum, risk-parity weighted.
+
+    ETF universe: XLP, XLU, IVE, IVW, QQQ, IWM, VNQ.
+    Signal: 126-day trailing total return (6 months), shifted 1 bar.
+    Portfolio: top-N by 6m return, inverse-vol (vol_lookback-day) risk-parity.
+    Falls back to SPY when fewer ETFs have sufficient history.
+
+    Prices DataFrame must contain {symbol.lower()}_close columns for each ETF.
+    """
+
+    name = "sector_etf_momentum"
+
+    _EQUITY_ETFS = ["XLP", "XLU", "IVE", "IVW", "QQQ", "IWM", "VNQ"]
+
+    def __init__(
+        self,
+        mom_window: int = 126,
+        vol_lookback: int = 60,
+        top_n: int = 3,
+    ) -> None:
+        self.mom_window = mom_window
+        self.vol_lookback = vol_lookback
+        self.top_n = top_n
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        col_map = {a: f"{a.lower()}_close" for a in self._EQUITY_ETFS}
+        available = {a: col for a, col in col_map.items() if col in prices.columns}
+
+        if not available:
+            return pd.DataFrame({"SPY": pd.Series(1.0, index=prices.index)})
+
+        # 6m momentum and rolling vol for each available ETF
+        mom_df = pd.DataFrame(
+            {a: prices[col].pct_change(self.mom_window) for a, col in available.items()}
+        )
+        ret_df = pd.DataFrame(
+            {a: prices[col].pct_change() for a, col in available.items()}
+        )
+        vol_df = ret_df.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
+        # Fill NaN vol with 1.0 so inv-vol is equal-weight when history is short
+        inv_vol_df = vol_df.replace(0, np.nan).rdiv(1).fillna(1.0)
+
+        # Rank ETFs by 6m momentum each day (1 = best); NaN = insufficient history
+        mom_rank = mom_df.rank(axis=1, ascending=False, na_option="keep")
+        top_mask = (mom_rank <= self.top_n) & mom_rank.notna()
+
+        # ETF weights: inv-vol within top-N, normalized to sum to 1
+        raw = inv_vol_df.where(top_mask, 0.0)
+        total = raw.sum(axis=1).replace(0, np.nan)
+        etf_w = raw.div(total, axis=0).fillna(0.0)
+
+        # SPY fallback when no ETF has enough history
+        no_etf = top_mask.sum(axis=1) == 0
+        etf_w["SPY"] = no_etf.astype(float)
+
+        return etf_w.shift(1).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H205: SectorMomentumRiskParity
+# ---------------------------------------------------------------------------
+
+
+class SectorMomentumRiskParity(MultiAssetStrategy):
+    """H205: H021 variant — top equity ETF by 6m momentum paired with TLT.
+
+    Selects the single best-performing equity ETF (XLP, XLU, IVE, IVW, QQQ,
+    IWM, VNQ) by 126-day trailing return, then risk-parity weights it against
+    TLT. Hypothesis: concentrating the equity leg in the strongest sector while
+    keeping the TLT hedge should improve on H021's fixed SPY exposure.
+
+    Falls back to SPY when no ETF has 6m history. Falls back to 100% winner
+    equity ETF when TLT is unavailable.
+    """
+
+    name = "sector_momentum_risk_parity"
+
+    _EQUITY_ETFS = ["XLP", "XLU", "IVE", "IVW", "QQQ", "IWM", "VNQ"]
+
+    def __init__(
+        self,
+        mom_window: int = 126,
+        vol_lookback: int = 60,
+    ) -> None:
+        self.mom_window = mom_window
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        col_map = {a: f"{a.lower()}_close" for a in self._EQUITY_ETFS}
+        available = {a: col for a, col in col_map.items() if col in prices.columns}
+
+        tlt_col = "tlt_close"
+        has_tlt = tlt_col in prices.columns
+
+        # 6m momentum for equity ETFs
+        mom_df = pd.DataFrame(
+            {a: prices[col].pct_change(self.mom_window) for a, col in available.items()}
+        )
+
+        # 60d vol for equity ETFs, TLT, SPY
+        ret_df = pd.DataFrame(
+            {a: prices[col].pct_change() for a, col in available.items()}
+        )
+        vol_etf = ret_df.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
+
+        tlt_r = prices[tlt_col].pct_change() if has_tlt else pd.Series(np.nan, index=prices.index)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
+        spy_r = prices["adj_close"].pct_change()
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
+
+        # Top-1 equity ETF by 6m momentum (all-NaN rows handled explicitly)
+        winner_valid = mom_df.notna().any(axis=1)
+        winner = pd.Series("SPY", index=prices.index, dtype=object)
+        if winner_valid.any():
+            winner.loc[winner_valid] = mom_df.loc[winner_valid].idxmax(axis=1, skipna=True)
+
+        # Build output weight DataFrame covering all possible assets
+        all_assets = list(dict.fromkeys(list(available.keys()) + (["TLT"] if has_tlt else []) + ["SPY"]))
+        wdf = pd.DataFrame(0.0, index=prices.index, columns=all_assets)
+
+        for date in prices.index:
+            w_asset = winner.loc[date]
+
+            # Equity leg vol
+            if w_asset == "SPY":
+                e_v = spy_vol.loc[date]
+            elif w_asset in vol_etf.columns:
+                e_v = vol_etf.loc[date, w_asset]
+            else:
+                e_v = np.nan
+            inv_e = (1.0 / e_v) if (not np.isnan(e_v) and e_v > 0) else 1.0
+
+            # TLT leg
+            t_v = tlt_vol.loc[date] if has_tlt else np.nan
+            tlt_ok = has_tlt and not np.isnan(prices[tlt_col].loc[date])
+
+            if tlt_ok and not np.isnan(t_v) and t_v > 0:
+                inv_t = 1.0 / t_v
+                tot = inv_e + inv_t
+                wdf.loc[date, w_asset] = inv_e / tot
+                wdf.loc[date, "TLT"] = inv_t / tot
+            else:
+                wdf.loc[date, w_asset] = 1.0
+
+        return wdf.shift(1).fillna(0.0)

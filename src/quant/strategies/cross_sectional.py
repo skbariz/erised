@@ -3227,3 +3227,225 @@ class MultiSignalComposite(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 1 helpers (H202-H204): sector return computation
+# ---------------------------------------------------------------------------
+
+
+def _compute_sector_returns(
+    prices_panel: pd.DataFrame,
+    membership: pd.DataFrame,
+    sectors: pd.Series,
+    window: int,
+) -> pd.DataFrame:
+    """Equal-weight average of member-stock returns over `window` days, per sector.
+
+    Returns DataFrame: index=dates, columns=sector names.
+    Only in-membership stocks contribute on each date.
+    """
+    mem_f = membership.reindex_like(prices_panel).fillna(False)
+    ret_window = prices_panel.pct_change(window)
+    sec_rets: dict[str, pd.Series] = {}
+
+    for sector in sectors.dropna().unique():
+        sec_tickers = [t for t in sectors[sectors == sector].index if t in prices_panel.columns]
+        if not sec_tickers:
+            continue
+        sec_ret = ret_window[sec_tickers].where(mem_f[sec_tickers])
+        n_valid = mem_f[sec_tickers].sum(axis=1).replace(0, np.nan)
+        sec_rets[sector] = sec_ret.sum(axis=1) / n_valid
+
+    return pd.DataFrame(sec_rets, index=prices_panel.index)
+
+
+# ---------------------------------------------------------------------------
+# H202: IndustryConfirmedMomentum
+# ---------------------------------------------------------------------------
+
+
+class IndustryConfirmedMomentum(CrossSectionalStrategy):
+    """H202: Moskowitz-Grinblatt (1999): 12-1m momentum gated by sector 6m trend.
+
+    Signal: standard 12-1m price momentum (H150 signal).
+    Gate: stock weight zeroed when its GICS sector 6m equal-weight return < 0.
+    Sector return = avg 126d return of in-membership stocks in that sector.
+    Rationale: sector momentum explains much of individual momentum; only buy
+    winners in winning sectors for higher conviction entries.
+    """
+
+    name = "industry_confirmed_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        sector_mom_window: int = 126,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.sector_mom_window = sector_mom_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # Standard 12-1m momentum
+        mom = prices_panel.pct_change(self.mom_window).shift(self.skip_window)
+
+        # Sector 6m returns (membership-weighted)
+        sector_ret_df = _compute_sector_returns(
+            prices_panel, membership, self.sectors, self.sector_mom_window
+        )
+        sector_positive = sector_ret_df > 0  # dates × sectors
+
+        # Map sector gate to each stock
+        sec_map = self.sectors.reindex(prices_panel.columns)
+        stock_gate = pd.DataFrame(False, index=prices_panel.index, columns=prices_panel.columns)
+        for sec in sector_positive.columns:
+            tickers = sec_map[sec_map == sec].index.tolist()
+            tickers = [t for t in tickers if t in stock_gate.columns]
+            if tickers:
+                gate_col = sector_positive[sec].reindex(prices_panel.index)
+                for t in tickers:
+                    stock_gate[t] = gate_col
+
+        # Gate: zero signal for stocks in sectors with negative 6m return
+        gated_mom = mom.where(stock_gate, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            gated_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H203: SectorLeaderLongOnly
+# ---------------------------------------------------------------------------
+
+
+class SectorLeaderLongOnly(CrossSectionalStrategy):
+    """H203: Allocate entirely to stocks inside the top-N GICS sectors by 6m return.
+
+    Rank GICS sectors by their 6m equal-weight member return. Stocks in the
+    top-N sectors are equally weighted; stocks in other sectors get zero weight.
+    More aggressive than H202 (gate): concentrates in sector leaders.
+    Sector return = avg 126d return of in-membership stocks in that sector.
+    """
+
+    name = "sector_leader_long_only"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        sector_mom_window: int = 126,
+        top_sectors: int = 2,
+    ) -> None:
+        self.sectors = sectors
+        self.sector_mom_window = sector_mom_window
+        self.top_sectors = top_sectors
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mem_f = membership.reindex_like(prices_panel).fillna(False)
+
+        # Sector 6m returns
+        sector_ret_df = _compute_sector_returns(
+            prices_panel, membership, self.sectors, self.sector_mom_window
+        )
+
+        # Rank sectors per day (1=best), select top-N
+        sec_rank = sector_ret_df.rank(axis=1, ascending=False, na_option="keep")
+        top_sec_mask = (sec_rank <= self.top_sectors) & sec_rank.notna()
+
+        # Map to stocks
+        sec_map = self.sectors.reindex(prices_panel.columns)
+        in_top_sector = pd.DataFrame(False, index=prices_panel.index, columns=prices_panel.columns)
+        for sec in top_sec_mask.columns:
+            tickers = sec_map[sec_map == sec].index.tolist()
+            tickers = [t for t in tickers if t in in_top_sector.columns]
+            if tickers:
+                top_col = top_sec_mask[sec].reindex(prices_panel.index)
+                for t in tickers:
+                    in_top_sector[t] = top_col
+
+        # Equal-weight in-membership stocks inside top sectors
+        eligible = in_top_sector & mem_f
+        n_eligible = eligible.sum(axis=1).replace(0, np.nan)
+        daily_w = eligible.astype(float).div(n_eligible, axis=0).fillna(0.0)
+
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H204: IndustryRelativeStrength
+# ---------------------------------------------------------------------------
+
+
+class IndustryRelativeStrength(CrossSectionalStrategy):
+    """H204: 21-day return minus sector-average 21d return; sector-neutral top quintile.
+
+    Signal: stock_21d_return - sector_avg_21d_return.
+    Captures stocks breaking out above their sector's recent pace — pure
+    idiosyncratic short-horizon momentum. Different from H196 (12-1m version):
+    H204 uses a 21-day formation with no skip window.
+    Sector-neutral so macro sector bets are eliminated.
+    """
+
+    name = "industry_relative_strength"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        rel_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.rel_window = rel_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mem_f = membership.reindex_like(prices_panel).fillna(False)
+        ret_21 = prices_panel.pct_change(self.rel_window)
+
+        # Sector average 21d return (membership-weighted, per date)
+        sector_ret_df = _compute_sector_returns(
+            prices_panel, membership, self.sectors, self.rel_window
+        )
+
+        # Map sector avg back to each stock
+        sec_map = self.sectors.reindex(prices_panel.columns)
+        sector_avg_for_stock = pd.DataFrame(
+            np.nan, index=prices_panel.index, columns=prices_panel.columns
+        )
+        for sec in sector_ret_df.columns:
+            tickers = sec_map[sec_map == sec].index.tolist()
+            tickers = [t for t in tickers if t in sector_avg_for_stock.columns]
+            if tickers:
+                avg_col = sector_ret_df[sec].reindex(prices_panel.index)
+                for t in tickers:
+                    sector_avg_for_stock[t] = avg_col
+
+        # Relative return: stock - sector avg
+        rel_return = ret_21 - sector_avg_for_stock
+
+        # Sector-neutral: select top quintile within each sector
+        daily_w = _sector_neutral_weights(
+            rel_return, mem_f, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

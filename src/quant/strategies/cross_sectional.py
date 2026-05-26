@@ -4885,3 +4885,176 @@ class EfficientGrowth(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 8: H236-H240 -- solvency, margins, ROA
+# ---------------------------------------------------------------------------
+
+
+class LiquidityMomentum(CrossSectionalStrategy):
+    """H236: YoY improvement in current ratio (CA / CL)."""
+
+    name = "liquidity_momentum"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        curr_ratio = ca / cl.where(cl > 0)
+        cr_change = curr_ratio - curr_ratio.shift(self.window)
+        daily_w = _sector_neutral_weights(
+            cr_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class DebtCoverage(CrossSectionalStrategy):
+    """H237: OCF / long_term_debt solvency ratio -- higher = better debt coverage."""
+
+    name = "debt_coverage"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.operating_cf = operating_cf
+        self.long_term_debt = long_term_debt
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        # Clip LTD to a small positive floor to handle zero-debt companies gracefully
+        debt_coverage = ocf / ltd.where(ltd > 0)
+        debt_coverage = debt_coverage.clip(-2.0, 10.0)
+        daily_w = _sector_neutral_weights(
+            debt_coverage, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class NetProfitMargin(CrossSectionalStrategy):
+    """H238: YoY improvement in net profit margin (NI / revenue)."""
+
+    name = "net_profit_margin"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.revenue = revenue
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        margin = ni / rev.where(rev > 0)
+        margin_change = margin - margin.shift(self.window)
+        daily_w = _sector_neutral_weights(
+            margin_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class GrossMarginLevel(CrossSectionalStrategy):
+    """H239: Level of gross margin (GP / revenue) -- persistent margin quality."""
+
+    name = "gross_margin_level"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        gross_margin = gp / rev.where(rev > 0)
+        daily_w = _sector_neutral_weights(
+            gross_margin, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ROAMomentum(CrossSectionalStrategy):
+    """H240: YoY improvement in Return on Assets (NI / total_assets)."""
+
+    name = "roa_momentum"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        avg_ta = (ta + ta.shift(self.window)) / 2
+        roa = ni / avg_ta.where(avg_ta > 0)
+        roa_lag = ni.shift(self.window) / ta.shift(self.window).where(ta.shift(self.window) > 0)
+        roa_change = roa - roa_lag
+        daily_w = _sector_neutral_weights(
+            roa_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H225",
+  "name": "earnings-consistency",
+  "strategy_class": "EarningsConsistency",
+  "family": "quality factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.692,
+  "ci_low": 0.2878,
+  "ci_high": 1.1039,
+  "cagr": 0.0773,
+  "max_drawdown": -0.3742,
+  "n_trades": 1,
+  "h001_corr": -0.017,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.198,
+    1.887,
+    0.795,
+    1.685,
+    0.968,
+    0.985
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Multi-period earnings consistency: z(1yr NI growth) + z(2yr NI growth). Distinguishes consistent compounders from one-time earners. Sector-neutral top 20%, monthly rebalance. Folds 0-5 zero due to EDGAR coverage gap (pre-2010).",
+  "canonical_params": {
+    "window_1yr": 252,
+    "window_2yr": 504,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

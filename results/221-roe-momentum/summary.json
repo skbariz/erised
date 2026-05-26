@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H221",
+  "name": "roe-momentum",
+  "strategy_class": "ROEMomentum",
+  "family": "quality factors",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7175,
+  "ci_low": 0.3092,
+  "ci_high": 1.1353,
+  "cagr": 0.0841,
+  "max_drawdown": -0.3834,
+  "n_trades": 1,
+  "h001_corr": -0.02,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.374,
+    1.924,
+    0.786,
+    1.906,
+    1.068,
+    0.949
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY improvement in Return on Equity (NI / book_equity). Long top 20% stocks with most-improved ROE within sector. Profitability trend signal. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "roe_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

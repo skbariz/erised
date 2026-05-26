@@ -245,6 +245,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 219 | Fundamental momentum | residual momentum (CS) | **kept** | 0.729 | [0.329, 1.139] | 8.56% | −39.05% | −0.021 | Pure accounting growth: no price signal; H001 corr −0.021 |
 | 220 | Residual mom quality | residual momentum (CS) | **kept** | 0.958 | [0.558, 1.369] | 19.11% | −51.94% | +0.001 | H163 + low-accruals gate; slightly below H216 but stable sensitivity |
 
+### Batch 5: Quality Factors (H221–H225)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 221 | ROE momentum | quality factors (CS) | **kept** | 0.717 | [0.309, 1.135] | 8.41% | −38.34% | −0.020 | YoY ROE improvement; folds 0-5 zero; H001 corr −0.020 |
+| **222** | **Cash conversion quality** | **quality factors (CS)** | **kept ★** | **0.829** | **[0.423, 1.240]** | 10.24% | **−35.83%** | **−0.020** | **OCF/gross_profit ratio; fold 5 active; best MaxDD + Sharpe in batch** |
+| 223 | Leverage reduction | quality factors (CS) | **kept** | 0.716 | [0.305, 1.118] | 8.31% | −38.22% | −0.022 | YoY decrease in LTD/TA; folds 0-5 zero; H001 corr −0.022 |
+| 224 | Piotroski F-score | quality factors (CS) | **kept** | 0.752 | [0.346, 1.162] | 8.53% | −37.02% | −0.022 | 9-component binary quality score; folds 0-5 zero; consistent folds 6-11 |
+| 225 | Earnings consistency | quality factors (CS) | **kept** | 0.692 | [0.288, 1.104] | 7.73% | −37.42% | −0.017 | z(1yr NI growth)+z(2yr NI growth); folds 0-5 zero; consistent growers |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

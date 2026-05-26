@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H222",
+  "name": "cash-conversion-quality",
+  "strategy_class": "CashConversionQuality",
+  "family": "quality factors",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8292,
+  "ci_low": 0.4225,
+  "ci_high": 1.2399,
+  "cagr": 0.1024,
+  "max_drawdown": -0.3583,
+  "n_trades": 1,
+  "h001_corr": -0.0202,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.602,
+    0.898,
+    2.176,
+    0.854,
+    1.928,
+    0.993,
+    0.942
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Cash conversion efficiency: OCF / gross_profit. High ratio = gross profit efficiently converted to operating cash. Quality factor: earnings backed by cash, not accruals. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H224",
+  "name": "piotroski-f-score",
+  "strategy_class": "PiotroskiFScore",
+  "family": "quality factors",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7523,
+  "ci_low": 0.3463,
+  "ci_high": 1.1624,
+  "cagr": 0.0853,
+  "max_drawdown": -0.3702,
+  "n_trades": 1,
+  "h001_corr": -0.0215,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.642,
+    2.018,
+    0.867,
+    1.748,
+    1.033,
+    0.95
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Piotroski (2000) F-Score: 9-component binary quality score. Profitability: ROA>0, OCF>0, ROA improving, OCF>NI. Leverage/liquidity: LTD/TA decreasing, current ratio improving, no dilution. Efficiency: gross margin improving, asset turnover improving. Sector-neutral top 20% by F-score, monthly rebalance.",
+  "canonical_params": {
+    "score_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

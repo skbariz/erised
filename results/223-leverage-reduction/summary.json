@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H223",
+  "name": "leverage-reduction",
+  "strategy_class": "LeverageReduction",
+  "family": "quality factors",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7164,
+  "ci_low": 0.3047,
+  "ci_high": 1.1181,
+  "cagr": 0.0831,
+  "max_drawdown": -0.3822,
+  "n_trades": 1,
+  "h001_corr": -0.0219,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.441,
+    1.993,
+    0.938,
+    1.922,
+    0.96,
+    0.853
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Financial de-leveraging: long stocks with largest YoY decrease in LTD/TA. Declining leverage ratio signals improving financial health and management discipline. Distinct from CapitalDiscipline (H210) which uses absolute change in LTD level. Sector-neutral bottom 20% lev_change (most reduced), monthly rebalance.",
+  "canonical_params": {
+    "lev_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

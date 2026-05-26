@@ -5487,3 +5487,339 @@ class GrandFundamentalComposite(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H251: IdiosyncraticVolFactor
+# ---------------------------------------------------------------------------
+
+
+class IdiosyncraticVolFactor(CrossSectionalStrategy):
+    """H251: Long bottom quintile by 63-day idiosyncratic (residual) volatility.
+
+    Ang, Hodrick, Xing, Zhang (2006): high idio vol predicts low returns.
+    Idio vol = std of residuals from rolling OLS of stock return on SPY return.
+    Distinct from H176 (total vol): residual vol strips out market beta.
+    """
+
+    name = "idiosyncratic_vol_factor"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        idio_vol_window: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.idio_vol_window = idio_vol_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        w = self.idio_vol_window
+        min_p = w // 2
+
+        # Rolling beta = cov(stock, SPY) / var(SPY)
+        cov_sm = daily_rets.rolling(w, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(w, min_periods=min_p).var().replace(0, np.nan)
+        beta = cov_sm.div(var_m, axis=0)
+
+        # Residual return = stock_ret - beta * spy_ret
+        spy_broadcast = pd.DataFrame(
+            np.outer(spy.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        residuals = daily_rets - beta.shift(1) * spy_broadcast
+
+        idio_vol = residuals.rolling(w, min_periods=min_p).std()
+
+        # ascending=True: low idio vol selected
+        daily_w = _sector_neutral_weights(
+            idio_vol, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H252: MaxReturnLotteryAvoid
+# ---------------------------------------------------------------------------
+
+
+class MaxReturnLotteryAvoid(CrossSectionalStrategy):
+    """H252: Long bottom quintile by 21-day maximum daily return (MAX21).
+
+    Bali, Cakici, Whitelaw (2011): investors overpay for lottery-like payoffs.
+    Stocks with extreme recent single-day returns earn lower subsequent returns.
+    """
+
+    name = "max_return_lottery_avoid"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        max_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.max_window = max_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        max21 = daily_rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+
+        # ascending=True: low MAX selected
+        daily_w = _sector_neutral_weights(
+            max21, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H253: DownsideBetaFactor
+# ---------------------------------------------------------------------------
+
+
+class DownsideBetaFactor(CrossSectionalStrategy):
+    """H253: Long bottom quintile by 252-day downside beta.
+
+    Harvey & Siddique (2000): crash sensitivity (beta on SPY down-days only)
+    is priced. Low downside-beta stocks are preferred by crash-averse investors.
+    Downside beta = sum(r_i * r_m | r_m < 0) / sum(r_m^2 | r_m < 0) over window.
+    """
+
+    name = "downside_beta_factor"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        downside_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.downside_window = downside_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        w = self.downside_window
+        min_p = w // 4  # fewer observations on down days; relax min_periods
+
+        # Mask: zero out positive-SPY days for regression-through-origin
+        down_mask = (spy < 0).astype(float)
+        spy_down = spy * down_mask  # spy on down days, 0 elsewhere
+
+        spy_down_broadcast = pd.DataFrame(
+            np.outer(spy_down.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        stock_down = daily_rets.multiply(down_mask, axis=0)
+
+        # Downside beta = sum(r_i * r_m on down days) / sum(r_m^2 on down days)
+        numerator = (stock_down * spy_down_broadcast).rolling(w, min_periods=min_p).sum()
+        denominator = (spy_down**2).rolling(w, min_periods=min_p).sum().replace(0, np.nan)
+        downside_beta = numerator.div(denominator, axis=0)
+
+        # ascending=True: low downside beta selected
+        daily_w = _sector_neutral_weights(
+            downside_beta, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H254: TailRiskComposite
+# ---------------------------------------------------------------------------
+
+
+class TailRiskComposite(CrossSectionalStrategy):
+    """H254: Equal z-score composite of four tail-risk signals.
+
+    Score = z(-idio_vol_63d) + z(-MAX21) + z(-downside_beta_252d) + z(skewness_63d).
+    All four oriented so high score = low tail risk. Sector-neutral top 20%.
+    """
+
+    name = "tail_risk_composite"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        idio_vol_window: int = 63,
+        max_window: int = 21,
+        downside_window: int = 252,
+        skew_window: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.idio_vol_window = idio_vol_window
+        self.max_window = max_window
+        self.downside_window = downside_window
+        self.skew_window = skew_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # --- Idio vol ---
+        w_iv = self.idio_vol_window
+        cov_sm = daily_rets.rolling(w_iv, min_periods=w_iv // 2).cov(spy)
+        var_m = spy.rolling(w_iv, min_periods=w_iv // 2).var().replace(0, np.nan)
+        beta = cov_sm.div(var_m, axis=0)
+        spy_bc = pd.DataFrame(
+            np.outer(spy.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        residuals = daily_rets - beta.shift(1) * spy_bc
+        idio_vol = residuals.rolling(w_iv, min_periods=w_iv // 2).std()
+
+        # --- MAX21 ---
+        max21 = daily_rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+
+        # --- Downside beta ---
+        w_db = self.downside_window
+        down_mask = (spy < 0).astype(float)
+        spy_down = spy * down_mask
+        spy_down_bc = pd.DataFrame(
+            np.outer(spy_down.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        stock_down = daily_rets.multiply(down_mask, axis=0)
+        num = (stock_down * spy_down_bc).rolling(w_db, min_periods=w_db // 4).sum()
+        den = (spy_down**2).rolling(w_db, min_periods=w_db // 4).sum().replace(0, np.nan)
+        downside_beta = num.div(den, axis=0)
+
+        # --- Skewness ---
+        skew = daily_rets.rolling(self.skew_window, min_periods=self.skew_window // 2).skew()
+
+        # Composite: all terms oriented so high = low tail risk
+        score = (
+            _cs_zscore(-idio_vol).fillna(0.0)
+            + _cs_zscore(-max21).fillna(0.0)
+            + _cs_zscore(-downside_beta).fillna(0.0)
+            + _cs_zscore(skew).fillna(0.0)
+        )
+
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H255: TailFilteredMomentum
+# ---------------------------------------------------------------------------
+
+
+class TailFilteredMomentum(CrossSectionalStrategy):
+    """H255: 12-1 month momentum with lottery exclusion filter.
+
+    Before ranking by momentum, exclude stocks in the top decile of idio vol
+    (63d) OR top decile of MAX21 (21d). Tests whether removing lottery noise
+    from the momentum universe improves quality vs H157 (Sharpe 1.079).
+    """
+
+    name = "tail_filtered_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        momentum_window: int = 252,
+        momentum_skip: int = 21,
+        idio_vol_window: int = 63,
+        max_window: int = 21,
+        exclude_decile: float = 0.10,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.momentum_window = momentum_window
+        self.momentum_skip = momentum_skip
+        self.idio_vol_window = idio_vol_window
+        self.max_window = max_window
+        self.exclude_decile = exclude_decile
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # --- 12-1 month momentum ---
+        mom = prices_panel.shift(self.momentum_skip) / prices_panel.shift(self.momentum_window) - 1
+
+        # --- Idio vol ---
+        w_iv = self.idio_vol_window
+        cov_sm = daily_rets.rolling(w_iv, min_periods=w_iv // 2).cov(spy)
+        var_m = spy.rolling(w_iv, min_periods=w_iv // 2).var().replace(0, np.nan)
+        beta = cov_sm.div(var_m, axis=0)
+        spy_bc = pd.DataFrame(
+            np.outer(spy.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        residuals = daily_rets - beta.shift(1) * spy_bc
+        idio_vol = residuals.rolling(w_iv, min_periods=w_iv // 2).std()
+
+        # --- MAX21 ---
+        max21 = daily_rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+
+        # Identify lottery stocks: top decile of idio vol OR top decile of MAX21
+        mem = membership.reindex_like(idio_vol).fillna(False)
+        idio_rank = idio_vol.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        max_rank = max21.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        is_lottery = (idio_rank > (1.0 - self.exclude_decile)) | (
+            max_rank > (1.0 - self.exclude_decile)
+        )
+
+        # Exclude lottery stocks from the selection universe
+        filtered_membership = membership & ~is_lottery.fillna(False)
+
+        daily_w = _sector_neutral_weights(
+            mom, filtered_membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

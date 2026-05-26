@@ -28,9 +28,13 @@ Falsification: High correlation with gross profitability (H227 GP/assets > 0.88)
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.861 |
+| 95% CI | [0.457, 1.269] |
+| CAGR | 10.78% |
+| Max DD | −34.59% |
+| H001 corr | −0.012 |
+| Decision | **KEEP** |
+
+**Sensitivity (within_sector_quantile):** 10% → 0.870 | 20% → 0.861 | 30% → 0.856. Stable — gross margin level is a structural characteristic. Tighter concentration marginally better.
+
+**Gross margin is a strong intangible proxy:** H266 (0.861) is a clean, simple signal using only 2 fundamental fields. The gross margin level signal is measurably distinct from GP/assets (H227 type) because it normalizes by revenue rather than assets — capturing pricing power not scale.

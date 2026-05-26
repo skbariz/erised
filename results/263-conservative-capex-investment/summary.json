@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H263",
+  "name": "conservative-capex-investment",
+  "strategy_class": "ConservativeCapexInvestment",
+  "family": "accounting sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7937,
+  "ci_low": 0.3902,
+  "ci_high": 1.2061,
+  "cagr": 0.0913,
+  "max_drawdown": -0.3694,
+  "n_trades": 1,
+  "h001_corr": -0.0185,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.593,
+    2.242,
+    0.975,
+    2.103,
+    0.863,
+    0.968
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY change in long-term assets (TA - current_assets) / TA as capex proxy. capex not in VALID_FIELDS; LT asset growth captures PP&E + long-term investment. Rank ascending (low growth = conservative = best). Titman et al. (2004). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H264",
+  "name": "sustainable-earnings-composite",
+  "strategy_class": "SustainableEarningsComposite",
+  "family": "accounting sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8107,
+  "ci_low": 0.4012,
+  "ci_high": 1.2241,
+  "cagr": 0.0939,
+  "max_drawdown": -0.3865,
+  "n_trades": 1,
+  "h001_corr": -0.0192,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.641,
+    2.234,
+    0.916,
+    1.859,
+    1.039,
+    1.099
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-factor sustainability composite: z(-NOA) + z(-accruals) + z(CFO/NI). NOA = (TA-CL)/TA, accruals = (NI-OCF)/avg_TA, cash_purity = OCF/NI clipped [-5,5]. Tests 3-factor dilution boundary from H201-H250 findings. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

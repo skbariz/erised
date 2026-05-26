@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H258",
+  "name": "distress-trend-factor",
+  "strategy_class": "DistressTrendFactor",
+  "family": "distress avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8089,
+  "ci_low": 0.4035,
+  "ci_high": 1.2285,
+  "cagr": 0.0975,
+  "max_drawdown": -0.3708,
+  "n_trades": 1,
+  "h001_corr": -0.0182,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.347,
+    0.819,
+    2.039,
+    0.906,
+    1.823,
+    1.044,
+    1.071
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "QoQ change in O-score proxy (delta of H256 composite). Rank ascending (falling score = improving distress = best). Tests level vs change dynamic in distress family. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "lag": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

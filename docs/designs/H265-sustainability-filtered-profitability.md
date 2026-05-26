@@ -27,9 +27,13 @@ Falsification: GP correlation with sustainability composite > 0.85 (filter redun
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.952 |
+| 95% CI | [0.549, 1.355] |
+| CAGR | 11.80% |
+| Max DD | −31.52% |
+| H001 corr | −0.025 |
+| Decision | **KEEP** |
+
+**Sensitivity (sustainability_pct):** 33% → 0.983 | 50% → 0.952 | 67% → 0.923. Tighter sustainability filter is stronger — tightest MaxDD (−31.52%) in batch 3. Canonical = 50% balances coverage and quality.
+
+**Best in batch 3** at Sharpe 0.952. Filter adds clear value: H265 (0.952) vs GP/TA standalone H227 (0.878). Sustainability filter removes accounting-unreliable high-GP names. MaxDD −31.52% is also the best in the accounting sustainability batch.

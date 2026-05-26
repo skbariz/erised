@@ -27,9 +27,13 @@ Falsification: Level signal (H256) materially outperforms change signal — conf
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.809 |
+| 95% CI | [0.404, 1.228] |
+| CAGR | 9.75% |
+| Max DD | −37.08% |
+| H001 corr | −0.018 |
+| Decision | **KEEP** |
+
+**Sensitivity (lag):** 42d → 0.831 | 63d → 0.809 | 126d → 0.757. Shorter lag marginally better; 63d is canonical quarterly proxy.
+
+**Change beats level in distress family:** H258 (0.809) outperforms H256 (0.766) — an exception to the general program finding (feedback_level_vs_change_signals) that level beats change. Distress trajectory appears more informative than distress level in this S&P 500 sample, possibly because S&P membership screens out severely distressed firms, leaving only trend-signal candidates.

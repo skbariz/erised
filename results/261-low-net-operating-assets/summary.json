@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H261",
+  "name": "low-net-operating-assets",
+  "strategy_class": "LowNetOperatingAssets",
+  "family": "accounting sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8888,
+  "ci_low": 0.479,
+  "ci_high": 1.3006,
+  "cagr": 0.1105,
+  "max_drawdown": -0.3866,
+  "n_trades": 1,
+  "h001_corr": -0.0173,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.752,
+    0.788,
+    2.371,
+    1.255,
+    1.791,
+    1.329,
+    0.99
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NOA proxy = (total_assets - current_liabilities) / total_assets. Rank ascending (low NOA = low balance-sheet bloat = best). Sector-neutral top 20%, monthly rebalance. Hirshleifer et al. (2004).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

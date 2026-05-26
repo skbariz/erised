@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H270",
+  "name": "intangible-quality-composite",
+  "strategy_class": "IntangibleQualityComposite",
+  "family": "intangible quality",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7935,
+  "ci_low": 0.3816,
+  "ci_high": 1.2069,
+  "cagr": 0.0953,
+  "max_drawdown": -0.3536,
+  "n_trades": 1,
+  "h001_corr": -0.0183,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.354,
+    2.178,
+    0.937,
+    1.835,
+    1.177,
+    1.083
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-factor intangible quality composite: z(gross_margin) + z(YoY_delta_GM) + z(CFO/NI). Gross margin level + improving margins + cash purity. Tests dilution boundary for intangible proxy batch. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

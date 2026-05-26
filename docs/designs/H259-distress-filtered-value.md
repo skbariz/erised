@@ -29,9 +29,13 @@ Falsification: Distress filter excludes so many value names that N < 20 per reba
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.835 |
+| 95% CI | [0.433, 1.244] |
+| CAGR | 10.74% |
+| Max DD | −37.23% |
+| H001 corr | −0.021 |
+| Decision | **KEEP** |
+
+**Sensitivity (value_quantile):** 15% → 0.876 | 20% → 0.835 | 30% → 0.786. Tighter value quintile better; more concentrated value selection after distress filter works well.
+
+**Distress filter adds value:** H259 (0.835) meaningfully above a raw B/M factor. The intersection avoids value traps. Six zero folds due to data gaps; all 6 active folds strongly positive.

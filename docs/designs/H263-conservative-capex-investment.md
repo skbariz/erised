@@ -29,9 +29,13 @@ Falsification: High correlation with asset growth (H206) — same signal, differ
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.794 |
+| 95% CI | [0.390, 1.206] |
+| CAGR | 9.13% |
+| Max DD | −36.94% |
+| H001 corr | −0.018 |
+| Decision | **KEEP** |
+
+**Sensitivity (window):** 126d → 0.798 | 252d → 0.794 | 504d → 0.767. Nearly flat — LT asset growth is a slow-moving structural signal. Canonical = 252d.
+
+**Capex proxy works:** Despite using LT asset change rather than actual capex, the signal passes the keep bar clearly. The LT asset change approach captures the same overinvestment mechanism as Titman et al. (2004) within available VALID_FIELDS.

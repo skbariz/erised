@@ -33,9 +33,13 @@ Falsification: H257–H256 correlation > 0.85 (not additive to pure accounting s
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.712 |
+| 95% CI | [0.314, 1.114] |
+| CAGR | 8.24% |
+| Max DD | −34.46% |
+| H001 corr | −0.017 |
+| Decision | **KEEP** |
+
+**Sensitivity (vol_window):** 126d → 0.720 | 252d → 0.712 | 504d → 0.710. Nearly flat — market vol signal is robust across lookback windows.
+
+**H257 (0.712) underperforms H256 (0.766):** Surprising — pure accounting O-score beats combined market+accounting signal. Market inputs (recent return, vol) may add noise in cross-sectional S&P 500 universe. Weakest in batch 2. Both signals have near-zero H001 corr, confirming orthogonality to trend-following.

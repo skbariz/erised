@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H265",
+  "name": "sustainability-filtered-profitability",
+  "strategy_class": "SustainabilityFilteredProfitability",
+  "family": "accounting sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9516,
+  "ci_low": 0.5487,
+  "ci_high": 1.355,
+  "cagr": 0.118,
+  "max_drawdown": -0.3152,
+  "n_trades": 1,
+  "h001_corr": -0.0247,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.613,
+    2.302,
+    0.816,
+    2.054,
+    1.512,
+    1.376
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Gross profitability (GP/TA) filtered by H264 sustainability composite. Top-half sustainability required before including a high-GP name. Ensures GP is cash-backed and balance-sheet clean. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "sustainability_pct": 0.5,
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

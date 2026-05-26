@@ -29,9 +29,13 @@ Falsification: Correlation with H208 (ROE quality) > 0.85 implies not an indepen
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.766 |
+| 95% CI | [0.369, 1.167] |
+| CAGR | 9.51% |
+| Max DD | −36.97% |
+| H001 corr | −0.018 |
+| Decision | **KEEP** |
+
+**Sensitivity (within_sector_quantile):** 10% → 0.773 | 20% → 0.766 | 30% → 0.761. Tighter selection marginally better; flat sensitivity confirms structural signal. Canonical = 20%.
+
+**Folds 0–4 zero:** Fundamental data unavailable before ~2008 train window. Effective 7-fold OOS over 2008–2022. All 7 active folds positive (lowest +0.367, highest +2.016). H001 corr −0.018 is essentially zero — this family is completely orthogonal to trend-following signals.

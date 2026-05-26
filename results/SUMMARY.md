@@ -367,6 +367,74 @@ lottery exclusion filter hurts momentum quality vs. H157 vol-scaling. H001 corre
 near-zero (−0.003 to +0.002) across all five — these cross-sectional tail-risk signals are
 orthogonal to the macro trend-following universe.
 
+### Batch 2: Distress Avoidance & Value-Trap Filter (H256–H260)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 256 | OhlsonOScoreDistress | distress | kept | 0.766 | [0.369, 1.167] | 9.51% | −36.97% | −0.018 | Proxy O-score from fundamentals; 7 active folds post data-start |
+| 257 | CHSMarketDistress | distress | kept | 0.712 | [0.314, 1.114] | 8.24% | −34.46% | −0.017 | Market+accounting distress; weakest in batch; market inputs add noise |
+| 258 | DistressTrendFactor | distress | kept | 0.809 | [0.404, 1.228] | 9.75% | −37.08% | −0.018 | QoQ change in O-score; EXCEPTION: change (0.809) beats level (0.766) |
+| 259 | DistressFilteredValue | distress | kept | 0.835 | [0.433, 1.244] | 10.74% | −37.23% | −0.021 | B/M value with CHS distress guard; removes value traps effectively |
+| 260 | LowDistressQualityMomentum | distress | kept | 0.920 | [0.526, 1.328] | 12.39% | −32.29% | −0.010 | Three-way quality+momentum+distress; best in batch; MaxDD −32.29% |
+
+**Batch 2 summary:** All 5 KEEP. H260 three-way screen (0.920) is the standout — tightest MaxDD
+in the batch (−32.29%) and highest Sharpe. H259 distress-filtered value (0.835) shows the
+value-trap filter adds measurable value. Notable exception to program pattern: H258 change signal
+(0.809) beats H256 level signal (0.766) — distress trajectory is more informative than level in
+S&P 500 (membership screens out most truly distressed names). All five strategies have H001 corr
+near −0.02 — negative but essentially zero, fully orthogonal to trend-following.
+
+---
+
+### Batch 3: Accounting Sustainability (H261–H265)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 261 | LowNetOperatingAssets | acctg sust | kept | 0.889 | [0.479, 1.301] | 11.05% | −38.66% | −0.017 | NOA proxy (TA-CL)/TA; strongest standalone in batch |
+| 262 | AccrualReliabilityFactor | acctg sust | kept | 0.758 | [0.356, 1.162] | 8.79% | −37.08% | −0.020 | (NI-OCF)/avg_TA; Richardson et al.; passes bar cleanly |
+| 263 | ConservativeCapexInvestment | acctg sust | kept | 0.794 | [0.390, 1.206] | 9.13% | −36.94% | −0.018 | LT asset growth as capex proxy; robust to window choice |
+| 264 | SustainableEarningsComposite | acctg sust | kept | 0.811 | [0.401, 1.224] | 9.39% | −38.65% | −0.019 | 3-factor z-score; dilutes H261; MaxDD worst in batch |
+| 265 | SustainabilityFilteredProfitability | acctg sust | kept | 0.952 | [0.549, 1.355] | 11.80% | −31.52% | −0.025 | GP/TA filtered by sustainability composite; best in batch |
+
+**Batch 3 summary:** All 5 KEEP. H265 (0.952) is the batch champion — sustainability filter
+applied to gross profitability outperforms both the raw GP/TA signal (H227: 0.878) and any
+standalone accounting metric. H261 NOA (0.889) is the strongest pure standalone. H264 3-factor
+composite (0.811) shows dilution vs. H261 — consistent with program finding that composites above
+2–3 factors dilute. H265 proves the value of combining a primary factor with an accounting quality
+gate: the filter removes low-quality high-GP names and produces better risk-adjusted returns AND
+lower MaxDD (−31.52%).
+
+---
+
+### Batch 4: Intangible Quality via Gross Margin Proxies (H266–H270)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 266 | GrossMarginIntensityFactor | intangible | kept | 0.861 | [0.457, 1.269] | 10.78% | −34.59% | −0.012 | GP/revenue; strong intangible proxy; 2 fields only |
+| 267 | GrossMarginChangeFactor | intangible | kept | 0.768 | [0.354, 1.182] | 9.04% | −34.53% | −0.016 | YoY delta GP/revenue; change < level (confirms program pattern) |
+| 268 | KnowledgeReturnProxy | intangible | kept | 0.922 | [0.519, 1.323] | 11.51% | −29.29% | −0.016 | GP/TA top-decile; best in batch; lower MaxDD than quintile |
+| 269 | IntangibleValueScreen | intangible | kept | 0.628 | [0.220, 1.036] | 8.19% | −43.18% | −0.017 | High margin + cheap B/M + low distress; conflicting screens; widest CI |
+| 270 | IntangibleQualityComposite | intangible | kept | 0.793 | [0.382, 1.207] | 9.53% | −35.36% | −0.018 | 3-factor composite; dilutes H266; delta-GM weakens signal |
+
+**Batch 4 summary:** All 5 KEEP. H268 KnowledgeReturnProxy (0.922) is the batch champion —
+top-decile GP/TA concentration outperforms the traditional top-quintile approach (H227: 0.878),
+and also delivers the lowest MaxDD in the batch (−29.29%). H266 gross margin level (0.861) is a
+strong standalone intangible proxy using only 2 fundamental fields. H269 (0.628) is the weakest —
+the high-margin + cheap B/M intersection has inherent tension (high-margin firms are typically
+expensive on B/M), causing extreme fold variance (Fold 6: −0.807). H267 change < level confirms
+the program-wide pattern. H270 composite shows dilution — gross margin change dilutes the
+strong level signal. Key insight: top-decile concentration (H268) is superior to top-quintile for
+GP/TA in this dataset.
+
+---
+
+**H256–H270 cross-batch summary:** 15/15 KEEP — the distress, sustainability, and intangible quality
+families all pass the bar. Structurally notable: all 15 strategies have H001 corr in the range
+[−0.025, −0.010] — essentially zero or mildly negative, completely orthogonal to the trend-following
+universe. This makes H251–H270 an entire cohort of high-quality ensemble diversifiers. The
+five-fold data gap (folds 0–4 zero for most strategies) is inherent to quarterly fundamental data
+availability and is consistent across all H201–H270 cross-sectional strategies.
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

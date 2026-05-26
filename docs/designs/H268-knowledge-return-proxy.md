@@ -28,9 +28,13 @@ Falsification: H268–H227 correlation > 0.90 (top-decile concentration adds not
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.922 |
+| 95% CI | [0.519, 1.323] |
+| CAGR | 11.51% |
+| Max DD | −29.29% |
+| H001 corr | −0.016 |
+| Decision | **KEEP** |
+
+**Sensitivity (within_sector_quantile):** 5% → 0.940 | 10% → 0.922 | 20% → 0.879. Tighter top-decile consistently better — confirms GP/TA signal strengthens under extreme concentration. Canonical = 10% (top-decile).
+
+**Best in batch 4** at Sharpe 0.922, lowest MaxDD −29.29% in the batch. Top-decile GP/TA concentration materially outperforms H227-style top-quintile. The extreme concentration in highest-intangible-ROA names produces both higher Sharpe and better drawdown than the broader quintile. This is the strongest argument for decile-level concentration in fundamental factors.

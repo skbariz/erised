@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H256",
+  "name": "ohlson-oscore-distress",
+  "strategy_class": "OhlsonOScoreDistress",
+  "family": "distress avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7657,
+  "ci_low": 0.369,
+  "ci_high": 1.1672,
+  "cagr": 0.0951,
+  "max_drawdown": -0.3697,
+  "n_trades": 1,
+  "h001_corr": -0.018,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.367,
+    0.734,
+    2.016,
+    0.728,
+    1.795,
+    0.986,
+    1.02
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Proxy Ohlson O-score from quarterly fundamentals: leverage, working capital ratio, current ratio, ROA, CFO/liabilities. Z-score sum; rank ascending (low distress best). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

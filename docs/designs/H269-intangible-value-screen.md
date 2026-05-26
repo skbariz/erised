@@ -30,9 +30,13 @@ Falsification: Three-way screen consistently leaves N < 10 per rebalance.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.628 |
+| 95% CI | [0.220, 1.036] |
+| CAGR | 8.19% |
+| Max DD | −43.18% |
+| H001 corr | −0.017 |
+| Decision | **KEEP** |
+
+**Sensitivity (gm_pct):** 25% → 0.610 | 33% → 0.628 | 50% → 0.765. Loosening the gross margin filter strongly improves Sharpe — the three-way intersection is too restrictive at 25%.
+
+**Weakest in batch 4.** Three-way screen creates fold volatility: Fold 6 = −0.807 (2010–2012). The combination of high margin + high B/M + low distress conflicts — high-margin firms tend to have low B/M (expensive), so the intersection leaves very few stocks and fold variance explodes. Passes keep bar (CI lower 0.220 > 0) but wide CI is a concern. The individual screens are stronger than this combination.

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H257",
+  "name": "chs-market-distress",
+  "strategy_class": "CHSMarketDistress",
+  "family": "distress avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7118,
+  "ci_low": 0.3138,
+  "ci_high": 1.1136,
+  "cagr": 0.0824,
+  "max_drawdown": -0.3446,
+  "n_trades": 1,
+  "h001_corr": -0.0174,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.013,
+    0.76,
+    1.891,
+    0.796,
+    1.646,
+    0.961,
+    0.975
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "CHS-style distress composite: leverage, ROA, 3m return, 12m vol, CFO/TA, log(market cap). Market-based inputs react faster than accounting. Long bottom-quintile (low distress). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "vol_window": 252,
+    "mom_window": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

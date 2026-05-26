@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H260",
+  "name": "low-distress-quality-momentum",
+  "strategy_class": "LowDistressQualityMomentum",
+  "family": "distress avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9197,
+  "ci_low": 0.526,
+  "ci_high": 1.3279,
+  "cagr": 0.1239,
+  "max_drawdown": -0.3229,
+  "n_trades": 3,
+  "h001_corr": -0.01,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.673,
+    0.951,
+    1.829,
+    1.314,
+    2.049,
+    1.013,
+    1.276
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Three-way screen: top-1/3 gross profitability (GP/TA) AND top-half 12-1 momentum AND bottom-half CHS distress. Equal-weight survivors, monthly rebalance.",
+  "canonical_params": {
+    "quality_pct": 0.33,
+    "momentum_pct": 0.5,
+    "distress_pct": 0.5,
+    "momentum_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

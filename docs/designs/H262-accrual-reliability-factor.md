@@ -29,9 +29,13 @@ Falsification: Correlation with H166 > 0.90 (redundant proxy).
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.758 |
+| 95% CI | [0.356, 1.162] |
+| CAGR | 8.79% |
+| Max DD | −37.08% |
+| H001 corr | −0.020 |
+| Decision | **KEEP** |
+
+**Sensitivity (window):** 126d → 0.780 | 252d → 0.758 | 504d → 0.717. Shorter window slightly stronger; shorter avg_TA reduces stale data averaging.
+
+**H262 (0.758) weaker than H261 (0.889):** The NOA signal captures more information than the raw accruals measure. 6 zero folds (data starts ~2010). Consistent with Sloan (1996) finding but less precisely measured with quarterly VALID_FIELDS data.

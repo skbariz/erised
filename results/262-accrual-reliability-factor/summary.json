@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H262",
+  "name": "accrual-reliability-factor",
+  "strategy_class": "AccrualReliabilityFactor",
+  "family": "accounting sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7579,
+  "ci_low": 0.3565,
+  "ci_high": 1.1618,
+  "cagr": 0.0879,
+  "max_drawdown": -0.3708,
+  "n_trades": 1,
+  "h001_corr": -0.0204,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.581,
+    2.057,
+    0.788,
+    1.75,
+    1.02,
+    1.06
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Total accruals = (net_income - operating_cf) / avg(total_assets). Richardson et al. (2005) direct cash-flow-statement measure. Rank ascending (low accruals = cash-backed earnings = best). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

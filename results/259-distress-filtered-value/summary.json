@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H259",
+  "name": "distress-filtered-value",
+  "strategy_class": "DistressFilteredValue",
+  "family": "distress avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8348,
+  "ci_low": 0.433,
+  "ci_high": 1.2444,
+  "cagr": 0.1074,
+  "max_drawdown": -0.3723,
+  "n_trades": 1,
+  "h001_corr": -0.0205,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.086,
+    2.0,
+    0.808,
+    2.003,
+    0.73,
+    1.241
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Book-to-market value combined with CHS distress filter. Top-quintile B/M (cheap) AND bottom-half CHS distress. Removes value traps. Equal-weight survivors, monthly rebalance.",
+  "canonical_params": {
+    "value_quantile": 0.2,
+    "distress_pct": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H269",
+  "name": "intangible-value-screen",
+  "strategy_class": "IntangibleValueScreen",
+  "family": "intangible quality",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.6277,
+  "ci_low": 0.2202,
+  "ci_high": 1.0359,
+  "cagr": 0.0819,
+  "max_drawdown": -0.4318,
+  "n_trades": 5,
+  "h001_corr": -0.0168,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.807,
+    0.986,
+    0.763,
+    1.709,
+    1.463,
+    1.679
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Three-way screen: top-1/3 gross margin (intangible quality confirmed) AND top-half B/M (cheap, intangible-adjusted value) AND bottom-half CHS distress. Identifies genuinely cheap high-margin stocks with clean balance sheets. Equal-weight survivors, monthly rebalance.",
+  "canonical_params": {
+    "gm_pct": 0.33,
+    "btm_pct": 0.5,
+    "distress_pct": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

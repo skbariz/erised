@@ -29,9 +29,13 @@ Falsification: Three-way intersection leaves N < 15 per rebalance on average.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.920 |
+| 95% CI | [0.526, 1.328] |
+| CAGR | 12.39% |
+| Max DD | −32.29% |
+| H001 corr | −0.010 |
+| Decision | **KEEP** |
+
+**Sensitivity (quality_pct):** 25% → 0.949 | 33% → 0.920 | 50% → 0.837. Tighter quality cutoff better; confirmed three-way intersection concentrates effectively.
+
+**Best in batch 2** at Sharpe 0.920. Three-way screen produces tightest MaxDD (−32.29%) in the distress batch. H001 corr −0.010 ≈ zero. Sufficient names per rebalance in active folds: N > 15 confirmed.

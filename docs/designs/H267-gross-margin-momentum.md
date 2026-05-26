@@ -26,9 +26,13 @@ Falsification: Change signal underperforms level signal (H266) — confirms gene
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.768 |
+| 95% CI | [0.354, 1.182] |
+| CAGR | 9.04% |
+| Max DD | −34.53% |
+| H001 corr | −0.016 |
+| Decision | **KEEP** |
+
+**Sensitivity (window):** 126d → 0.760 | 252d → 0.768 | 504d → 0.831. Longer lookback better — moat expansion is a slow-moving process. Longer window candidates for sensitivity canonical.
+
+**Change underperforms level** (H267: 0.768 vs H266: 0.861) — confirms general program finding. The level of gross margin is more predictive than YoY improvement. Passes the keep bar; useful as a composite component (H270).

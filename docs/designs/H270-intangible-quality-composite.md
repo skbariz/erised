@@ -29,9 +29,13 @@ Falsification: Composite Sharpe falls below best individual signal (dilution con
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.793 |
+| 95% CI | [0.382, 1.207] |
+| CAGR | 9.53% |
+| Max DD | −35.36% |
+| H001 corr | −0.018 |
+| Decision | **KEEP** |
+
+**Sensitivity (within_sector_quantile):** 10% → 0.800 | 20% → 0.793 | 30% → 0.792. Nearly identical across quintiles — composite is stable.
+
+**Dilution observed:** 3-factor composite (0.793) underperforms best standalone H266 (0.861). The gross margin change component dilutes the strong level signal. Composite passes the bar but GM level alone is the preferred single signal. Consistent with program-wide composite dilution finding (feedback_composite_signal_dilution).

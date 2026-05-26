@@ -32,7 +32,7 @@ def main():
     wf = walk_forward(prices, lambda _: VIXMeanReversion(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (lookback=60, n_sigma=2.0):")
+    print("\nCanonical (lookback=60, n_sigma=2.0):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
@@ -40,8 +40,10 @@ def main():
     for ns in [1.5, 2.0, 2.5]:
         w = walk_forward(prices, lambda _, n=ns: VIXMeanReversion(n_sigma=n), folds=folds)
         lo_v, hi_v = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
-        print(f"  n_sigma={ns}  Sharpe {w.combined_report.sharpe:.3f}"
-              f"  CI [{lo_v:.3f}, {hi_v:.3f}]  N_trades {w.combined_report.n_trades}")
+        print(
+            f"  n_sigma={ns}  Sharpe {w.combined_report.sharpe:.3f}"
+            f"  CI [{lo_v:.3f}, {hi_v:.3f}]  N_trades {w.combined_report.n_trades}"
+        )
 
     print("\nSensitivity -- lookback:")
     for lb in [20, 60, 120]:
@@ -50,8 +52,10 @@ def main():
 
     print("\nPer-fold Sharpe:")
     for i, fold_result in enumerate(wf.fold_results):
-        print(f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
-              f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})")
+        print(
+            f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
+            f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})"
+        )
 
     decision = "KEEP" if rep.sharpe > 0.51 and lo > 0 else "kill"
     print(f"\nDecision: {decision}")

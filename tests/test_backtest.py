@@ -8,8 +8,8 @@ import pytest
 
 from quant.backtest.engine import assert_no_lookahead, assert_no_lookahead_multi, run_backtest
 from quant.strategies.base import (
-    ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
+    ADXFilteredMACrossover,
     BuyAndHold,
     ConsecutiveDownDays,
     DefensiveEquityHedge,
@@ -22,14 +22,14 @@ from quant.strategies.base import (
     MeanReversionStrategy,
     MovingAverageCrossover,
     QuarterEndDrift,
-    RSIReversionStrategy,
     RealizedVsImpliedVol,
     RiskParity,
-    SPYGLDRotation,
-    SPYTLTDualMomentum,
+    RSIReversionStrategy,
     SeasonalityTrendCombo,
     SellInMay,
     ShortHoldMeanReversion,
+    SPYGLDRotation,
+    SPYTLTDualMomentum,
     ThreeAssetMomentum,
     TimeSeriesMomentum,
     TrendVIXGate,
@@ -136,6 +136,7 @@ def test_position_magnitude_validated():
 # H001 – MovingAverageCrossover
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_ma_crossover_no_lookahead():
     """The MA crossover strategy must be lookahead-free."""
     # Build a longer series so MAs can warm up
@@ -164,6 +165,7 @@ def test_buy_and_hold_compounds_correctly():
 # H002 – MeanReversionStrategy
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_mean_reversion_no_lookahead():
     """MeanReversionStrategy must be lookahead-free across all parameter combos."""
     rng = np.random.default_rng(42)
@@ -188,7 +190,7 @@ def test_mean_reversion_fires_on_down_move_and_holds():
     n_warmup = 25
     # Alternating ±1%: mean=0, std≈1%, so −10% gives z≈−9.75
     rets = [0.01 if i % 2 == 0 else -0.01 for i in range(n_warmup)]
-    rets.append(-0.10)                      # signal bar
+    rets.append(-0.10)  # signal bar
     rets.extend([0.001] * (hold_days + 2))  # neutral tail
     prices = _make_prices(rets)
     strat = MeanReversionStrategy(lookback=lookback, threshold=2.0, hold_days=hold_days)
@@ -198,7 +200,9 @@ def test_mean_reversion_fires_on_down_move_and_holds():
     signal_iloc = n_warmup + 1
     for i in range(hold_days):
         assert pos.iloc[signal_iloc + i] == pytest.approx(1.0), f"Expected long at hold offset {i}"
-    assert pos.iloc[signal_iloc + hold_days] == pytest.approx(0.0), "Expected flat after hold expires"
+    assert pos.iloc[signal_iloc + hold_days] == pytest.approx(0.0), (
+        "Expected flat after hold expires"
+    )
 
 
 def test_mean_reversion_flat_before_warmup():
@@ -215,6 +219,7 @@ def test_mean_reversion_flat_before_warmup():
 # ───────────────────────────────────────────────────────────────────────────
 # H003 – ShortHoldMeanReversion
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_short_hold_mean_reversion_no_lookahead():
     rng = np.random.default_rng(1)
@@ -244,6 +249,7 @@ def test_short_hold_mean_reversion_hold_expires_at_2():
 # ───────────────────────────────────────────────────────────────────────────
 # H004 – RSIReversionStrategy
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_rsi_reversion_no_lookahead():
     rng = np.random.default_rng(2)
@@ -278,6 +284,7 @@ def test_rsi_reversion_exits_above_exit_rsi():
 # ───────────────────────────────────────────────────────────────────────────
 # H005 – ConsecutiveDownDays
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_consecutive_down_days_no_lookahead():
     rng = np.random.default_rng(3)
@@ -317,6 +324,7 @@ def test_consecutive_down_days_no_signal_after_up_break():
 # H006 – VIXFilteredReversionStrategy
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_vix_filtered_reversion_no_lookahead():
     rng = np.random.default_rng(4)
     n = 1000
@@ -354,6 +362,7 @@ def test_vix_filtered_reversion_requires_vix_column():
 # H007 – TimeSeriesMomentum
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_ts_momentum_no_lookahead():
     rng = np.random.default_rng(5)
     prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
@@ -376,6 +385,7 @@ def test_ts_momentum_flat_before_warmup():
 # ───────────────────────────────────────────────────────────────────────────
 # H008 – AbsoluteMomentumStrategy
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_absolute_momentum_no_lookahead():
     rng = np.random.default_rng(6)
@@ -401,6 +411,7 @@ def test_absolute_momentum_long_in_uptrend():
 # H009 – MACDCrossover
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_macd_no_lookahead():
     rng = np.random.default_rng(7)
     prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
@@ -424,6 +435,7 @@ def test_macd_flat_during_warmup():
 # H010 – FastMACrossover
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_fast_ma_no_lookahead():
     rng = np.random.default_rng(8)
     prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
@@ -446,6 +458,7 @@ def test_fast_ma_flat_before_slow_ma_warm():
 # ───────────────────────────────────────────────────────────────────────────
 # H011 – ADXFilteredMACrossover
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_adx_filtered_ma_no_lookahead():
     rng = np.random.default_rng(9)
@@ -472,6 +485,7 @@ def test_adx_filtered_ma_suppresses_weak_trend():
 # H012 – VolatilityRegime
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_vol_regime_no_lookahead():
     rng = np.random.default_rng(11)
     prices = _make_prices(rng.normal(0.0005, 0.012, 1500).tolist())
@@ -489,6 +503,7 @@ def test_vol_regime_flat_before_warmup():
 # ───────────────────────────────────────────────────────────────────────────
 # H013 – LongShortMACrossover
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_ls_ma_crossover_no_lookahead():
     rng = np.random.default_rng(12)
@@ -519,6 +534,7 @@ def test_ls_ma_crossover_positions_binary():
 # H014 – LongShortTSMomentum
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_ls_ts_momentum_no_lookahead():
     rng = np.random.default_rng(14)
     prices = _make_prices(rng.normal(0.0005, 0.012, 1000).tolist())
@@ -545,6 +561,7 @@ def test_ls_ts_momentum_positions_binary():
 # ───────────────────────────────────────────────────────────────────────────
 # H015 – DualMALongShort
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_dual_ma_ls_no_lookahead():
     rng = np.random.default_rng(16)
@@ -573,6 +590,7 @@ def test_dual_ma_ls_positions_binary():
 # ───────────────────────────────────────────────────────────────────────────
 # H016 – VolScaledTrend
 # ───────────────────────────────────────────────────────────────────────────
+
 
 def test_vol_scaled_trend_no_lookahead():
     rng = np.random.default_rng(18)
@@ -604,6 +622,7 @@ def test_vol_scaled_trend_scales_down_in_high_vol():
 # H017 – TrendVIXGate
 # ───────────────────────────────────────────────────────────────────────────
 
+
 def test_trend_vix_gate_no_lookahead():
     rng = np.random.default_rng(20)
     n = 1000
@@ -616,7 +635,7 @@ def test_trend_vix_gate_no_lookahead():
 def test_trend_vix_gate_flat_in_crash():
     """When VIX > 40, position must be 0 regardless of MA signal."""
     rets = [0.001] * 300  # uptrend — MA signal would be long
-    vix = [50.0] * 301    # crash-level VIX throughout
+    vix = [50.0] * 301  # crash-level VIX throughout
     prices = _make_prices_with_vix(rets, vix)
     pos = TrendVIXGate(vix_extreme=40.0).generate_positions(prices)
     assert (pos == 0.0).all()
@@ -641,6 +660,7 @@ def test_trend_vix_gate_requires_vix_column():
 # ---------------------------------------------------------------------------
 # H018: SPYTLTDualMomentum helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_multiasset_prices(spy_rets, tlt_rets=None, gld_rets=None, start="2010-01-04"):
     """Build a prices DataFrame with SPY + optional TLT/GLD columns."""
@@ -681,6 +701,7 @@ def _make_multiasset_prices(spy_rets, tlt_rets=None, gld_rets=None, start="2010-
 # ---------------------------------------------------------------------------
 # H018 tests
 # ---------------------------------------------------------------------------
+
 
 def test_spy_tlt_dual_momentum_no_lookahead():
     n = 700
@@ -725,6 +746,7 @@ def test_spy_tlt_dual_momentum_tlt_when_spy_negative():
 # H019 tests
 # ---------------------------------------------------------------------------
 
+
 def test_spy_gld_rotation_no_lookahead():
     n = 700
     spy_rets = [0.001] * n
@@ -766,6 +788,7 @@ def test_spy_gld_rotation_always_fully_invested():
 # H020 tests
 # ---------------------------------------------------------------------------
 
+
 def test_three_asset_momentum_no_lookahead():
     n = 700
     spy_rets = [0.001] * n
@@ -778,7 +801,7 @@ def test_three_asset_momentum_no_lookahead():
 
 def test_three_asset_momentum_picks_best():
     """Asset with highest 12m return should get weight 1.0."""
-    spy_rets = [0.002] * 300   # best
+    spy_rets = [0.002] * 300  # best
     tlt_rets = [0.001] * 300
     gld_rets = [0.0005] * 300
     prices = _make_multiasset_prices(spy_rets, tlt_rets=tlt_rets, gld_rets=gld_rets)
@@ -800,6 +823,7 @@ def test_three_asset_momentum_cash_when_all_negative():
 # ---------------------------------------------------------------------------
 # H021 tests
 # ---------------------------------------------------------------------------
+
 
 def test_risk_parity_no_lookahead():
     n = 700
@@ -825,6 +849,7 @@ def test_risk_parity_weights_sum_to_one():
 def test_risk_parity_higher_vol_gets_lower_weight():
     """Asset with higher realized vol should receive lower weight."""
     import numpy as np
+
     rng = np.random.default_rng(42)
     # SPY: high vol (2%), TLT: low vol (0.5%)
     spy_rets = (rng.normal(0, 0.02, 300)).tolist()
@@ -838,6 +863,7 @@ def test_risk_parity_higher_vol_gets_lower_weight():
 # ---------------------------------------------------------------------------
 # H022 tests
 # ---------------------------------------------------------------------------
+
 
 def test_defensive_equity_hedge_no_lookahead():
     n = 700
@@ -883,6 +909,7 @@ def test_defensive_equity_hedge_always_fully_invested():
 # Helpers for calendar strategy tests
 # ---------------------------------------------------------------------------
 
+
 def _make_prices_dated(n_rets: int, start: str = "1995-01-03") -> pd.DataFrame:
     """Build prices anchored at a known calendar date for calendar-effect tests."""
     return _make_prices([0.0005] * n_rets, start=start)
@@ -891,6 +918,7 @@ def _make_prices_dated(n_rets: int, start: str = "1995-01-03") -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # H023 — SellInMay
 # ---------------------------------------------------------------------------
+
 
 def test_sell_in_may_no_lookahead():
     prices = _make_prices([0.001] * 700, start="1995-01-03")
@@ -933,6 +961,7 @@ def test_sell_in_may_transitions_at_boundary():
 # H024 — TurnOfMonth
 # ---------------------------------------------------------------------------
 
+
 def test_turn_of_month_no_lookahead():
     """Ranks must be stable when future price rows are added."""
     prices = _make_prices([0.001] * 700, start="1995-01-03")
@@ -968,6 +997,7 @@ def test_turn_of_month_last_day_long():
 # ---------------------------------------------------------------------------
 # H025 — JanuaryBarometer
 # ---------------------------------------------------------------------------
+
 
 def test_january_barometer_no_lookahead():
     prices = _make_prices([0.001] * 700, start="1995-01-03")
@@ -1010,6 +1040,7 @@ def test_january_barometer_flat_in_january():
 # H026 — QuarterEndDrift
 # ---------------------------------------------------------------------------
 
+
 def test_quarter_end_drift_no_lookahead():
     """Ranks must be stable when future price rows are added."""
     prices = _make_prices([0.001] * 700, start="1995-01-03")
@@ -1040,6 +1071,7 @@ def test_quarter_end_drift_only_active_near_quarter_end():
     pos = QuarterEndDrift(n_days=5).generate_positions(prices)
     # Count active days per quarter
     from quant.strategies.base import _calendar_quarter_rank_end
+
     rank_end = _calendar_quarter_rank_end(prices.index)
     # Active days = rank_end < 5; should be exactly 5 per quarter for full quarters
     quarters = prices.index.to_period("Q")
@@ -1051,6 +1083,7 @@ def test_quarter_end_drift_only_active_near_quarter_end():
 # ---------------------------------------------------------------------------
 # H027 — SeasonalityTrendCombo
 # ---------------------------------------------------------------------------
+
 
 def test_seasonality_trend_combo_no_lookahead():
     prices = _make_prices([0.001] * 700, start="1995-01-03")
@@ -1090,14 +1123,24 @@ def test_seasonality_trend_combo_flat_in_downtrend_favorable():
 # H028 — VIXSpikeEntry
 # ---------------------------------------------------------------------------
 
+
 def _make_vix_prices(spy_rets, vix_levels, start="2010-01-04"):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
     px = [100.0]
     for r in spy_rets:
         px.append(px[-1] * (1 + r))
-    df = pd.DataFrame({"adj_close": px, "open": px, "high": px, "low": px,
-                       "close": px, "volume": [1_000_000] * (n + 1)}, index=idx)
+    df = pd.DataFrame(
+        {
+            "adj_close": px,
+            "open": px,
+            "high": px,
+            "low": px,
+            "close": px,
+            "volume": [1_000_000] * (n + 1),
+        },
+        index=idx,
+    )
     assert len(vix_levels) == n + 1
     df["vix_close"] = vix_levels
     return df
@@ -1143,6 +1186,7 @@ def test_vix_spike_entry_binary():
 # H029 — VIXRegimeFilter
 # ---------------------------------------------------------------------------
 
+
 def test_vix_regime_filter_no_lookahead():
     rng = np.random.default_rng(42)
     spy = rng.normal(0.0005, 0.01, 700).tolist()
@@ -1181,6 +1225,7 @@ def test_vix_regime_filter_binary():
 # ---------------------------------------------------------------------------
 # H030 — VIXTrendSignal
 # ---------------------------------------------------------------------------
+
 
 def test_vix_trend_signal_no_lookahead():
     rng = np.random.default_rng(42)
@@ -1226,6 +1271,7 @@ def test_vix_trend_signal_valid_range():
 # H031 — RealizedVsImpliedVol
 # ---------------------------------------------------------------------------
 
+
 def test_realized_vs_implied_no_lookahead():
     rng = np.random.default_rng(42)
     spy = rng.normal(0.0005, 0.01, 700).tolist()
@@ -1255,6 +1301,7 @@ def test_realized_vs_implied_binary():
 # ---------------------------------------------------------------------------
 # H032 — VIXMeanReversion
 # ---------------------------------------------------------------------------
+
 
 def test_vix_mean_reversion_no_lookahead():
     rng = np.random.default_rng(42)

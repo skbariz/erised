@@ -34,8 +34,18 @@ WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 
 
 def _fetch_wiki_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
+    import io
+
+    import urllib.request
+
     log.info("Fetching Wikipedia S&P 500 page...")
-    tables = pd.read_html(WIKI_URL, header=0)
+    req = urllib.request.Request(
+        WIKI_URL,
+        headers={"User-Agent": "Mozilla/5.0 (compatible; research-bot/1.0)"},
+    )
+    with urllib.request.urlopen(req) as resp:
+        html = resp.read()
+    tables = pd.read_html(io.BytesIO(html), header=0)
     current = tables[0]
     changes = tables[1]
     return current, changes

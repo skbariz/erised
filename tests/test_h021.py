@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
 from quant.backtest.engine import assert_no_lookahead_multi
 from quant.strategies.base import RiskParity
@@ -13,7 +12,8 @@ from quant.strategies.base import RiskParity
 def _prices(spy_rets, tlt_rets, start="2010-01-04"):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
-    spy = [100.0]; tlt = [100.0]
+    spy = [100.0]
+    tlt = [100.0]
     for r in spy_rets:
         spy.append(spy[-1] * (1 + r))
     for r in tlt_rets:
@@ -41,8 +41,8 @@ def test_weights_sum_to_one_after_warmup():
 def test_higher_vol_gets_lower_weight():
     """Higher-volatility asset should receive smaller weight."""
     rng = np.random.default_rng(0)
-    spy_rets = rng.normal(0, 0.025, 300).tolist()   # high vol
-    tlt_rets = rng.normal(0, 0.005, 300).tolist()   # low vol
+    spy_rets = rng.normal(0, 0.025, 300).tolist()  # high vol
+    tlt_rets = rng.normal(0, 0.005, 300).tolist()  # low vol
     prices = _prices(spy_rets, tlt_rets)
     w = RiskParity(vol_lookback=60).generate_weights(prices)
     # TLT (low vol) should have higher weight than SPY (high vol)

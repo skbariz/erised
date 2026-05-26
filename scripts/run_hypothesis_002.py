@@ -46,7 +46,9 @@ def run_wf(prices, folds, lookback, threshold, hold_days):
 
 def main() -> None:
     prices = load_research("SPY")
-    print(f"Research data: {len(prices)} rows  {prices.index.min().date()} to {prices.index.max().date()}")
+    print(
+        f"Research data: {len(prices)} rows  {prices.index.min().date()} to {prices.index.max().date()}"
+    )
 
     # Identical folds to H001 — required for a valid OOS correlation comparison.
     folds = make_folds(prices, train_years=5, test_years=2)
@@ -57,10 +59,12 @@ def main() -> None:
     # ------------------------------------------------------------------ #
     # Canonical run                                                         #
     # ------------------------------------------------------------------ #
-    print(section(
-        f"H002 CANONICAL: MeanReversionStrategy"
-        f"(lookback={CANONICAL['lookback']}, threshold={CANONICAL['threshold']}, hold_days={CANONICAL['hold_days']})"
-    ))
+    print(
+        section(
+            f"H002 CANONICAL: MeanReversionStrategy"
+            f"(lookback={CANONICAL['lookback']}, threshold={CANONICAL['threshold']}, hold_days={CANONICAL['hold_days']})"
+        )
+    )
     wf_canon = run_wf(prices, folds, **CANONICAL)
     rep = wf_canon.combined_report
     print(f"\nCombined OOS report ({len(folds)} folds, {rep.n_periods} periods):")
@@ -71,15 +75,17 @@ def main() -> None:
 
     bench_returns = pd.concat([r.bench_returns for r in wf_canon.fold_results]).sort_index()
     bench_rep = report(bench_returns)
-    print(f"\nSPY benchmark over same OOS windows:")
-    print(f"  Sharpe {bench_rep.sharpe:.2f}  CAGR {bench_rep.cagr:.2%}  Max DD {bench_rep.max_drawdown:.2%}")
+    print("\nSPY benchmark over same OOS windows:")
+    print(
+        f"  Sharpe {bench_rep.sharpe:.2f}  CAGR {bench_rep.cagr:.2%}  Max DD {bench_rep.max_drawdown:.2%}"
+    )
 
     # ------------------------------------------------------------------ #
     # Per-fold Sharpe (regime analysis)                                    #
     # ------------------------------------------------------------------ #
     print(section("PER-FOLD OOS SHARPE  (regime / decay check)"))
     print(f"  {'Fold':<5} {'Test window':<25} {'H002':>8} {'SPY':>8}")
-    print(f"  {'-'*5} {'-'*25} {'-'*8} {'-'*8}")
+    print(f"  {'-' * 5} {'-' * 25} {'-' * 8} {'-' * 8}")
     for fold, result in zip(wf_canon.folds, wf_canon.fold_results):
         h002_sh = sharpe(result.net_returns)
         spy_sh = sharpe(result.bench_returns)
@@ -94,7 +100,9 @@ def main() -> None:
     for lb, thr, hd in PARAM_GRID:
         wf = run_wf(prices, folds, lb, thr, hd)
         grid_results[(lb, thr, hd)] = wf.combined_report.sharpe
-        print(f"  lookback={lb:2d}  threshold={thr:.1f}  hold_days={hd}  Sharpe {wf.combined_report.sharpe:.2f}")
+        print(
+            f"  lookback={lb:2d}  threshold={thr:.1f}  hold_days={hd}  Sharpe {wf.combined_report.sharpe:.2f}"
+        )
 
     # ------------------------------------------------------------------ #
     # 1-D sensitivity tables                                               #
@@ -102,15 +110,15 @@ def main() -> None:
     print(section("1-D SENSITIVITY  (one param varied, others at canonical)"))
 
     for param, values, label in [
-        ("lookback",  [10, 20, 30],   "threshold=2.0, hold_days=5"),
+        ("lookback", [10, 20, 30], "threshold=2.0, hold_days=5"),
         ("threshold", [1.5, 2.0, 2.5], "lookback=20,  hold_days=5"),
-        ("hold_days", [3, 5, 7],      "lookback=20,  threshold=2.0"),
+        ("hold_days", [3, 5, 7], "lookback=20,  threshold=2.0"),
     ]:
         print(f"\n  Varying {param}  ({label})")
         print(f"  {'Value':>9}  {'OOS Sharpe':>12}")
         for v in values:
             key = {
-                "lookback":  (v, CANONICAL["threshold"], CANONICAL["hold_days"]),
+                "lookback": (v, CANONICAL["threshold"], CANONICAL["hold_days"]),
                 "threshold": (CANONICAL["lookback"], v, CANONICAL["hold_days"]),
                 "hold_days": (CANONICAL["lookback"], CANONICAL["threshold"], v),
             }[param]

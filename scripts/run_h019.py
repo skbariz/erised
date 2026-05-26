@@ -32,19 +32,25 @@ def main():
     wf = walk_forward_multi(prices, lambda _: SPYGLDRotation(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (lookback=12m, skip=1m):")
+    print("\nCanonical (lookback=12m, skip=1m):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
     print("\nSensitivity — lookback_months:")
     for lm in [3, 6, 9, 12, 18]:
-        w = walk_forward_multi(prices, lambda _, l=lm: SPYGLDRotation(lookback_months=l), folds=folds)
+        w = walk_forward_multi(
+            prices, lambda _, l=lm: SPYGLDRotation(lookback_months=l), folds=folds
+        )
         lo_v, hi_v = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
-        print(f"  {lm:>3}m  Sharpe {w.combined_report.sharpe:.3f}  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}")
+        print(
+            f"  {lm:>3}m  Sharpe {w.combined_report.sharpe:.3f}  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}"
+        )
 
     print("\nPer-fold Sharpe:")
     for i, fold_result in enumerate(wf.fold_results):
-        print(f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}  ({folds[i].test_start.date()} — {folds[i].test_end.date()})")
+        print(
+            f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}  ({folds[i].test_start.date()} — {folds[i].test_end.date()})"
+        )
 
     folds_spy = make_folds(spy, train_years=5, test_years=2)
     wf_h001 = walk_forward(spy, lambda _: MovingAverageCrossover(50, 200), folds=folds_spy)

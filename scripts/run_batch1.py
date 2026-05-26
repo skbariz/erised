@@ -12,16 +12,15 @@ import sys
 from itertools import product
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from quant.data.loader import load_research
-from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
+from quant.metrics.performance import bootstrap_sharpe_ci, sharpe
 from quant.strategies.base import (
-    ADXFilteredMACrossover,
     AbsoluteMomentumStrategy,
+    ADXFilteredMACrossover,
     ConsecutiveDownDays,
     FastMACrossover,
     MACDCrossover,
@@ -48,7 +47,9 @@ def run(prices, folds, factory, label):
     bench = pd.concat([r.bench_returns for r in wf.fold_results]).sort_index()
     bench_sh = sharpe(bench)
     print(f"\n  {label}")
-    print(f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}")
+    print(
+        f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}"
+    )
     print(f"  SPY benchmark Sharpe: {bench_sh:.2f}")
     fold_sharpes = [sharpe(r.net_returns) for r in wf.fold_results]
     print(f"  Per-fold: {[f'{s:.2f}' for s in fold_sharpes]}")
@@ -56,13 +57,17 @@ def run(prices, folds, factory, label):
 
 
 def h001_baseline(prices, folds):
-    wf = walk_forward(prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds)
+    wf = walk_forward(
+        prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds
+    )
     return wf
 
 
 def main():
     prices = load_research("SPY")
-    print(f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}")
+    print(
+        f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}"
+    )
 
     # VIX for H006
     vix_path = Path(__file__).resolve().parents[1] / "data" / "VIX_research.parquet"
@@ -102,11 +107,17 @@ def main():
         print(f"    n_down={nd} hold={hd}  Sharpe {wf.combined_report.sharpe:.2f}")
 
     # ------------------------------------------------------------------ H006
-    print(section("H006: VIXFilteredReversionStrategy  canonical (lookback=20, thresh=2.0, hold=2, vix=20)"))
+    print(
+        section(
+            "H006: VIXFilteredReversionStrategy  canonical (lookback=20, thresh=2.0, hold=2, vix=20)"
+        )
+    )
     wf6, rep6, lo6, hi6 = run(prices_vix, folds, VIXFilteredReversionStrategy, "canonical")
     print("  1-D sensitivity (vix_threshold):")
     for vt in [15, 20, 25]:
-        wf = walk_forward(prices_vix, lambda _, v=vt: VIXFilteredReversionStrategy(vix_threshold=v), folds=folds)
+        wf = walk_forward(
+            prices_vix, lambda _, v=vt: VIXFilteredReversionStrategy(vix_threshold=v), folds=folds
+        )
         print(f"    vix_threshold={vt}  Sharpe {wf.combined_report.sharpe:.2f}")
 
     # ------------------------------------------------------------------ H007
@@ -130,7 +141,9 @@ def main():
     wf9, rep9, lo9, hi9 = run(prices, folds, MACDCrossover, "canonical")
     print("  Grid variants:")
     for f, s, sig in [(12, 26, 9), (8, 21, 5), (5, 13, 3)]:
-        wf = walk_forward(prices, lambda _, ff=f, ss=s, sg=sig: MACDCrossover(ff, ss, sg), folds=folds)
+        wf = walk_forward(
+            prices, lambda _, ff=f, ss=s, sg=sig: MACDCrossover(ff, ss, sg), folds=folds
+        )
         print(f"    MACD({f},{s},{sig})  Sharpe {wf.combined_report.sharpe:.2f}")
 
     # ------------------------------------------------------------------ H010
@@ -146,7 +159,9 @@ def main():
     wf11, rep11, lo11, hi11 = run(prices, folds, ADXFilteredMACrossover, "canonical")
     print("  1-D sensitivity (adx_threshold):")
     for thr in [20, 25, 30]:
-        wf = walk_forward(prices, lambda _, t=thr: ADXFilteredMACrossover(adx_threshold=t), folds=folds)
+        wf = walk_forward(
+            prices, lambda _, t=thr: ADXFilteredMACrossover(adx_threshold=t), folds=folds
+        )
         print(f"    adx_threshold={thr}  Sharpe {wf.combined_report.sharpe:.2f}")
 
     # ------------------------------------------------------------------ H012
@@ -160,9 +175,16 @@ def main():
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
     strategies = [
-        ("H003", wf3), ("H004", wf4), ("H005", wf5), ("H006", wf6),
-        ("H007", wf7), ("H008", wf8), ("H009", wf9), ("H010", wf10),
-        ("H011", wf11), ("H012", wf12),
+        ("H003", wf3),
+        ("H004", wf4),
+        ("H005", wf5),
+        ("H006", wf6),
+        ("H007", wf7),
+        ("H008", wf8),
+        ("H009", wf9),
+        ("H010", wf10),
+        ("H011", wf11),
+        ("H012", wf12),
     ]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10}")

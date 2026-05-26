@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # The directory where Parquet files live.
 DATA_DIR = Path(__file__).resolve().parents[3] / "data"
 
+
 # Filename convention: SYMBOL.parquet for the full series,
 # SYMBOL_research.parquet for the research-only slice,
 # SYMBOL_holdout.parquet for the sealed holdout.

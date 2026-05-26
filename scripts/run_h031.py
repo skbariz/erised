@@ -32,21 +32,27 @@ def main():
     wf = walk_forward(prices, lambda _: RealizedVsImpliedVol(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (realized_window=20):")
+    print("\nCanonical (realized_window=20):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
     print("\nSensitivity -- realized_window:")
     for rw in [10, 20, 60]:
-        w = walk_forward(prices, lambda _, r=rw: RealizedVsImpliedVol(realized_window=r), folds=folds)
+        w = walk_forward(
+            prices, lambda _, r=rw: RealizedVsImpliedVol(realized_window=r), folds=folds
+        )
         lo_v, hi_v = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
-        print(f"  realized_window={rw}d  Sharpe {w.combined_report.sharpe:.3f}"
-              f"  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}")
+        print(
+            f"  realized_window={rw}d  Sharpe {w.combined_report.sharpe:.3f}"
+            f"  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}"
+        )
 
     print("\nPer-fold Sharpe:")
     for i, fold_result in enumerate(wf.fold_results):
-        print(f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
-              f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})")
+        print(
+            f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
+            f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})"
+        )
 
     decision = "KEEP" if rep.sharpe > 0.51 and lo > 0 else "kill"
     print(f"\nDecision: {decision}")

@@ -32,7 +32,7 @@ def main():
     wf = walk_forward(prices, lambda _: VIXSpikeEntry(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (vix_threshold=30, hold_days=20):")
+    print("\nCanonical (vix_threshold=30, hold_days=20):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
@@ -40,20 +40,25 @@ def main():
     for vt in [25, 30, 40]:
         w = walk_forward(prices, lambda _, v=vt: VIXSpikeEntry(vix_threshold=v), folds=folds)
         lo_v, hi_v = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
-        print(f"  vix_threshold={vt}  Sharpe {w.combined_report.sharpe:.3f}"
-              f"  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}")
+        print(
+            f"  vix_threshold={vt}  Sharpe {w.combined_report.sharpe:.3f}"
+            f"  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {w.combined_report.max_drawdown:.2%}"
+        )
 
     print("\nSensitivity -- hold_days:")
     for hd in [10, 20, 30]:
         w = walk_forward(prices, lambda _, h=hd: VIXSpikeEntry(hold_days=h), folds=folds)
         lo_v, hi_v = bootstrap_sharpe_ci(w.combined_returns, n_boot=1000)
-        print(f"  hold_days={hd}  Sharpe {w.combined_report.sharpe:.3f}"
-              f"  CI [{lo_v:.3f}, {hi_v:.3f}]")
+        print(
+            f"  hold_days={hd}  Sharpe {w.combined_report.sharpe:.3f}  CI [{lo_v:.3f}, {hi_v:.3f}]"
+        )
 
     print("\nPer-fold Sharpe:")
     for i, fold_result in enumerate(wf.fold_results):
-        print(f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
-              f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})")
+        print(
+            f"  Fold {i:>2}: {sharpe(fold_result.net_returns):+.3f}"
+            f"  ({folds[i].test_start.date()} -- {folds[i].test_end.date()})"
+        )
 
     decision = "KEEP" if rep.sharpe > 0.51 and lo > 0 else "kill"
     print(f"\nDecision: {decision}")

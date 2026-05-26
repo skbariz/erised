@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -13,7 +12,9 @@ from quant.strategies.base import ThreeAssetMomentum
 def _prices(spy_rets, tlt_rets, gld_rets, start="2010-01-04"):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
-    spy = [100.0]; tlt = [100.0]; gld = [100.0]
+    spy = [100.0]
+    tlt = [100.0]
+    gld = [100.0]
     for r in spy_rets:
         spy.append(spy[-1] * (1 + r))
     for r in tlt_rets:

@@ -38,7 +38,9 @@ def run(prices, folds, factory, label):
     bench = pd.concat([r.bench_returns for r in wf.fold_results]).sort_index()
     bench_sh = sharpe(bench)
     print(f"\n  {label}")
-    print(f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}")
+    print(
+        f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}"
+    )
     print(f"  SPY benchmark Sharpe: {bench_sh:.2f}")
     fold_sharpes = [sharpe(r.net_returns) for r in wf.fold_results]
     print(f"  Per-fold: {[f'{s:.2f}' for s in fold_sharpes]}")
@@ -47,14 +49,18 @@ def run(prices, folds, factory, label):
 
 def main():
     prices = load_research("SPY")
-    print(f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}")
+    print(
+        f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}"
+    )
 
     folds = make_folds(prices, train_years=5, test_years=2)
     print(f"Folds: {len(folds)}")
 
     # H001 reference
     print(section("H001 baseline (reference)"))
-    wf_h001 = walk_forward(prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds)
+    wf_h001 = walk_forward(
+        prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds
+    )
     print(f"  H001 MA(50,200) Sharpe: {wf_h001.combined_report.sharpe:.2f}")
 
     # ------------------------------------------------------------------ H023
@@ -95,9 +101,7 @@ def main():
 
     # ------------------------------------------------------------------ Correlation table
     print(section("CORRELATION WITH H001 (net returns, same folds)"))
-    strategies = [
-        ("H023", wf23), ("H024", wf24), ("H025", wf25), ("H026", wf26), ("H027", wf27)
-    ]
+    strategies = [("H023", wf23), ("H024", wf24), ("H025", wf25), ("H026", wf26), ("H027", wf27)]
     h001_ret = wf_h001.combined_returns
     print(f"  {'Strategy':<8} {'Sharpe':>8} {'vs H001':>10} {'Decision':>10}")
     for name, wf in strategies:

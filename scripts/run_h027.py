@@ -29,7 +29,7 @@ def main():
     wf = walk_forward(spy, lambda _: SeasonalityTrendCombo(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (fast=50, slow=200, Nov-Apr gate):")
+    print("\nCanonical (fast=50, slow=200, Nov-Apr gate):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
@@ -50,10 +50,18 @@ def main():
     print("\nComparison with component strategies:")
     wf_h001 = walk_forward(spy, lambda _: MovingAverageCrossover(50, 200), folds=folds)
     wf_h023 = walk_forward(spy, lambda _: SellInMay(), folds=folds)
-    corr_h001 = wf.combined_returns.corr(wf_h001.combined_returns.reindex(wf.combined_returns.index))
-    corr_h023 = wf.combined_returns.corr(wf_h023.combined_returns.reindex(wf.combined_returns.index))
-    print(f"  H001 (MA crossover) Sharpe: {wf_h001.combined_report.sharpe:.3f}  H027 corr: {corr_h001:+.3f}")
-    print(f"  H023 (SellInMay)    Sharpe: {wf_h023.combined_report.sharpe:.3f}  H027 corr: {corr_h023:+.3f}")
+    corr_h001 = wf.combined_returns.corr(
+        wf_h001.combined_returns.reindex(wf.combined_returns.index)
+    )
+    corr_h023 = wf.combined_returns.corr(
+        wf_h023.combined_returns.reindex(wf.combined_returns.index)
+    )
+    print(
+        f"  H001 (MA crossover) Sharpe: {wf_h001.combined_report.sharpe:.3f}  H027 corr: {corr_h001:+.3f}"
+    )
+    print(
+        f"  H023 (SellInMay)    Sharpe: {wf_h023.combined_report.sharpe:.3f}  H027 corr: {corr_h023:+.3f}"
+    )
     print(f"  H027 (this)         Sharpe: {rep.sharpe:.3f}")
 
     print("\nPer-fold Sharpe:")

@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H021",
+  "name": "risk-parity",
+  "strategy_class": "RiskParity",
+  "family": "risk parity",
+  "run_date": "2026-05-22",
+  "oos_sharpe": 1.0287,
+  "ci_low": 0.6209,
+  "ci_high": 1.4383,
+  "cagr": 0.0769,
+  "max_drawdown": -0.1841,
+  "n_trades": 4845,
+  "h001_corr": 0.407,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.548,
+    0.981,
+    0.93,
+    0.318,
+    2.125,
+    1.146,
+    1.118,
+    2.244,
+    1.442,
+    0.796
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "First OOS Sharpe >= 1.0. Vol-lookback robust 10-252d.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

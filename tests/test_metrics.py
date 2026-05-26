@@ -29,14 +29,16 @@ def test_cagr_zero_when_zero_returns():
 def test_cagr_compounds_correctly():
     # 0.1% per day for 252 days should be ~28.6% annual
     r = _const_returns(0.001, n=252)
-    expected = (1.001 ** 252) - 1
+    expected = (1.001**252) - 1
     assert cagr(r) == pytest.approx(expected, rel=1e-6)
 
 
 def test_annualized_vol_scales_with_sqrt_t():
     rng = np.random.default_rng(0)
     daily_vol = 0.01
-    r = pd.Series(rng.normal(0, daily_vol, size=10000), index=pd.bdate_range("2000-01-01", periods=10000))
+    r = pd.Series(
+        rng.normal(0, daily_vol, size=10000), index=pd.bdate_range("2000-01-01", periods=10000)
+    )
     av = annualized_vol(r)
     assert av == pytest.approx(daily_vol * np.sqrt(252), rel=0.05)
 

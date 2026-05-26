@@ -8,13 +8,12 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from quant.data.loader import load_research
-from quant.metrics.performance import bootstrap_sharpe_ci, report, sharpe
+from quant.metrics.performance import bootstrap_sharpe_ci, sharpe
 from quant.strategies.base import (
     DualMALongShort,
     LongShortMACrossover,
@@ -39,7 +38,9 @@ def run(prices, folds, factory, label):
     bench = pd.concat([r.bench_returns for r in wf.fold_results]).sort_index()
     bench_sh = sharpe(bench)
     print(f"\n  {label}")
-    print(f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}")
+    print(
+        f"  Sharpe {rep.sharpe:.2f}  CI [{lo:.2f}, {hi:.2f}]  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  Trades {rep.n_trades}"
+    )
     print(f"  SPY benchmark Sharpe: {bench_sh:.2f}")
     fold_sharpes = [sharpe(r.net_returns) for r in wf.fold_results]
     print(f"  Per-fold: {[f'{s:.2f}' for s in fold_sharpes]}")
@@ -47,13 +48,17 @@ def run(prices, folds, factory, label):
 
 
 def h001_baseline(prices, folds):
-    wf = walk_forward(prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds)
+    wf = walk_forward(
+        prices, strategy_factory=lambda _: MovingAverageCrossover(50, 200), folds=folds
+    )
     return wf
 
 
 def main():
     prices = load_research("SPY")
-    print(f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}")
+    print(
+        f"SPY research: {len(prices)} rows {prices.index.min().date()} to {prices.index.max().date()}"
+    )
 
     # VIX for H017
     vix_path = Path(__file__).resolve().parents[1] / "data" / "VIX_research.parquet"
@@ -73,6 +78,7 @@ def main():
     wf13, rep13, lo13, hi13 = run(prices, folds, LongShortMACrossover, "canonical")
     print("  1-D sensitivity (fast/slow):")
     from quant.strategies.base import LongShortMACrossover as LSMA
+
     for f, s in [(20, 100), (50, 200), (50, 150)]:
         wf = walk_forward(prices, lambda _, ff=f, ss=s: LSMA(ff, ss), folds=folds)
         print(f"    MA({f},{s})  Sharpe {wf.combined_report.sharpe:.2f}")

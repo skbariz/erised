@@ -13,7 +13,8 @@ from quant.strategies.base import DefensiveEquityHedge
 def _prices(spy_rets, tlt_rets, start="2010-01-04"):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
-    spy = [100.0]; tlt = [100.0]
+    spy = [100.0]
+    tlt = [100.0]
     for r in spy_rets:
         spy.append(spy[-1] * (1 + r))
     for r in tlt_rets:

@@ -192,8 +192,12 @@ def run_multiasset_backtest(
     bench_equity = (1 + bench_rets).cumprod()
 
     # For BacktestResult compatibility, expose SPY weight (or total weight) as positions
-    proxy_positions = weights.get("SPY", weights.sum(axis=1)) if "SPY" in weights.columns else weights.sum(axis=1)
-    proxy_applied = applied.get("SPY", applied.sum(axis=1)) if "SPY" in applied.columns else applied.sum(axis=1)
+    proxy_positions = (
+        weights.get("SPY", weights.sum(axis=1)) if "SPY" in weights.columns else weights.sum(axis=1)
+    )
+    proxy_applied = (
+        applied.get("SPY", applied.sum(axis=1)) if "SPY" in applied.columns else applied.sum(axis=1)
+    )
 
     return BacktestResult(
         name=name,
@@ -208,7 +212,9 @@ def run_multiasset_backtest(
     )
 
 
-def assert_no_lookahead_multi(weights_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0) -> None:
+def assert_no_lookahead_multi(
+    weights_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0
+) -> None:
     """No-lookahead check for MultiAssetStrategy.generate_weights.
 
     Same logic as assert_no_lookahead but checks all weight columns.
@@ -234,7 +240,9 @@ def assert_no_lookahead_multi(weights_fn, prices: pd.DataFrame, n_checks: int = 
                 )
 
 
-def assert_no_lookahead(strategy_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0) -> None:
+def assert_no_lookahead(
+    strategy_fn, prices: pd.DataFrame, n_checks: int = 20, seed: int = 0
+) -> None:
     """Sanity check: chopping off future data must not change today's position.
 
     Picks random dates t in the middle of the series, computes positions using

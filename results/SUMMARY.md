@@ -127,4 +127,79 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 ---
 
+## H150–H200 Program: Cross-Sectional Equity + Terminal Ensemble
+
+H101–H149 intentionally skipped. Program pivoted to cross-sectional equity (H150–H199) then cross-program ensemble (H200).
+All metrics are **walk-forward OOS (1993–2022)** using same fold structure. H001 corr = correlation with H001 MA(50,200) crossover.
+Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalance counts are ~350/yr (monthly) or ~1500/yr (weekly) × ~100 stocks per rebalance.
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 150 | Momentum long-only | CS momentum | **kept** | 0.981 | [0.578, 1.396] | 20.38% | −52.12% | +0.714 | 12-1m momentum top quintile, equal-weight, monthly rebalance |
+| 151 | Momentum market-neutral | CS momentum L/S | killed | 0.099 | [−0.301, 0.508] | 0.46% | −70.66% | +0.235 | L/S 50bps/yr borrow + 2.5bps/turn; ~zero market beta; collapses to noise |
+| 152 | High-water momentum | CS momentum | **kept** | 0.850 | [0.447, 1.253] | 13.60% | −46.03% | +0.710 | price/52w-high anchoring signal (George & Hwang 2004) |
+| 153 | Sector-neutral momentum | CS momentum | **kept** | 0.941 | [0.534, 1.354] | 18.31% | −51.46% | +0.678 | 12-1m momentum ranked within GICS sector; top 30% per sector |
+| 154 | Trend-gated momentum | CS momentum | **kept** | 0.962 | [0.568, 1.367] | 14.84% | −27.40% | +0.723 | H150 gated by SPY MA200/MA100; MaxDD −27% vs −52% for H150 |
+| 155 | Smooth momentum | CS momentum | **kept** | 0.976 | [0.573, 1.389] | 20.23% | −52.08% | +0.715 | 12-1m × fraction positive days (path-consistent, Da et al. 2014) |
+| 156 | Jump-penalized momentum | CS momentum | **kept** | 0.949 | [0.552, 1.365] | 20.34% | −54.70% | +0.706 | 12-1m trimmed return (exclude top/bottom 5 daily returns) |
+| **157** | **Vol-scaled momentum** | **CS momentum** | **kept ★** | **1.079** | **[0.685, 1.495]** | 14.15% | **−25.39%** | +0.700 | H150 + vol-target overlay (H086 mechanism on CS momentum); N=5868 |
+| **158** | **Drawdown circuit breaker** | **CS momentum** | **kept ★** | **1.077** | **[0.681, 1.487]** | 17.44% | **−27.55%** | +0.748 | H150 + hysteresis drawdown circuit breaker (H087 mechanism); N=119 |
+| **159** | **Smooth vol-target momentum** | **CS momentum** | **kept ★** | **1.072** | **[0.676, 1.485]** | 14.05% | **−25.23%** | +0.701 | H155 smooth signal + H157 vol-target; dual protection |
+| 160 | Large-cap value | CS value | **kept** | 0.730 | [0.333, 1.138] | 9.76% | −43.51% | +0.605 | B/M + E/P composite, point-in-time EDGAR XBRL; coverage ~2009+ |
+| 161 | Five-year reversal | CS contrarian | **kept** | 0.850 | [0.446, 1.253] | 18.32% | −55.02% | +0.562 | Buy 5-year losers (De Bondt-Thaler 60-month formation) |
+| 162 | Composite value+momentum | CS contrarian | **kept** | 0.905 | [0.503, 1.319] | 17.60% | −48.51% | +0.680 | 50/50 12-1m momentum + negated 36m reversal (Asness-Moskowitz-Pedersen) |
+| 163 | Residual momentum | CS momentum | **kept** | 0.961 | [0.563, 1.380] | 21.24% | −60.08% | +0.649 | Cumulative CAPM residual; removes market-beta loading from signal |
+| 164 | Near 52-week low | CS contrarian | **kept** | 0.884 | [0.489, 1.294] | 17.07% | −48.17% | +0.564 | Buy stocks nearest to 52-week low (price/rolling_min) |
+| 165 | Gross profitability rank | CS quality | **kept** | 0.878 | [0.469, 1.287] | 11.03% | −34.46% | +0.620 | Long top 20% by GP/A within GICS sector (Novy-Marx 2013) |
+| 166 | Low accruals quality | CS quality | **kept** | 0.824 | [0.425, 1.238] | 10.54% | −34.52% | +0.634 | Long bottom 20% by accruals = (NI−OCF)/|TA| (Sloan 1996) |
+| 167 | Piotroski high bar | CS value | **kept** | 0.591 | [0.201, 0.997] | 9.88% | −55.68% | +0.372 | Top B/M quintile filtered by F-score ≥ 7; too restrictive |
+| **168** | **Composite quality score** | **CS quality** | **kept ★★** | **1.181** | **[0.773, 1.594]** | 18.55% | **−40.44%** | +0.660 | QMJ-inspired: profitability (GP/A, ROE, cash-ROE) + growth + safety |
+| 169 | Quality+value composite | CS quality+value | **kept** | 0.839 | [0.433, 1.250] | 10.32% | −37.11% | +0.628 | (1/3)*z(B/M) + (1/3)*z(GP/A) + (1/3)*z(−accruals) |
+| 170 | FF5 investment factor | CS investment | **kept** | 0.721 | [0.322, 1.131] | 8.43% | −38.41% | +0.575 | Long bottom 20% by 1-yr total asset growth; FF5 CMA factor |
+| 171 | Operating profitability FF5 | CS quality | **kept** | 0.864 | [0.447, 1.271] | 10.83% | −36.29% | +0.621 | Long top 20% by GP/BE within sector; FF2015 RMW factor |
+| 172 | FF5 composite | CS multi-factor | **kept** | 0.757 | [0.353, 1.170] | 9.45% | −39.03% | +0.617 | (1/3)*z(B/M) + (1/3)*z(GP/BE) + (1/3)*z(−ΔCTA); FF5 HML+RMW+CMA |
+| 173 | Return on assets | CS quality | **kept** | 0.785 | [0.382, 1.188] | 9.31% | −35.82% | +0.634 | Long top 20% by NI/TA within sector |
+| 174 | Cash operating profitability | CS quality | **kept** | 0.766 | [0.365, 1.176] | 9.32% | −38.86% | +0.626 | Long top 20% by OCF/BE within sector; cash-based OP filters accruals |
+| **175** | **Betting against beta** | **CS low-beta** | **kept ★** | **1.088** | **[0.681, 1.497]** | 16.32% | **−40.75%** | +0.638 | Long bottom 20% by 252d beta vs SPY; Frazzini-Pedersen (2014) BAB |
+| 176 | Low-volatility anomaly | CS low-vol | **kept** | 0.877 | [0.466, 1.293] | 13.35% | −40.48% | +0.660 | Long bottom 20% by 252d realized vol within sector |
+| 177 | Vol-targeted momentum | CS momentum | **kept** | 0.937 | [0.535, 1.346] | 17.86% | −49.53% | +0.727 | 12-1m momentum with per-stock vol-targeting |
+| **178** | **Defensive quality momentum** | **CS quality+momentum** | **kept ★** | **1.125** | **[0.721, 1.539]** | 19.11% | **−46.95%** | +0.664 | (1/2)*z(GP/A + low-beta) + (1/2)*z(12-1m momentum) |
+| **179** | **Low-beta quality** | **CS low-beta+quality** | **kept ★★** | **1.198** | **[0.788, 1.609]** | 18.16% | **−40.44%** | +0.644 | **(1/2)*z(−beta) + (1/2)*z(GP/A), sector-neutral; BAB + Novy-Marx composite** |
+| 180 | Earnings trend long | CS earnings drift | **kept** | 0.715 | [0.311, 1.125] | 8.31% | −37.19% | +0.581 | SUE proxy = (NI_t − NI_{t−252})/|NI_{t−252}|; EDGAR filing-date PIT |
+| 181 | Revenue+earnings double growth | CS earnings drift | **kept** | 0.762 | [0.355, 1.172] | 8.70% | −36.80% | +0.586 | Both NI and revenue grew YoY (Jegadeesh-Livnat proxy) |
+| 182 | Filing-date gap continuation | CS earnings / event | **kept** | 0.623 | [0.224, 1.027] | 8.69% | −42.49% | +0.538 | Long stocks with >2% price reaction on EDGAR filing date, hold 21d |
+| 183 | Cash earnings drift | CS earnings / quality | **kept** | 0.687 | [0.287, 1.095] | 7.86% | −36.66% | +0.578 | NI YoY growth filtered to OCF/NI > 0.5 (Sloan 1996 accruals filter) |
+| 184 | Earnings momentum composite | CS earnings+momentum | **kept** | 0.992 | [0.594, 1.400] | 18.66% | −46.21% | +0.687 | (z_SUE + z_mom_63d)/2 sector-neutral; combines PEAD + price momentum |
+| **185** | **Weekly reversal sector-neutral** | **CS short-term reversal** | **kept ★** | **1.103** | **[0.703, 1.517]** | 24.88% | **−50.76%** | +0.613 | Long prior 5-day losers within sector, weekly rebalance (Lehmann 1990) |
+| **186** | **Residual weekly reversal** | **CS short-term reversal** | **kept ★** | **1.095** | **[0.696, 1.513]** | 24.20% | **−51.71%** | +0.613 | H185 on idiosyncratic 5d return only (strips SPY beta) |
+| **187** | **Liquidity-filtered reversal** | **CS short-term reversal** | **kept ★** | **1.068** | **[0.666, 1.483]** | 25.64% | **−53.17%** | +0.600 | H185 applied to top-50% by realized vol (Amihud illiquidity proxy) |
+| 188 | Monthly reversal long | CS short-term reversal | **kept** | 0.949 | [0.550, 1.363] | 20.82% | −55.66% | +0.589 | Prior-month losers sector-neutral, monthly rebalance |
+| **189** | **Residual OU mean reversion** | **CS stat arb** | **kept ★** | **1.025** | **[0.626, 1.439]** | 24.58% | **−49.77%** | +0.548 | Avellaneda-Lee (2010) OU z-score on 5d idiosyncratic return; N=3 |
+| 190 | Sector pairs trading | CS pairs / stat arb | killed | 0.205 | [−0.183, 0.608] | 1.27% | −38.35% | +0.043 | Gatev et al. (2006) minimum-SSD pairs; CI contains zero |
+| **191** | **PCA residual reversal** | **CS PCA stat arb** | **kept ★** | **1.135** | **[0.733, 1.553]** | 24.75% | **−48.11%** | +0.619 | K=10 PCA, strip factor exposure, 5d residual reversal, weekly rebalance |
+| **192** | **PCA OU mean reversion** | **CS PCA stat arb** | **kept ★★** | **1.175** | **[0.776, 1.592]** | 27.53% | **−50.69%** | +0.567 | K=10 PCA, OU z-score on 5d cumulative residuals; entry z<−1.5 |
+| 193 | Long-short momentum | CS market-neutral | killed | −0.157 | [−0.546, 0.245] | −1.22% | −41.27% | +0.116 | Market-neutral L/S momentum; L/S costs destroy long-only signal |
+| 194 | Long-short reversal | CS market-neutral | **kept** | 0.829 | [0.439, 1.214] | 4.39% | −18.33% | **+0.146** | Market-neutral L/S reversal; H001 corr +0.146 — key cross-program diversifier |
+| 195 | 52-week high momentum | CS momentum | **kept** | 0.878 | [0.475, 1.286] | 14.43% | −45.83% | +0.692 | George-Hwang (2004) price/52w-high ratio as momentum signal |
+| 196 | Idiosyncratic momentum | CS momentum | **kept** | 0.930 | [0.526, 1.343] | 18.08% | −50.97% | +0.690 | 12-1m stock return minus sector-average return |
+| 197 | Low skewness anomaly | CS risk anomaly | **kept** | 0.879 | [0.477, 1.287] | 16.97% | −51.84% | +0.612 | Long low-skewness stocks (Bali, Cakici, Whitelaw 2011) |
+| 198 | Earnings acceleration | CS earnings drift | **kept** | 0.681 | [0.282, 1.088] | 7.60% | −36.08% | +0.584 | Second derivative of earnings: sue_t − sue_{t−63d} |
+| 199 | Multi-signal composite | CS composite | **kept** | 1.020 | [0.622, 1.427] | 20.68% | −51.39% | +0.668 | Equal-weight z-score: momentum + reversal + earnings growth + quality |
+| **200** | **Cross-program MDR portfolio** | **cross-program ensemble** | **kept ★★** | **1.350** | **[0.941, 1.737]** | 5.36% | **−8.83%** | +0.622 | **Terminal champion. SLSQP MDR over 46 strategies (37 AA + 9 CS). H194 weight 29.8%.** |
+
+---
+
+## H150–H200 Summary
+
+| Target | Result |
+|--------|--------|
+| CS strategies tested | 50 (H150–H199) |
+| CS strategies kept | 47 (killed: H151, H190, H193) |
+| Terminal champion (H200) | Sharpe 1.350, MaxDD −8.83%, CAGR 5.4% |
+| Best CS individual | H179 LowBetaQuality — Sharpe 1.198, MaxDD −40.4% |
+| Key cross-program diversifier | H194 (market-neutral L/S reversal) — H001 corr +0.146, MaxDD −18.3% |
+| H200 top component weights | H194 29.8%, H043 19.7%, H078 13.9%, H035 10.5%, H060 9.7% |
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

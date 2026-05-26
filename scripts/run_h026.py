@@ -29,7 +29,7 @@ def main():
     wf = walk_forward(spy, lambda _: QuarterEndDrift(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (n_days=5):")
+    print("\nCanonical (n_days=5):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
@@ -51,7 +51,7 @@ def main():
             f"  ({folds[i].test_start.date()} — {folds[i].test_end.date()})"
         )
 
-    print(f"\nLowest H001 correlation in the program: +0.176")
+    print("\nLowest H001 correlation in the program: +0.176")
     print(f"Lowest MaxDD in the program: {rep.max_drawdown:.2%}")
     decision = "KEEP" if rep.sharpe > 0.51 and lo > 0 else "kill"
     print(f"Decision: {decision}")

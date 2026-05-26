@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import numpy as np
 import pandas as pd
 import pytest
 
@@ -58,8 +57,9 @@ def test_weights_binary():
 
 def test_no_simultaneous_spy_tlt():
     """SPY and TLT must never both be non-zero at the same time."""
-    prices = _prices([0.001 * ((-1) ** i) for i in range(300)],
-                     [0.001 * ((-1) ** (i + 1)) for i in range(300)])
+    prices = _prices(
+        [0.001 * ((-1) ** i) for i in range(300)], [0.001 * ((-1) ** (i + 1)) for i in range(300)]
+    )
     w = SPYTLTDualMomentum().generate_weights(prices)
     both_active = (w["SPY"] > 0) & (w["TLT"] > 0)
     assert not both_active.any()

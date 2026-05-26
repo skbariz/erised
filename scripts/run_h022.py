@@ -32,7 +32,7 @@ def main():
     wf = walk_forward_multi(prices, lambda _: DefensiveEquityHedge(), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"\nCanonical (fast=50, slow=200):")
+    print("\nCanonical (fast=50, slow=200):")
     print(f"  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]")
     print(f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
 
@@ -57,7 +57,9 @@ def main():
             f"  ({folds[i].test_start.date()} — {folds[i].test_end.date()})"
         )
 
-    print(f"\nSPY MaxDD: -55.92%  →  H022 MaxDD: {rep.max_drawdown:.2%}  (improvement: {-55.92 - rep.max_drawdown*100:.1f}pp)")
+    print(
+        f"\nSPY MaxDD: -55.92%  →  H022 MaxDD: {rep.max_drawdown:.2%}  (improvement: {-55.92 - rep.max_drawdown * 100:.1f}pp)"
+    )
     decision = "KEEP" if rep.sharpe > 0.51 and lo > 0 else "kill"
     print(f"Decision: {decision}")
 

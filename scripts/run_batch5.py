@@ -33,8 +33,10 @@ def run(prices, folds, cls, label, **kwargs):
     wf = walk_forward(prices, lambda _: cls(**kwargs), folds=folds)
     rep = wf.combined_report
     lo, hi = bootstrap_sharpe_ci(wf.combined_returns, n_boot=5000)
-    print(f"  [{label}]  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]"
-          f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}")
+    print(
+        f"  [{label}]  Sharpe {rep.sharpe:.3f}  CI [{lo:.3f}, {hi:.3f}]"
+        f"  CAGR {rep.cagr:.2%}  MaxDD {rep.max_drawdown:.2%}  N_trades {rep.n_trades}"
+    )
     return wf, rep, lo, hi
 
 
@@ -50,10 +52,16 @@ def main():
     print(f"Folds: {len(folds)}")
 
     print(section("H001 baseline (reference)"))
-    wf_h001 = walk_forward(spy, lambda _: MovingAverageCrossover(50, 200), folds=make_folds(spy, train_years=5, test_years=2))
+    wf_h001 = walk_forward(
+        spy,
+        lambda _: MovingAverageCrossover(50, 200),
+        folds=make_folds(spy, train_years=5, test_years=2),
+    )
     lo_h001, hi_h001 = bootstrap_sharpe_ci(wf_h001.combined_returns, n_boot=5000)
-    print(f"  [H001]  Sharpe {wf_h001.combined_report.sharpe:.3f}  CI [{lo_h001:.3f}, {hi_h001:.3f}]"
-          f"  CAGR {wf_h001.combined_report.cagr:.2%}  MaxDD {wf_h001.combined_report.max_drawdown:.2%}")
+    print(
+        f"  [H001]  Sharpe {wf_h001.combined_report.sharpe:.3f}  CI [{lo_h001:.3f}, {hi_h001:.3f}]"
+        f"  CAGR {wf_h001.combined_report.cagr:.2%}  MaxDD {wf_h001.combined_report.max_drawdown:.2%}"
+    )
 
     print(section("H028: VIXSpikeEntry  canonical (vix_threshold=30, hold_days=20)"))
     wf28, rep28, lo28, hi28 = run(prices, folds, VIXSpikeEntry, "canonical")
@@ -84,7 +92,9 @@ def main():
     wf31, rep31, lo31, hi31 = run(prices, folds, RealizedVsImpliedVol, "canonical")
     print("  Sensitivity (realized_window):")
     for rw in [10, 20, 60]:
-        w = walk_forward(prices, lambda _, r=rw: RealizedVsImpliedVol(realized_window=r), folds=folds)
+        w = walk_forward(
+            prices, lambda _, r=rw: RealizedVsImpliedVol(realized_window=r), folds=folds
+        )
         print(f"    realized_window={rw}  Sharpe {w.combined_report.sharpe:.3f}")
 
     print(section("H032: VIXMeanReversion  canonical (lookback=60, n_sigma=2.0)"))

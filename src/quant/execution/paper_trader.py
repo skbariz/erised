@@ -71,11 +71,15 @@ class PaperBroker:
     def get_position(self, symbol: str) -> Position | None:
         try:
             p = self._client.get_open_position(symbol)
-            return Position(symbol=p.symbol, qty=float(p.qty), avg_entry_price=float(p.avg_entry_price))
+            return Position(
+                symbol=p.symbol, qty=float(p.qty), avg_entry_price=float(p.avg_entry_price)
+            )
         except Exception:
             return None
 
-    def submit_target_position(self, symbol: str, target_fraction: float, latest_price: float) -> dict:
+    def submit_target_position(
+        self, symbol: str, target_fraction: float, latest_price: float
+    ) -> dict:
         """Bring the position to target_fraction * equity worth of `symbol`."""
         from alpaca.trading.enums import OrderSide, TimeInForce
         from alpaca.trading.requests import MarketOrderRequest

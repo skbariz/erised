@@ -48,7 +48,9 @@ def validate_bars(df: pd.DataFrame, symbol: str = "?") -> None:
     bad_hi = (df["high"] < df[["open", "close", "low"]].max(axis=1)).sum()
     bad_lo = (df["low"] > df[["open", "close", "high"]].min(axis=1)).sum()
     if bad_hi or bad_lo:
-        raise ValueError(f"[{symbol}] OHLC inconsistencies: {bad_hi} high violations, {bad_lo} low violations")
+        raise ValueError(
+            f"[{symbol}] OHLC inconsistencies: {bad_hi} high violations, {bad_lo} low violations"
+        )
 
     # Sanity: no negative or zero prices
     for col in ["open", "high", "low", "close", "adj_close"]:

@@ -86,7 +86,8 @@ def test_ma_period_param():
 
 def test_requires_vix_close_column():
     """Raises ValueError if vix_close column is missing."""
-    prices = pd.DataFrame({"adj_close": [100.0, 101.0, 102.0]},
-                          index=pd.bdate_range("2010-01-04", periods=3))
+    prices = pd.DataFrame(
+        {"adj_close": [100.0, 101.0, 102.0]}, index=pd.bdate_range("2010-01-04", periods=3)
+    )
     with pytest.raises(ValueError, match="vix_close"):
         VIXTrendSignal().generate_positions(prices)

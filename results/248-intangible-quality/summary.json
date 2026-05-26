@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H248",
+  "name": "intangible-quality",
+  "strategy_class": "IntangibleQuality",
+  "family": "structural factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8637,
+  "ci_low": 0.4465,
+  "ci_high": 1.2714,
+  "cagr": 0.1083,
+  "max_drawdown": -0.3629,
+  "n_trades": 1,
+  "h001_corr": -0.0185,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.592,
+    0.806,
+    2.046,
+    1.054,
+    2.087,
+    1.189,
+    1.042
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Intangible asset intensity proxy: GP / book_equity. High GP relative to book value = brand, IP, or other off-balance-sheet assets. Distinct from GP/TA (H227, asset efficiency) and GP/revenue (H239, margin). Clipped [-1.0, 10.0]. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

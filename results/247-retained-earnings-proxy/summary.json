@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H247",
+  "name": "retained-earnings-proxy",
+  "strategy_class": "RetainedEarningsProxy",
+  "family": "structural factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7831,
+  "ci_low": 0.3761,
+  "ci_high": 1.1906,
+  "cagr": 0.0928,
+  "max_drawdown": -0.3785,
+  "n_trades": 1,
+  "h001_corr": -0.0171,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.662,
+    1.998,
+    0.983,
+    1.544,
+    1.114,
+    1.075
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Retained earnings proxy: (BE_t - BE_{t-1y}) / TA_{t-1y}. Growing book equity = profitable AND not paying out all profits. Distinct from H207 shareholder yield (buybacks) and H206 asset growth (dilution). Clipped [-0.5, 1.0]. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

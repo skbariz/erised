@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H250",
+  "name": "grand-fundamental-composite",
+  "strategy_class": "GrandFundamentalComposite",
+  "family": "structural factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.742,
+  "ci_low": 0.3286,
+  "ci_high": 1.1436,
+  "cagr": 0.0861,
+  "max_drawdown": -0.3508,
+  "n_trades": 1,
+  "h001_corr": -0.0198,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.058,
+    2.211,
+    0.803,
+    2.206,
+    1.135,
+    1.008
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Terminal 5-factor composite: z(GP/TA) + z(-accruals) + z(-asset_growth) + z(OCF/TA) + z(-LTD/TA). Combines best cross-batch signals: Novy-Marx profitability + Sloan accruals + conservative investment + cash generation + low leverage. Equal-weighted z-score sum. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

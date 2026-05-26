@@ -5058,3 +5058,432 @@ class ROAMomentum(CrossSectionalStrategy):
             roa_change, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 9: Market Value & Cash Flow Factors (H241–H245)
+# ---------------------------------------------------------------------------
+
+
+class FCFYield(CrossSectionalStrategy):
+    """H241: Free cash flow yield = OCF / market_cap (price × shares_outstanding)."""
+
+    name = "fcf_yield"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        market_cap = prices_panel * shares
+        fcf_yield = ocf / market_cap.where(market_cap > 0)
+        fcf_yield = fcf_yield.clip(-0.5, 0.5)
+        daily_w = _sector_neutral_weights(
+            fcf_yield, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class CashReturnOnEquity(CrossSectionalStrategy):
+    """H242: Cash return on equity = OCF / book_equity."""
+
+    name = "cash_return_on_equity"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.operating_cf = operating_cf
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        croe = ocf / be.where(be > 0)
+        croe = croe.clip(-1.0, 5.0)
+        daily_w = _sector_neutral_weights(
+            croe, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class GrossProfitGrowth(CrossSectionalStrategy):
+    """H243: YoY absolute gross profit growth scaled by total assets."""
+
+    name = "gross_profit_growth"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gp_growth = (gp - gp.shift(self.window)) / ta.shift(self.window).where(
+            ta.shift(self.window) > 0
+        )
+        gp_growth = gp_growth.clip(-1.0, 2.0)
+        daily_w = _sector_neutral_weights(
+            gp_growth, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class AltmanZProxy(CrossSectionalStrategy):
+    """H244: Simplified Altman Z-score proxy from available fundamentals.
+
+    Composite of 4 components: NWC/TA + NI/TA + BE/TL + revenue/TA.
+    """
+
+    name = "altman_z_proxy"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+
+        nwc_ta = (ca - cl) / ta.where(ta > 0)
+        ni_ta = ni / ta.where(ta > 0)
+        total_liab = (ta - be).where((ta - be) > 0)
+        be_tl = be / total_liab.where(total_liab > 0)
+        rev_ta = rev / ta.where(ta > 0)
+
+        score = _cs_zscore(nwc_ta) + _cs_zscore(ni_ta) + _cs_zscore(be_tl) + _cs_zscore(rev_ta)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class OCFMomentum(CrossSectionalStrategy):
+    """H245: YoY improvement in OCF/total_assets (cash return on assets)."""
+
+    name = "ocf_momentum"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ocf_ta = ocf / ta.where(ta > 0)
+        ocf_ta_change = ocf_ta - ocf_ta.shift(self.window)
+        daily_w = _sector_neutral_weights(
+            ocf_ta_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 10: Structural & Terminal Composite Factors (H246–H250)
+# ---------------------------------------------------------------------------
+
+
+class EquityMultiplier(CrossSectionalStrategy):
+    """H246: Low equity multiplier (TA/BE) = low financial leverage. DuPont component."""
+
+    name = "equity_multiplier"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        em = ta / be.where(be > 0)
+        em = em.clip(1.0, 20.0)
+        # Low equity multiplier = low leverage = better
+        daily_w = _sector_neutral_weights(
+            em, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class RetainedEarningsProxy(CrossSectionalStrategy):
+    """H247: YoY book equity growth / total assets = retained earnings proxy."""
+
+    name = "retained_earnings_proxy"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.book_equity = book_equity
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        be_growth = (be - be.shift(self.window)) / ta.shift(self.window).where(
+            ta.shift(self.window) > 0
+        )
+        be_growth = be_growth.clip(-0.5, 1.0)
+        daily_w = _sector_neutral_weights(
+            be_growth, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class IntangibleQuality(CrossSectionalStrategy):
+    """H248: GP/book_equity -- intangible asset intensity proxy.
+
+    High GP relative to book equity signals brand, IP, or other intangibles
+    not captured on the balance sheet.
+    """
+
+    name = "intangible_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        gp_be = gp / be.where(be > 0)
+        gp_be = gp_be.clip(-1.0, 10.0)
+        daily_w = _sector_neutral_weights(
+            gp_be, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class FinancialHealthComposite(CrossSectionalStrategy):
+    """H249: Composite financial health score: z(OCF/TA) + z(-LTD/TA) + z(curr_ratio) + z(NI/TA)."""
+
+    name = "financial_health_composite"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.long_term_debt = long_term_debt
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.net_income = net_income
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+
+        ocf_ta = ocf / ta.where(ta > 0)
+        ltd_ta = ltd / ta.where(ta > 0)
+        curr_ratio = ca / cl.where(cl > 0)
+        ni_ta = ni / ta.where(ta > 0)
+
+        score = (
+            _cs_zscore(ocf_ta) + _cs_zscore(-ltd_ta) + _cs_zscore(curr_ratio) + _cs_zscore(ni_ta)
+        )
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class GrandFundamentalComposite(CrossSectionalStrategy):
+    """H250: Terminal composite: z(GP/TA) + z(-accruals) + z(-asset_growth) + z(OCF/TA) + z(-LTD/TA).
+
+    Combines the best cross-batch signals: Novy-Marx profitability, accruals quality,
+    conservative investment, cash generation, and low leverage.
+    """
+
+    name = "grand_fundamental_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.operating_cf = operating_cf
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.long_term_debt = long_term_debt
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+
+        # Novy-Marx profitability
+        gp_ta = gp / ta.where(ta > 0)
+
+        # Balance-sheet accruals (Sloan): delta(NWC) / avg_TA
+        nwc = ca - cl
+        avg_ta = (ta + ta.shift(self.window)) / 2
+        accruals = (nwc - nwc.shift(self.window)) / avg_ta.where(avg_ta > 0)
+
+        # Conservative investment: low asset growth
+        asset_growth = (ta - ta.shift(self.window)) / ta.shift(self.window).where(
+            ta.shift(self.window) > 0
+        )
+
+        # Cash generation
+        ocf_ta = ocf / ta.where(ta > 0)
+
+        # Low leverage
+        ltd_ta = ltd / ta.where(ta > 0)
+
+        score = (
+            _cs_zscore(gp_ta)
+            + _cs_zscore(-accruals)
+            + _cs_zscore(-asset_growth)
+            + _cs_zscore(ocf_ta)
+            + _cs_zscore(-ltd_ta)
+        )
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H213",
+  "name": "earnings-quality-momentum",
+  "strategy_class": "EarningsQualityMomentum",
+  "family": "accruals / earnings quality",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9075,
+  "ci_low": 0.4965,
+  "ci_high": 1.3164,
+  "cagr": 0.1743,
+  "max_drawdown": -0.4988,
+  "n_trades": 1,
+  "h001_corr": 0.0014,
+  "fold_sharpes": [
+    1.41,
+    0.898,
+    1.173,
+    1.608,
+    1.111,
+    -0.15,
+    0.637,
+    2.264,
+    0.999,
+    1.544,
+    1.014,
+    0.849
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(-balance_sheet_accruals) + z(12-1m momentum). Sloan (1996) balance-sheet accruals quality + Jegadeesh-Titman momentum. Momentum covers pre-2009 fundamental data gap.",
+  "canonical_params": {
+    "accrual_window": 252,
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

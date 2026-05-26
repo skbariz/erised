@@ -225,6 +225,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | **209** | **Buyback momentum** | **capital discipline+momentum (CS)** | **kept ★** | **0.930** | **[0.527, 1.344]** | 18.03% | −49.88% | **+0.002** | **z(-net_issuance)+z(12-1m mom); full 12-fold coverage; batch star** |
 | 210 | Capital discipline | capital discipline (CS) | **kept** | 0.733 | [0.329, 1.141] | 8.44% | −37.64% | −0.019 | z(-asset_growth)+z(-net_issuance)+z(-leverage_change); 6 active folds |
 
+### Batch 3: Accruals & Earnings Quality (H211–H215)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 211 | Balance-sheet accruals | accruals / earnings quality (CS) | **kept** | 0.800 | [0.396, 1.206] | 9.22% | −37.35% | −0.021 | Sloan (1996) BS approach: delta(NWC)/avg_TA; distinct from H166 CF approach |
+| 212 | Dual momentum+earnings | accruals / earnings quality (CS) | **kept** | 0.587 | [0.184, 0.991] | 7.14% | −36.26% | −0.009 | AND condition: top 30% price rank AND NI YoY rank; lower Sharpe vs composite |
+| **213** | **Earnings quality momentum** | **accruals / earnings quality (CS)** | **kept ★** | **0.907** | **[0.496, 1.316]** | 17.43% | −49.88% | **+0.001** | **z(-BS_accruals)+z(12-1m mom); full 12-fold; batch star** |
+| 214 | Gross margin momentum | accruals / earnings quality (CS) | **kept** | 0.690 | [0.282, 1.099] | 8.52% | −34.55% | −0.014 | 12-1m mom gated by improving gross margin; 504d window stronger (0.907) |
+| 215 | Fundamental reversal | accruals / earnings quality (CS) | **kept** | 0.718 | [0.318, 1.122] | 9.44% | −43.10% | −0.015 | Monthly reversal gated by NI>0 AND OCF>0; avoids value traps |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

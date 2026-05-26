@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H211",
+  "name": "balance-sheet-accruals",
+  "strategy_class": "BalanceSheetAccruals",
+  "family": "accruals / earnings quality",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7996,
+  "ci_low": 0.3957,
+  "ci_high": 1.2056,
+  "cagr": 0.0922,
+  "max_drawdown": -0.3735,
+  "n_trades": 1,
+  "h001_corr": -0.0205,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.782,
+    2.286,
+    0.905,
+    1.867,
+    1.14,
+    0.844
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sloan (1996) balance-sheet accruals: \u0394(NWC)/avg_TA where NWC=CA-CL. Distinct from H166 cash-flow accruals (NI-OCF)/TA. NWC growth = channel stuffing, inventory build = lower quality earnings.",
+  "canonical_params": {
+    "accrual_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

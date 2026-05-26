@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H214",
+  "name": "gross-margin-momentum",
+  "strategy_class": "GrossMarginMomentum",
+  "family": "accruals / earnings quality",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.6903,
+  "ci_low": 0.2818,
+  "ci_high": 1.0993,
+  "cagr": 0.0852,
+  "max_drawdown": -0.3455,
+  "n_trades": 3,
+  "h001_corr": -0.0143,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.118,
+    1.914,
+    1.219,
+    1.669,
+    1.398,
+    0.894
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1m momentum gated by YoY gross margin improvement (GP/rev_t > GP/rev_{t-252}). Expanding margins signal pricing power and quality improvement. Sector-neutral top 20% of qualifying stocks.",
+  "canonical_params": {
+    "margin_window": 252,
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

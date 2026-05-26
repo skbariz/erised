@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H215",
+  "name": "fundamental-reversal",
+  "strategy_class": "FundamentalReversal",
+  "family": "accruals / earnings quality",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.7176,
+  "ci_low": 0.3182,
+  "ci_high": 1.1216,
+  "cagr": 0.0944,
+  "max_drawdown": -0.431,
+  "n_trades": 1,
+  "h001_corr": -0.0146,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.459,
+    0.708,
+    2.108,
+    0.685,
+    1.435,
+    1.053,
+    0.947
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Monthly price reversal gated by fundamental stability: NI>0 AND OCF>0. Buys oversold stocks that are not fundamental deteriorating. Avoids value traps in short-term reversal. Sector-neutral bottom 20% by 21d return.",
+  "canonical_params": {
+    "reversal_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

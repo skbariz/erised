@@ -1,0 +1,989 @@
+S&P 500 QUANT TRADING PAPER LEARNINGS - SET 2
+Created for: chatbot-assisted planning of 10 additional batches of trading algorithms
+Scope: additional papers beyond the first 20-paper brief; focused on industry/residual momentum, reversals,
+corporate actions, issuance, analyst/insider/short-seller information, options-informed signals,
+investor attention, sentiment, seasonality, and overnight behavior.
+Important note: This is a research and development brief, not financial advice. Every strategy below is a
+hypothesis that needs point-in-time data, realistic transaction costs, and out-of-sample validation.
+
+================================================================================
+HOW THIS SET DIFFERS FROM SET 1
+================================================================================
+
+Set 1 covered the core canon: classic momentum, value, quality, profitability, low beta,
+volatility management, PEAD, liquidity, pairs/stat arb, and machine learning.
+
+Set 2 adds more specialized alpha modules:
+- Industry momentum and residual momentum
+- Short-term reversal and seasonal return memory
+- Asset growth, share issuance, IPO/SEO underperformance, and buyback drift
+- Intangible return signals and earnings momentum
+- Analyst recommendation changes
+- Insider buying and short-selling information
+- Options-volume and put-call parity signals
+- Attention/sentiment/overnight-return behavior
+
+Use Set 2 after the baseline infrastructure from Set 1 exists:
+- point-in-time S&P 500 universe
+- daily adjusted returns
+- lagged fundamentals
+- corporate-action/event tables
+- standardized backtest result JSON
+- cost/slippage/borrow model
+
+================================================================================
+CHATBOT PROMPT TO USE WITH THIS FILE
+================================================================================
+
+"Use this Set 2 research brief to plan 10 additional batches of S&P 500 algorithms.
+For each batch, define objective, source papers, strategy hypotheses, required data,
+features, portfolio construction, execution assumptions, validation checks, expected
+failure modes, and JSON output fields. Avoid repeating the Set 1 core strategies unless
+needed as baselines. Prioritize modular implementation in Python with Polars/DuckDB/Parquet,
+smoke tests first, and strict point-in-time data handling."
+
+================================================================================
+GENERAL IMPLEMENTATION WARNINGS
+================================================================================
+
+1. These papers often depend on data that is harder than daily prices:
+   - analyst recommendations and revisions
+   - insider transactions
+   - short-sale activity or short interest
+   - options volume, implied vols, and option surface data
+   - Google search volume or alternative attention data
+   - repurchase announcements, share issuance, IPO/SEO events
+
+2. Do not use "event date" when "public availability date" is needed.
+   For example, an insider trade date, filing date, and market availability date can differ.
+
+3. Use conservative execution delays:
+   - daily price signals: next close or next open
+   - analyst/insider/filing signals: after public release plus one trading day unless timestamps are precise
+   - options/intraday signals: use only if timestamped and your backtester supports intraday execution
+
+4. Many Set 2 signals are capacity-constrained.
+   Short-term reversal, options-volume signals, and attention signals can decay quickly after costs.
+
+5. Long/short implementations require borrow assumptions.
+   For short-seller, issuance, high-sentiment, high-attention, and high-overpricing signals,
+   always run a long-only "avoid/underweight" version alongside the short version.
+
+6. For S&P 500 specifically, many anomalies may be weaker than in all-stock universes.
+   Large-cap stocks are more liquid, more covered, and more arbitraged.
+
+================================================================================
+THE 20 ADDITIONAL PAPERS AND IMPLEMENTATION LEARNINGS
+================================================================================
+
+01. Moskowitz and Grinblatt (1999)
+Title: Do Industries Explain Momentum?
+Source: https://ideas.repec.org/a/bla/jfinan/v54y1999i4p1249-1290.html
+Core idea:
+Industry-level momentum explains much of individual-stock momentum. Past winning industries
+continue to outperform past losing industries, and industry momentum remains profitable even
+after controlling for size, value, individual momentum, and microstructure effects.
+Implementation translation:
+- Feature: industry_return_6m = value-weighted trailing industry return over prior 6 months.
+- Assign each S&P 500 stock to GICS sector/industry.
+- Rank industries by past return, then allocate to stocks inside top industries.
+Useful S&P 500 algorithms:
+- Long top 3-5 industries by 6-month return, equal-weight stocks inside each industry.
+- Industry momentum overlay: multiply stock momentum score by industry momentum score.
+- Long top industry stocks, short bottom industry stocks, sector exposure controlled by design.
+Main risks:
+- Concentration in one macro theme.
+- Industry classifications change over time.
+- Can underperform during sharp sector rotations.
+
+02. Blitz, Huij, and Martens (2011)
+Title: Residual Momentum
+Source: https://repub.eur.nl/pub/22252
+Core idea:
+Conventional momentum has time-varying exposures to common risk factors. Ranking stocks on
+residual returns after removing market/size/value exposures can produce cleaner, more stable
+momentum profits.
+Implementation translation:
+- Regress each stock's daily or monthly returns on market/sector/factor returns over a lookback window.
+- Compute residual cumulative return over the formation period.
+- Rank on residual_momentum instead of total_return_momentum.
+Useful S&P 500 algorithms:
+- Residual 12-1 momentum after removing SPY and sector ETF exposure.
+- Residual momentum + low-volatility weighting.
+- Composite: total momentum only if residual momentum confirms.
+Main risks:
+- Regression window choices can overfit.
+- Residual estimates are noisy for stocks with missing data.
+- Factor set must be known only through historical data.
+
+03. Jegadeesh (1990)
+Title: Evidence of Predictable Behavior of Security Returns
+Source: https://ideas.repec.org/a/bla/jfinan/v45y1990i3p881-98.html
+Core idea:
+Individual stock returns show negative first-order serial correlation at monthly horizons and
+positive serial correlation at longer lags. This paper helps motivate both short-term reversal
+and longer-horizon momentum.
+Implementation translation:
+- Feature: one_month_reversal = -return over last 21 trading days.
+- Combine with longer-horizon momentum to avoid fighting strong trends.
+Useful S&P 500 algorithms:
+- Monthly reversal among liquid stocks: long prior-month losers, short prior-month winners.
+- Reversal only after large idiosyncratic moves, neutralized for sector and beta.
+- Momentum-minus-reversal composite: favor stocks with strong 12-1 momentum but weak last-month runup.
+Main risks:
+- Bid-ask bounce and stale pricing can fake reversal in less liquid universes.
+- S&P 500 reversal may be small after costs.
+
+04. Lehmann (1990)
+Title: Fads, Martingales, and Market Efficiency
+Source: https://www.nber.org/papers/w2533
+Core idea:
+Very short-term winners and losers, especially over weekly intervals, tend to reverse. The
+paper interprets this as evidence of short-lived price pressure or liquidity effects.
+Implementation translation:
+- Feature: weekly_reversal = -return over prior 5 trading days.
+- Use strict liquidity and spread filters.
+- Use conservative slippage because expected edge can be small.
+Useful S&P 500 algorithms:
+- Weekly sector-neutral reversal on large S&P 500 constituents.
+- Reversal after abnormal volume or abnormal one-week move.
+- Reversal with no-trade bands to reduce turnover.
+Main risks:
+- High turnover.
+- Implementation shortfall can eliminate edge.
+- Hard to execute well without intraday/open-close modeling.
+
+05. Heston and Sadka (2008)
+Title: Seasonality in the Cross-Section of Stock Returns
+Source: https://www.sciencedirect.com/science/article/pii/S0304405X0700195X
+Core idea:
+Stocks tend to have relatively high or low returns in the same calendar month year after year.
+This annual same-month autocorrelation pattern can persist across many annual lags.
+Implementation translation:
+- Feature: same_month_history = average return in this calendar month over prior N years.
+- Rank stocks each month by historical same-month performance.
+- Combine with momentum and liquidity filters.
+Useful S&P 500 algorithms:
+- Same-month seasonality rank, monthly rebalance.
+- Seasonality-confirmed momentum: only buy momentum stocks with positive month-specific history.
+- Avoid known seasonal losers during their historically weak months.
+Main risks:
+- Data mining risk is high.
+- Needs long history and robust cross-validation.
+- Calendar effects may decay after publication.
+
+06. Cooper, Gulen, and Schill (2008)
+Title: Asset Growth and the Cross-Section of Stock Returns
+Source: https://ideas.repec.org/a/bla/jfinan/v63y2008i4p1609-1651.html
+Core idea:
+Firms with high total asset growth subsequently underperform firms with low asset growth.
+The effect remains meaningful even after controlling for common predictors such as value,
+size, momentum, and accruals.
+Implementation translation:
+- Feature: asset_growth = total_assets_t / total_assets_t_minus_1 - 1.
+- Rank low asset growth as better.
+- Combine with issuance, profitability, and valuation.
+Useful S&P 500 algorithms:
+- Long conservative asset-growth firms, avoid/short aggressive asset-growth firms.
+- Penalize high asset growth in quality and value models.
+- Asset growth + low accruals + high profitability composite.
+Main risks:
+- Sector effects are large.
+- Acquisitive firms can have high asset growth for strategic reasons.
+- Fundamental data must be point-in-time.
+
+07. Pontiff and Woodgate (2008)
+Title: Share Issuance and Cross-Sectional Returns
+Source: https://paperzz.com/doc/9459249/share-issuance-and-cross-sectional-returns
+Core idea:
+Post-1970, share issuance strongly predicts lower future returns. The annual issuance measure
+can be more statistically significant than size, value, or momentum as a cross-sectional predictor.
+Implementation translation:
+- Feature: net_share_issuance = change in split-adjusted shares outstanding over prior year.
+- High issuance is negative; repurchase/shrinking share count is positive.
+Useful S&P 500 algorithms:
+- Long firms reducing shares outstanding, avoid firms issuing shares.
+- Add net issuance penalty to value screens.
+- Issuance-aware quality model: prefer profitable firms with buybacks funded by cash flow.
+Main risks:
+- Share count data must be split-adjusted.
+- Issuance from compensation, M&A, or index events needs interpretation.
+
+08. Loughran and Ritter (1995)
+Title: The New Issues Puzzle
+Source: https://ideas.repec.org/a/bla/jfinan/v50y1995i1p23-51.html
+Core idea:
+Companies issuing stock through IPOs or seasoned equity offerings historically underperform
+over long horizons. The finding supports the idea that managers issue equity when valuations
+are favorable to the firm.
+Implementation translation:
+- Feature: recent_equity_issue_flag, ipo_age, seo_flag, months_since_issue.
+- For S&P 500, IPOs are rare, but seasoned issuance and recent inclusion after IPO can matter.
+Useful S&P 500 algorithms:
+- Avoid recent large equity issuers.
+- Underweight recent IPOs/newly public firms until they season.
+- Pair issuance flags with valuation and profitability to detect overvalued growth stories.
+Main risks:
+- S&P 500 inclusion often happens long after IPO.
+- Event datasets must be complete and timestamped.
+
+09. Ikenberry, Lakonishok, and Vermaelen (1995)
+Title: Market Underreaction to Open Market Share Repurchases
+Source: https://econpapers.repec.org/paper/nbrnberwo/4965.htm
+Core idea:
+Open-market repurchase announcements are followed by positive long-run abnormal returns,
+especially for value stocks. Markets appear to underreact to the information conveyed by
+repurchase announcements.
+Implementation translation:
+- Feature: repurchase_announcement_flag, buyback_authorization_size, value_status.
+- Hold horizon can be long: 6 months to several years.
+Useful S&P 500 algorithms:
+- Long value stocks after buyback announcements.
+- Shareholder yield strategy: buybacks + dividends + debt reduction.
+- Repurchase confirmation: require actual share count reduction after authorization.
+Main risks:
+- Authorization does not guarantee actual repurchase.
+- Buybacks can be poorly timed or debt-funded.
+- Need announcement data and later share count confirmation.
+
+10. Daniel and Titman (2006 / working paper versions 2001-2003)
+Title: Market Reactions to Tangible and Intangible Information
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=414701
+Core idea:
+The return component not explained by tangible accounting performance, called intangible
+information, can predict future returns. It separates price movement due to fundamentals
+from price movement not obviously backed by accounting performance.
+Implementation translation:
+- Decompose past return into tangible component and residual/intangible component.
+- Intangible return can be proxied by price return minus accounting-performance-implied return.
+Useful S&P 500 algorithms:
+- Fade large positive intangible returns when not backed by fundamentals.
+- Buy negative intangible return stocks when fundamentals are stable.
+- Combine with sentiment/attention measures to identify hype-driven moves.
+Main risks:
+- Decomposition is complex and sensitive to accounting definitions.
+- May overlap with value/reversal/issuance effects.
+
+11. Chan, Jegadeesh, and Lakonishok (1996)
+Title: Momentum Strategies
+Source: https://www.nber.org/papers/w5375
+Core idea:
+Past returns and past earnings surprises each predict future return drift even after controlling
+for each other. Analyst earnings forecasts also respond sluggishly to past news.
+Implementation translation:
+- Features: price_momentum, standardized_unexpected_earnings, analyst_revision_lag.
+- Build separate price-momentum and earnings-momentum signals.
+Useful S&P 500 algorithms:
+- Dual momentum: require both price momentum and earnings surprise momentum.
+- Earnings momentum sleeve independent from price momentum.
+- Avoid stocks with bad earnings momentum even if price momentum looks strong.
+Main risks:
+- Requires clean earnings surprise data and announcement timing.
+- Price and earnings signals can conflict around regime shifts.
+
+12. Womack (1996)
+Title: Do Brokerage Analysts' Recommendations Have Investment Value?
+Source: https://ideas.repec.org/a/bla/jfinan/v51y1996i1p137-67.html
+Core idea:
+Analyst recommendation changes produce immediate price reactions and post-event drift.
+Sell recommendations had especially large and longer-lasting negative drift in the original study.
+Implementation translation:
+- Feature: recommendation_change, new_buy_flag, new_sell_flag, downgrade_magnitude.
+- Trade after recommendation date/time, not before.
+Useful S&P 500 algorithms:
+- Long upgrades, avoid/short downgrades.
+- Stronger signal for rare sell/downgrade events.
+- Combine analyst changes with earnings revisions and momentum.
+Main risks:
+- Analyst recommendation data can be costly.
+- Public dissemination timing matters.
+- Recommendations may be biased or stale.
+
+13. Jegadeesh, Kim, Krische, and Lee (2004)
+Title: Analyzing the Analysts: When Do Recommendations Add Value?
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=291241
+Core idea:
+Consensus recommendation levels can be misleading because analysts often favor glamour stocks.
+Recommendation changes are more robust predictors and add information beyond many quantitative variables.
+Implementation translation:
+- Prefer delta_consensus_recommendation over consensus_level.
+- Interact analyst changes with value and momentum characteristics.
+Useful S&P 500 algorithms:
+- Buy positive recommendation changes only when valuation/momentum context is favorable.
+- Penalize highly recommended but expensive/negative-momentum stocks.
+- Short/avoid glamour stocks with deteriorating consensus.
+Main risks:
+- Consensus data revision history must be point-in-time.
+- Analyst coverage is dense for S&P 500, which may reduce edge.
+
+14. Lakonishok and Lee (2001)
+Title: Are Insiders' Trades Informative?
+Source: https://econpapers.repec.org/paper/nbrnberwo/6656.htm
+Core idea:
+Insiders tend to be contrarian and insider purchases are more informative than insider sales.
+The predictive power is stronger in smaller firms, but insider buying can still be useful as
+a confirmation signal in large caps.
+Implementation translation:
+- Features: net_insider_buying, insider_purchase_cluster, insider_role, dollar_value_purchased.
+- Treat purchases as more informative than sales.
+Useful S&P 500 algorithms:
+- Insider-confirmed value: buy cheap stocks with clustered insider purchases.
+- Avoid stocks with repeated insider selling plus negative fundamentals.
+- Use insider buying as a filter, not a standalone daily signal.
+Main risks:
+- Planned sales and compensation-related transactions are noisy.
+- SEC filing delays and amendments matter.
+- S&P 500 insider signal may be weaker than small-cap signal.
+
+15. Boehmer, Jones, and Zhang (2008)
+Title: Which Shorts Are Informed?
+Source: https://business.columbia.edu/faculty/research/which-shorts-are-informed
+Core idea:
+Short sellers are informative as a group; heavily shorted stocks underperform lightly shorted
+stocks over following weeks. Institutional non-program short sales are especially informative.
+Implementation translation:
+- Features: short_sale_volume_ratio, short_interest_ratio, institutional_short_proxy.
+- High informed shorting is negative.
+Useful S&P 500 algorithms:
+- Avoid high short-interest stocks unless offset by strong fundamentals and momentum.
+- Short high shorting + negative earnings revision stocks.
+- Use shorting pressure as a risk overlay on long portfolios.
+Main risks:
+- Proprietary NYSE short-sale data may not be available.
+- Public short interest is delayed.
+- High short interest can create squeeze risk.
+
+16. Diether, Lee, and Werner (2009)
+Title: Short-Sale Strategies and Return Predictability
+Source: https://ideas.repec.org/a/oup/rfinst/v22y2009i2p575-607.html
+Core idea:
+Short sellers increase activity after positive returns and predict future negative abnormal
+returns. Their behavior is consistent with trading against short-term overreaction.
+Implementation translation:
+- Feature: abnormal_short_sale_activity after positive stock move.
+- Use as a fast negative signal when data is timely.
+Useful S&P 500 algorithms:
+- Short/avoid stocks with abnormal shorting after price spikes.
+- Combine short-sale activity with weekly reversal.
+- Use short-sale data to improve sell timing for long-only strategies.
+Main risks:
+- Data availability and latency.
+- Borrow costs and short squeeze risk.
+- Daily signals can be very cost-sensitive.
+
+17. Pan and Poteshman (2006)
+Title: The Information in Option Volume for Future Stock Prices
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1096000
+Core idea:
+Option trading volume contains information about future stock prices. Buyer-initiated put-call
+ratios predict next-day and next-week stock returns, suggesting informed trading in options.
+Implementation translation:
+- Feature: option_put_call_opening_buy_ratio, or public proxy using put/call volume and open interest.
+- Low put-call ratio is bullish; high put-call ratio is bearish.
+Useful S&P 500 algorithms:
+- Options-flow confirmation for earnings/momentum trades.
+- Short-term bullish/bearish signal from abnormal call vs put buying.
+- Avoid longs when option flow turns strongly bearish.
+Main risks:
+- True buyer-initiated opening volume is hard to obtain.
+- Public option volume proxies are noisy.
+- Signal horizon is short and cost-sensitive.
+
+18. Cremers and Weinbaum (2010)
+Title: Deviations from Put-Call Parity and Stock Returns
+Source: https://chesler.us/resources/academia/Deviations%20from%20Put-Call%20Parity%20and%20Stock%20Returns.pdf
+Core idea:
+Deviations from put-call parity, often expressed through implied-volatility spreads between
+calls and puts, contain information about future stock returns.
+Implementation translation:
+- Feature: call_put_iv_spread = ATM_call_IV - ATM_put_IV, maturity-matched.
+- Positive spread can indicate bullish informed demand; negative spread can indicate bearish pressure.
+Useful S&P 500 algorithms:
+- Options-implied return signal for optionable S&P 500 names.
+- Combine with Pan-Poteshman option-volume signal.
+- Use put-call parity deviations as an event-confirmation filter.
+Main risks:
+- Requires clean option surfaces and dividend/borrow/rate assumptions.
+- Mispricing can reflect frictions, not alpha.
+- Must avoid stale or illiquid option contracts.
+
+19. Baker and Wurgler (2006)
+Title: Investor Sentiment and the Cross-Section of Stock Returns
+Source: https://ideas.repec.org/p/nbr/nberwo/10449.html
+Core idea:
+Broad investor sentiment affects stocks that are hard to value or hard to arbitrage more strongly.
+When sentiment is high, speculative/volatile/unprofitable/no-dividend/growth stocks tend to have
+lower subsequent returns; when sentiment is low, these stocks can rebound.
+Implementation translation:
+- Features: sentiment_regime, sentiment_sensitive_score, speculative_growth_score.
+- Use sentiment as a regime filter, not a standalone stock rank.
+Useful S&P 500 algorithms:
+- Reduce exposure to speculative growth during high-sentiment regimes.
+- Increase contrarian exposure after sentiment collapses and trend stabilizes.
+- Sentiment-aware short book: expensive, unprofitable, high-volatility names in high sentiment.
+Main risks:
+- Sentiment indices can be delayed and revised.
+- Timing sentiment reversals is hard.
+- High sentiment can persist for years.
+
+20. Da, Engelberg, and Gao (2011)
+Title: In Search of Attention
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1364209
+Core idea:
+Google Search Volume Index provides a direct measure of investor attention. Search activity
+is linked to retail investor behavior and can help explain IPO returns and momentum behavior.
+Implementation translation:
+- Feature: abnormal_search_volume = current ticker/company search volume relative to trailing baseline.
+- Combine with volume, news, and retail-trading proxies.
+Useful S&P 500 algorithms:
+- Attention-confirmed momentum: momentum works better when attention supports it.
+- Fade high-attention spikes when fundamentals/options/insider signals disagree.
+- Avoid buying high-attention stocks after extreme retail-driven price jumps.
+Main risks:
+- Ticker search data can be ambiguous.
+- Google Trends data is sampled/scaled and can be hard to reproduce.
+- Attention is not always bearish; context matters.
+
+Optional future extension: Aboody, Even-Tov, Lehavy, and Trueman (2018)
+Title: Overnight Returns and Firm-Specific Investor Sentiment
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2554010
+Core idea:
+Overnight returns can serve as a proxy for firm-specific investor sentiment. High overnight
+returns show short-term persistence but longer-term underperformance, especially for harder-to-value firms.
+Implementation translation:
+- Feature: overnight_return = open_t / close_t_minus_1 - 1.
+- Separate close-to-open and open-to-close returns.
+- Use rolling average overnight return as sentiment proxy.
+Useful S&P 500 algorithms:
+- Fade persistent high overnight sentiment after confirmation of overpricing.
+- Use overnight/intraday decomposition to distinguish retail sentiment from institutional trading.
+- Avoid buying stocks whose momentum is entirely overnight-driven and unsupported by fundamentals.
+Main risks:
+- Requires reliable open prices and corporate action handling.
+- Open auction liquidity/price quality matters.
+- Overnight return can reflect real news, not only sentiment.
+
+NOTE ON COUNT:
+The core requested set is exactly 20 papers. The overnight-return idea above is included only as
+an optional future extension because it is practical for S&P 500 open/close data, but it is not
+counted as part of the 20-paper set.
+
+================================================================================
+NEW STRATEGY PRIMITIVES FROM SET 2
+================================================================================
+
+Industry and residual-return primitives:
+- point-in-time sector/industry classification
+- industry return over 1, 3, 6, and 12 months
+- stock residual returns after market/sector/factor regression
+- residual cumulative momentum
+- industry-adjusted stock momentum
+
+Reversal and calendar primitives:
+- prior 5-day return
+- prior 21-day return
+- abnormal return relative to sector
+- same-calendar-month historical return
+- return decomposition: overnight vs intraday
+
+Corporate-action primitives:
+- net share issuance
+- split-adjusted shares outstanding growth
+- buyback authorization date and size
+- actual share count reduction
+- SEO/IPO/recent issuance flags
+- asset growth
+
+Information-event primitives:
+- earnings surprise
+- earnings momentum
+- analyst recommendation level
+- analyst recommendation change
+- consensus recommendation change
+- insider purchase/sale cluster
+- insider purchase dollar value
+- abnormal short-sale activity
+- short interest as percent of float
+
+Options and attention primitives:
+- option put/call volume ratio
+- abnormal call volume
+- abnormal put volume
+- call-put implied-volatility spread
+- put-call parity deviation
+- abnormal Google search volume
+- abnormal news volume
+- overnight sentiment score
+- broad sentiment regime
+
+Portfolio construction primitives:
+- industry-neutral long/short
+- event-horizon portfolios
+- signal decay curves by event type
+- avoid/underweight version of every short signal
+- stale-signal expiration rules
+- cost-aware turnover throttles
+
+================================================================================
+10 ADDITIONAL ALGORITHM DEVELOPMENT BATCHES
+================================================================================
+
+BATCH 1: Industry Momentum and Sector Rotation
+Source papers:
+- Moskowitz and Grinblatt (1999)
+Objective:
+Build industry-level momentum as a separate signal and as an overlay for stock momentum.
+Algorithms:
+1. Industry top-minus-bottom momentum: long top industries, short bottom industries.
+2. Long-only sector rotation: allocate to top 3-5 S&P 500 industries or sectors.
+3. Industry-confirmed stock momentum: buy stock momentum only when industry momentum is positive.
+4. Industry-relative momentum: rank stocks by return relative to their industry.
+Data needed:
+- point-in-time GICS/industry mapping
+- daily/monthly returns
+- sector/industry ETFs for benchmarks
+Validation:
+- Compare to SPY, equal-sector S&P 500, and classic stock momentum.
+- Watch sector concentration and turnover during rotations.
+
+BATCH 2: Residual Momentum and Clean Momentum
+Source papers:
+- Blitz, Huij, and Martens (2011)
+- Daniel and Titman (2006)
+Objective:
+Separate stock-specific momentum from market/sector/factor exposures.
+Algorithms:
+1. Residual momentum after SPY + sector ETF regression.
+2. Residual momentum after Fama-French-style factor proxy regression.
+3. Residual momentum with value/quality exclusions.
+4. Intangible-return reversal: fade large non-fundamental price moves.
+Data needed:
+- stock returns
+- SPY returns
+- sector ETF returns
+- optional factor returns or local factor proxies
+Validation:
+- Report alpha after market/sector/factor exposure.
+- Compare residual momentum vs total momentum.
+
+BATCH 3: Short-Term Reversal and Liquidity Pressure
+Source papers:
+- Jegadeesh (1990)
+- Lehmann (1990)
+Objective:
+Exploit short-horizon reversal without letting costs eat the edge.
+Algorithms:
+1. Weekly reversal: long prior-week losers, short prior-week winners.
+2. Monthly reversal: long prior-month losers, short prior-month winners.
+3. Reversal after abnormal volume, sector-neutral.
+4. Reversal with no-trade bands and ADV/slippage filters.
+Data needed:
+- daily returns
+- volume/ADV
+- spreads or spread proxy
+- borrow/cost assumptions
+Validation:
+- Run pre-cost and post-cost.
+- Sensitivity test slippage from 1 bps to 20 bps.
+- Require capacity estimate.
+
+BATCH 4: Seasonality and Calendar Memory
+Source papers:
+- Heston and Sadka (2008)
+Objective:
+Test annual same-month return memory as a low-frequency signal.
+Algorithms:
+1. Same-month seasonality rank.
+2. Seasonality-confirmed momentum.
+3. Seasonality as a position-size modifier.
+4. Month-specific avoid list for historically weak stocks.
+Data needed:
+- long monthly return history
+- point-in-time universe membership
+Validation:
+- Walk-forward only.
+- Test across different lookback years: 5, 10, 15, 20.
+- Use false discovery controls because calendar effects are data-mining prone.
+
+BATCH 5: Corporate Issuance, Asset Growth, and Buyback Signals
+Source papers:
+- Cooper, Gulen, and Schill (2008)
+- Pontiff and Woodgate (2008)
+- Loughran and Ritter (1995)
+- Ikenberry, Lakonishok, and Vermaelen (1995)
+Objective:
+Use corporate financing behavior as a slow-moving alpha signal.
+Algorithms:
+1. Conservative-growth portfolio: low asset growth + low net issuance.
+2. Shareholder-yield portfolio: buybacks + dividends + low issuance.
+3. Avoid recent issuers and high asset-growth firms.
+4. Buyback-value drift: value stocks after repurchase announcements.
+Data needed:
+- shares outstanding
+- fundamentals
+- buyback announcements
+- IPO/SEO/recent issuance flags
+Validation:
+- Quarterly/monthly rebalance only.
+- Confirm actual share count reduction, not only authorization.
+- Separate debt-funded buybacks from cash-flow-funded buybacks if possible.
+
+BATCH 6: Earnings Momentum and Analyst Revision Signals
+Source papers:
+- Chan, Jegadeesh, and Lakonishok (1996)
+- Womack (1996)
+- Jegadeesh, Kim, Krische, and Lee (2004)
+Objective:
+Build event and revision signals from earnings news and analyst behavior.
+Algorithms:
+1. Earnings momentum: buy high earnings surprise and positive revision names.
+2. Analyst upgrade/downgrade drift.
+3. Consensus recommendation change, not level.
+4. Analyst signal only when supported by value/momentum context.
+Data needed:
+- earnings announcement dates and surprises
+- analyst recommendations
+- consensus revisions
+- price returns
+Validation:
+- Event-time backtest: 1, 5, 20, 60 trading-day horizons.
+- Use public release timestamp plus execution delay.
+- Compare large-cap vs mid-cap S&P 500 constituents.
+
+BATCH 7: Insider and Short-Seller Information
+Source papers:
+- Lakonishok and Lee (2001)
+- Boehmer, Jones, and Zhang (2008)
+- Diether, Lee, and Werner (2009)
+Objective:
+Use informed-trader footprints as confirmation and risk-control signals.
+Algorithms:
+1. Insider-confirmed value: cheap stocks with clustered insider buying.
+2. Short-pressure avoid list: avoid high short-interest/high short-sale-activity names.
+3. Spike-and-short reversal: short-sale activity after positive price spikes.
+4. Disagreement model: insider buying vs high short interest conflict monitor.
+Data needed:
+- Form 4 insider transactions
+- short interest and/or short-sale activity
+- borrow costs if shorting
+- price/volume
+Validation:
+- Use filing dates, not transaction dates, unless trading timestamp is known.
+- Run avoid/underweight implementation for long-only feasibility.
+- Track short squeeze losses and borrow assumptions.
+
+BATCH 8: Options-Informed Equity Signals
+Source papers:
+- Pan and Poteshman (2006)
+- Cremers and Weinbaum (2010)
+Objective:
+Use options market information to improve short-term stock selection and risk filters.
+Algorithms:
+1. Put-call volume signal: bullish when call-buying dominates put-buying.
+2. Put-call parity deviation signal.
+3. Options-confirmed earnings drift.
+4. Bearish options warning overlay for long portfolio.
+Data needed:
+- option volume by contract
+- implied volatilities
+- strikes, maturities, rates, dividends
+- stock returns and event dates
+Validation:
+- Start with liquid optionable S&P 500 names only.
+- Exclude stale/illiquid contracts.
+- Test next-day, next-week, and next-month horizons separately.
+
+BATCH 9: Attention, Sentiment, and Overnight Behavior
+Source papers:
+- Baker and Wurgler (2006)
+- Da, Engelberg, and Gao (2011)
+- Optional future extension: Aboody, Even-Tov, Lehavy, and Trueman (2018)
+Objective:
+Use attention and sentiment as regime filters and overpricing detectors.
+Algorithms:
+1. High-sentiment speculative-stock underweight.
+2. Abnormal search-volume attention overlay.
+3. Fade high-attention spikes when unsupported by fundamentals/options.
+4. Overnight sentiment reversal: fade persistent high overnight sentiment in hard-to-value names.
+Data needed:
+- sentiment index or proxy
+- Google Trends/search proxy
+- news volume
+- open/close prices
+- firm difficulty-to-value proxies
+Validation:
+- Separate high-sentiment and low-sentiment regimes.
+- Test whether attention confirms momentum or predicts reversal.
+- Beware ticker ambiguity in search data.
+
+BATCH 10: Set 2 Ensemble and Signal Conflict Engine
+Source papers:
+- All Set 2 papers
+Objective:
+Combine specialized signals into a transparent ensemble with conflict handling.
+Algorithms:
+1. Signal family scores: industry, residual momentum, reversal, corporate action, analyst, insider/short, options, attention.
+2. Conflict-aware ranking: downgrade names where informed sellers oppose price momentum.
+3. Event horizon allocator: use different holding periods by signal type.
+4. Long-only avoid engine: improve a baseline long portfolio by removing red-flag stocks.
+Data needed:
+- all feature families, but allow missing modules
+- standardized daily/monthly feature store
+Validation:
+- Compare ensemble to each sleeve and to equal-weighted sleeve blend.
+- Use walk-forward weights or fixed equal weights first.
+- Track contribution by sleeve, turnover, and drawdown.
+
+================================================================================
+SUGGESTED DATA TABLES FOR SET 2
+================================================================================
+
+features_industry.parquet:
+- date
+- symbol/vendor_id
+- sector
+- industry
+- industry_return_1m
+- industry_return_3m
+- industry_return_6m
+- industry_rank
+
+features_residual_momentum.parquet:
+- date
+- symbol/vendor_id
+- regression_window
+- beta_spy
+- beta_sector
+- residual_return_12_1
+- residual_vol
+- residual_momentum_rank
+
+features_reversal_seasonality.parquet:
+- date
+- symbol/vendor_id
+- return_5d
+- return_21d
+- weekly_reversal_rank
+- monthly_reversal_rank
+- same_month_history
+- overnight_return_rolling
+- intraday_return_rolling
+
+features_corporate_actions.parquet:
+- date
+- symbol/vendor_id
+- asset_growth
+- net_share_issuance
+- buyback_announcement_flag
+- buyback_authorization_pct_market_cap
+- actual_share_count_change
+- recent_equity_issue_flag
+
+features_analyst_events.parquet:
+- date
+- symbol/vendor_id
+- earnings_surprise
+- analyst_revision_1m
+- recommendation_level
+- recommendation_change
+- upgrade_flag
+- downgrade_flag
+
+features_informed_traders.parquet:
+- date
+- symbol/vendor_id
+- insider_buy_value
+- insider_sell_value
+- insider_cluster_buy_flag
+- short_interest_pct_float
+- abnormal_short_sale_activity
+- borrow_cost_estimate
+
+features_options_attention.parquet:
+- date
+- symbol/vendor_id
+- put_call_volume_ratio
+- abnormal_call_volume
+- abnormal_put_volume
+- call_put_iv_spread
+- put_call_parity_deviation
+- abnormal_search_volume
+- abnormal_news_volume
+- sentiment_regime
+
+================================================================================
+RESULT JSON EXTENSIONS FOR SET 2
+================================================================================
+
+Add these fields to each run summary:
+
+{
+  "paper_set": "set2",
+  "source_papers": ["string"],
+  "signal_family": "industry|residual_momentum|reversal|corporate_action|analyst|insider_short|options|attention|ensemble",
+  "event_delay_days": 1,
+  "holding_period_days": 20,
+  "data_latency_assumption": "next-trading-day-after-public-release",
+  "shorting_required": false,
+  "borrow_cost_bps_annual": 0,
+  "options_data_required": false,
+  "analyst_data_required": false,
+  "insider_data_required": false,
+  "attention_data_required": false,
+  "pre_cost_sharpe": 0.0,
+  "post_cost_sharpe": 0.0,
+  "slippage_sensitivity": {
+    "1_bps": 0.0,
+    "5_bps": 0.0,
+    "10_bps": 0.0,
+    "20_bps": 0.0
+  }
+}
+
+================================================================================
+BEST IMPLEMENTATION ORDER
+================================================================================
+
+1. Batch 1: Industry momentum
+   Reason: only needs prices and sector/industry mapping.
+
+2. Batch 2: Residual momentum
+   Reason: builds on existing momentum infrastructure and improves risk attribution.
+
+3. Batch 3: Short-term reversal
+   Reason: easy to test, but validates cost/slippage engine.
+
+4. Batch 5: Corporate issuance/buyback/asset growth
+   Reason: slow-moving and implementable if fundamentals/share-count data exists.
+
+5. Batch 6: Earnings and analyst revision signals
+   Reason: useful event layer once timestamps are clean.
+
+6. Batch 7: Insider and short-seller signals
+   Reason: powerful confirmation/risk overlay, but data quality varies.
+
+7. Batch 8: Options-informed signals
+   Reason: potentially valuable but data- and cleaning-heavy.
+
+8. Batch 9: Attention/sentiment/overnight behavior
+   Reason: use as overlay after baseline signals exist.
+
+9. Batch 4: Seasonality
+   Reason: interesting, but high data-mining risk; do after robust validation framework exists.
+
+10. Batch 10: Ensemble/conflict engine
+   Reason: only after individual signal families have honest metrics.
+
+================================================================================
+PAPER SOURCE LIST
+================================================================================
+
+1. Moskowitz and Grinblatt (1999), Do Industries Explain Momentum?
+   https://ideas.repec.org/a/bla/jfinan/v54y1999i4p1249-1290.html
+
+2. Blitz, Huij, and Martens (2011), Residual Momentum
+   https://repub.eur.nl/pub/22252
+
+3. Jegadeesh (1990), Evidence of Predictable Behavior of Security Returns
+   https://ideas.repec.org/a/bla/jfinan/v45y1990i3p881-98.html
+
+4. Lehmann (1990), Fads, Martingales, and Market Efficiency
+   https://www.nber.org/papers/w2533
+
+5. Heston and Sadka (2008), Seasonality in the Cross-Section of Stock Returns
+   https://www.sciencedirect.com/science/article/pii/S0304405X0700195X
+
+6. Cooper, Gulen, and Schill (2008), Asset Growth and the Cross-Section of Stock Returns
+   https://ideas.repec.org/a/bla/jfinan/v63y2008i4p1609-1651.html
+
+7. Pontiff and Woodgate (2008), Share Issuance and Cross-Sectional Returns
+   https://paperzz.com/doc/9459249/share-issuance-and-cross-sectional-returns
+
+8. Loughran and Ritter (1995), The New Issues Puzzle
+   https://ideas.repec.org/a/bla/jfinan/v50y1995i1p23-51.html
+
+9. Ikenberry, Lakonishok, and Vermaelen (1995), Market Underreaction to Open Market Share Repurchases
+   https://econpapers.repec.org/paper/nbrnberwo/4965.htm
+
+10. Daniel and Titman, Market Reactions to Tangible and Intangible Information
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=414701
+
+11. Chan, Jegadeesh, and Lakonishok (1996), Momentum Strategies
+    https://www.nber.org/papers/w5375
+
+12. Womack (1996), Do Brokerage Analysts' Recommendations Have Investment Value?
+    https://ideas.repec.org/a/bla/jfinan/v51y1996i1p137-67.html
+
+13. Jegadeesh, Kim, Krische, and Lee (2004), Analyzing the Analysts
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=291241
+
+14. Lakonishok and Lee (2001), Are Insiders' Trades Informative?
+    https://econpapers.repec.org/paper/nbrnberwo/6656.htm
+
+15. Boehmer, Jones, and Zhang (2008), Which Shorts Are Informed?
+    https://business.columbia.edu/faculty/research/which-shorts-are-informed
+
+16. Diether, Lee, and Werner (2009), Short-Sale Strategies and Return Predictability
+    https://ideas.repec.org/a/oup/rfinst/v22y2009i2p575-607.html
+
+17. Pan and Poteshman (2006), The Information in Option Volume for Future Stock Prices
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1096000
+
+18. Cremers and Weinbaum (2010), Deviations from Put-Call Parity and Stock Returns
+    https://chesler.us/resources/academia/Deviations%20from%20Put-Call%20Parity%20and%20Stock%20Returns.pdf
+
+19. Baker and Wurgler (2006), Investor Sentiment and the Cross-Section of Stock Returns
+    https://ideas.repec.org/p/nbr/nberwo/10449.html
+
+20. Da, Engelberg, and Gao (2011), In Search of Attention
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1364209
+
+Optional future extension, not counted in the 20-paper set:
+Aboody, Even-Tov, Lehavy, and Trueman, Overnight Returns and Firm-Specific Investor Sentiment
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2554010
+
+================================================================================
+FIRST TASK TO GIVE CLAUDE CODE
+================================================================================
+
+"Implement Set 2 Batch 1 only. Add a feature module for point-in-time industry returns,
+including 1m, 3m, and 6m industry momentum. Create a long-only sector/industry rotation
+strategy and a stock-level industry-confirmed momentum strategy. Run on a smoke dataset first.
+Write results/latest_summary.json and include sector concentration, turnover, SPY beta,
+and comparison to classic stock momentum."
+
+================================================================================
+WHAT NOT TO DO FIRST
+================================================================================
+
+- Do not start with options signals unless you already have clean options data.
+- Do not start with analyst/insider/short data unless timestamps and historical revisions are solved.
+- Do not combine all 20 papers into one ML model immediately.
+- Do not optimize thresholds before baseline versions are correct.
+- Do not trust pre-cost short-term reversal results.
+- Do not use today's S&P 500 members as the historical universe.
+
+================================================================================
+HIGHEST-ROI SET 2 IDEAS
+================================================================================
+
+1. Industry-confirmed momentum
+   Low data complexity, good complement to classic momentum.
+
+2. Residual momentum
+   Strong upgrade to basic momentum if implemented carefully.
+
+3. Net share issuance / shareholder yield
+   Slow-moving, low-turnover, useful for S&P 500.
+
+4. Analyst recommendation changes
+   Useful if you have point-in-time analyst data.
+
+5. Short-interest avoid overlay
+   Useful even in long-only portfolios.
+
+6. Options-flow confirmation
+   Potentially valuable but only after options data quality is solved.
+
+7. Attention/overnight overpricing filter
+   Useful as a risk overlay for hype-driven names.

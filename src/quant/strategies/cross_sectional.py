@@ -5823,3 +5823,873 @@ class TailFilteredMomentum(CrossSectionalStrategy):
             mom, filtered_membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H256: OhlsonOScoreDistress
+# ---------------------------------------------------------------------------
+
+
+class OhlsonOScoreDistress(CrossSectionalStrategy):
+    """H256: Proxy Ohlson O-score from quarterly fundamentals; long bottom-quintile (low distress)."""
+
+    name = "ohlson_oscore_distress"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        liab = (ta - be).clip(lower=0)
+        leverage = liab / ta.where(ta > 0)
+        wc_ratio = (ca - cl) / ta.where(ta > 0)
+        curr_ratio = ca / cl.where(cl > 0)
+        roa = ni / ta.where(ta > 0)
+        cfo_lev = ocf / liab.where(liab > 0)
+
+        # High score = high distress; rank ascending (low distress = best)
+        score = (
+            _cs_zscore(leverage)
+            + _cs_zscore(-wc_ratio)
+            + _cs_zscore(-curr_ratio)
+            + _cs_zscore(-roa)
+            + _cs_zscore(-cfo_lev)
+        )
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H257: CHSMarketDistress
+# ---------------------------------------------------------------------------
+
+
+class CHSMarketDistress(CrossSectionalStrategy):
+    """H257: CHS-style distress composite (market + accounting); long bottom-quintile."""
+
+    name = "chs_market_distress"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        vol_window: int = 252,
+        mom_window: int = 63,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.mom_window = mom_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shs = _align_fund(self.shares_outstanding, prices_panel)
+
+        liab = (ta - be).clip(lower=0)
+        leverage = liab / ta.where(ta > 0)
+        roa = ni / ta.where(ta > 0)
+        cash_ratio = ocf / ta.where(ta > 0)
+
+        mcap = (prices_panel * shs).where(shs > 0)
+        log_size = np.log(mcap.where(mcap > 0))
+
+        daily_rets = prices_panel.pct_change()
+        momentum = prices_panel / prices_panel.shift(self.mom_window) - 1
+        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
+
+        # High score = high distress; rank ascending
+        score = (
+            _cs_zscore(leverage)
+            + _cs_zscore(-roa)
+            + _cs_zscore(-momentum)
+            + _cs_zscore(vol12m)
+            + _cs_zscore(-cash_ratio)
+            + _cs_zscore(-log_size)
+        )
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H258: DistressTrendFactor
+# ---------------------------------------------------------------------------
+
+
+class DistressTrendFactor(CrossSectionalStrategy):
+    """H258: QoQ change in O-score proxy; long improving (falling) distress."""
+
+    name = "distress_trend_factor"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        lag: int = 63,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.lag = lag
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        liab = (ta - be).clip(lower=0)
+        score = (
+            _cs_zscore(liab / ta.where(ta > 0))
+            + _cs_zscore(-(ca - cl) / ta.where(ta > 0))
+            + _cs_zscore(-ca / cl.where(cl > 0))
+            + _cs_zscore(-ni / ta.where(ta > 0))
+            + _cs_zscore(-ocf / liab.where(liab > 0))
+        )
+
+        # Falling score = improving distress = best; rank ascending on delta
+        delta_score = score - score.shift(self.lag)
+        daily_w = _sector_neutral_weights(
+            delta_score, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H259: DistressFilteredValue
+# ---------------------------------------------------------------------------
+
+
+class DistressFilteredValue(CrossSectionalStrategy):
+    """H259: Book-to-market value intersected with low CHS distress filter."""
+
+    name = "distress_filtered_value"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        value_quantile: float = 0.20,
+        distress_pct: float = 0.50,
+        vol_window: int = 252,
+        mom_window: int = 63,
+    ):
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.value_quantile = value_quantile
+        self.distress_pct = distress_pct
+        self.vol_window = vol_window
+        self.mom_window = mom_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shs = _align_fund(self.shares_outstanding, prices_panel)
+
+        # Book-to-market (high = cheap)
+        mcap = (prices_panel * shs).where(shs > 0)
+        btm = be / mcap.where(mcap > 0)
+
+        # CHS distress score
+        liab = (ta - be).clip(lower=0)
+        leverage = liab / ta.where(ta > 0)
+        roa = ni / ta.where(ta > 0)
+        cash_ratio = ocf / ta.where(ta > 0)
+        log_size = np.log(mcap.where(mcap > 0))
+        daily_rets = prices_panel.pct_change()
+        momentum = prices_panel / prices_panel.shift(self.mom_window) - 1
+        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
+
+        distress = (
+            _cs_zscore(leverage)
+            + _cs_zscore(-roa)
+            + _cs_zscore(-momentum)
+            + _cs_zscore(vol12m)
+            + _cs_zscore(-cash_ratio)
+            + _cs_zscore(-log_size)
+        )
+
+        # Filter: top-quintile BTM (cheap) AND bottom-half distress
+        mem = membership.reindex_like(btm).fillna(False)
+        btm_rank = btm.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        distress_rank = distress.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+
+        filtered_mem = (
+            membership
+            & (btm_rank >= (1.0 - self.value_quantile)).fillna(False)
+            & (distress_rank <= self.distress_pct).fillna(False)
+        )
+
+        # Equal-weight surviving names
+        n_valid = filtered_mem.sum(axis=1).replace(0, np.nan)
+        daily_w = filtered_mem.div(n_valid, axis=0).fillna(0.0)
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H260: LowDistressQualityMomentum
+# ---------------------------------------------------------------------------
+
+
+class LowDistressQualityMomentum(CrossSectionalStrategy):
+    """H260: Three-way screen: top-third GP/TA + top-half momentum + bottom-half CHS distress."""
+
+    name = "low_distress_quality_momentum"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        quality_pct: float = 0.33,
+        momentum_pct: float = 0.50,
+        distress_pct: float = 0.50,
+        momentum_window: int = 252,
+        momentum_skip: int = 21,
+        vol_window: int = 252,
+        mom3_window: int = 63,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.quality_pct = quality_pct
+        self.momentum_pct = momentum_pct
+        self.distress_pct = distress_pct
+        self.momentum_window = momentum_window
+        self.momentum_skip = momentum_skip
+        self.vol_window = vol_window
+        self.mom3_window = mom3_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shs = _align_fund(self.shares_outstanding, prices_panel)
+
+        # Quality: GP/TA
+        gp_ta = gp / ta.where(ta > 0)
+
+        # Momentum: 12-1 month
+        mom = prices_panel.shift(self.momentum_skip) / prices_panel.shift(self.momentum_window) - 1
+
+        # CHS distress
+        liab = (ta - be).clip(lower=0)
+        mcap = (prices_panel * shs).where(shs > 0)
+        leverage = liab / ta.where(ta > 0)
+        roa = ni / ta.where(ta > 0)
+        cash_ratio = ocf / ta.where(ta > 0)
+        log_size = np.log(mcap.where(mcap > 0))
+        daily_rets = prices_panel.pct_change()
+        mom3 = prices_panel / prices_panel.shift(self.mom3_window) - 1
+        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
+
+        distress = (
+            _cs_zscore(leverage)
+            + _cs_zscore(-roa)
+            + _cs_zscore(-mom3)
+            + _cs_zscore(vol12m)
+            + _cs_zscore(-cash_ratio)
+            + _cs_zscore(-log_size)
+        )
+
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        q_rank = gp_ta.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        m_rank = mom.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        d_rank = distress.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+
+        filtered_mem = (
+            membership
+            & (q_rank >= (1.0 - self.quality_pct)).fillna(False)
+            & (m_rank >= (1.0 - self.momentum_pct)).fillna(False)
+            & (d_rank <= self.distress_pct).fillna(False)
+        )
+
+        n_valid = filtered_mem.sum(axis=1).replace(0, np.nan)
+        daily_w = filtered_mem.div(n_valid, axis=0).fillna(0.0)
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H261: LowNetOperatingAssets
+# ---------------------------------------------------------------------------
+
+
+class LowNetOperatingAssets(CrossSectionalStrategy):
+    """H261: NOA proxy = (total_assets - current_liabilities) / total_assets; long bottom-quintile."""
+
+    name = "low_net_operating_assets"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+
+        noa = (ta - cl) / ta.where(ta > 0)
+        daily_w = _sector_neutral_weights(
+            noa, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H262: AccrualReliabilityFactor
+# ---------------------------------------------------------------------------
+
+
+class AccrualReliabilityFactor(CrossSectionalStrategy):
+    """H262: Total accruals = (net_income - operating_cf) / avg_total_assets; long low-accrual quintile."""
+
+    name = "accrual_reliability_factor"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        avg_ta = (ta + ta.shift(self.window)) / 2
+        accruals = (ni - ocf) / avg_ta.where(avg_ta > 0)
+
+        daily_w = _sector_neutral_weights(
+            accruals, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H263: ConservativeCapexInvestment
+# ---------------------------------------------------------------------------
+
+
+class ConservativeCapexInvestment(CrossSectionalStrategy):
+    """H263: YoY change in long-term assets / total_assets as capex proxy; long bottom-quintile."""
+
+    name = "conservative_capex_investment"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+
+        lt_assets = (ta - ca).clip(lower=0)
+        delta_lt = (lt_assets - lt_assets.shift(self.window)) / ta.where(ta > 0)
+
+        daily_w = _sector_neutral_weights(
+            delta_lt, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H264: SustainableEarningsComposite
+# ---------------------------------------------------------------------------
+
+
+class SustainableEarningsComposite(CrossSectionalStrategy):
+    """H264: 3-factor composite: z(-NOA) + z(-accruals) + z(CFO/NI); long top-quintile."""
+
+    name = "sustainable_earnings_composite"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        noa = (ta - cl) / ta.where(ta > 0)
+        avg_ta = (ta + ta.shift(self.window)) / 2
+        accruals = (ni - ocf) / avg_ta.where(avg_ta > 0)
+        # Cash purity: OCF / NI; winsorize to [-5, 5] to handle near-zero NI
+        cfo_ni = (ocf / ni.where(ni.abs() > 1e-6)).clip(-5.0, 5.0)
+
+        score = _cs_zscore(-noa) + _cs_zscore(-accruals) + _cs_zscore(cfo_ni)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H265: SustainabilityFilteredProfitability
+# ---------------------------------------------------------------------------
+
+
+class SustainabilityFilteredProfitability(CrossSectionalStrategy):
+    """H265: GP/TA filtered by sustainability composite; top-half sustainability required."""
+
+    name = "sustainability_filtered_profitability"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        sustainability_pct: float = 0.50,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.sustainability_pct = sustainability_pct
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        gp_ta = gp / ta.where(ta > 0)
+
+        noa = (ta - cl) / ta.where(ta > 0)
+        avg_ta = (ta + ta.shift(self.window)) / 2
+        accruals = (ni - ocf) / avg_ta.where(avg_ta > 0)
+        cfo_ni = (ocf / ni.where(ni.abs() > 1e-6)).clip(-5.0, 5.0)
+        sust_score = _cs_zscore(-noa) + _cs_zscore(-accruals) + _cs_zscore(cfo_ni)
+
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        sust_rank = sust_score.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        filtered_mem = membership & (sust_rank >= (1.0 - self.sustainability_pct)).fillna(False)
+
+        daily_w = _sector_neutral_weights(
+            gp_ta, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H266: GrossMarginIntensityFactor
+# ---------------------------------------------------------------------------
+
+
+class GrossMarginIntensityFactor(CrossSectionalStrategy):
+    """H266: Gross margin (GP/revenue) as intangible intensity proxy; long top-quintile."""
+
+    name = "gross_margin_intensity_factor"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+
+        gm = gp / rev.where(rev > 0)
+        daily_w = _sector_neutral_weights(
+            gm, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H267: GrossMarginMomentum
+# ---------------------------------------------------------------------------
+
+
+class GrossMarginChangeFactor(CrossSectionalStrategy):
+    """H267: YoY change in gross margin; long top-quintile (improving margins)."""
+
+    name = "gross_margin_change_factor"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+
+        gm = gp / rev.where(rev > 0)
+        delta_gm = gm - gm.shift(self.window)
+
+        daily_w = _sector_neutral_weights(
+            delta_gm, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H268: KnowledgeReturnProxy
+# ---------------------------------------------------------------------------
+
+
+class KnowledgeReturnProxy(CrossSectionalStrategy):
+    """H268: GP/total_assets as intangible ROA proxy; top-decile concentration."""
+
+    name = "knowledge_return_proxy"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.10,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        gp_ta = gp / ta.where(ta > 0)
+        daily_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H269: IntangibleValueScreen
+# ---------------------------------------------------------------------------
+
+
+class IntangibleValueScreen(CrossSectionalStrategy):
+    """H269: High gross margin + cheap B/M + low distress three-way screen."""
+
+    name = "intangible_value_screen"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        gm_pct: float = 0.33,
+        btm_pct: float = 0.50,
+        distress_pct: float = 0.50,
+        vol_window: int = 252,
+        mom_window: int = 63,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.gm_pct = gm_pct
+        self.btm_pct = btm_pct
+        self.distress_pct = distress_pct
+        self.vol_window = vol_window
+        self.mom_window = mom_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shs = _align_fund(self.shares_outstanding, prices_panel)
+
+        gm = gp / rev.where(rev > 0)
+        mcap = (prices_panel * shs).where(shs > 0)
+        btm = be / mcap.where(mcap > 0)
+
+        liab = (ta - be).clip(lower=0)
+        leverage = liab / ta.where(ta > 0)
+        roa = ni / ta.where(ta > 0)
+        cash_ratio = ocf / ta.where(ta > 0)
+        log_size = np.log(mcap.where(mcap > 0))
+        daily_rets = prices_panel.pct_change()
+        mom3 = prices_panel / prices_panel.shift(self.mom_window) - 1
+        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
+
+        distress = (
+            _cs_zscore(leverage)
+            + _cs_zscore(-roa)
+            + _cs_zscore(-mom3)
+            + _cs_zscore(vol12m)
+            + _cs_zscore(-cash_ratio)
+            + _cs_zscore(-log_size)
+        )
+
+        mem = membership.reindex_like(gm).fillna(False)
+        gm_rank = gm.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        btm_rank = btm.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        dist_rank = distress.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+
+        filtered_mem = (
+            membership
+            & (gm_rank >= (1.0 - self.gm_pct)).fillna(False)
+            & (btm_rank >= (1.0 - self.btm_pct)).fillna(False)
+            & (dist_rank <= self.distress_pct).fillna(False)
+        )
+
+        n_valid = filtered_mem.sum(axis=1).replace(0, np.nan)
+        daily_w = filtered_mem.div(n_valid, axis=0).fillna(0.0)
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H270: IntangibleQualityComposite
+# ---------------------------------------------------------------------------
+
+
+class IntangibleQualityComposite(CrossSectionalStrategy):
+    """H270: Composite of gross margin level + YoY change + CFO/NI cash quality."""
+
+    name = "intangible_quality_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        gm = gp / rev.where(rev > 0)
+        delta_gm = gm - gm.shift(self.window)
+        cfo_ni = (ocf / ni.where(ni.abs() > 1e-6)).clip(-5.0, 5.0)
+
+        score = _cs_zscore(gm) + _cs_zscore(delta_gm) + _cs_zscore(cfo_ni)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

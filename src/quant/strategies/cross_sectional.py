@@ -3449,3 +3449,248 @@ class IndustryRelativeStrength(CrossSectionalStrategy):
             rel_return, mem_f, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# Batch 2: Asset Growth & Net Share Issuance (H206-H210)
+# ---------------------------------------------------------------------------
+
+
+class LowAssetGrowth(CrossSectionalStrategy):
+    """H206: Long bottom quintile by 2-year total-asset growth rate.
+
+    Extended Cooper et al. (2008): firms with sustained 2-year asset growth
+    underperform more persistently than 1-year growth (H170/FF5InvestmentFactor).
+    Low sustained asset growth = conservative capital allocation.
+    Sector-neutral bottom 20%, monthly rebalance.
+    """
+
+    name = "low_asset_growth"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        growth_window: int = 504,
+    ):
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.growth_window = growth_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_lag = ta.shift(self.growth_window)
+        asset_growth = (ta - ta_lag) / ta_lag.where(ta_lag > 0)
+        daily_w = _sector_neutral_weights(
+            asset_growth, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ShareholderYield(CrossSectionalStrategy):
+    """H207: Long bottom quintile by 1-year share count change rate.
+
+    Net issuance = (shares_t - shares_{t-252}) / shares_{t-252}.
+    Negative = buyback (share count reduction).
+    Stocks reducing share count signal management confidence in valuation.
+    Sector-neutral bottom 20% (most negative = most buybacks), monthly rebalance.
+    """
+
+    name = "shareholder_yield"
+
+    def __init__(
+        self,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        issuance_window: int = 252,
+    ):
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.issuance_window = issuance_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        sh_lag = sh.shift(self.issuance_window)
+        net_issuance = (sh - sh_lag) / sh_lag.where(sh_lag > 0)
+        # ascending=True: most negative (most buyback) selected in bottom quintile
+        daily_w = _sector_neutral_weights(
+            net_issuance, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ConservativeQuality(CrossSectionalStrategy):
+    """H208: z(-asset_growth) + z(-net_issuance) + z(OCF/TA) composite.
+
+    Three capital discipline dimensions combined via cross-sectional z-scores:
+    - Low asset growth (H206 signal)
+    - Low share issuance / high buyback (H207 signal)
+    - High operating cash flow relative to assets (cash quality signal)
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "conservative_quality"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+    ):
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+
+        ta_lag = ta.shift(self.window)
+        asset_growth = (ta - ta_lag) / ta_lag.where(ta_lag > 0)
+        sh_lag = sh.shift(self.window)
+        net_issuance = (sh - sh_lag) / sh_lag.where(sh_lag > 0)
+        ocf_ta = ocf / ta.where(ta > 0)
+
+        z_ag = _cs_zscore(-asset_growth)
+        z_ni = _cs_zscore(-net_issuance)
+        z_ocf = _cs_zscore(ocf_ta)
+
+        composite = z_ag.add(z_ni, fill_value=0.0).add(z_ocf.fillna(0.0), fill_value=0.0)
+        n_signals = (
+            z_ag.notna().astype(float) + z_ni.notna().astype(float) + z_ocf.notna().astype(float)
+        )
+        composite = composite / n_signals.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class BuybackMomentum(CrossSectionalStrategy):
+    """H209: z(-net_issuance) + z(12-1m price momentum) composite.
+
+    Management confidence (share buyback) + market confirmation (price momentum).
+    Stocks both reducing share count and showing intermediate-term price strength.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "buyback_momentum"
+
+    def __init__(
+        self,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        issuance_window: int = 252,
+        mom_window: int = 252,
+        skip_window: int = 21,
+    ):
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.issuance_window = issuance_window
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        sh_lag = sh.shift(self.issuance_window)
+        net_issuance = (sh - sh_lag) / sh_lag.where(sh_lag > 0)
+
+        z_buyback = _cs_zscore(-net_issuance)
+        z_mom = _cs_zscore(prices_panel.pct_change(self.mom_window).shift(self.skip_window))
+
+        composite = z_buyback.add(z_mom, fill_value=0.0)
+        n = z_buyback.notna().astype(float) + z_mom.notna().astype(float)
+        composite = composite / n.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class CapitalDiscipline(CrossSectionalStrategy):
+    """H210: z(-asset_growth) + z(-net_issuance) + z(-leverage_change) composite.
+
+    Three capital allocation dimensions:
+    - Low asset growth: avoid empire-building
+    - Low share issuance: prefer buybacks
+    - Low leverage increase: avoid debt-financed growth
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "capital_discipline"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+    ):
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.long_term_debt = long_term_debt
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+
+        ta_lag = ta.shift(self.window)
+        asset_growth = (ta - ta_lag) / ta_lag.where(ta_lag > 0)
+        sh_lag = sh.shift(self.window)
+        net_issuance = (sh - sh_lag) / sh_lag.where(sh_lag > 0)
+        leverage = ltd / ta.where(ta > 0)
+        leverage_change = leverage - leverage.shift(self.window)
+
+        z_ag = _cs_zscore(-asset_growth)
+        z_ni = _cs_zscore(-net_issuance)
+        z_lev = _cs_zscore(-leverage_change)
+
+        composite = z_ag.add(z_ni, fill_value=0.0).add(z_lev.fillna(0.0), fill_value=0.0)
+        n = z_ag.notna().astype(float) + z_ni.notna().astype(float) + z_lev.notna().astype(float)
+        composite = composite / n.replace(0, np.nan)
+
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

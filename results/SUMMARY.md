@@ -265,6 +265,16 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | 229 | Operating leverage | value factors (CS) | **kept** | 0.764 | [0.350, 1.178] | 9.00% | −34.79% | −0.016 | GP_growth−rev_growth; 504d window stronger (0.834); MaxDD −34.79% |
 | 230 | Asset turnover | value factors (CS) | **kept** | 0.741 | [0.334, 1.149] | 8.52% | −36.32% | −0.021 | YoY rev/TA improvement; DuPont efficiency component; folds 0-5 zero |
 
+### Batch 7: Composite Quality+Momentum Signals (H231–H235)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| **231** | **Quality momentum** | **composite factors (CS)** | **kept ★** | **0.870** | **[0.460, 1.282]** | 11.24% | **−35.71%** | **−0.014** | **z(GP/TA)+z(12-1m mom); flat across mom windows 126/252/504d; batch star** |
+| 232 | Value quality | composite factors (CS) | **kept** | 0.864 | [0.451, 1.274] | 11.00% | −35.61% | −0.019 | z(BE/price)+z(GP/TA); QMJ-style; top 10% MaxDD -32.40% |
+| 233 | Growth quality | composite factors (CS) | **kept** | 0.803 | [0.386, 1.220] | 9.41% | −34.38% | −0.019 | z(rev_growth)+z(GP/TA); best MaxDD in batch; 504d window 0.815 |
+| 234 | Multi-factor composite | composite factors (CS) | **kept** | 0.857 | [0.442, 1.266] | 10.48% | −35.76% | −0.013 | z(mom)+z(GP/TA)+z(-accruals)+z(-asset_growth); 4-factor composite |
+| 235 | Efficient growth | composite factors (CS) | **kept** | 0.766 | [0.362, 1.170] | 8.79% | −34.51% | −0.022 | z(rev_growth)+z(OCF/TA); cash-backed growth; fold 11 strong 1.284 |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

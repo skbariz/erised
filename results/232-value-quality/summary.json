@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H232",
+  "name": "value-quality",
+  "strategy_class": "ValueQuality",
+  "family": "composite factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8638,
+  "ci_low": 0.4508,
+  "ci_high": 1.2743,
+  "cagr": 0.11,
+  "max_drawdown": -0.3561,
+  "n_trades": 1,
+  "h001_corr": -0.019,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.475,
+    0.824,
+    2.054,
+    0.864,
+    2.183,
+    1.145,
+    1.1
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Value-quality composite: z(book_equity/price) + z(GP/TA). Asness et al. (2019) QMJ-style: cheap AND high-quality companies. No price signal -- pure fundamental composite. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

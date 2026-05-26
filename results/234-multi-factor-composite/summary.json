@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H234",
+  "name": "multi-factor-composite",
+  "strategy_class": "MultiFactorComposite",
+  "family": "composite factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8572,
+  "ci_low": 0.4421,
+  "ci_high": 1.2659,
+  "cagr": 0.1048,
+  "max_drawdown": -0.3576,
+  "n_trades": 1,
+  "h001_corr": -0.0127,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.748,
+    2.251,
+    0.795,
+    2.047,
+    1.2,
+    1.033
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "4-factor equal-weight composite: z(12-1m momentum) + z(GP/TA) + z(-BS_accruals) + z(-asset_growth). Momentum + quality + accruals quality + capital discipline. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_days": 21,
+    "fundamental_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

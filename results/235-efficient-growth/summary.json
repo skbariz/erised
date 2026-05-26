@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H235",
+  "name": "efficient-growth",
+  "strategy_class": "EfficientGrowth",
+  "family": "composite factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7657,
+  "ci_low": 0.3621,
+  "ci_high": 1.1698,
+  "cagr": 0.0879,
+  "max_drawdown": -0.3451,
+  "n_trades": 1,
+  "h001_corr": -0.0223,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.464,
+    2.028,
+    0.789,
+    1.66,
+    0.946,
+    1.284
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Efficient growth: z(YoY revenue growth) + z(OCF/TA). Revenue growth backed by operating cash flow generation. Filters out unprofitable growth: high revenue growth requires high OCF/TA to score well. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "growth_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

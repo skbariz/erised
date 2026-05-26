@@ -4666,3 +4666,222 @@ class AssetTurnover(CrossSectionalStrategy):
             at_change, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Batch 7: H231-H235 -- composite quality+momentum signals
+# ---------------------------------------------------------------------------
+
+
+class QualityMomentum(CrossSectionalStrategy):
+    """H231: z(GP/TA) + z(12-1m momentum) -- Novy-Marx quality + price momentum."""
+
+    name = "quality_momentum"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_days: int = 21,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_days = skip_days
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gp_ta = gp / ta.where(ta > 0)
+        price_ret = prices_panel.pct_change(self.mom_window - self.skip_days).shift(self.skip_days)
+        score = _cs_zscore(gp_ta) + _cs_zscore(price_ret)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class ValueQuality(CrossSectionalStrategy):
+    """H232: z(BE/price) + z(GP/TA) -- value-quality composite (QMJ-style)."""
+
+    name = "value_quality"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.book_equity = book_equity
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        bm = be / prices_panel.where(prices_panel > 0)
+        gp_ta = gp / ta.where(ta > 0)
+        score = _cs_zscore(bm) + _cs_zscore(gp_ta)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class GrowthQuality(CrossSectionalStrategy):
+    """H233: z(rev_growth) + z(GP/TA) -- growth + profitability composite."""
+
+    name = "growth_quality"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        growth_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.revenue = revenue
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.growth_window = growth_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        rev_lag = rev.shift(self.growth_window)
+        rev_growth = (rev - rev_lag) / rev_lag.where(rev_lag > 0)
+        rev_growth = rev_growth.clip(-1.0, 3.0)
+        gp_ta = gp / ta.where(ta > 0)
+        score = _cs_zscore(rev_growth) + _cs_zscore(gp_ta)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class MultiFactorComposite(CrossSectionalStrategy):
+    """H234: z(mom) + z(GP/TA) + z(-BS_accruals) + z(-asset_growth) -- 4-factor composite."""
+
+    name = "multi_factor_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_days: int = 21,
+        fundamental_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_days = skip_days
+        self.fundamental_window = fundamental_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+
+        w = self.fundamental_window
+        # Price momentum
+        price_ret = prices_panel.pct_change(self.mom_window - self.skip_days).shift(self.skip_days)
+        # Gross profitability (quality)
+        gp_ta = gp / ta.where(ta > 0)
+        # Balance-sheet accruals (lower = better quality)
+        nwc = ca - cl
+        avg_ta = (ta + ta.shift(w)) / 2
+        accruals = (nwc - nwc.shift(w)) / avg_ta.where(avg_ta > 0)
+        # Asset growth (lower = better capital discipline)
+        asset_growth = (ta - ta.shift(w)) / ta.shift(w).where(ta.shift(w) > 0)
+
+        score = (
+            _cs_zscore(price_ret)
+            + _cs_zscore(gp_ta)
+            + _cs_zscore(-accruals)
+            + _cs_zscore(-asset_growth)
+        )
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+class EfficientGrowth(CrossSectionalStrategy):
+    """H235: z(rev_growth) + z(OCF/TA) -- revenue growth backed by operating cash flows."""
+
+    name = "efficient_growth"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        growth_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.revenue = revenue
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.growth_window = growth_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        rev_lag = rev.shift(self.growth_window)
+        rev_growth = (rev - rev_lag) / rev_lag.where(rev_lag > 0)
+        rev_growth = rev_growth.clip(-1.0, 3.0)
+        ocf_ta = ocf / ta.where(ta > 0)
+        score = _cs_zscore(rev_growth) + _cs_zscore(ocf_ta)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

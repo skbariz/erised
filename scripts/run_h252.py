@@ -75,7 +75,7 @@ def main() -> None:
         )
         lo_s, hi_s = bootstrap_sharpe_ci(r.combined_returns, n_boot=1000)
         print(
-            f"  max_window={_mw}d  Sharpe {r.combined_report.sharpe:.3f}"
+            f"  max_window={mw}d  Sharpe {r.combined_report.sharpe:.3f}"
             f"  CI [{lo_s:.3f}, {hi_s:.3f}]  MaxDD {r.combined_report.max_drawdown:.2%}"
         )
 

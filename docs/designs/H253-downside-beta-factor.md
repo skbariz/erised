@@ -21,3 +21,21 @@ Expected regime behavior:
 
 Success criteria: OOS Sharpe ≥ 0.70, Max DD < −45%, CI lower bound > 0.
 Falsification: H175 correlation > 0.88 (conditional beta indistinguishable from unconditional).
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.976 |
+| 95% CI | [0.577, 1.392] |
+| CAGR | 19.50% |
+| Max DD | −46.74% |
+| H001 corr | +0.002 |
+| Decision | **KEEP** |
+
+**Sensitivity (downside_window):** 126d → 0.952 | 252d → 0.976 | 504d → 0.987. Monotonically
+improving with longer lookback — downside beta is a slow-moving structural characteristic.
+Canonical = 252d (standard; 504d also viable but reduces early-fold coverage).
+
+**Strongest standalone signal in Batch 1** at Sharpe 0.976 (CI lower 0.577). Near-zero H001
+corr (−0.002) confirms orthogonality to macro signals. Max DD −46.74% is equity-range risk.

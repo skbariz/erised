@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H252",
+  "name": "max-return-lottery-avoid",
+  "strategy_class": "MaxReturnLotteryAvoid",
+  "family": "tail risk avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9271,
+  "ci_low": 0.522,
+  "ci_high": 1.3454,
+  "cagr": 0.1514,
+  "max_drawdown": -0.4602,
+  "n_trades": 1,
+  "h001_corr": -0.0002,
+  "fold_sharpes": [
+    0.934,
+    1.678,
+    0.775,
+    1.425,
+    1.49,
+    0.092,
+    0.908,
+    2.099,
+    0.786,
+    1.899,
+    1.175,
+    0.794
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Bali, Cakici, Whitelaw (2011): investors overpay for lottery-like payoffs. MAX21 = max single daily return over 21 days. Long low-MAX bottom quintile. Sector-neutral, monthly rebalance. Distinct from H197 (skewness) -- event-driven 21d window.",
+  "canonical_params": {
+    "max_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

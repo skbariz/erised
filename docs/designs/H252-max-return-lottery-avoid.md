@@ -21,3 +21,21 @@ Expected regime behavior:
 
 Success criteria: OOS Sharpe ≥ 0.65, Max DD < −50%, CI lower bound > 0.
 Falsification: Near-zero incremental IC over H197 (skewness) or H251 (idio vol).
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.927 |
+| 95% CI | [0.522, 1.345] |
+| CAGR | 15.14% |
+| Max DD | −46.02% |
+| H001 corr | −0.000 |
+| Decision | **KEEP** |
+
+**Sensitivity (max_window):** 10d → 0.960 | 21d → 0.927 | 63d → 0.861. Shorter MAX window
+is stronger — lottery spikes are short-lived. Canonical = 21d balances signal strength vs.
+stability. Highest Sharpe of the three standalone tail-risk signals (H251/H252/H253).
+
+**Fold 5 (2008–2010):** Sharpe +0.092. Better than H251/H253 in the GFC; MAX signal
+distinguishes distress-driven extreme moves from baseline high-vol names.

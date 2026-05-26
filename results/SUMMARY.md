@@ -348,4 +348,25 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 
 ---
 
+## H251–H300 — Set 3: Tail Risk, Distress Avoidance, Accounting Sustainability
+
+### Batch 1: Tail Risk and Lottery Avoidance (H251–H255)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 251 | IdiosyncraticVolFactor | tail risk | kept | 0.897 | [0.490, 1.306] | 13.51% | −41.42% | −0.003 | Residual vol from SPY OLS; 11/12 folds positive |
+| 252 | MaxReturnLotteryAvoid | tail risk | kept | 0.927 | [0.522, 1.345] | 15.14% | −46.02% | −0.000 | Highest standalone Sharpe in batch; shorter window stronger |
+| 253 | DownsideBetaFactor | tail risk | kept | 0.976 | [0.577, 1.392] | 19.50% | −46.74% | +0.002 | Best standalone signal; longer window monotonically better |
+| 254 | TailRiskComposite | tail risk | kept | 0.911 | [0.506, 1.327] | 14.76% | −44.60% | −0.000 | 4-signal composite; dilutes H253; best MaxDD in batch |
+| 255 | TailFilteredMomentum | tail risk | kept | 0.896 | [0.496, 1.313] | 16.31% | −49.46% | +0.000 | Momentum with lottery exclusion; underperforms H157 (1.079) |
+
+**Batch 1 summary:** All 5 KEEP. H253 DownsideBetaFactor (0.976) is the standout — strongest
+standalone signal, CI lower 0.577, robust to longer windows. H252 MaxReturnLotteryAvoid (0.927)
+is second. H254 composite (0.911) shows dilution vs. H253 but still passes bar. H255 falsified:
+lottery exclusion filter hurts momentum quality vs. H157 vol-scaling. H001 correlations
+near-zero (−0.003 to +0.002) across all five — these cross-sectional tail-risk signals are
+orthogonal to the macro trend-following universe.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

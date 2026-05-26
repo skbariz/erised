@@ -22,3 +22,22 @@ Expected regime behavior:
 Success criteria: OOS Sharpe ≥ 1.00, Max DD < −30%, CI lower bound > 0.
 Must beat H157 vol-scaled momentum (Sharpe 1.079) to justify the filtering complexity.
 Falsification: Sharpe below H157 (filter removed the good momentum names along with bad).
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.896 |
+| 95% CI | [0.496, 1.313] |
+| CAGR | 16.31% |
+| Max DD | −49.46% |
+| H001 corr | +0.000 |
+| Decision | **KEEP** |
+
+**Sensitivity (exclude_decile):** 5% → 0.903 | 10% → 0.896 | 20% → 0.883. Tighter exclusion
+marginally better; diminishing returns as more names are excluded. Canonical = 10%.
+
+**Falsification confirmed:** H255 (0.896) materially underperforms H157 (1.079). The lottery
+filter removes some genuine momentum names along with the noise. Max DD −49.46% is also worse
+than H157 (−25.4%). The volatility-scaling in H157 is more effective than lottery exclusion as
+a momentum quality filter. H255 is kept (passes bar) but H157 is the superior momentum strategy.

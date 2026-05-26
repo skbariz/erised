@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H255",
+  "name": "tail-filtered-momentum",
+  "strategy_class": "TailFilteredMomentum",
+  "family": "tail risk avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8958,
+  "ci_low": 0.4957,
+  "ci_high": 1.3132,
+  "cagr": 0.1631,
+  "max_drawdown": -0.4946,
+  "n_trades": 1,
+  "h001_corr": 0.0004,
+  "fold_sharpes": [
+    1.333,
+    1.106,
+    0.98,
+    1.481,
+    1.141,
+    -0.161,
+    0.708,
+    2.434,
+    1.155,
+    1.478,
+    0.878,
+    0.747
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1 month momentum with lottery exclusion: removes top-10% idio vol OR top-10% MAX21 stocks before momentum ranking. Goal: strip lottery noise from momentum universe. Target: beat H157 VolScaledMomentum (Sharpe 1.079).",
+  "canonical_params": {
+    "momentum_window": 252,
+    "momentum_skip": 21,
+    "idio_vol_window": 63,
+    "max_window": 21,
+    "exclude_decile": 0.1,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

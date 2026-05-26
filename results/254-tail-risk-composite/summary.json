@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H254",
+  "name": "tail-risk-composite",
+  "strategy_class": "TailRiskComposite",
+  "family": "tail risk avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9111,
+  "ci_low": 0.5063,
+  "ci_high": 1.3267,
+  "cagr": 0.1476,
+  "max_drawdown": -0.446,
+  "n_trades": 1,
+  "h001_corr": -0.0002,
+  "fold_sharpes": [
+    1.15,
+    1.224,
+    0.714,
+    1.458,
+    1.393,
+    -0.031,
+    0.952,
+    2.086,
+    1.288,
+    1.661,
+    1.062,
+    0.761
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "4-factor tail risk composite: z(-idio_vol_63d) + z(-MAX21) + z(-downside_beta_252d) + z(skew_63d). All terms oriented high=low-risk. Sector-neutral top 20%, monthly rebalance. Tests dilution boundary at 4 factors (expect > best standalone to justify complexity).",
+  "canonical_params": {
+    "idio_vol_window": 63,
+    "max_window": 21,
+    "downside_window": 252,
+    "skew_window": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

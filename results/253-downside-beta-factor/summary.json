@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H253",
+  "name": "downside-beta-factor",
+  "strategy_class": "DownsideBetaFactor",
+  "family": "tail risk avoidance",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9755,
+  "ci_low": 0.5771,
+  "ci_high": 1.3918,
+  "cagr": 0.195,
+  "max_drawdown": -0.4674,
+  "n_trades": 1,
+  "h001_corr": 0.0018,
+  "fold_sharpes": [
+    1.563,
+    0.725,
+    1.084,
+    1.622,
+    1.249,
+    0.056,
+    0.749,
+    2.305,
+    1.159,
+    1.83,
+    1.039,
+    0.947
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Harvey & Siddique (2000): downside beta measures crash sensitivity. Computed as sum(r_i*r_m | r_m<0) / sum(r_m^2 | r_m<0) over 252d. Long low downside-beta quintile. Distinct from H175 (unconditional BAB).",
+  "canonical_params": {
+    "downside_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

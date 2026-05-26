@@ -21,3 +21,23 @@ Expected regime behavior:
 
 Success criteria: OOS Sharpe ≥ 0.70, Max DD < −45%, CI lower bound > 0.
 Falsification: H176 correlation > 0.90 (confirmed duplicate of total vol).
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| OOS Sharpe | 0.897 |
+| 95% CI | [0.490, 1.306] |
+| CAGR | 13.51% |
+| Max DD | −41.42% |
+| H001 corr | −0.003 |
+| Decision | **KEEP** |
+
+**Sensitivity (idio_vol_window):** 21d → 0.920 | 63d → 0.897 | 126d → 0.883. Shorter window
+slightly stronger; flat sensitivity confirms robust signal. Canonical = 63d.
+
+**Fold 5 (2008–2010):** Sharpe +0.030 — GFC collapses idio vol spread as all stocks become
+correlated. Otherwise consistent across all folds (11/12 positive, range +0.03 to +2.07).
+
+H001 corr = −0.003: near-zero, confirming the cross-sectional equity signal is orthogonal to
+the macro trend-following baseline.

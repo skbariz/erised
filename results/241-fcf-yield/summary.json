@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H241",
+  "name": "fcf-yield",
+  "strategy_class": "FCFYield",
+  "family": "market value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7583,
+  "ci_low": 0.358,
+  "ci_high": 1.1661,
+  "cagr": 0.0998,
+  "max_drawdown": -0.4231,
+  "n_trades": 1,
+  "h001_corr": -0.0211,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.248,
+    0.837,
+    2.131,
+    0.701,
+    1.834,
+    0.941,
+    0.984
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Free cash flow yield: OCF / (price \u00d7 shares_outstanding). Classic value factor: cheap-on-cash-flow vs expensive-on-price. Bridges accounting (OCF) and market pricing. Clipped [-0.5, 0.5]. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

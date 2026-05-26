@@ -285,6 +285,26 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 | **239** | **Gross margin level** | **solvency factors (CS)** | **kept ★** | **0.861** | **[0.457, 1.269]** | 10.78% | **−34.59%** | **−0.012** | **Persistent GP/revenue level; pricing power/moat proxy; batch star** |
 | 240 | ROA momentum | solvency factors (CS) | **kept** | 0.751 | [0.339, 1.167] | 8.66% | −36.54% | −0.020 | YoY ROA (NI/avg_TA) improvement; DuPont: margin × turnover; folds 0-5 zero |
 
+### Batch 9: Market Value & Cash Flow Factors (H241–H245)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 241 | FCF yield | market value factors (CS) | **kept** | 0.758 | [0.358, 1.166] | 9.98% | −42.31% | −0.021 | OCF/market_cap; fold 5 active; top 10% stronger (0.833); MaxDD worst in batch |
+| 242 | Cash return on equity | market value factors (CS) | **kept** | 0.766 | [0.365, 1.176] | 9.32% | −38.86% | −0.021 | OCF/book_equity; cash ROE avoids NI accruals; fold 5 active |
+| **243** | **Gross profit growth** | **market value factors (CS)** | **kept ★** | **0.791** | **[0.381, 1.202]** | 9.47% | **−34.90%** | **−0.015** | **YoY absolute GP growth / TA; flat window sensitivity; best MaxDD; batch star** |
+| 244 | Altman Z proxy | market value factors (CS) | **kept** | 0.764 | [0.362, 1.168] | 9.48% | −36.64% | −0.017 | z(NWC/TA)+z(NI/TA)+z(BE/TL)+z(rev/TA); fold 7 Sharpe 2.25; accounting-only |
+| 245 | OCF momentum | market value factors (CS) | **kept** | 0.741 | [0.334, 1.146] | 8.64% | −37.99% | −0.018 | YoY OCF/TA improvement; cash-flow ROA analog; flat window sensitivity |
+
+### Batch 10: Structural & Terminal Composite Factors (H246–H250)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 246 | Equity multiplier | structural factors (CS) | **kept** | 0.759 | [0.352, 1.166] | 9.27% | −36.51% | −0.017 | Low TA/BE = low financial leverage; DuPont component; top 10% MaxDD -33.49% |
+| 247 | Retained earnings proxy | structural factors (CS) | **kept** | 0.783 | [0.376, 1.191] | 9.28% | −37.85% | −0.017 | YoY BE growth / TA; profitable AND retaining earnings; folds 0-5 zero |
+| **248** | **Intangible quality** | **structural factors (CS)** | **kept ★** | **0.864** | **[0.446, 1.271]** | 10.83% | **−36.29%** | **−0.019** | **GP/book_equity; intangible asset intensity; fold 9 Sharpe 2.09; batch star** |
+| 249 | Financial health composite | structural factors (CS) | **kept** | 0.588 | [0.180, 1.013] | 7.71% | −35.73% | −0.019 | z(OCF/TA)+z(-LTD/TA)+z(curr_ratio)+z(NI/TA); fold 5 negative; weakest batch |
+| 250 | Grand fundamental composite | structural factors (CS) | **kept** | 0.742 | [0.329, 1.144] | 8.61% | −35.08% | −0.020 | 5-factor: z(GP/TA)+z(-accruals)+z(-asset_growth)+z(OCF/TA)+z(-LTD/TA); fold 6 low |
+
 ---
 
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

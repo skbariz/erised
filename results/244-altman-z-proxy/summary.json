@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H244",
+  "name": "altman-z-proxy",
+  "strategy_class": "AltmanZProxy",
+  "family": "market value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7644,
+  "ci_low": 0.3625,
+  "ci_high": 1.1675,
+  "cagr": 0.0948,
+  "max_drawdown": -0.3664,
+  "n_trades": 1,
+  "h001_corr": -0.017,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.221,
+    0.618,
+    2.252,
+    0.793,
+    1.719,
+    0.948,
+    1.095
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Simplified Altman Z-score proxy: z(NWC/TA) + z(NI/TA) + z(BE/TL) + z(rev/TA). 4 components: liquidity + profitability + leverage + efficiency. No market cap required (accounting-only). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

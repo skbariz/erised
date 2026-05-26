@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H242",
+  "name": "cash-return-on-equity",
+  "strategy_class": "CashReturnOnEquity",
+  "family": "market value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7664,
+  "ci_low": 0.3654,
+  "ci_high": 1.1764,
+  "cagr": 0.0932,
+  "max_drawdown": -0.3886,
+  "n_trades": 1,
+  "h001_corr": -0.0208,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.45,
+    0.745,
+    2.103,
+    0.701,
+    1.867,
+    0.884,
+    1.035
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Cash return on equity: OCF / book_equity. Cash-based analog to ROE: how much real cash each dollar of equity generates. Avoids NI accrual distortions. Distinct from ROE momentum (H221) and OCF/TA (H245). Clipped [-1.0, 5.0]. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

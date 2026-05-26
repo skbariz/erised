@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H243",
+  "name": "gross-profit-growth",
+  "strategy_class": "GrossProfitGrowth",
+  "family": "market value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7906,
+  "ci_low": 0.381,
+  "ci_high": 1.2019,
+  "cagr": 0.0947,
+  "max_drawdown": -0.349,
+  "n_trades": 1,
+  "h001_corr": -0.015,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.35,
+    1.919,
+    0.985,
+    1.945,
+    1.265,
+    1.121
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY absolute gross profit growth scaled by lagged TA: (GP_t - GP_{t-1y}) / TA_{t-1y}. Distinct from GP/TA level (H227) and GP/revenue level (H239). Tests whether growing the absolute gross profit pool predicts returns. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

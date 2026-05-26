@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H245",
+  "name": "ocf-momentum",
+  "strategy_class": "OCFMomentum",
+  "family": "market value factors",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.741,
+  "ci_low": 0.334,
+  "ci_high": 1.1457,
+  "cagr": 0.0864,
+  "max_drawdown": -0.3799,
+  "n_trades": 1,
+  "h001_corr": -0.0176,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.437,
+    1.923,
+    0.919,
+    1.831,
+    0.938,
+    1.071
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY improvement in OCF/TA (cash return on assets trend). Cash-flow analog to ROA momentum (H240): avoids accrual distortions. Distinct from OCF level (CashConversionQuality H222) and ROA change (H240). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

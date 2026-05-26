@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H201",
+  "name": "sector-etf-momentum",
+  "strategy_class": "SectorETFMomentum",
+  "family": "sector/industry momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.6542,
+  "ci_low": 0.2726,
+  "ci_high": 1.0565,
+  "cagr": 0.0652,
+  "max_drawdown": -0.3899,
+  "n_trades": 2,
+  "h001_corr": 0.0682,
+  "fold_sharpes": [
+    0.06,
+    -0.503,
+    -0.105,
+    0.85,
+    0.932,
+    0.742,
+    0.897,
+    1.101,
+    1.532,
+    -0.181,
+    1.544,
+    1.236
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Moskowitz-Grinblatt (1999) at ETF level. Rank XLP/XLU/IVE/IVW/QQQ/IWM/VNQ by 126d return; long top-3 risk-parity weighted. SPY fallback before ETF inception dates.",
+  "canonical_params": {
+    "mom_window": 126,
+    "vol_lookback": 60,
+    "top_n": 3
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

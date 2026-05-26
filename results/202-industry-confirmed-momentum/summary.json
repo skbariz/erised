@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H202",
+  "name": "industry-confirmed-momentum",
+  "strategy_class": "IndustryConfirmedMomentum",
+  "family": "sector/industry momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.9081,
+  "ci_low": 0.5068,
+  "ci_high": 1.3127,
+  "cagr": 0.1706,
+  "max_drawdown": -0.4716,
+  "n_trades": 9,
+  "h001_corr": 0.0054,
+  "fold_sharpes": [
+    1.377,
+    0.939,
+    0.643,
+    1.598,
+    1.072,
+    -0.174,
+    0.568,
+    2.105,
+    0.865,
+    1.761,
+    1.074,
+    0.863
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Moskowitz-Grinblatt (1999): 12-1m momentum gated by sector 6m trend. Zero weight for stocks in sectors with negative equal-weight 6m return. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "sector_mom_window": 126,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

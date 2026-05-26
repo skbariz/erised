@@ -202,4 +202,18 @@ Note: cross-sectional strategies record `n_trades=1` as artifact; actual rebalan
 
 ---
 
+## H201–H250 — Sector/Industry Momentum, Fundamental Factors, Behavioral Finance
+
+### Batch 1: Industry/Sector Momentum (H201–H205)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 201 | Sector ETF momentum | sector momentum (AA) | **kept** | 0.654 | [0.273, 1.057] | 7.24% | −38.99% | +0.068 | Top-3 equity ETFs by 126d return, risk-parity weighted; TLT fallback |
+| 202 | Industry-confirmed momentum | sector/industry momentum (CS) | **kept** | 0.908 | [0.507, 1.313] | 17.06% | −47.16% | +0.005 | 12-1m momentum gated by sector 6m trend; H001 corr near zero |
+| 203 | Sector-leader long-only | sector/industry momentum (CS) | **kept** | 0.915 | [0.518, 1.325] | 15.30% | −46.69% | +0.001 | Top-2 GICS sectors by 126d return, equal-weight within; H001 corr ~0 |
+| 204 | Industry relative strength | sector/industry momentum (CS) | **kept** | 0.824 | [0.421, 1.233] | 15.43% | −52.86% | +0.004 | 21d stock return minus sector-avg 21d return; sector-neutral top 20% |
+| 205 | Sector-momentum risk parity | sector momentum (AA) | killed | 0.399 | [−0.004, 0.802] | 4.22% | −54.16% | +0.047 | Top-1 ETF + TLT risk parity; CI clips zero, MaxDD −54% unacceptable |
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

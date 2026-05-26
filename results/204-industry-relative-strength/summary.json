@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H204",
+  "name": "industry-relative-strength",
+  "strategy_class": "IndustryRelativeStrength",
+  "family": "sector/industry momentum",
+  "run_date": "2026-05-25",
+  "oos_sharpe": 0.8242,
+  "ci_low": 0.4214,
+  "ci_high": 1.2328,
+  "cagr": 0.1543,
+  "max_drawdown": -0.5286,
+  "n_trades": 1,
+  "h001_corr": 0.0036,
+  "fold_sharpes": [
+    1.185,
+    0.776,
+    0.785,
+    1.609,
+    1.188,
+    0.066,
+    0.743,
+    2.025,
+    0.932,
+    1.373,
+    0.584,
+    1.001
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "21d stock return minus equal-weight sector-average 21d return. Pure idiosyncratic short-horizon momentum: stocks outrunning their sector. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "rel_window": 21,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -7768,3 +7768,354 @@ class CapitalEfficiencyQualityComposite(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# Helper: buy/hold band for stateful strategies
+# ---------------------------------------------------------------------------
+
+
+def _buy_hold_band(
+    strict_w: pd.DataFrame,
+    extended_w: pd.DataFrame,
+    membership: pd.DataFrame,
+    rebalance_period: int = 21,
+) -> pd.DataFrame:
+    """Stateful buy/hold band portfolio.
+
+    Entry: stock enters top-quintile (strict_w > 0) on a rebalance day.
+    Hold: stock remains in extended selection (extended_w > 0) at next rebalance.
+    Exit: stock falls out of extended selection at any rebalance day.
+
+    Between rebalance days, the previous portfolio is held unchanged (except membership exits).
+    Equal-weight among held-and-in-membership stocks.
+    """
+    dates = strict_w.index
+    tickers = strict_w.columns.tolist()
+    n_dates = len(dates)
+    n_stocks = len(tickers)
+
+    strict_arr = (strict_w.values > 0)
+    extended_arr = (extended_w.values > 0)
+    mem_arr = membership.reindex_like(strict_w).fillna(False).values
+
+    held = np.zeros(n_stocks, dtype=bool)
+    out = np.zeros((n_dates, n_stocks))
+
+    for i in range(n_dates):
+        is_rebal = (i % rebalance_period == 0)
+        mem_today = mem_arr[i]
+
+        if is_rebal:
+            forced_sell = held & ~extended_arr[i]
+            new_buy = strict_arr[i] & ~held & mem_today
+            held = (held | new_buy) & ~forced_sell & mem_today
+        else:
+            held = held & mem_today
+
+        n_active = held.sum()
+        if n_active > 0:
+            out[i] = held.astype(float) / n_active
+
+    return pd.DataFrame(out, index=dates, columns=tickers)
+
+
+# ---------------------------------------------------------------------------
+# H291: LowTurnoverValueFactor
+# ---------------------------------------------------------------------------
+
+
+class LowTurnoverValueFactor(CrossSectionalStrategy):
+    """H291: Earnings yield with buy/hold band (buy top-20%, hold until top-40% exit).
+
+    Novy-Marx & Velikov (2016): value factors have heavy churn. Band reduces
+    round-trip costs by ~62% while maintaining similar gross exposure.
+    """
+
+    name = "low_turnover_value_factor"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.40,
+        rebalance_period: int = 21,
+    ):
+        self.net_income = net_income
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+        market_cap = prices_panel * sh
+        ey = ni / market_cap.replace(0, np.nan)
+
+        strict_w = _sector_neutral_weights(
+            ey, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            ey, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H292: LowTurnoverQualityFactor
+# ---------------------------------------------------------------------------
+
+
+class LowTurnoverQualityFactor(CrossSectionalStrategy):
+    """H292: GP/TA with quarterly rebalance (every 63 trading days).
+
+    Tests whether the stable GP/TA signal retains alpha at quarterly frequency.
+    Identical signal to H227; only rebalance cadence differs.
+    """
+
+    name = "low_turnover_quality_factor"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gp_ta = gp / ta.replace(0, np.nan)
+        daily_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H293: CostAwareMomentumLongHold
+# ---------------------------------------------------------------------------
+
+
+class CostAwareMomentumLongHold(CrossSectionalStrategy):
+    """H293: 12-1 month momentum with bi-monthly rebalance (every 42 trading days).
+
+    Tests whether momentum IC decays within 42 days or remains stable.
+    H090 showed risk parity is insensitive to rebalance frequency; momentum may differ.
+    """
+
+    name = "cost_aware_momentum_long_hold"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 42,
+    ):
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom = prices_panel.shift(self.skip_window) / prices_panel.shift(self.mom_window) - 1
+        daily_w = _sector_neutral_weights(
+            mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H294: TurnoverCappedProfitabilityFactor
+# ---------------------------------------------------------------------------
+
+
+class TurnoverCappedProfitabilityFactor(CrossSectionalStrategy):
+    """H294: GP/TA with 20% monthly replacement cap.
+
+    At each rebalance, limit portfolio turnover to 20% of current holdings.
+    Existing stocks in top-40% are held; new additions capped at 20% of portfolio.
+    Reduces market-impact during periods of high factor-rank volatility.
+    """
+
+    name = "turnover_capped_profitability_factor"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.40,
+        max_replace_fraction: float = 0.20,
+        rebalance_period: int = 21,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.max_replace_fraction = max_replace_fraction
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gp_ta = gp / ta.replace(0, np.nan)
+
+        # Score panel: used to rank new additions by quality
+        score_arr = gp_ta.values
+
+        strict_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+
+        dates = prices_panel.index
+        tickers = prices_panel.columns.tolist()
+        n_dates = len(dates)
+        n_stocks = len(tickers)
+
+        strict_arr = (strict_w.values > 0)
+        extended_arr = (extended_w.values > 0)
+        mem_arr = membership.reindex_like(prices_panel).fillna(False).values
+
+        held = np.zeros(n_stocks, dtype=bool)
+        out = np.zeros((n_dates, n_stocks))
+
+        for i in range(n_dates):
+            is_rebal = (i % self.rebalance_period == 0)
+            mem_today = mem_arr[i]
+
+            if is_rebal:
+                # Forced exits (fell out of extended zone) and new buys
+                keep = held & extended_arr[i] & mem_today
+                potential_new = strict_arr[i] & ~held & mem_today
+
+                n_held = int(held.sum())
+                max_new = max(1, int(self.max_replace_fraction * n_held)) if n_held > 0 else int(
+                    strict_arr[i].sum()
+                )
+
+                # Rank potential new additions by score (best first)
+                if potential_new.sum() > 0 and max_new > 0:
+                    scores_today = score_arr[i]
+                    new_scores = np.where(potential_new, scores_today, -np.inf)
+                    top_new_idx = np.argsort(-np.nan_to_num(new_scores, nan=-np.inf))[:max_new]
+                    add_mask = np.zeros(n_stocks, dtype=bool)
+                    for idx in top_new_idx:
+                        if potential_new[idx]:
+                            add_mask[idx] = True
+                    held = keep | add_mask
+                else:
+                    held = keep
+            else:
+                held = held & mem_today
+
+            n_active = held.sum()
+            if n_active > 0:
+                out[i] = held.astype(float) / n_active
+
+        return pd.DataFrame(out, index=dates, columns=tickers)
+
+
+# ---------------------------------------------------------------------------
+# H295: ExecutionEfficientComposite
+# ---------------------------------------------------------------------------
+
+
+class ExecutionEfficientComposite(CrossSectionalStrategy):
+    """H295: z(gp_ta) + z(efficiency_ratio), bi-monthly rebalance + buy/hold band.
+
+    Combines best fundamental signal (GP/TA) with best capital-efficiency signal
+    (investment efficiency ratio). Buy when rank >= 0.70, hold until < 0.50.
+    Bi-monthly rebalance (42 days) to reduce momentum-level turnover costs.
+    """
+
+    name = "execution_efficient_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.50,
+        rebalance_period: int = 42,
+        window: int = 252,
+        capex_floor: float = 0.01,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.revenue = revenue
+        self.sectors = sectors
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+        self.window = window
+        self.capex_floor = capex_floor
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        lt_assets = ta - ca
+
+        gp_ta = gp / ta.replace(0, np.nan)
+        rev_growth = (rev - rev.shift(self.window)) / rev.shift(self.window).abs().replace(
+            0, np.nan
+        )
+        rev_growth = rev_growth.clip(-5, 5)
+        capex_intensity = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        capex_intensity = capex_intensity.clip(lower=0)
+        efficiency = (rev_growth / (capex_intensity + self.capex_floor)).clip(-100, 100)
+
+        score = _cs_zscore(gp_ta) + _cs_zscore(efficiency)
+
+        strict_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)

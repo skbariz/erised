@@ -8119,3 +8119,262 @@ class ExecutionEfficientComposite(CrossSectionalStrategy):
             score, membership, self.sectors, self.hold_quantile, ascending=False
         )
         return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H296: TailRiskFilteredCrossProgram
+# ---------------------------------------------------------------------------
+
+
+class TailRiskFilteredCrossProgram(CrossSectionalStrategy):
+    """H296: GP/TA quality factor with tail-risk stock exclusion.
+
+    Extends the program's best cross-sectional signal (GP/TA, H227/H268) with a
+    pre-filter that excludes high-tail-risk stocks. Tail risk composite (same as H254):
+    z(-idio_vol_63d) + z(-MAX21) + z(-downside_beta_252d).
+    Bottom-decile tail-risk stocks excluded from the selection universe.
+    Tests whether removing lottery/crash names from the quality universe improves net alpha.
+    """
+
+    name = "tail_risk_filtered_cross_program"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        exclude_quantile: float = 0.10,
+        idio_vol_window: int = 63,
+        max_window: int = 21,
+        downside_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.exclude_quantile = exclude_quantile
+        self.idio_vol_window = idio_vol_window
+        self.max_window = max_window
+        self.downside_window = downside_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+
+        # Idio vol (rolling beta residual)
+        w_iv = self.idio_vol_window
+        cov_sm = daily_rets.rolling(w_iv, min_periods=w_iv // 2).cov(spy)
+        var_m = spy.rolling(w_iv, min_periods=w_iv // 2).var().replace(0, np.nan)
+        beta_iv = cov_sm.div(var_m, axis=0)
+        spy_bc = pd.DataFrame(
+            np.outer(spy.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        residuals = daily_rets - beta_iv.shift(1) * spy_bc
+        idio_vol = residuals.rolling(w_iv, min_periods=w_iv // 2).std()
+
+        # MAX21
+        max21 = daily_rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+
+        # Downside beta
+        w_db = self.downside_window
+        down_mask = (spy < 0).astype(float)
+        spy_down = spy * down_mask
+        spy_down_bc = pd.DataFrame(
+            np.outer(spy_down.values, np.ones(prices_panel.shape[1])),
+            index=prices_panel.index,
+            columns=prices_panel.columns,
+        )
+        stock_down = daily_rets.multiply(down_mask, axis=0)
+        num = (stock_down * spy_down_bc).rolling(w_db, min_periods=w_db // 4).sum()
+        den = (spy_down**2).rolling(w_db, min_periods=w_db // 4).sum().replace(0, np.nan)
+        downside_beta = num.div(den, axis=0)
+
+        # Tail risk composite: high = low tail risk
+        tail_score = (
+            _cs_zscore(-idio_vol).fillna(0.0)
+            + _cs_zscore(-max21).fillna(0.0)
+            + _cs_zscore(-downside_beta).fillna(0.0)
+        )
+
+        # Build filtered membership: exclude bottom-decile tail-risk stocks
+        tail_rank = tail_score.rank(axis=1, pct=True, na_option="keep")
+        high_tail_risk = tail_rank <= self.exclude_quantile
+        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & ~high_tail_risk.fillna(False)
+
+        # GP/TA signal on filtered universe
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        gp_ta = gp / ta.replace(0, np.nan)
+        daily_w = _sector_neutral_weights(
+            gp_ta, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H297: DistressScreenedValueQuality
+# ---------------------------------------------------------------------------
+
+
+class DistressScreenedValueQuality(CrossSectionalStrategy):
+    """H297: GP/TA + earnings yield, filtered by low CHS-inspired distress score.
+
+    CHS distress (simplified): z(leverage) + z(-ROA) + z(-12m_momentum) + z(vol12m)
+    + z(-net_working_capital_ratio). Filter: keep bottom-half distress names.
+    Signal: z(gp_ta) + z(earnings_yield) on the filtered universe.
+    """
+
+    name = "distress_screened_value_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        distress_pct: float = 0.50,
+        mom_window: int = 252,
+        mom_skip: int = 21,
+        vol_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.long_term_debt = long_term_debt
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.distress_pct = distress_pct
+        self.mom_window = mom_window
+        self.mom_skip = mom_skip
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        sh = _align_fund(self.shares_outstanding, prices_panel)
+
+        ta_safe = ta.replace(0, np.nan)
+
+        # CHS-inspired distress components (high score = more distressed)
+        leverage = (ltd / ta_safe).clip(-5, 5)
+        neg_roa = -(ni / ta_safe).clip(-5, 5)
+        daily_rets = prices_panel.pct_change()
+        neg_mom = -(
+            prices_panel.shift(self.mom_skip) / prices_panel.shift(self.mom_window) - 1
+        ).clip(-5, 5)
+        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std() * np.sqrt(
+            252
+        )
+        nwc = (ca - cl) / ta_safe
+        neg_nwc = (-nwc).clip(-5, 5)
+
+        distress_score = (
+            _cs_zscore(leverage).fillna(0.0)
+            + _cs_zscore(neg_roa).fillna(0.0)
+            + _cs_zscore(neg_mom).fillna(0.0)
+            + _cs_zscore(vol12m).fillna(0.0)
+            + _cs_zscore(neg_nwc).fillna(0.0)
+        )
+
+        # Filter: keep bottom-half distress (low distress firms)
+        distress_rank = distress_score.rank(axis=1, pct=True, na_option="keep")
+        low_distress = distress_rank <= self.distress_pct
+        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & low_distress.fillna(False)
+
+        # Value-quality score on filtered universe
+        gp_ta = gp / ta_safe
+        market_cap = prices_panel * sh.replace(0, np.nan)
+        earnings_yield = (ni / market_cap.replace(0, np.nan)).clip(-5, 5)
+        score = _cs_zscore(gp_ta).fillna(0.0) + _cs_zscore(earnings_yield).fillna(0.0)
+
+        daily_w = _sector_neutral_weights(
+            score, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H298: AccountingSustainabilityQualityComposite
+# ---------------------------------------------------------------------------
+
+
+class AccountingSustainabilityQualityComposite(CrossSectionalStrategy):
+    """H298: z(GP/TA) + z(-accruals) + z(-NOA) accounting sustainability composite.
+
+    GP/TA (productive), low accruals (cash-backed earnings), low NOA (lean balance sheet).
+    accruals = (NI - OCF) / total_assets; noa = (TA - CL) / TA.
+    Tests 3-factor composite at the dilution boundary vs H265 2-factor filtered quality.
+    """
+
+    name = "accounting_sustainability_quality_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+
+        ta_safe = ta.replace(0, np.nan)
+
+        gp_ta = gp / ta_safe
+        accruals = ((ni - ocf) / ta_safe).clip(-1, 1)
+        noa = ((ta - cl) / ta_safe).clip(0, 5)
+
+        score = (
+            _cs_zscore(gp_ta).fillna(0.0)
+            + _cs_zscore(-accruals).fillna(0.0)
+            + _cs_zscore(-noa).fillna(0.0)
+        )
+
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

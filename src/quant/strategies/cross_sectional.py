@@ -7478,3 +7478,293 @@ class FundamentalMomentumComposite(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H286: LowCapexGrowthFactor
+# ---------------------------------------------------------------------------
+
+
+class LowCapexGrowthFactor(CrossSectionalStrategy):
+    """H286: Long bottom-quintile by LT-asset-change acceleration (capex proxy 2nd derivative).
+
+    H263 uses the level of LT asset change (1st derivative). H286 tests the
+    acceleration (2nd derivative): how quickly is capex growing? Empire-building
+    firms accelerate investment before the peak — the acceleration is the warning signal.
+    """
+
+    name = "low_capex_growth_factor"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+    ):
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        lt_assets = ta - ca
+        # 1st derivative: annual LT-asset change normalized by TA
+        delta_lt = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        # 2nd derivative: how much faster is capex growing
+        capex_growth = (delta_lt - delta_lt.shift(self.window)) / delta_lt.shift(
+            self.window
+        ).abs().replace(0, np.nan)
+        capex_growth = capex_growth.clip(-10, 10)
+        # ascending=True: lowest acceleration = most disciplined = best
+        daily_w = _sector_neutral_weights(
+            capex_growth, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H287: InvestmentEfficiencyRatio
+# ---------------------------------------------------------------------------
+
+
+class InvestmentEfficiencyRatio(CrossSectionalStrategy):
+    """H287: Long top-quintile by revenue growth per unit of capital invested.
+
+    Productive investment generates revenue. efficiency = rev_growth / (capex_intensity + 0.01).
+    High ratio = revenue growth from modest capital = productive investment.
+    Low ratio = capex without revenue payoff = empire-building.
+    """
+
+    name = "investment_efficiency_ratio"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+        capex_floor: float = 0.01,
+    ):
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+        self.capex_floor = capex_floor
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        lt_assets = ta - ca
+
+        rev_growth = (rev - rev.shift(self.window)) / rev.shift(self.window).abs().replace(
+            0, np.nan
+        )
+        rev_growth = rev_growth.clip(-5, 5)
+        # capex intensity: annual LT asset change / TA (annualized fraction)
+        capex_intensity = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        # Use only positive capex (investment, not divestiture)
+        capex_intensity = capex_intensity.clip(lower=0)
+        efficiency = rev_growth / (capex_intensity + self.capex_floor)
+        efficiency = efficiency.clip(-100, 100)
+
+        daily_w = _sector_neutral_weights(
+            efficiency, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H288: ROICCapexDiscipline
+# ---------------------------------------------------------------------------
+
+
+class ROICCapexDiscipline(CrossSectionalStrategy):
+    """H288: z(ROIC) + z(-capex_growth) — earnings quality + investment restraint.
+
+    ROIC = NI / (TA - CL): how well assets earn.
+    capex_growth = acceleration of LT-asset change (from H286).
+    Combines high-earnings-quality with low investment acceleration.
+    """
+
+    name = "roic_capex_discipline"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+    ):
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        lt_assets = ta - ca
+
+        invested_capital = (ta - cl).where((ta - cl) > 0)
+        roic = ni / invested_capital.replace(0, np.nan)
+
+        delta_lt = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        capex_growth = (delta_lt - delta_lt.shift(self.window)) / delta_lt.shift(
+            self.window
+        ).abs().replace(0, np.nan)
+        capex_growth = capex_growth.clip(-10, 10)
+
+        score = _cs_zscore(roic) + _cs_zscore(-capex_growth)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H289: AssetGrowthPenalty
+# ---------------------------------------------------------------------------
+
+
+class AssetGrowthPenalty(CrossSectionalStrategy):
+    """H289: z(total_asset_growth) + z(lt_asset_change) — comprehensive investment activity.
+
+    Combines total-asset growth (H206 signal) with LT-asset change (H263 signal).
+    Rank ascending: lowest combined investment = most disciplined = best.
+    Distinct from H206 (total-asset only) and H263 (LT-asset only).
+    """
+
+    name = "asset_growth_penalty"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+    ):
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        lt_assets = ta - ca
+
+        asset_growth = (ta - ta.shift(self.window)) / ta.shift(self.window).replace(0, np.nan)
+        asset_growth = asset_growth.clip(-5, 5)
+        lt_change = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        lt_change = lt_change.clip(-5, 5)
+
+        comprehensive = _cs_zscore(asset_growth) + _cs_zscore(lt_change)
+        # ascending=True: lowest combined investment activity = best
+        daily_w = _sector_neutral_weights(
+            comprehensive, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H290: CapitalEfficiencyQualityComposite
+# ---------------------------------------------------------------------------
+
+
+class CapitalEfficiencyQualityComposite(CrossSectionalStrategy):
+    """H290: z(ROIC) + z(efficiency_ratio) + z(-NOA) — 3-factor capital quality.
+
+    ROIC = NI/(TA-CL), efficiency = rev_growth/(capex_intensity+0.01), NOA = (TA-CL)/TA.
+    3-factor composite testing the dilution boundary (program finding: composites above 2-3 factors dilute).
+    """
+
+    name = "capital_efficiency_quality_composite"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        window: int = 252,
+        capex_floor: float = 0.01,
+    ):
+        self.net_income = net_income
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.window = window
+        self.capex_floor = capex_floor
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        lt_assets = ta - ca
+
+        invested_capital = (ta - cl).where((ta - cl) > 0)
+        roic = ni / invested_capital.replace(0, np.nan)
+
+        noa = (ta - cl) / ta.replace(0, np.nan)
+
+        rev_growth = (rev - rev.shift(self.window)) / rev.shift(self.window).abs().replace(
+            0, np.nan
+        )
+        rev_growth = rev_growth.clip(-5, 5)
+        capex_intensity = (lt_assets - lt_assets.shift(self.window)) / ta.replace(0, np.nan)
+        capex_intensity = capex_intensity.clip(lower=0)
+        efficiency = (rev_growth / (capex_intensity + self.capex_floor)).clip(-100, 100)
+
+        score = _cs_zscore(roic) + _cs_zscore(efficiency) + _cs_zscore(-noa)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H309",
+  "name": "multi-signal-stress-adjusted",
+  "strategy_class": "MultiSignalStressAdjusted",
+  "family": "funding stress",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6849,
+  "ci_low": 0.2883,
+  "ci_high": 1.076,
+  "cagr": 0.0529,
+  "max_drawdown": -0.1684,
+  "n_trades": 5023,
+  "h001_corr": 0.5406,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.43,
+    0.859,
+    0.664,
+    0.732,
+    -0.051,
+    1.041,
+    1.817,
+    0.636,
+    0.562,
+    -0.038
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with 5-signal stress monitor. Signals: VIX>30, 5% drawdown, SHY>TLT, HYG<LQD, vol accel. Tiers: 0=100%, 1=85%, 2=70%, 3=55%, 4+=40%. Rapach-Zhou (2010): combination forecasts outperform individual predictors.",
+  "canonical_params": {
+    "vix_threshold": 30.0,
+    "dd_threshold": 0.05
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H310",
+  "name": "funding-stress-vol-target",
+  "strategy_class": "FundingStressVolTarget",
+  "family": "funding stress",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6771,
+  "ci_low": 0.2815,
+  "ci_high": 1.0712,
+  "cagr": 0.0489,
+  "max_drawdown": -0.2024,
+  "n_trades": 5023,
+  "h001_corr": 0.5343,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.437,
+    0.665,
+    0.802,
+    0.762,
+    -0.373,
+    1.083,
+    1.894,
+    0.741,
+    0.756,
+    -0.076
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H086 vol-target (8%) compounded with binary funding stress flag. stress = VIX>30 AND HYG<LQD 63d (fallback: VIX>30 only pre-2007). final_scale = vol_scale \u00d7 (0.65 if stressed else 1.0). Compound two derisking mechanisms.",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "vix_threshold": 30.0,
+    "stress_reduction": 0.65
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

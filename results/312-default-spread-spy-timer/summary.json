@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H312",
+  "name": "default-spread-spy-timer",
+  "strategy_class": "DefaultSpreadSPYTimer",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6842,
+  "ci_low": 0.282,
+  "ci_high": 1.0793,
+  "cagr": 0.0587,
+  "max_drawdown": -0.1986,
+  "n_trades": 5023,
+  "h001_corr": 0.4863,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.431,
+    0.824,
+    0.791,
+    0.847,
+    -0.02,
+    1.132,
+    1.545,
+    0.345,
+    0.818,
+    0.032
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with HYG vs LQD 63d return as default spread proxy. Credit risk-off (LQD > HYG) \u2192 SPY weight \u00d7 0.60; freed weight to TLT. Pre-2007 (no HYG): pure H021. Goyal-Welch (2008): default spread predicts equity premium.",
+  "canonical_params": {
+    "credit_lookback": 63,
+    "spy_scale": 0.6
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

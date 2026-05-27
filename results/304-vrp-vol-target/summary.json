@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H304",
+  "name": "vrp-vol-target",
+  "strategy_class": "VRPVolTarget",
+  "family": "VRP timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6461,
+  "ci_low": 0.253,
+  "ci_high": 1.0419,
+  "cagr": 0.0473,
+  "max_drawdown": -0.2335,
+  "n_trades": 5023,
+  "h001_corr": 0.5323,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.363,
+    0.597,
+    0.719,
+    0.716,
+    -0.654,
+    1.105,
+    2.067,
+    0.867,
+    0.724,
+    -0.122
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H086 vol-target (8%) combined with VRP z-score amplifier. final_scale = min(1.25, vol_scale * clip(1 + 0.15*vrp_z, 0.8, 1.2)). High VRP \u2192 accept slightly more risk; low VRP \u2192 dampen below vol target.",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "vrp_amplifier": 0.15,
+    "max_scale": 1.25,
+    "vrp_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

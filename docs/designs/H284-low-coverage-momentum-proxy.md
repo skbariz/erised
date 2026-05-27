@@ -30,9 +30,14 @@ Falsification: H271 corr > 0.85 — idio-vol is not distinct from total vol for 
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.974 |
+| 95% CI | [0.571, 1.389] |
+| CAGR | 18.44% |
+| Max DD | -51.36% |
+| H001 corr | +0.002 |
+| Decision | KEEP |
+
+Active from fold 0 (price-only signal). Folds: 1.35, 1.28, 1.09, 1.69, 1.41, -0.14, 0.73, 2.44, 1.12, 1.59, 1.24, 0.76.
+Flat sensitivity (beta_window 42-126: Sharpe 0.974-0.986). Near-zero H001 corr (+0.002).
+Idio-vol ratio adds value over pure momentum (H271: 0.875) — coverage-proxy signal is real.
+High CAGR (18.44%) with large MaxDD (-51.36%): momentum family risk profile.

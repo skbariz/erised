@@ -33,9 +33,14 @@ Falsification: Composite Sharpe below H281 — dilution from adding GP/price to 
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.740 |
+| 95% CI | [0.331, 1.158] |
+| CAGR | 8.87% |
+| Max DD | -36.76% |
+| H001 corr | -0.011 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR data gap). Active folds 6-11: 0.32, 1.97, 0.73, 1.88, 1.08, 1.01.
+Flat sensitivity (mom_window 63-252: Sharpe 0.730-0.745). Composite dilution confirmed:
+H284 standalone (0.974) > H285 composite (0.740). Adding fundamental signals to price momentum hurts.
+Three-factor composite exhibits same dilution pattern as H251-H270 batch.

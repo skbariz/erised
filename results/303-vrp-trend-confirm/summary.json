@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H303",
+  "name": "vrp-trend-confirm",
+  "strategy_class": "VRPTrendConfirm",
+  "family": "VRP timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6665,
+  "ci_low": 0.2697,
+  "ci_high": 1.0571,
+  "cagr": 0.0501,
+  "max_drawdown": -0.1846,
+  "n_trades": 5023,
+  "h001_corr": 0.5587,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.358,
+    0.816,
+    0.674,
+    0.79,
+    -0.269,
+    1.008,
+    1.822,
+    0.68,
+    0.635,
+    0.026
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 scaled by VRP+trend dual gate. Both favorable: 1.0\u00d7; one only: 0.85\u00d7; neither: 0.60\u00d7. VRP favorable = VRP > 0. Trend favorable = SPY > 200d MA. Trend guardrail prevents VRP alone from holding through crash continuation.",
+  "canonical_params": {
+    "ma_window": 200,
+    "full_scale": 1.0,
+    "partial_scale": 0.85,
+    "min_scale": 0.6
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -33,9 +33,9 @@ best momentum names (which legitimately carry tail risk as compensation for mome
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.953 |
+| 95% CI | [0.550, 1.365] |
+| CAGR | 17.58% |
+| Max DD | -51.62% |
+| H001 corr | +0.002 |
+| Decision | KEEP |

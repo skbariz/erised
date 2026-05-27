@@ -31,9 +31,9 @@ momentum names along with the crowded ones.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.868 |
+| 95% CI | [0.464, 1.283] |
+| CAGR | 14.65% |
+| Max DD | -51.50% |
+| H001 corr | +0.003 |
+| Decision | KEEP |

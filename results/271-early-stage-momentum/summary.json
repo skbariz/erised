@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H271",
+  "name": "early-stage-momentum",
+  "strategy_class": "EarlyStageMomentum",
+  "family": "momentum lifecycle",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.94,
+  "ci_low": 0.5345,
+  "ci_high": 1.3565,
+  "cagr": 0.1629,
+  "max_drawdown": -0.4849,
+  "n_trades": 1,
+  "h001_corr": 0.0053,
+  "fold_sharpes": [
+    1.293,
+    1.166,
+    0.857,
+    1.734,
+    1.403,
+    -0.119,
+    0.932,
+    2.33,
+    1.154,
+    1.76,
+    0.957,
+    0.644
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Early-stage momentum: z(12-1 mom) - z(21d vol). High momentum + low vol = uncrowded. Turnover unavailable; vol is price-based crowding proxy (Lee & Swaminathan 2000). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "vol_window": 21,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

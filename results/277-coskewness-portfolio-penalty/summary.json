@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H277",
+  "name": "coskewness-portfolio-penalty",
+  "strategy_class": "CoskewnessPortfolioPenalty",
+  "family": "skew tail risk",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9357,
+  "ci_low": 0.5256,
+  "ci_high": 1.345,
+  "cagr": 0.1849,
+  "max_drawdown": -0.5483,
+  "n_trades": 1,
+  "h001_corr": -0.0008,
+  "fold_sharpes": [
+    1.257,
+    1.46,
+    0.991,
+    1.662,
+    1.103,
+    0.248,
+    0.72,
+    1.949,
+    0.837,
+    1.572,
+    1.148,
+    1.027
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Coskewness portfolio penalty: long stocks with lowest 252d rolling coskewness with SPY (E[(ri-\u03bci)(rm-\u03bcm)\u00b2]/(\u03c3i*\u03c3m\u00b2)). Harvey & Siddique (2000). Negative coskewness = diversification value in crashes. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -30,9 +30,9 @@ Falsification: H276 corr > 0.85 — coskewness and marginal skewness are interch
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.936 |
+| 95% CI | [0.526, 1.345] |
+| CAGR | 18.49% |
+| Max DD | -54.83% |
+| H001 corr | -0.001 |
+| Decision | KEEP |

@@ -30,9 +30,9 @@ Falsification: CVaR rank correlates ≥ 0.85 with 21d realized vol rank — CVaR
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.911 |
+| 95% CI | [0.506, 1.325] |
+| CAGR | 13.99% |
+| Max DD | -39.02% |
+| H001 corr | +0.000 |
+| Decision | KEEP |

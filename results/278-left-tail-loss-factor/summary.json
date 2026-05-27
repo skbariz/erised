@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H278",
+  "name": "left-tail-loss-factor",
+  "strategy_class": "LeftTailLossFactor",
+  "family": "skew tail risk",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9106,
+  "ci_low": 0.5059,
+  "ci_high": 1.3253,
+  "cagr": 0.1399,
+  "max_drawdown": -0.3902,
+  "n_trades": 1,
+  "h001_corr": 0.0003,
+  "fold_sharpes": [
+    0.991,
+    1.449,
+    0.775,
+    1.496,
+    1.342,
+    0.098,
+    1.023,
+    2.117,
+    0.903,
+    1.7,
+    1.045,
+    0.715
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Left tail loss factor: CVaR 5% = mean of worst 5% of 252d daily returns. Long stocks with least-negative CVaR (lowest tail loss). Agarwal & Naik (2004) \u2014 empirical expected shortfall. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "cvar_pct": 0.05,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

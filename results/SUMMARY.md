@@ -437,4 +437,56 @@ availability and is consistent across all H201–H270 cross-sectional strategies
 
 ---
 
+### Batch 5: Volume State & Momentum Lifecycle (H271–H275)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 271 | EarlyStageMomentum | mom lifecycle | kept | 0.940 | [0.535, 1.357] | 16.29% | −48.49% | +0.005 | z(mom) - z(vol_21d); vol as crowding proxy; robust to vol_window |
+| 272 | VolatilitySurgeReturnPremium | mom lifecycle | kept | 0.570 | [0.173, 0.952] | 13.27% | −63.71% | −0.004 | vol_ratio>1.5 AND ret_21d>0; marginal; threshold=1.2 stronger (0.912) |
+| 273 | PriceBreakoutMomentum | mom lifecycle | kept | 0.568 | [0.146, 0.975] | 10.00% | −64.99% | +0.006 | 63d breakout; marginal; high MaxDD; breakout_window insensitive |
+| 274 | AttentionReversalScreen | mom lifecycle | kept | 0.941 | [0.537, 1.360] | 15.62% | −42.52% | −0.005 | Avoid top-decile MAX21+vol+weak GP/TA; threshold insensitive; best MaxDD in batch |
+| 275 | MomentumVolatilityScore | mom lifecycle | kept | 0.868 | [0.464, 1.283] | 14.65% | −51.50% | +0.003 | mom_pct - 0.5*vol_pct - 0.3*max_pct; vol_weight insensitive; composite penalization works |
+
+**Batch 5 summary:** All 5 KEEP. H271 EarlyStageMomentum (0.940) and H274 AttentionReversalScreen
+(0.941) are the batch co-champions. H274 delivers the best MaxDD in the batch (−42.52%) — the
+triple-screen is remarkably insensitive to threshold choice (5%, 10%, 20% all produce identical
+results), indicating the triple-intersection is sparse by design. H272 and H273 are marginal
+(Sharpe ~0.57) with high MaxDD (−63-65%) — volume-surge and breakout signals work but are
+volatile. Notable finding: all H271-H275 have |H001 corr| ≤ 0.006 — near-zero, entirely
+orthogonal to trend-following. This is consistent with the H251-H270 cross-sectional cohort.
+
+---
+
+### Batch 6: Skewness, Coskewness & Crash-Aware (H276–H280)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 276 | NegativeSkewnessAvoidance | skew tail | kept | 1.062 | [0.661, 1.477] | 21.02% | −50.44% | +0.003 | 252d rolling skew; batch champion; highest CAGR |
+| 277 | CoskewnessPortfolioPenalty | skew tail | kept | 0.936 | [0.526, 1.345] | 18.49% | −54.83% | −0.001 | Low coskewness with SPY; robust to window; Harvey & Siddique |
+| 278 | LeftTailLossFactor | skew tail | kept | 0.911 | [0.506, 1.325] | 13.99% | −39.02% | +0.000 | CVaR 5%; best MaxDD in batch (−39.02%); insensitive to cvar_pct |
+| 279 | CrashSensitivityRegime | skew tail | kept | 0.929 | [0.522, 1.336] | 18.27% | −54.83% | −0.002 | Coskewness + SPY vol regime; tightening adds marginal benefit |
+| 280 | SkewAdjustedMomentum | skew tail | kept | 0.953 | [0.550, 1.365] | 17.58% | −51.62% | +0.002 | mom_pct - 0.4*cosk - 0.3*cvar; robust; best composite in batch |
+
+**Batch 6 summary:** All 5 KEEP. H276 NegativeSkewnessAvoidance (1.062) is the batch champion
+and the first cross-sectional strategy to beat the H276 > 1.0 threshold — highest CAGR (21.02%)
+in the entire H251-H280 cohort. H278 LeftTailLossFactor delivers the best MaxDD in the batch
+(−39.02%) with CVaR 5% as the purest tail-risk measure. H279 regime-tightening over H277 adds
+only marginal benefit (0.929 vs 0.936) — the stress regime rarely fires in most folds. H280
+composite (0.953) outperforms both standalone components (H277: 0.936, H278: 0.911), showing
+the momentum-plus-tail-penalty approach works.
+
+Notable: all H276-H280 have |H001 corr| ≤ 0.003 — the near-zero correlation with trend-following
+holds for the entire skew/tail batch. The H271-H280 cohort (all 10 strategies) clusters at
+H001 corr ∈ [−0.005, +0.006], tighter than the H251-H270 cohort [−0.025, +0.002].
+
+---
+
+**H271–H280 cross-batch summary:** 10/10 KEEP — the momentum lifecycle and skew/tail risk
+families both pass the bar. Structurally notable: all 10 strategies have |H001 corr| < 0.01 —
+essentially zero, completely orthogonal to trend-following. These are pure price-signal strategies
+that require no fundamental data (except H274 which uses GP/TA). Best single strategy:
+H276 NegativeSkewnessAvoidance (Sharpe 1.062). Best risk-adjusted: H278 CVaR factor (MaxDD −39.02%).
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

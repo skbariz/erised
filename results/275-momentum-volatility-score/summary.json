@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H275",
+  "name": "momentum-volatility-score",
+  "strategy_class": "MomentumVolatilityScore",
+  "family": "momentum lifecycle",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.868,
+  "ci_low": 0.4638,
+  "ci_high": 1.2828,
+  "cagr": 0.1465,
+  "max_drawdown": -0.515,
+  "n_trades": 1,
+  "h001_corr": 0.0029,
+  "fold_sharpes": [
+    1.131,
+    1.306,
+    0.798,
+    1.293,
+    1.23,
+    -0.214,
+    0.86,
+    2.324,
+    0.996,
+    1.729,
+    1.123,
+    0.609
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Momentum lifecycle score: mom_pct - 0.5*vol_pct - 0.3*max_pct. Rewards momentum, penalizes vol (crowding) and MAX (lottery attention). Adapted from VolumeMomentumLifeCycle (Lee & Swaminathan 2000). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "vol_window": 21,
+    "max_window": 21,
+    "vol_weight": 0.5,
+    "max_weight": 0.3,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -28,9 +28,9 @@ continuation in this universe (high-vol = high momentum = best performers).
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.940 |
+| 95% CI | [0.535, 1.357] |
+| CAGR | 16.29% |
+| Max DD | -48.49% |
+| H001 corr | +0.005 |
+| Decision | KEEP |

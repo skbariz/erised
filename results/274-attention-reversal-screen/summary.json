@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H274",
+  "name": "attention-reversal-screen",
+  "strategy_class": "AttentionReversalScreen",
+  "family": "momentum lifecycle",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9405,
+  "ci_low": 0.5371,
+  "ci_high": 1.3599,
+  "cagr": 0.1562,
+  "max_drawdown": -0.4252,
+  "n_trades": 15,
+  "h001_corr": -0.0051,
+  "fold_sharpes": [
+    1.333,
+    1.274,
+    0.915,
+    1.608,
+    1.12,
+    0.268,
+    0.706,
+    2.149,
+    0.886,
+    1.872,
+    1.037,
+    0.995
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Attention reversal screen (Barber & Odean 2008): avoid top-decile MAX21 AND top-decile 21d vol AND bottom-half GP/TA. Long non-froth equal-weight. Standalone screen test before overlay deployment. Monthly rebalance.",
+  "canonical_params": {
+    "max_window": 21,
+    "vol_window": 21,
+    "max_quantile": 0.1,
+    "vol_quantile": 0.1,
+    "quality_pct": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

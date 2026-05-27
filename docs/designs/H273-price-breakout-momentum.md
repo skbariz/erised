@@ -28,9 +28,9 @@ Falsification: H195 correlation > 0.85 — 63d breakout is not distinct from 252
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.568 |
+| 95% CI | [0.146, 0.975] |
+| CAGR | 10.00% |
+| Max DD | -64.99% |
+| H001 corr | +0.006 |
+| Decision | KEEP |

@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H279",
+  "name": "crash-sensitivity-regime",
+  "strategy_class": "CrashSensitivityRegime",
+  "family": "skew tail risk",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9287,
+  "ci_low": 0.5217,
+  "ci_high": 1.3356,
+  "cagr": 0.1827,
+  "max_drawdown": -0.5483,
+  "n_trades": 1,
+  "h001_corr": -0.0017,
+  "fold_sharpes": [
+    1.257,
+    1.399,
+    0.991,
+    1.662,
+    1.057,
+    0.248,
+    0.72,
+    2.002,
+    0.837,
+    1.572,
+    1.148,
+    1.022
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Crash sensitivity regime: base low-coskewness quintile + stress tightening. When SPY 21d ann. vol > 30% (VIX>25 proxy), switch to top-decile coskewness AND require bottom-half CVaR. Extends H277 with regime adaptivity. Sector-neutral, monthly rebalance.",
+  "canonical_params": {
+    "window": 252,
+    "base_quantile": 0.2,
+    "stress_quantile": 0.1,
+    "spy_stress_window": 21,
+    "spy_stress_vol_threshold": 0.3
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

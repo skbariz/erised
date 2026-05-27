@@ -29,9 +29,9 @@ Falsification: Premium disappears after removing high-distress names (pure distr
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.570 |
+| 95% CI | [0.173, 0.952] |
+| CAGR | 13.27% |
+| Max DD | -63.71% |
+| H001 corr | -0.004 |
+| Decision | KEEP |

@@ -31,9 +31,9 @@ just bad ones, in stress periods.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.929 |
+| 95% CI | [0.522, 1.336] |
+| CAGR | 18.27% |
+| Max DD | -54.83% |
+| H001 corr | -0.002 |
+| Decision | KEEP |

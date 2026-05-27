@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H276",
+  "name": "negative-skewness-avoidance",
+  "strategy_class": "NegativeSkewnessAvoidance",
+  "family": "skew tail risk",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 1.0618,
+  "ci_low": 0.6607,
+  "ci_high": 1.4765,
+  "cagr": 0.2102,
+  "max_drawdown": -0.5044,
+  "n_trades": 1,
+  "h001_corr": 0.0034,
+  "fold_sharpes": [
+    1.618,
+    1.279,
+    1.03,
+    2.077,
+    1.383,
+    0.213,
+    0.905,
+    2.382,
+    0.956,
+    1.737,
+    1.173,
+    0.926
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Negative skewness avoidance: long most positive 252d rolling skewness stocks. Harvey & Siddique (2000) \u2014 negative skew stocks earn higher returns as compensation; positive skew stocks are overpriced lottery names. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "skew_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

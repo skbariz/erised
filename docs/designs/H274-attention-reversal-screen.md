@@ -29,9 +29,9 @@ Falsification: MAX21 + vol spike alone drive all the predictive power (GP qualit
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.941 |
+| 95% CI | [0.537, 1.360] |
+| CAGR | 15.62% |
+| Max DD | -42.52% |
+| H001 corr | -0.005 |
+| Decision | KEEP |

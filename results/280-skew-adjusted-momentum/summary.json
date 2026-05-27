@@ -1,0 +1,47 @@
+{
+  "hypothesis": "H280",
+  "name": "skew-adjusted-momentum",
+  "strategy_class": "SkewAdjustedMomentum",
+  "family": "skew tail risk",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9526,
+  "ci_low": 0.55,
+  "ci_high": 1.3654,
+  "cagr": 0.1758,
+  "max_drawdown": -0.5162,
+  "n_trades": 1,
+  "h001_corr": 0.0018,
+  "fold_sharpes": [
+    1.483,
+    1.265,
+    1.106,
+    1.566,
+    1.064,
+    -0.177,
+    0.887,
+    2.147,
+    1.072,
+    1.674,
+    1.161,
+    0.792
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Skew-adjusted momentum: mom_pct - 0.4*coskewness_pct - 0.3*cvar_pct. Momentum minus tail risk penalties (coskewness + CVaR). Removes high-crash-sensitivity names from momentum portfolio. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "cosk_window": 252,
+    "cvar_window": 252,
+    "cvar_pct": 0.05,
+    "cosk_weight": 0.4,
+    "cvar_weight": 0.3,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

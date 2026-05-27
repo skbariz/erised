@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H273",
+  "name": "price-breakout-momentum",
+  "strategy_class": "PriceBreakoutMomentum",
+  "family": "momentum lifecycle",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.5684,
+  "ci_low": 0.146,
+  "ci_high": 0.9747,
+  "cagr": 0.1,
+  "max_drawdown": -0.6499,
+  "n_trades": 13,
+  "h001_corr": 0.0056,
+  "fold_sharpes": [
+    0.201,
+    0.738,
+    0.233,
+    1.444,
+    0.933,
+    -1.03,
+    0.436,
+    2.406,
+    0.564,
+    2.187,
+    0.389,
+    1.412
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "63-day price breakout momentum: close > prior day's 63d rolling max. George & Hwang (2004) short-window variant vs H195 (252d). No volume gate (volume unavailable). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "breakout_window": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

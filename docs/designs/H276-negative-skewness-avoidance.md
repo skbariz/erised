@@ -30,9 +30,9 @@ Falsification: H197 correlation > 0.85 — skewness and downside beta measure th
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 1.062 |
+| 95% CI | [0.661, 1.477] |
+| CAGR | 21.02% |
+| Max DD | -50.44% |
+| H001 corr | +0.003 |
+| Decision | KEEP |

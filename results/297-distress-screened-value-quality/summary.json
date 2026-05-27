@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H297",
+  "name": "distress-screened-value-quality",
+  "strategy_class": "DistressScreenedValueQuality",
+  "family": "distress",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8018,
+  "ci_low": 0.4162,
+  "ci_high": 1.2006,
+  "cagr": 0.114,
+  "max_drawdown": -0.3513,
+  "n_trades": 17,
+  "h001_corr": -0.0078,
+  "fold_sharpes": [
+    0.0,
+    0.363,
+    1.111,
+    -0.088,
+    0.0,
+    -0.006,
+    0.752,
+    1.939,
+    1.063,
+    2.018,
+    0.949,
+    1.015
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA + earnings yield quality-value score, filtered by CHS-inspired distress. CHS distress: z(leverage) + z(-ROA) + z(-12m_mom) + z(vol12m) + z(-NWC/TA). Keep bottom-half distress names (low financial stress). Tests if distress-screening adds to quality-value composite (H232: 0.864).",
+  "canonical_params": {
+    "distress_pct": 0.5,
+    "mom_window": 252,
+    "mom_skip": 21,
+    "vol_window": 252,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

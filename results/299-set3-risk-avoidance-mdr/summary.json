@@ -1,0 +1,55 @@
+{
+  "hypothesis": "H299",
+  "name": "set3-risk-avoidance-mdr",
+  "strategy_class": "Set3RiskAvoidanceMDR",
+  "family": "ensemble",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 1.0379,
+  "ci_low": 0.6281,
+  "ci_high": 1.4446,
+  "cagr": 0.1316,
+  "max_drawdown": -0.3379,
+  "n_trades": 0,
+  "h001_corr": -0.0129,
+  "fold_sharpes": [
+    1.219,
+    1.257,
+    0.819,
+    1.545,
+    1.411,
+    -0.019,
+    0.81,
+    2.303,
+    0.992,
+    1.927,
+    1.304,
+    1.112
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over 5 Set 3 strategies: H268 (GP/TA decile), H265 (sustainability GP), H254 (tail risk), H287 (investment efficiency), H284 (coverage-adjusted momentum). Top weights: {'H268': 0.11386287514874308, 'H265': 0.342912965706266, 'H254': 0.2955763564330216, 'H287': 0.14757747158318044, 'H284': 0.10007033112878895}. Equal-weight baseline: Sharpe 1.034.",
+  "canonical_params": {
+    "n_strategies": 5,
+    "method": "SLSQP",
+    "candidates": [
+      "H268",
+      "H265",
+      "H254",
+      "H287",
+      "H284"
+    ],
+    "top_weights": {
+      "H268": 0.11386287514874308,
+      "H265": 0.342912965706266,
+      "H254": 0.2955763564330216,
+      "H287": 0.14757747158318044,
+      "H284": 0.10007033112878895
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

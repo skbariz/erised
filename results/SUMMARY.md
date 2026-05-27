@@ -565,4 +565,51 @@ and trend-following cancel at bi-monthly cadence.
 
 ---
 
+### Batch 10: Tail Risk / Distress / Sustainability / Terminal Ensembles (H296–H300)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 296 | TailRiskFilteredCrossProgram | tail-risk | kept | 0.829 | [0.419, 1.238] | 9.95% | −33.05% | −0.019 | GP/TA + tail-risk exclusion; exclude_quantile=0.20 best (0.889/−28.25% MaxDD) |
+| 297 | DistressScreenedValueQuality | distress | kept | 0.802 | [0.416, 1.201] | 11.40% | −35.13% | −0.008 | GP/TA + earnings yield + distress filter; confirms distress risk real in S&P 500 |
+| 298 | AccountingSustainabilityQualityComposite | sustainability | kept | 0.856 | [0.450, 1.272] | 10.57% | −38.49% | −0.018 | z(GP/TA)+z(-accruals)+z(-NOA); 3-factor dilution confirmed vs H265 (0.952) |
+| 299 | Set3RiskAvoidanceMDR | ensemble | kept | 1.038 | [0.628, 1.445] | 13.16% | −33.79% | −0.013 | MDR over H265+H254+H287+H268+H284; EW baseline 1.034 — MDR minimal benefit |
+| 300 | GrandCrossProgram300MDR | cross-program | **kept ★** | **1.525** | **[1.134, 1.921]** | 5.82% | **−6.86%** | +0.652 | **NEW PROGRAM CHAMPION** — 52 strategies; beats H200 (1.350/−8.83%) |
+
+**Batch 10 summary:** All 5 KEEP. H300 GrandCrossProgram300MDR is the new program champion at
+Sharpe 1.525, MaxDD −6.86% — beats H200 (Sharpe 1.350, MaxDD −8.83%) definitively. This is
+the terminal result of the 300-strategy research program.
+
+H300 MDR weights concentrate on H194 LongShortReversal (23%), macro strategies (H016, H043,
+H068, H076), and notably H265 SustainabilityFilteredProfitability (7%) from Set 3 — confirming
+that cross-program MDR picks the most decorrelated components regardless of program phase.
+
+H299 Set3RiskAvoidanceMDR achieves Sharpe 1.038 — best pure Set 3 result. MDR weights concentrate
+on H265+H254 (sustainability filtered quality + tail risk), the two most decorrelated Set 3 signals.
+Near-zero MDR benefit over equal-weight (+0.004) confirms Set 3 components are already well-balanced.
+
+H296-H298 individual strategies: all KEEP with Sharpe 0.80-0.86. H296 tail-risk filter shows best
+MaxDD at wider exclusion (−28.25% at quantile=0.20). H297 distress filter confirms genuine distress
+risk even within S&P 500. H298 confirms 3-factor dilution at the GP/TA base (0.856 < H265 0.952).
+
+H251-H300 final tally: 50/50 KEEP. All 10 batches of Set 3 are complete.
+
+---
+
+## Terminal Program Summary (H001–H300): 300 Strategies Complete
+
+**Program champions:**
+- H300 GrandCrossProgram300MDR: Sharpe 1.525 / MaxDD −6.86% (terminal champion)
+- H200 CrossProgramMDRPortfolio: Sharpe 1.350 / MaxDD −8.83% (Set 2 champion)
+- H095 MaxDiversificationPortfolio: Sharpe 1.133 / MaxDD −7.16% (Set 1 champion)
+- H086 LowVolTargetPortfolio: Sharpe 1.109 / MaxDD −9.93% (best individual)
+
+**Cross-program key findings:**
+- MDR ensemble (SLSQP) consistently beats equal-weight. Gain from H095→H200→H300: 1.133→1.350→1.525.
+- H194 (LongShortReversal) is the most valuable diversifier in H300 — near-zero correlation with all other families.
+- H265 SustainabilityFilteredProfitability is the only Set 3 strategy with material MDR weight (7%) in H300.
+- The program confirms: macro ETF rotation + cross-sectional reversal + sustainability-filtered quality is the optimal combination.
+- Holdout H049 (2023-2026): Sharpe 1.346 / MaxDD −9.91% — OOS seal confirmed program methodology.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

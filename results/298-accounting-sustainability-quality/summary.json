@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H298",
+  "name": "accounting-sustainability-quality",
+  "strategy_class": "AccountingSustainabilityQualityComposite",
+  "family": "sustainability",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8557,
+  "ci_low": 0.4495,
+  "ci_high": 1.272,
+  "cagr": 0.1057,
+  "max_drawdown": -0.3849,
+  "n_trades": 1,
+  "h001_corr": -0.0184,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.906,
+    0.719,
+    2.281,
+    1.203,
+    1.911,
+    1.107,
+    1.022
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-factor accounting sustainability: z(GP/TA) + z(-accruals) + z(-NOA). GP/TA (productive assets), low accruals (cash-backed earnings), low NOA (lean balance sheet). accruals = (NI-OCF)/TA; noa = (TA-CL)/TA. Direct test of 3-factor dilution vs H265 2-factor filtered quality (Sharpe 0.952).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

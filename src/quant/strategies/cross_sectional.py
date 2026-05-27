@@ -7228,3 +7228,253 @@ class SkewAdjustedMomentum(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H281: GrossProfitImprovementFactor
+# ---------------------------------------------------------------------------
+
+
+class GrossProfitImprovementFactor(CrossSectionalStrategy):
+    """H281: Long top-quintile by YoY gross profit dollar growth, sector-neutral.
+
+    Distinct from GP/revenue level (H266), GP margin change (H267), GP/TA (H268),
+    and NI change (H180). Tests whether GP dollar expansion predicts returns.
+    """
+
+    name = "gross_profit_improvement_factor"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+    ):
+        self.gross_profit = gross_profit
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        gp_lag = gp.shift(self.yoy_window)
+        gp_change = (gp - gp_lag) / gp_lag.abs().replace(0, np.nan)
+        gp_change = gp_change.clip(-5, 5)
+        daily_w = _sector_neutral_weights(
+            gp_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H282: RevenueGrowthFactor
+# ---------------------------------------------------------------------------
+
+
+class RevenueGrowthFactor(CrossSectionalStrategy):
+    """H282: Long top-quintile by YoY revenue dollar growth, sector-neutral.
+
+    Pure top-line growth signal. Distinct from H181 (requires NI growth too),
+    H267 (GP margin change), and H281 (GP dollar growth, not total revenue).
+    """
+
+    name = "revenue_growth_factor"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+    ):
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_lag = rev.shift(self.yoy_window)
+        rev_change = (rev - rev_lag) / rev_lag.abs().replace(0, np.nan)
+        rev_change = rev_change.clip(-5, 5)
+        daily_w = _sector_neutral_weights(
+            rev_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H283: OCFGrowthFactor
+# ---------------------------------------------------------------------------
+
+
+class OCFGrowthFactor(CrossSectionalStrategy):
+    """H283: Long top-quintile by YoY operating cash flow growth, sector-neutral.
+
+    Cash flow growth as standalone signal. Distinct from H183 (OCF/NI ratio as
+    filter on NI change) and H281/H282 (GP and revenue growth). Tests whether
+    OCF expansion itself — not cash backing of earnings — predicts returns.
+    """
+
+    name = "ocf_growth_factor"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+    ):
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ocf_lag = ocf.shift(self.yoy_window)
+        ocf_change = (ocf - ocf_lag) / ocf_lag.abs().replace(0, np.nan)
+        ocf_change = ocf_change.clip(-5, 5)
+        daily_w = _sector_neutral_weights(
+            ocf_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H284: LowCoverageMomentumProxy
+# ---------------------------------------------------------------------------
+
+
+class LowCoverageMomentumProxy(CrossSectionalStrategy):
+    """H284: Momentum × idiosyncratic-vol trajectory as analyst-coverage proxy.
+
+    Hong, Lim & Stein (2000): momentum stronger in low-coverage firms.
+    Proxy: idio-vol ratio = rolling_std(idio_ret, 63d) / rolling_std(idio_ret, 252d).
+    Low ratio = quiet information phase = low-coverage proxy.
+    Score = z(momentum_12_1) - z(idio_vol_ratio).
+    Distinct from H271 (total vol level, not idio-vol ratio).
+    """
+
+    name = "low_coverage_momentum_proxy"
+
+    def __init__(
+        self,
+        spy_prices: pd.Series,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        beta_window: int = 63,
+        ivol_short: int = 63,
+        ivol_long: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.spy_prices = spy_prices
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.beta_window = beta_window
+        self.ivol_short = ivol_short
+        self.ivol_long = ivol_long
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        spy_rets = self.spy_prices.pct_change().reindex(prices_panel.index).fillna(0.0)
+
+        # Momentum 12-1
+        mom = prices_panel.shift(self.skip_window) / prices_panel.shift(self.mom_window) - 1
+
+        # Rolling beta over beta_window, then idio_ret = stock_ret - beta * spy_ret
+        spy_var = spy_rets.rolling(self.beta_window, min_periods=self.beta_window // 4).var()
+        # Cross-covariance using axis=0 broadcasting
+        spy_mean = spy_rets.rolling(self.beta_window, min_periods=self.beta_window // 4).mean()
+        cov_ri_rm = rets.mul(spy_rets, axis=0).rolling(
+            self.beta_window, min_periods=self.beta_window // 4
+        ).mean() - rets.rolling(self.beta_window, min_periods=self.beta_window // 4).mean().mul(
+            spy_mean, axis=0
+        )
+        beta = cov_ri_rm.div(spy_var.replace(0, np.nan), axis=0)
+        idio_ret = rets - beta.mul(spy_rets, axis=0)
+
+        ivol_short = idio_ret.rolling(self.ivol_short, min_periods=self.ivol_short // 4).std()
+        ivol_long = idio_ret.rolling(self.ivol_long, min_periods=self.ivol_long // 4).std()
+        ivol_ratio = ivol_short / ivol_long.replace(0, np.nan)
+
+        score = _cs_zscore(mom) - _cs_zscore(ivol_ratio)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H285: FundamentalMomentumComposite (EarningsAttentionComposite)
+# ---------------------------------------------------------------------------
+
+
+class FundamentalMomentumComposite(CrossSectionalStrategy):
+    """H285: z(GP_change) + z(NI_change) + z(6m_momentum) — earnings attention composite.
+
+    Combines GP improvement (H281), NI improvement (H180 analog), and 6m price
+    confirmation. Distinct from H184 (NI+63d_mom only). Tests whether adding GP
+    growth and using medium-term momentum amplifies earnings drift.
+    """
+
+    name = "fundamental_momentum_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        yoy_window: int = 252,
+        mom_window: int = 126,
+    ):
+        self.gross_profit = gross_profit
+        self.net_income = net_income
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.yoy_window = yoy_window
+        self.mom_window = mom_window
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+
+        gp_lag = gp.shift(self.yoy_window)
+        ni_lag = ni.shift(self.yoy_window)
+        gp_change = (gp - gp_lag) / gp_lag.abs().replace(0, np.nan)
+        ni_change = (ni - ni_lag) / ni_lag.abs().replace(0, np.nan)
+        gp_change = gp_change.clip(-5, 5)
+        ni_change = ni_change.clip(-5, 5)
+
+        mom_6m = prices_panel / prices_panel.shift(self.mom_window) - 1
+
+        score = _cs_zscore(gp_change) + _cs_zscore(ni_change) + _cs_zscore(mom_6m)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

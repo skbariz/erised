@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H306",
+  "name": "funding-stress-monitor",
+  "strategy_class": "FundingStressMonitor",
+  "family": "funding stress",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.7281,
+  "ci_low": 0.3323,
+  "ci_high": 1.1201,
+  "cagr": 0.0559,
+  "max_drawdown": -0.1758,
+  "n_trades": 5023,
+  "h001_corr": 0.5431,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.461,
+    0.858,
+    0.835,
+    0.839,
+    -0.102,
+    1.116,
+    1.767,
+    0.626,
+    0.806,
+    0.002
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 scaled by 3-signal composite funding stress. stress = mean(VIX 252d percentile, credit_stress (HYG<LQD 63d), vol_accel (21d>1.5\u00d763d)). scale = max(0.40, 1 - 0.5*stress). Pre-HYG era: 2-signal composite.",
+  "canonical_params": {
+    "stress_sensitivity": 0.5,
+    "min_scale": 0.4,
+    "vix_pctile_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

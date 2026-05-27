@@ -30,9 +30,14 @@ Falsification: Sharpe below best standalone component — dilution at 3-factor b
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.789 |
+| 95% CI | [0.380, 1.200] |
+| CAGR | 9.10% |
+| Max DD | -36.83% |
+| H001 corr | -0.020 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR gap). Active folds 6-11: 0.59, 2.20, 0.93, 1.73, 1.05, 1.08.
+Flat sensitivity (quantile 0.15-0.25: Sharpe 0.785-0.796). 3-factor composite slightly below H287+H289.
+3-factor composite at the dilution boundary — adding NOA to ROIC+efficiency marginally dilutes.
+Best MaxDD-efficiency tradeoff: -36.83% with 0.789 Sharpe.

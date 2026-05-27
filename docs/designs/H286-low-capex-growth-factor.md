@@ -30,9 +30,14 @@ Falsification: H263 corr > 0.85 — capex growth is just lagged capex level.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.676 |
+| 95% CI | [0.274, 1.083] |
+| CAGR | 7.45% |
+| Max DD | -37.18% |
+| H001 corr | -0.014 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR gap). Active folds 6-11: 0.15, 1.88, 0.69, 2.10, 0.82, 0.88.
+Flat sensitivity (quantile 0.15-0.25: Sharpe 0.672-0.688). Weakest in batch.
+2nd derivative of capex is noisier than 1st derivative level (H263: 0.794).
+Acceleration signal adds some value but fold 6 (0.149) shows weak early activation.

@@ -29,9 +29,13 @@ Falsification: Ratio collapses to revenue growth alone (capex denominator adds n
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.790 |
+| 95% CI | [0.386, 1.199] |
+| CAGR | 9.09% |
+| Max DD | -34.66% |
+| H001 corr | -0.020 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR gap). Active folds 6-11: 0.66, 2.19, 0.77, 1.68, 1.12, 1.06.
+Flat sensitivity (capex_floor 0.005-0.020: Sharpe 0.782-0.794). Best MaxDD in batch (-34.66%).
+Productivity ratio beats both standalone components. Revenue growth per capex unit is a genuine signal.

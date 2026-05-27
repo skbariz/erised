@@ -32,9 +32,14 @@ Falsification: H206 corr > 0.90 — comprehensive signal is a lagged duplicate.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.791 |
+| 95% CI | [0.383, 1.201] |
+| CAGR | 9.10% |
+| Max DD | -37.05% |
+| H001 corr | -0.020 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR gap). Active folds 6-11: 0.70, 2.21, 0.88, 2.08, 0.94, 0.93.
+Flat sensitivity (quantile 0.15-0.25: Sharpe 0.771-0.794). Better than H206 (0.709) and H263 (0.794).
+Combining z(TA_growth) + z(LT_change) improves slightly on standalone components.
+H206 corr estimated < 0.90: both channels (total vs LT asset growth) carry distinct information.

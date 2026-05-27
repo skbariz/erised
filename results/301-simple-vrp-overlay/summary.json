@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H301",
+  "name": "simple-vrp-overlay",
+  "strategy_class": "SimpleVRPOverlay",
+  "family": "VRP timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6329,
+  "ci_low": 0.2409,
+  "ci_high": 1.0314,
+  "cagr": 0.0552,
+  "max_drawdown": -0.2747,
+  "n_trades": 5023,
+  "h001_corr": 0.5358,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.307,
+    0.551,
+    0.508,
+    0.645,
+    -0.615,
+    1.07,
+    2.168,
+    0.879,
+    0.705,
+    0.107
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 inverse-vol weights \u00d7 VRP z-score exposure scaler in [0.5, 1.5]. VRP = (VIX/100)^2 - realized_var_21d * 252. Positive VRP \u2192 increase exposure; negative \u2192 reduce. Z-score computed over 252d rolling window.",
+  "canonical_params": {
+    "vrp_sensitivity": 0.25,
+    "vrp_window": 252,
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

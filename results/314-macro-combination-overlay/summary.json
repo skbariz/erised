@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H314",
+  "name": "macro-combination-overlay",
+  "strategy_class": "MacroCombinationOverlay",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6409,
+  "ci_low": 0.2435,
+  "ci_high": 1.0345,
+  "cagr": 0.0522,
+  "max_drawdown": -0.2314,
+  "n_trades": 5023,
+  "h001_corr": 0.5325,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.426,
+    0.585,
+    0.572,
+    0.74,
+    -0.426,
+    1.127,
+    1.987,
+    0.716,
+    0.66,
+    0.034
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-signal macro ensemble: VRP (+1/-1), TLT vs SHY 252d (+1/-1), HYG vs LQD 63d (+1/-1/0). Sum \u22652: 1.20\u00d7 scale; =1: 1.05\u00d7; =0: 0.90\u00d7; \u2264-1: 0.75\u00d7. Rapach-Zhou (2010): forecast combinations outperform individual predictors.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

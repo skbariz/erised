@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H289",
+  "name": "asset-growth-penalty",
+  "strategy_class": "AssetGrowthPenalty",
+  "family": "capital discipline",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7912,
+  "ci_low": 0.3828,
+  "ci_high": 1.2009,
+  "cagr": 0.091,
+  "max_drawdown": -0.3705,
+  "n_trades": 1,
+  "h001_corr": -0.02,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.7,
+    2.211,
+    0.878,
+    2.08,
+    0.936,
+    0.93
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Comprehensive investment activity: z(total_asset_growth_1yr) + z(lt_asset_change/TA). Combines H206 signal (total TA growth) with H263 signal (LT asset change). Bottom quintile = most investment-disciplined across both channels. Sector-neutral bottom 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

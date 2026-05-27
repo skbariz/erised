@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H287",
+  "name": "investment-efficiency-ratio",
+  "strategy_class": "InvestmentEfficiencyRatio",
+  "family": "capital discipline",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7899,
+  "ci_low": 0.3863,
+  "ci_high": 1.1987,
+  "cagr": 0.0909,
+  "max_drawdown": -0.3466,
+  "n_trades": 1,
+  "h001_corr": -0.0204,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    2.193,
+    0.772,
+    1.682,
+    1.117,
+    1.055
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Investment productivity: rev_growth / (capex_intensity + 0.01). capex_intensity = (TA-CA change)/TA (LT asset change fraction). High ratio = revenue from modest capital = productive investment. Distinct from H286 (avoids high capex acceleration). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "window": 252,
+    "capex_floor": 0.01
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

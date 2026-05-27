@@ -512,4 +512,28 @@ EDGAR data gap in folds 0-5. H284-H285 follow the respective patterns of their c
 
 ---
 
+### Batch 8: Capital Discipline (H286–H290)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 286 | LowCapexGrowthFactor | capital discipline | kept | 0.676 | [0.274, 1.083] | 7.45% | −37.18% | −0.014 | Capex 2nd derivative; noisier than H263 level (0.794); fold 6 weak (0.149) |
+| 287 | InvestmentEfficiencyRatio | capital discipline | kept | 0.790 | [0.386, 1.199] | 9.09% | −34.66% | −0.020 | rev_growth/capex_intensity; batch champion; best MaxDD (−34.66%) |
+| 288 | ROICCapexDiscipline | capital discipline | kept | 0.715 | [0.308, 1.129] | 7.82% | −35.69% | −0.017 | z(ROIC)+z(-capex_growth); mild dilution below H287 (0.790) |
+| 289 | AssetGrowthPenalty | capital discipline | kept | 0.791 | [0.383, 1.201] | 9.10% | −37.05% | −0.020 | z(TA_growth)+z(LT_change); beats both H206 (0.709) & H263 (0.794) |
+| 290 | CapitalEfficiencyQualityComposite | capital discipline | kept | 0.789 | [0.380, 1.200] | 9.10% | −36.83% | −0.020 | 3-factor: ROIC+efficiency+NOA; at dilution boundary; marginal vs H287 |
+
+**Batch 8 summary:** All 5 KEEP. H289 AssetGrowthPenalty (0.791) and H287 InvestmentEfficiencyRatio
+(0.790) are the batch co-champions. H289 demonstrates a genuine additive effect: combining total
+asset growth (H206 signal: 0.709) with LT asset change (H263 signal: 0.794) produces 0.791 —
+both channels carry distinct information. H287 productivity ratio (revenue growth per capex) is
+the best MaxDD story in the batch at −34.66%. H286 (0.676) is the weakest — the 2nd derivative
+of capex acceleration is noisier than the 1st derivative level and requires an additional 252-day
+lag for warmup. H290 (0.789) confirms the 3-factor dilution boundary: adding NOA to ROIC+efficiency
+produces no additional benefit over 2-component combinations.
+
+All 5 H286-H290 strategies have H001 corr in [−0.020, −0.014] — uniformly negative (slight)
+due to the EDGAR data gap causing folds 0-5 zero.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

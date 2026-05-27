@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H286",
+  "name": "low-capex-growth",
+  "strategy_class": "LowCapexGrowthFactor",
+  "family": "capital discipline",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.6759,
+  "ci_low": 0.2744,
+  "ci_high": 1.0835,
+  "cagr": 0.0745,
+  "max_drawdown": -0.3718,
+  "n_trades": 1,
+  "h001_corr": -0.014,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.149,
+    1.881,
+    0.692,
+    2.096,
+    0.823,
+    0.884
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Titman et al. (2004) capex-acceleration proxy. delta_lt = (TA-CA change)/TA; capex_growth = (delta_lt - delta_lt.shift(252)) / |delta_lt.shift(252)|, clipped [-10,10]. 2nd derivative of LT asset change. Distinct from H263 (1st derivative level). Sector-neutral bottom 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

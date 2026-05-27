@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H288",
+  "name": "roic-capex-discipline",
+  "strategy_class": "ROICCapexDiscipline",
+  "family": "capital discipline",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7154,
+  "ci_low": 0.3081,
+  "ci_high": 1.1294,
+  "cagr": 0.0782,
+  "max_drawdown": -0.3569,
+  "n_trades": 1,
+  "h001_corr": -0.0167,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.177,
+    1.975,
+    0.84,
+    1.924,
+    1.038,
+    0.954
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Capital discipline composite: z(ROIC) + z(-capex_growth). ROIC = NI/(TA-CL); capex_growth = 2nd derivative of LT asset change. Rewards high earnings quality + restraint from accelerating investment. Distinct from H287 (productivity ratio). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H290",
+  "name": "capital-efficiency-quality",
+  "strategy_class": "CapitalEfficiencyQualityComposite",
+  "family": "capital discipline",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7885,
+  "ci_low": 0.3804,
+  "ci_high": 1.2003,
+  "cagr": 0.091,
+  "max_drawdown": -0.3683,
+  "n_trades": 1,
+  "h001_corr": -0.0195,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.59,
+    2.196,
+    0.933,
+    1.729,
+    1.054,
+    1.083
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-factor capital quality composite: z(ROIC) + z(investment_efficiency) + z(-NOA). ROIC=NI/(TA-CL), efficiency=rev_growth/(capex_intensity+0.01), NOA=(TA-CL)/TA. Tests 3-factor dilution boundary (program finding: >2-3 factors dilute). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "window": 252,
+    "capex_floor": 0.01
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

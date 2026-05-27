@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H302",
+  "name": "vrp-risk-parity-scaled",
+  "strategy_class": "VRPRiskParityScaled",
+  "family": "VRP timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6765,
+  "ci_low": 0.2858,
+  "ci_high": 1.0687,
+  "cagr": 0.0591,
+  "max_drawdown": -0.2506,
+  "n_trades": 5023,
+  "h001_corr": 0.5397,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.329,
+    0.724,
+    0.536,
+    0.75,
+    -0.407,
+    1.223,
+    2.035,
+    0.88,
+    0.626,
+    0.106
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 weights \u00d7 3-tier VRP percentile multiplier. VRP > 252d 70th pctile \u2192 1.25\u00d7; < 30th pctile \u2192 0.75\u00d7; middle \u2192 1.0\u00d7. Discrete tiers reduce whipsaw vs continuous z-score (H301).",
+  "canonical_params": {
+    "high_pctile": 0.7,
+    "low_pctile": 0.3,
+    "high_scale": 1.25,
+    "low_scale": 0.75,
+    "vrp_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H311",
+  "name": "term-spread-spy-timer",
+  "strategy_class": "TermSpreadSPYTimer",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6079,
+  "ci_low": 0.2045,
+  "ci_high": 0.9987,
+  "cagr": 0.0517,
+  "max_drawdown": -0.219,
+  "n_trades": 5023,
+  "h001_corr": 0.4156,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.414,
+    0.516,
+    0.456,
+    0.711,
+    -0.137,
+    1.171,
+    1.966,
+    0.083,
+    0.794,
+    -0.017
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with TLT vs SHY 252d return as term spread proxy. Inverted curve (SHY > TLT 252d) \u2192 SPY weight \u00d7 0.50; freed weight to TLT. Normal curve \u2192 H021 unchanged. Goyal-Welch (2008): term spread predicts equity premium.",
+  "canonical_params": {
+    "spread_lookback": 252,
+    "spy_scale": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

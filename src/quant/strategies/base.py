@@ -3433,11 +3433,17 @@ class PCARiskRegime(MultiAssetStrategy):
         spy_r = prices["adj_close"].pct_change()
         tlt_r = prices["tlt_close"].pct_change()
         has_gld = "gld_close" in prices.columns
-        gld_r = prices["gld_close"].pct_change() if has_gld else pd.Series(np.nan, index=prices.index)
+        gld_r = (
+            prices["gld_close"].pct_change() if has_gld else pd.Series(np.nan, index=prices.index)
+        )
 
         spy_cum = prices["adj_close"].pct_change(self.signal_days)
         tlt_cum = prices["tlt_close"].pct_change(self.signal_days)
-        gld_cum = prices["gld_close"].pct_change(self.signal_days) if has_gld else pd.Series(np.nan, index=prices.index)
+        gld_cum = (
+            prices["gld_close"].pct_change(self.signal_days)
+            if has_gld
+            else pd.Series(np.nan, index=prices.index)
+        )
 
         n = len(prices)
         score_arr = np.full(n, np.nan)
@@ -3450,7 +3456,9 @@ class PCARiskRegime(MultiAssetStrategy):
             n_gld_valid = int(np.sum(~np.isnan(w_gld)))
             if n_gld_valid > self.pca_lookback // 2:
                 ret_mat = np.column_stack([w_spy, w_tlt, w_gld])
-                sig = np.array([spy_cum.values[i - 1], tlt_cum.values[i - 1], gld_cum.values[i - 1]])
+                sig = np.array(
+                    [spy_cum.values[i - 1], tlt_cum.values[i - 1], gld_cum.values[i - 1]]
+                )
             else:
                 ret_mat = np.column_stack([w_spy, w_tlt])
                 sig = np.array([spy_cum.values[i - 1], tlt_cum.values[i - 1]])
@@ -3659,9 +3667,7 @@ class SectorETFMomentum(MultiAssetStrategy):
         mom_df = pd.DataFrame(
             {a: prices[col].pct_change(self.mom_window) for a, col in available.items()}
         )
-        ret_df = pd.DataFrame(
-            {a: prices[col].pct_change() for a, col in available.items()}
-        )
+        ret_df = pd.DataFrame({a: prices[col].pct_change() for a, col in available.items()})
         vol_df = ret_df.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
         # Fill NaN vol with 1.0 so inv-vol is equal-weight when history is short
         inv_vol_df = vol_df.replace(0, np.nan).rdiv(1).fillna(1.0)
@@ -3724,9 +3730,7 @@ class SectorMomentumRiskParity(MultiAssetStrategy):
         )
 
         # 60d vol for equity ETFs, TLT, SPY
-        ret_df = pd.DataFrame(
-            {a: prices[col].pct_change() for a, col in available.items()}
-        )
+        ret_df = pd.DataFrame({a: prices[col].pct_change() for a, col in available.items()})
         vol_etf = ret_df.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
 
         tlt_r = prices[tlt_col].pct_change() if has_tlt else pd.Series(np.nan, index=prices.index)
@@ -3741,7 +3745,9 @@ class SectorMomentumRiskParity(MultiAssetStrategy):
             winner.loc[winner_valid] = mom_df.loc[winner_valid].idxmax(axis=1, skipna=True)
 
         # Build output weight DataFrame covering all possible assets
-        all_assets = list(dict.fromkeys(list(available.keys()) + (["TLT"] if has_tlt else []) + ["SPY"]))
+        all_assets = list(
+            dict.fromkeys(list(available.keys()) + (["TLT"] if has_tlt else []) + ["SPY"])
+        )
         wdf = pd.DataFrame(0.0, index=prices.index, columns=all_assets)
 
         for date in prices.index:
@@ -3769,3 +3775,791 @@ class SectorMomentumRiskParity(MultiAssetStrategy):
                 wdf.loc[date, w_asset] = 1.0
 
         return wdf.shift(1).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H301-H315: Set 4 — VRP, Funding Stress, and Macro Timing
+# ---------------------------------------------------------------------------
+
+
+def _h021_weights(
+    spy_r: pd.Series, tlt_r: pd.Series, vol_lookback: int
+) -> tuple[pd.Series, pd.Series]:
+    """Shared H021 inverse-vol SPY/TLT weights."""
+    spy_vol = spy_r.rolling(vol_lookback, min_periods=vol_lookback).std().shift(1) * np.sqrt(252)
+    tlt_vol = tlt_r.rolling(vol_lookback, min_periods=vol_lookback).std().shift(1) * np.sqrt(252)
+    inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+    inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+    total = inv_spy + inv_tlt
+    return (inv_spy / total).fillna(0.0), (inv_tlt / total).fillna(0.0)
+
+
+def _vrp_series(spy_r: pd.Series, vix: pd.Series) -> pd.Series:
+    """VRP = annualized implied var (VIX^2) minus annualized realized var (21d)."""
+    implied_var = (vix.shift(1) / 100.0) ** 2
+    realized_var = spy_r.rolling(21, min_periods=10).var().shift(1) * 252
+    return (implied_var - realized_var).fillna(0.0)
+
+
+class SimpleVRPOverlay(MultiAssetStrategy):
+    """H301: H021 with VRP z-score bounded exposure scaler.
+
+    VRP = (VIX/100)^2 - realized_var_21d * 252  (both annualized).
+    Z-score of VRP over vrp_window bars, clipped to [-2, 2].
+    scale = 1.0 + vrp_sensitivity * vrp_z ∈ [0.5, 1.5] for vrp_sensitivity=0.25.
+    Positive VRP → increase exposure; negative VRP → reduce.
+    """
+
+    name = "simple_vrp_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        vrp_window: int = 252,
+        vrp_sensitivity: float = 0.25,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.vrp_window = vrp_window
+        self.vrp_sensitivity = vrp_sensitivity
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        vrp_mean = vrp.rolling(self.vrp_window, min_periods=63).mean()
+        vrp_std = vrp.rolling(self.vrp_window, min_periods=63).std().replace(0, np.nan)
+        vrp_z = ((vrp - vrp_mean) / vrp_std).clip(-2.0, 2.0).fillna(0.0)
+
+        scale = (1.0 + self.vrp_sensitivity * vrp_z).clip(0.5, 1.5)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class VRPRiskParityScaled(MultiAssetStrategy):
+    """H302: H021 with 3-tier VRP percentile exposure multiplier.
+
+    VRP > rolling 70th percentile → high_scale (1.25×).
+    VRP < rolling 30th percentile → low_scale (0.75×).
+    Middle tier → 1.0× (standard H021).
+    """
+
+    name = "vrp_risk_parity_scaled"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        vrp_window: int = 252,
+        high_pctile: float = 0.70,
+        low_pctile: float = 0.30,
+        high_scale: float = 1.25,
+        low_scale: float = 0.75,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.vrp_window = vrp_window
+        self.high_pctile = high_pctile
+        self.low_pctile = low_pctile
+        self.high_scale = high_scale
+        self.low_scale = low_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        hi = vrp.rolling(self.vrp_window, min_periods=63).quantile(self.high_pctile)
+        lo = vrp.rolling(self.vrp_window, min_periods=63).quantile(self.low_pctile)
+
+        scale_arr = np.where(vrp > hi, self.high_scale, np.where(vrp < lo, self.low_scale, 1.0))
+        scale = pd.Series(np.where(hi.isna() | lo.isna(), 1.0, scale_arr), index=prices.index)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class VRPTrendConfirm(MultiAssetStrategy):
+    """H303: H021 conditional on VRP + SPY 200d MA dual confirmation.
+
+    Both favorable (VRP > 0 AND SPY > MA): full_scale (1.0).
+    Exactly one favorable: partial_scale (0.85).
+    Neither favorable: min_scale (0.60).
+    """
+
+    name = "vrp_trend_confirm"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        ma_window: int = 200,
+        full_scale: float = 1.0,
+        partial_scale: float = 0.85,
+        min_scale: float = 0.60,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.ma_window = ma_window
+        self.full_scale = full_scale
+        self.partial_scale = partial_scale
+        self.min_scale = min_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        vrp_ok = (vrp > 0).fillna(False)
+
+        spy_ma = prices["adj_close"].rolling(self.ma_window, min_periods=self.ma_window // 2).mean()
+        trend_ok = (prices["adj_close"].shift(1) > spy_ma.shift(1)).fillna(False)
+
+        n_ok = vrp_ok.astype(float) + trend_ok.astype(float)
+        scale_arr = np.where(
+            n_ok >= 2, self.full_scale, np.where(n_ok == 1, self.partial_scale, self.min_scale)
+        )
+        scale = pd.Series(scale_arr, index=prices.index)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class VRPVolTarget(MultiAssetStrategy):
+    """H304: H086 vol-target with VRP z-score amplifier.
+
+    vol_scale = min(1, vol_target / port_vol)  [H086 mechanism].
+    vrp_factor = clip(1 + vrp_amplifier * vrp_z, 0.8, 1.2).
+    final_scale = min(max_scale, vol_scale * vrp_factor).
+    """
+
+    name = "vrp_vol_target"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        port_vol_lookback: int = 20,
+        vol_target: float = 0.08,
+        vrp_window: int = 252,
+        vrp_amplifier: float = 0.15,
+        max_scale: float = 1.25,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.port_vol_lookback = port_vol_lookback
+        self.vol_target = vol_target
+        self.vrp_window = vrp_window
+        self.vrp_amplifier = vrp_amplifier
+        self.max_scale = max_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        port_r = w_spy.shift(1) * spy_r + w_tlt.shift(1) * tlt_r
+        port_vol = port_r.rolling(
+            self.port_vol_lookback, min_periods=self.port_vol_lookback
+        ).std().shift(1) * np.sqrt(252)
+        vol_scale = (self.vol_target / port_vol).clip(upper=1.0)
+        vol_scale = vol_scale.where(port_vol.notna() & (port_vol > 0), 1.0)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        vrp_mean = vrp.rolling(self.vrp_window, min_periods=63).mean()
+        vrp_std = vrp.rolling(self.vrp_window, min_periods=63).std().replace(0, np.nan)
+        vrp_z = ((vrp - vrp_mean) / vrp_std).clip(-2.0, 2.0).fillna(0.0)
+
+        vrp_factor = (1.0 + self.vrp_amplifier * vrp_z).clip(0.8, 1.2)
+        scale = (vol_scale * vrp_factor).clip(upper=self.max_scale)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class VRPSeasonalHybrid(MultiAssetStrategy):
+    """H305: H078 seasonal framework + VRP overlay in Nov-Apr active window.
+
+    May-Oct: 100% TLT (same as H078).
+    Nov-Apr + VRP > 0: H021 at favorable_scale (1.0).
+    Nov-Apr + VRP ≤ 0: H021 weights * unfavorable_scale (0.75); remainder cash.
+    """
+
+    name = "vrp_seasonal_hybrid"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        unfavorable_scale: float = 0.75,
+        winter_months: tuple = (11, 12, 1, 2, 3, 4),
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.unfavorable_scale = unfavorable_scale
+        self.winter_months = frozenset(winter_months)
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy_rp, w_tlt_rp = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        vrp_positive = (vrp > 0).fillna(False)
+
+        in_season = pd.Series(prices.index.month.isin(self.winter_months), index=prices.index)
+        tlt_avail = prices["tlt_close"].notna()
+
+        # Start with H021 weights
+        w_spy = w_spy_rp.copy()
+        w_tlt = w_tlt_rp.copy()
+
+        # May-Oct: 100% TLT (if available) or SPY
+        summer = ~in_season
+        w_spy = w_spy.where(~summer, 0.0)
+        w_tlt = w_tlt.where(~summer, tlt_avail.astype(float))
+
+        # Nov-Apr, VRP unfavorable: scale down
+        winter_unfav = in_season & ~vrp_positive
+        w_spy = w_spy.where(~winter_unfav, w_spy_rp * self.unfavorable_scale)
+        w_tlt = w_tlt.where(~winter_unfav, w_tlt_rp * self.unfavorable_scale)
+
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# Batch 2: Funding Stress (H306-H310)
+# ---------------------------------------------------------------------------
+
+
+class FundingStressMonitor(MultiAssetStrategy):
+    """H306: H021 scaled by 3-signal composite funding stress index.
+
+    stress = mean(vix_pctile_252d, credit_stress, vol_accel)
+      credit_stress = 1 if HYG 63d return < LQD 63d return, else 0 (0 if unavailable)
+      vol_accel = 1 if SPY 21d vol > 1.5× SPY 63d vol, else 0
+      vix_pctile = rolling 252d percentile of VIX level ∈ [0, 1]
+    scale = max(min_scale, 1 - stress_sensitivity * stress)
+    """
+
+    name = "funding_stress_monitor"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        stress_sensitivity: float = 0.50,
+        min_scale: float = 0.40,
+        vix_pctile_window: int = 252,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.stress_sensitivity = stress_sensitivity
+        self.min_scale = min_scale
+        self.vix_pctile_window = vix_pctile_window
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vix = prices["vix_close"].shift(1)
+        vix_hi = vix.rolling(self.vix_pctile_window, min_periods=63).quantile(0.75)
+        vix_lo = vix.rolling(self.vix_pctile_window, min_periods=63).quantile(0.25)
+        vix_range = (vix_hi - vix_lo).replace(0, np.nan)
+        vix_pctile = ((vix - vix_lo) / vix_range).clip(0.0, 1.0).fillna(0.5)
+
+        spy_vol_21 = spy_r.rolling(21, min_periods=10).std().shift(1)
+        spy_vol_63 = spy_r.rolling(63, min_periods=30).std().shift(1)
+        vol_accel = (spy_vol_21 > spy_vol_63 * 1.5).fillna(False).astype(float)
+
+        n_signals = 2.0
+        credit_stress = pd.Series(0.0, index=prices.index)
+        if "hyg_close" in prices.columns and "lqd_close" in prices.columns:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            credit_ok = hyg_avail & hyg_ret.notna() & lqd_ret.notna()
+            credit_stress = (hyg_ret < lqd_ret).where(credit_ok, False).astype(float)
+            n_signals = 3.0
+
+        stress = (vix_pctile + credit_stress + vol_accel) / n_signals
+        scale = (1.0 - self.stress_sensitivity * stress).clip(lower=self.min_scale)
+
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class LiquiditySpiralProtection(MultiAssetStrategy):
+    """H307: H021 with triple-confirm liquidity spiral crisis override.
+
+    Crisis: VIX > vix_spike AND HYG 63d < LQD 63d AND SPY 21d vol > 2× 63d vol.
+    Crisis mode: crisis_tlt% TLT / (1-crisis_tlt)% SPY.
+    Exit: after resume_days consecutive non-crisis bars.
+    Pre-HYG era: 2-of-2 (VIX + vol acceleration) trigger.
+    """
+
+    name = "liquidity_spiral_protection"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        vix_spike: float = 35.0,
+        crisis_tlt: float = 0.90,
+        resume_days: int = 10,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.vix_spike = vix_spike
+        self.crisis_tlt = crisis_tlt
+        self.resume_days = resume_days
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vix = prices["vix_close"].shift(1).fillna(0.0)
+        spy_vol_21 = spy_r.rolling(21, min_periods=10).std().shift(1)
+        spy_vol_63 = spy_r.rolling(63, min_periods=30).std().shift(1)
+        vol_spike = (spy_vol_21 > spy_vol_63 * 2.0).fillna(False)
+
+        has_credit = "hyg_close" in prices.columns and "lqd_close" in prices.columns
+        if has_credit:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            credit_stress = (hyg_ret < lqd_ret).where(hyg_avail, False).fillna(False)
+            crisis_flag = (vix > self.vix_spike) & credit_stress & vol_spike
+            # Pre-credit era: use 2-of-2 VIX + vol
+            crisis_flag = crisis_flag.where(hyg_avail, (vix > self.vix_spike) & vol_spike)
+        else:
+            crisis_flag = (vix > self.vix_spike) & vol_spike
+
+        w_spy_out = w_spy.copy()
+        w_tlt_out = w_tlt.copy()
+        in_crisis = False
+        calm_count = 0
+
+        for i in range(len(prices)):
+            if crisis_flag.iloc[i]:
+                in_crisis = True
+                calm_count = 0
+            elif in_crisis:
+                calm_count += 1
+                if calm_count >= self.resume_days:
+                    in_crisis = False
+                    calm_count = 0
+            if in_crisis:
+                w_spy_out.iloc[i] = 1.0 - self.crisis_tlt
+                w_tlt_out.iloc[i] = self.crisis_tlt
+
+        return pd.DataFrame({"SPY": w_spy_out, "TLT": w_tlt_out}, index=prices.index)
+
+
+class CreditRegimeRiskParity(MultiAssetStrategy):
+    """H308: H021 with HYG vs LQD credit regime signal.
+
+    HYG 63d return > LQD 63d return → credit risk-on → H021 full.
+    LQD outperforming → credit risk-off → SPY weight * spy_scale; excess to TLT.
+    Pre-HYG era (pre-2007): H021 unmodified.
+    """
+
+    name = "credit_regime_risk_parity"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        credit_lookback: int = 63,
+        spy_scale: float = 0.60,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.credit_lookback = credit_lookback
+        self.spy_scale = spy_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        if "hyg_close" not in prices.columns or "lqd_close" not in prices.columns:
+            return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+        hyg_ret = prices["hyg_close"].pct_change(self.credit_lookback).shift(1)
+        lqd_ret = prices["lqd_close"].pct_change(self.credit_lookback).shift(1)
+        hyg_avail = prices["hyg_close"].notna()
+
+        credit_risk_off = (hyg_ret < lqd_ret) & hyg_avail & hyg_ret.notna()
+
+        freed = w_spy * (1.0 - self.spy_scale)
+        new_spy = w_spy.where(~credit_risk_off, w_spy * self.spy_scale)
+        new_tlt = w_tlt.where(~credit_risk_off, (w_tlt + freed).clip(upper=1.0))
+
+        return pd.DataFrame({"SPY": new_spy, "TLT": new_tlt}, index=prices.index)
+
+
+class MultiSignalStressAdjusted(MultiAssetStrategy):
+    """H309: H021 with 5-signal stress monitor and tiered exposure.
+
+    Signals: VIX>30, SPY 5% DD from 20d high, SHY>TLT 63d, HYG<LQD 63d, SPY vol accel.
+    Exposure tiers: 0=100%, 1=85%, 2=70%, 3=55%, 4+=40%.
+    Pre-HYG era (4 signals): 0=100%, 1=87%, 2=73%, 3+=40%.
+    """
+
+    name = "multi_signal_stress_adjusted"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        vix_threshold: float = 30.0,
+        dd_threshold: float = 0.05,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.vix_threshold = vix_threshold
+        self.dd_threshold = dd_threshold
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vix = prices["vix_close"].shift(1).fillna(0.0)
+        s1 = (vix > self.vix_threshold).astype(float)
+
+        spy_px = prices["adj_close"].shift(1)
+        rolling_hi = spy_px.rolling(20, min_periods=5).max()
+        dd = (spy_px / rolling_hi - 1.0).fillna(0.0)
+        s2 = (dd < -self.dd_threshold).astype(float)
+
+        has_shy = "shy_close" in prices.columns
+        s3 = pd.Series(0.0, index=prices.index)
+        if has_shy:
+            shy_ret = prices["shy_close"].pct_change(63).shift(1)
+            tlt_ret_63 = prices["tlt_close"].pct_change(63).shift(1)
+            s3 = (shy_ret > tlt_ret_63).fillna(False).astype(float)
+
+        has_credit = "hyg_close" in prices.columns and "lqd_close" in prices.columns
+        s4 = pd.Series(0.0, index=prices.index)
+        if has_credit:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            s4 = ((hyg_ret < lqd_ret) & hyg_avail).fillna(False).astype(float)
+
+        spy_vol_21 = spy_r.rolling(21, min_periods=10).std().shift(1)
+        spy_vol_63 = spy_r.rolling(63, min_periods=30).std().shift(1)
+        s5 = (spy_vol_21 > spy_vol_63 * 1.5).fillna(False).astype(float)
+
+        total = s1 + s2 + s3 + s4 + s5
+        tiers_5 = [1.0, 0.85, 0.70, 0.55, 0.40]
+        scale_arr = np.select(
+            [total == 0, total == 1, total == 2, total == 3],
+            tiers_5[:4],
+            default=tiers_5[4],
+        )
+        scale = pd.Series(scale_arr, index=prices.index)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class FundingStressVolTarget(MultiAssetStrategy):
+    """H310: H086 vol-target compounded with binary funding stress reduction.
+
+    vol_scale = min(1, vol_target / port_vol)  [H086].
+    stress_flag = VIX > 30 AND HYG 63d < LQD 63d (fallback: VIX > 30 only).
+    final_scale = vol_scale * (stress_reduction if stress_flag else 1.0).
+    """
+
+    name = "funding_stress_vol_target"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        port_vol_lookback: int = 20,
+        vol_target: float = 0.08,
+        vix_threshold: float = 30.0,
+        stress_reduction: float = 0.65,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.port_vol_lookback = port_vol_lookback
+        self.vol_target = vol_target
+        self.vix_threshold = vix_threshold
+        self.stress_reduction = stress_reduction
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        port_r = w_spy.shift(1) * spy_r + w_tlt.shift(1) * tlt_r
+        port_vol = port_r.rolling(
+            self.port_vol_lookback, min_periods=self.port_vol_lookback
+        ).std().shift(1) * np.sqrt(252)
+        vol_scale = (self.vol_target / port_vol).clip(upper=1.0)
+        vol_scale = vol_scale.where(port_vol.notna() & (port_vol > 0), 1.0)
+
+        vix = prices["vix_close"].shift(1).fillna(0.0)
+        vix_stress = vix > self.vix_threshold
+
+        if "hyg_close" in prices.columns and "lqd_close" in prices.columns:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            credit_off = (hyg_ret < lqd_ret) & hyg_avail & hyg_ret.notna()
+            stress_flag = (vix_stress & credit_off).where(hyg_avail, vix_stress)
+        else:
+            stress_flag = vix_stress
+
+        stress_scale = stress_flag.map({True: self.stress_reduction, False: 1.0})
+        scale = vol_scale * stress_scale
+
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# Batch 3: Macro Timing (H311-H315)
+# ---------------------------------------------------------------------------
+
+
+class TermSpreadSPYTimer(MultiAssetStrategy):
+    """H311: H021 with TLT vs SHY term spread SPY overlay.
+
+    Proxy term spread: TLT lookback-day return minus SHY lookback-day return.
+    Positive (normal curve) → H021 full.
+    Negative (inverted curve proxy) → SPY weight * spy_scale; freed weight to TLT.
+    """
+
+    name = "term_spread_spy_timer"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        spread_lookback: int = 252,
+        spy_scale: float = 0.50,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.spread_lookback = spread_lookback
+        self.spy_scale = spy_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        tlt_ret = prices["tlt_close"].pct_change(self.spread_lookback).shift(1)
+        shy_ret = prices["shy_close"].pct_change(self.spread_lookback).shift(1)
+        inverted = (shy_ret > tlt_ret) & tlt_ret.notna() & shy_ret.notna()
+
+        freed = w_spy * (1.0 - self.spy_scale)
+        new_spy = w_spy.where(~inverted, w_spy * self.spy_scale)
+        new_tlt = w_tlt.where(~inverted, (w_tlt + freed).clip(upper=1.0))
+        return pd.DataFrame({"SPY": new_spy, "TLT": new_tlt}, index=prices.index)
+
+
+class DefaultSpreadSPYTimer(MultiAssetStrategy):
+    """H312: H021 with HYG vs LQD default spread signal.
+
+    HYG 63d return > LQD 63d return → credit risk-on → H021 full.
+    LQD outperforming → credit risk-off → SPY weight * spy_scale; freed to TLT.
+    Pre-HYG era: H021 unmodified.
+    """
+
+    name = "default_spread_spy_timer"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        credit_lookback: int = 63,
+        spy_scale: float = 0.60,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.credit_lookback = credit_lookback
+        self.spy_scale = spy_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        if "hyg_close" not in prices.columns or "lqd_close" not in prices.columns:
+            return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+        hyg_ret = prices["hyg_close"].pct_change(self.credit_lookback).shift(1)
+        lqd_ret = prices["lqd_close"].pct_change(self.credit_lookback).shift(1)
+        hyg_avail = prices["hyg_close"].notna()
+        credit_off = (hyg_ret < lqd_ret) & hyg_avail & hyg_ret.notna()
+
+        freed = w_spy * (1.0 - self.spy_scale)
+        new_spy = w_spy.where(~credit_off, w_spy * self.spy_scale)
+        new_tlt = w_tlt.where(~credit_off, (w_tlt + freed).clip(upper=1.0))
+        return pd.DataFrame({"SPY": new_spy, "TLT": new_tlt}, index=prices.index)
+
+
+class EarningsYieldOverlay(MultiAssetStrategy):
+    """H313: H021 with SPY short-vs-long-run CAGR differential valuation signal.
+
+    Signal: SPY 252d return minus SPY 1260d annualized return (5yr CAGR proxy).
+    When short-run excess is high (market extended): reduce SPY weight by spy_cut.
+    When short-run below long-run (market lagging): neutral to H021.
+    Uses z-score over expanding window (5yr min) to calibrate thresholds.
+    """
+
+    name = "earnings_yield_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        short_window: int = 252,
+        long_window: int = 1260,
+        zscore_min: int = 1260,
+        spy_cut: float = 0.15,
+        zscore_threshold: float = 1.0,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.short_window = short_window
+        self.long_window = long_window
+        self.zscore_min = zscore_min
+        self.spy_cut = spy_cut
+        self.zscore_threshold = zscore_threshold
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        spy_px = prices["adj_close"]
+        ret_1yr = spy_px.pct_change(self.short_window).shift(1)
+        ret_5yr_ann = (
+            (spy_px / spy_px.shift(self.long_window)) ** (252.0 / self.long_window) - 1.0
+        ).shift(1)
+        excess = (ret_1yr - ret_5yr_ann).fillna(0.0)
+
+        ex_mean = excess.expanding(min_periods=self.zscore_min).mean()
+        ex_std = excess.expanding(min_periods=self.zscore_min).std().replace(0, np.nan)
+        ex_z = ((excess - ex_mean) / ex_std).fillna(0.0)
+
+        extended = ex_z > self.zscore_threshold
+        freed = w_spy * self.spy_cut
+        new_spy = w_spy.where(~extended, w_spy * (1.0 - self.spy_cut))
+        new_tlt = w_tlt.where(~extended, (w_tlt + freed).clip(upper=1.0))
+        return pd.DataFrame({"SPY": new_spy, "TLT": new_tlt}, index=prices.index)
+
+
+class MacroCombinationOverlay(MultiAssetStrategy):
+    """H314: Ensemble of 3 macro signals for H021 exposure adjustment.
+
+    Signal scores (+1 bullish, -1 bearish):
+      VRP signal: VRP > 0 = +1, ≤ 0 = -1.
+      Term spread: TLT 252d > SHY 252d = +1, else -1.
+      Credit spread: HYG 63d > LQD 63d = +1, else -1 (0 if unavailable).
+    Sum ≥ 2: 1.20× scale; sum = 1: 1.05×; sum = 0: 0.90×; sum ≤ -1: 0.75×.
+    """
+
+    name = "macro_combination_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        s_vrp = np.where(vrp > 0, 1.0, -1.0)
+
+        tlt_ret = prices["tlt_close"].pct_change(252).shift(1)
+        shy_ret = prices["shy_close"].pct_change(252).shift(1)
+        s_term = np.where(
+            tlt_ret.notna() & shy_ret.notna(),
+            np.where(tlt_ret > shy_ret, 1.0, -1.0),
+            0.0,
+        )
+
+        s_credit = pd.Series(0.0, index=prices.index)
+        if "hyg_close" in prices.columns and "lqd_close" in prices.columns:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            s_credit = pd.Series(
+                np.where(
+                    hyg_avail & hyg_ret.notna(),
+                    np.where(hyg_ret > lqd_ret, 1.0, -1.0),
+                    0.0,
+                ),
+                index=prices.index,
+            )
+
+        total = (
+            pd.Series(s_vrp, index=prices.index) + pd.Series(s_term, index=prices.index) + s_credit
+        )
+
+        scale_arr = np.select(
+            [total >= 2, total == 1, total == 0],
+            [1.20, 1.05, 0.90],
+            default=0.75,
+        )
+        scale = pd.Series(scale_arr, index=prices.index)
+        return pd.DataFrame({"SPY": w_spy * scale, "TLT": w_tlt * scale}, index=prices.index)
+
+
+class ConstrainedMacroOverlay(MultiAssetStrategy):
+    """H315: H314 macro combination with Campbell-Thompson constraints.
+
+    Applies three economic constraints to H314's macro signal:
+      Floor: SPY weight ≥ spy_floor * H021 SPY weight (never fully defensive).
+      Cap: SPY weight ≤ spy_cap * H021 SPY weight (no excess leverage).
+      Sign constraint: leverage (scale > 1) only when all 3 signals bullish or VRP very positive.
+    """
+
+    name = "constrained_macro_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        spy_floor: float = 0.50,
+        spy_cap: float = 1.30,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.spy_floor = spy_floor
+        self.spy_cap = spy_cap
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+
+        vrp = _vrp_series(spy_r, prices["vix_close"])
+        s_vrp = np.where(vrp > 0, 1.0, -1.0)
+
+        tlt_ret = prices["tlt_close"].pct_change(252).shift(1)
+        shy_ret = prices["shy_close"].pct_change(252).shift(1)
+        s_term = np.where(
+            tlt_ret.notna() & shy_ret.notna(),
+            np.where(tlt_ret > shy_ret, 1.0, -1.0),
+            0.0,
+        )
+
+        s_credit = pd.Series(0.0, index=prices.index)
+        if "hyg_close" in prices.columns and "lqd_close" in prices.columns:
+            hyg_ret = prices["hyg_close"].pct_change(63).shift(1)
+            lqd_ret = prices["lqd_close"].pct_change(63).shift(1)
+            hyg_avail = prices["hyg_close"].notna()
+            s_credit = pd.Series(
+                np.where(
+                    hyg_avail & hyg_ret.notna(),
+                    np.where(hyg_ret > lqd_ret, 1.0, -1.0),
+                    0.0,
+                ),
+                index=prices.index,
+            )
+
+        total = (
+            pd.Series(s_vrp, index=prices.index) + pd.Series(s_term, index=prices.index) + s_credit
+        )
+
+        # Unconstrained H314 scale
+        raw_scale = np.select(
+            [total >= 2, total == 1, total == 0],
+            [1.20, 1.05, 0.90],
+            default=0.75,
+        )
+        raw_scale = pd.Series(raw_scale, index=prices.index)
+
+        # Sign constraint: only leverage if all 3 signals bullish (total ≥ 3)
+        constrained_scale = raw_scale.where(total >= 3, raw_scale.clip(upper=1.0))
+
+        # SPY floor and cap
+        spy_scaled = (w_spy * constrained_scale).clip(
+            lower=w_spy * self.spy_floor,
+            upper=w_spy * self.spy_cap,
+        )
+        tlt_scaled = w_tlt * constrained_scale
+
+        return pd.DataFrame({"SPY": spy_scaled, "TLT": tlt_scaled}, index=prices.index)

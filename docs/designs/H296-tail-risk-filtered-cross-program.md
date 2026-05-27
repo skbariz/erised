@@ -28,9 +28,13 @@ Falsification: Filter removes names the MDR optimizer wants — Sharpe falls bel
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.829 |
+| 95% CI | [0.419, 1.238] |
+| CAGR | 9.95% |
+| Max DD | -33.05% |
+| H001 corr | -0.019 |
+| Decision | KEEP |
+
+Folds 0-4 zero (EDGAR gap). Active folds 5-11: 0.48, 0.67, 1.87, 1.20, 2.02, 1.13, 1.10.
+Sensitivity: exclude_quantile=0.20 achieves Sharpe 0.889 / MaxDD -28.25% (best MaxDD in batch). Wider exclusion zone removes more crash-prone names, improving risk-adjusted performance.
+H292 quarterly GP/TA (0.884) without tail filter slightly outperforms H296 (0.829) on Sharpe — but H296 provides much better MaxDD (-33% vs -34%). Tail-risk filter adds downside protection at modest alpha cost.

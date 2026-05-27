@@ -27,9 +27,15 @@ reduces Sharpe — Set 3 signals correlate with H200's cross-sectional equity co
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 1.525 |
+| 95% CI | [1.134, 1.921] |
+| CAGR | 5.82% |
+| Max DD | -6.86% |
+| H001 corr | +0.652 |
+| Decision | KEEP |
+
+All 12 folds active. Fold range: +0.791 (2018-2020) to +2.471 (2016-2018). No negative folds.
+NEW PROGRAM CHAMPION: Sharpe 1.525 / MaxDD -6.86% — beats H200 (1.350/-8.83%).
+MDR top weights: H194 LongShortReversal (23%), H016 VolScaledTrend (11%), H043 SellInMayBondConfirm (10%), H068 VrpCalendarHybrid (9%), H076 FourAssetRiskParity (8%), H265 SustainabilityFilteredProfitability (7%).
+Set 3 contribution: H265 (7%), H268 (1%), H287 (1%) — MDR correctly identifies Set 3 as incremental to the established H200 ensemble. The dominant diversifiers remain H194 (L/S reversal) and macro strategies.
+H001 corr +0.652 due to H001-H100 macro strategies dominating the portfolio via MDR concentration.

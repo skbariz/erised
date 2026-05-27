@@ -27,9 +27,13 @@ Falsification: If all Set 3 signals are highly correlated with each other (no di
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 1.038 |
+| 95% CI | [0.628, 1.445] |
+| CAGR | 13.16% |
+| Max DD | -33.79% |
+| H001 corr | -0.013 |
+| Decision | KEEP |
+
+All 12 folds active (mixed: H254 tail risk has early folds, H284 momentum has early folds). Fold range: -0.019 (2008-2010 GFC) to +2.303 (2012-2013). Robust across regimes.
+MDR weights: H265 (34%), H254 (30%), H287 (15%), H268 (11%), H284 (10%). MDR concentrates on sustainability-filtered quality and tail risk avoidance — the most decorrelated pair.
+Equal-weight baseline already achieves Sharpe 1.034 — near-zero MDR benefit (+0.004) suggests the 5 strategies are already well-balanced in volatility. MDR adds minimal improvement over equal-weight when components have similar vol. H299 is the best pure Set 3 ensemble.

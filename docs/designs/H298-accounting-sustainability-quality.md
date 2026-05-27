@@ -30,9 +30,13 @@ Falsification: Sharpe < H265 (0.952) — 3-factor dilution confirmed.
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.856 |
+| 95% CI | [0.450, 1.272] |
+| CAGR | 10.57% |
+| Max DD | -38.49% |
+| H001 corr | -0.018 |
+| Decision | KEEP |
+
+Folds 0-4 zero (EDGAR gap). Active folds 5-11: 0.91, 0.72, 2.28, 1.20, 1.91, 1.11, 1.02.
+Sensitivity: top-decile (0.10 quantile) gives Sharpe 0.924 vs top-quintile 0.856. Concentration wins here.
+3-factor composite (0.856) below H265 2-factor filtered quality (0.952) — dilution confirmed again. Adding NOA and accruals to GP/TA produces marginal negative dilution, consistent with program-wide 3-factor boundary finding. H265 (2-factor) is superior.

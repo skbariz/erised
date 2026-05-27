@@ -29,9 +29,13 @@ Falsification: Distress screen near-empty in S&P 500 — 99% of names pass, no a
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.802 |
+| 95% CI | [0.416, 1.201] |
+| CAGR | 11.40% |
+| Max DD | -35.13% |
+| H001 corr | -0.008 |
+| Decision | KEEP |
+
+Mixed fold behavior: fold 0 zero (EDGAR), fold 3 (-0.088) and fold 5 (-0.006) slightly negative. Active folds: 0.36, 1.11, 0.75, 1.94, 1.06, 2.02, 0.95, 1.02.
+Sensitivity: distress_pct=0.50 (bottom-half) is the sweet spot (0.802); tighter filter (0.33) reduces to 0.714, looser (0.67) to 0.750. Optimal filter removes ~50% of universe.
+Distress filter reveals genuine heterogeneity: S&P 500 contains enough distressed names that filtering them out meaningfully improves quality-value composite. Confirms distress is a real risk even in index constituents.

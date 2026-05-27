@@ -29,9 +29,13 @@ Falsification: Sharpe drops > 10% vs monthly momentum — bi-monthly is too slow
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.956 |
+| 95% CI | [0.557, 1.372] |
+| CAGR | 18.72% |
+| Max DD | -50.24% |
+| H001 corr | +0.001 |
+| Decision | KEEP |
+
+All 12 folds active (price-based, no EDGAR gap). Fold range: -0.155 (2008-2010 crash) to +2.356 (2012-2013).
+Sensitivity: monthly 0.975 > bi-monthly 0.956 > quarterly 0.928. Momentum IC does decay within 42 days but slowly; bi-monthly costs only 2% Sharpe vs monthly.
+High CAGR (18.72%) but MaxDD -50.24% — momentum is unleveraged vol. Best momentum variant without vol-scaling (H157 with vol-scaling achieves 1.079).

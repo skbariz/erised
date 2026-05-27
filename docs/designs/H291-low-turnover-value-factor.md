@@ -30,9 +30,13 @@ Falsification: Band causes portfolio to drift into value traps held past deterio
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.721 |
+| 95% CI | [0.323, 1.133] |
+| CAGR | 9.28% |
+| Max DD | -40.31% |
+| H001 corr | -0.022 |
+| Decision | KEEP |
+
+Folds 0-4 zero (EDGAR gap); fold 5 near-zero (+0.092). Active folds 6-11: 0.50, 2.00, 0.92, 2.08, 0.95, 0.99.
+Flat sensitivity across hold_quantile (0.30-0.50: Sharpe 0.721-0.726, MaxDD -39% to -41%). Band reduces effective churn substantially.
+Value factor weaker than quality (H292: 0.884) — earnings yield has more noise than GP/TA.

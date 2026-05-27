@@ -29,9 +29,13 @@ Falsification: Cap forces holding severely deteriorated positions — hurts Shar
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.857 |
+| 95% CI | [0.457, 1.267] |
+| CAGR | 11.00% |
+| Max DD | -34.59% |
+| H001 corr | -0.016 |
+| Decision | KEEP |
+
+Folds 0-4 zero (EDGAR gap). Active folds 5-11: 0.30, 0.66, 2.02, 0.94, 2.02, 1.28, 1.23.
+Sensitivity: max_replace barely matters (0.817 to 0.863), MaxDD constant at -34.59%. Cap rarely binds when GP/TA signal is stable.
+Between H292 quarterly (0.884) and H291 value (0.721) — replacement cap adds modest value over uncapped monthly rebalance.

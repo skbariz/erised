@@ -27,9 +27,13 @@ Falsification: Sharpe drops > 10% vs H227 — signal IC decays faster than quart
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.884 |
+| 95% CI | [0.472, 1.296] |
+| CAGR | 10.99% |
+| Max DD | -34.14% |
+| H001 corr | -0.017 |
+| Decision | KEEP |
+
+Folds 0-4 zero (EDGAR gap). Active folds 5-11: 0.66, 0.75, 2.06, 1.02, 2.04, 1.22, 1.18.
+Sensitivity: quarterly (63d) is the sweet spot — monthly 0.852, bi-monthly 0.859, quarterly 0.884, semi-annual 0.864. GP/TA signal IC is stable at 3-month horizon; quarterly reduces turnover ~75% at marginal alpha improvement.
+Quarterly beats monthly rebalance: GP/TA is sufficiently persistent that lower-frequency rebalancing actually improves net Sharpe after costs.

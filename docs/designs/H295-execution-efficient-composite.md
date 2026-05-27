@@ -29,9 +29,13 @@ Falsification: Bi-monthly cadence hurts vs monthly — quality signals also deca
 
 | Metric | Value |
 |--------|-------|
-| OOS Sharpe | |
-| 95% CI | |
-| CAGR | |
-| Max DD | |
-| H001 corr | |
-| Decision | |
+| OOS Sharpe | 0.840 |
+| 95% CI | [0.429, 1.257] |
+| CAGR | 10.19% |
+| Max DD | -35.47% |
+| H001 corr | -0.015 |
+| Decision | KEEP |
+
+Folds 0-5 zero (EDGAR + revenue data gap — one extra zero fold vs GP-only strategies). Active folds 6-11: 0.44, 2.23, 0.97, 1.86, 1.15, 1.26.
+Flat sensitivity across hold_quantile (0.40-0.60: Sharpe 0.838-0.840). 2-factor composite (GP/TA + efficiency) below GP/TA standalone (H292: 0.884).
+Execution-aware mechanics (bi-monthly + band) do not overcome the cost of adding efficiency ratio to GP/TA. H290 3-factor dilution pattern confirmed at 2-factor level here.

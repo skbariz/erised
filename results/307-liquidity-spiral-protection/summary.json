@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H307",
+  "name": "liquidity-spiral-protection",
+  "strategy_class": "LiquiditySpiralProtection",
+  "family": "funding stress",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6947,
+  "ci_low": 0.2977,
+  "ci_high": 1.0851,
+  "cagr": 0.0602,
+  "max_drawdown": -0.2131,
+  "n_trades": 5023,
+  "h001_corr": 0.5409,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.431,
+    0.824,
+    0.687,
+    0.825,
+    -0.133,
+    1.072,
+    1.814,
+    0.656,
+    0.732,
+    -0.008
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Triple-confirm liquidity spiral: VIX>35 AND HYG<LQD (63d) AND SPY 21d vol>2\u00d763d vol \u2192 90% TLT. Exit after 10 calm days. Pre-HYG era: VIX>35 + vol spike (2-of-2). Brunnermeier-Pedersen (2009): liquidity spirals require concurrent stress signals.",
+  "canonical_params": {
+    "vix_spike": 35.0,
+    "crisis_tlt": 0.9,
+    "resume_days": 10
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

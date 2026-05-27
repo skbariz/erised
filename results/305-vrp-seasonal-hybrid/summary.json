@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H305",
+  "name": "vrp-seasonal-hybrid",
+  "strategy_class": "VRPSeasonalHybrid",
+  "family": "VRP timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.3328,
+  "ci_low": -0.0675,
+  "ci_high": 0.7188,
+  "cagr": 0.0268,
+  "max_drawdown": -0.2217,
+  "n_trades": 2539,
+  "h001_corr": 0.2165,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.809,
+    -0.198,
+    0.014,
+    0.744,
+    -0.484,
+    0.901,
+    0.857,
+    0.407,
+    0.502,
+    0.367
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H078 seasonal framework + VRP overlay in Nov-Apr only. May-Oct: 100% TLT (unchanged). Nov-Apr + VRP>0: H021 full; + VRP<=0: H021 \u00d7 0.75. Combines zero-corr seasonal anchor with VRP timing during active season.",
+  "canonical_params": {
+    "unfavorable_scale": 0.75,
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

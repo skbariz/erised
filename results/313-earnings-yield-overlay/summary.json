@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H313",
+  "name": "earnings-yield-overlay",
+  "strategy_class": "EarningsYieldOverlay",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6795,
+  "ci_low": 0.2814,
+  "ci_high": 1.0705,
+  "cagr": 0.0585,
+  "max_drawdown": -0.2131,
+  "n_trades": 5023,
+  "h001_corr": 0.5166,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.407,
+    0.769,
+    0.691,
+    0.814,
+    -0.133,
+    1.025,
+    1.786,
+    0.702,
+    0.728,
+    -0.033
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with SPY 1yr-vs-5yr CAGR differential as valuation proxy. When 1yr return exceeds 5yr annualized CAGR by >1 z-score: reduce SPY \u00d7 0.85. Expanding-window z-score (5yr min). Contrarian slow-moving signal.",
+  "canonical_params": {
+    "short_window": 252,
+    "long_window": 1260,
+    "spy_cut": 0.15,
+    "zscore_threshold": 1.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H315",
+  "name": "constrained-macro-overlay",
+  "strategy_class": "ConstrainedMacroOverlay",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.631,
+  "ci_low": 0.2368,
+  "ci_high": 1.0261,
+  "cagr": 0.05,
+  "max_drawdown": -0.226,
+  "n_trades": 5023,
+  "h001_corr": 0.5341,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.406,
+    0.674,
+    0.526,
+    0.715,
+    -0.448,
+    1.109,
+    1.966,
+    0.71,
+    0.651,
+    0.034
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H314 macro combination with Campbell-Thompson constraints. SPY floor = 50% of H021 SPY weight (never fully out). SPY cap = 130% of H021 (no excess leverage without all-bullish signal). Leverage (scale > 1) only when all 3 signals bullish (total \u2265 3). Parameter-free constraints based on economic logic.",
+  "canonical_params": {
+    "spy_floor": 0.5,
+    "spy_cap": 1.3
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

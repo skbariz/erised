@@ -6693,3 +6693,538 @@ class IntangibleQualityComposite(CrossSectionalStrategy):
             score, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H271: EarlyStageMomentum
+# ---------------------------------------------------------------------------
+
+
+class EarlyStageMomentum(CrossSectionalStrategy):
+    """H271: Momentum minus vol z-score — uncrowded early-stage momentum proxy."""
+
+    name = "early_stage_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        vol_window: int = 21,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        mom = prices_panel.shift(self.skip_window) / prices_panel.shift(self.mom_window) - 1
+        vol = rets.rolling(self.vol_window, min_periods=self.vol_window // 2).std()
+
+        score = _cs_zscore(mom) - _cs_zscore(vol)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H272: VolatilitySurgeReturnPremium
+# ---------------------------------------------------------------------------
+
+
+class VolatilitySurgeReturnPremium(CrossSectionalStrategy):
+    """H272: Vol spike AND positive return — attention/visibility proxy."""
+
+    name = "volatility_surge_return_premium"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        short_window: int = 21,
+        long_window: int = 252,
+        vol_ratio_threshold: float = 1.5,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.short_window = short_window
+        self.long_window = long_window
+        self.vol_ratio_threshold = vol_ratio_threshold
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        vol_short = rets.rolling(self.short_window, min_periods=self.short_window // 2).std()
+        vol_long = rets.rolling(self.long_window, min_periods=self.long_window // 4).std()
+        vol_ratio = vol_short / vol_long.where(vol_long > 1e-10)
+
+        ret_short = prices_panel / prices_panel.shift(self.short_window) - 1
+        positive_return = ret_short > 0
+
+        # Only consider flagged stocks (vol spike + positive return); rank by vol_ratio within them
+        score = vol_ratio.where(positive_return & (vol_ratio > self.vol_ratio_threshold))
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H273: PriceBreakoutMomentum
+# ---------------------------------------------------------------------------
+
+
+class PriceBreakoutMomentum(CrossSectionalStrategy):
+    """H273: 63-day price high breakout — George & Hwang (2004) short-window."""
+
+    name = "price_breakout_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        breakout_window: int = 63,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.breakout_window = breakout_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        # Prior day's 63-day max (shift avoids lookahead)
+        rolling_max = (
+            prices_panel.rolling(self.breakout_window, min_periods=self.breakout_window)
+            .max()
+            .shift(1)
+        )
+        breakout = prices_panel > rolling_max
+
+        # Score: 1.0 for breakout stocks, NaN otherwise (non-breakouts excluded)
+        score = breakout.astype(float).where(breakout)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H274: AttentionReversalScreen
+# ---------------------------------------------------------------------------
+
+
+class AttentionReversalScreen(CrossSectionalStrategy):
+    """H274: Avoid top-decile MAX21 + top-decile vol + weak GP/TA. Long non-froth."""
+
+    name = "attention_reversal_screen"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        max_window: int = 21,
+        vol_window: int = 21,
+        max_quantile: float = 0.10,
+        vol_quantile: float = 0.10,
+        quality_pct: float = 0.50,
+    ):
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.max_window = max_window
+        self.vol_window = vol_window
+        self.max_quantile = max_quantile
+        self.vol_quantile = vol_quantile
+        self.quality_pct = quality_pct
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+
+        rets = prices_panel.pct_change()
+        max21 = rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+        vol21 = rets.rolling(self.vol_window, min_periods=self.vol_window // 2).std()
+        gp_ta = gp / ta.where(ta > 0)
+
+        mem = membership.reindex_like(prices_panel).fillna(False)
+        max_rank = max21.where(mem).rank(axis=1, pct=True, na_option="keep")
+        vol_rank = vol21.where(mem).rank(axis=1, pct=True, na_option="keep")
+        quality_rank = gp_ta.where(mem).rank(axis=1, pct=True, na_option="keep")
+
+        # Flag as froth: top-decile MAX + top-decile vol + bottom-half quality
+        froth = (
+            (max_rank >= (1.0 - self.max_quantile)).fillna(False)
+            & (vol_rank >= (1.0 - self.vol_quantile)).fillna(False)
+            & (quality_rank < self.quality_pct).fillna(False)
+        )
+
+        filtered_mem = membership & ~froth
+        n_valid = filtered_mem.sum(axis=1).replace(0, np.nan)
+        daily_w = filtered_mem.div(n_valid, axis=0).fillna(0.0)
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H275: MomentumVolatilityScore
+# ---------------------------------------------------------------------------
+
+
+class MomentumVolatilityScore(CrossSectionalStrategy):
+    """H275: Momentum minus vol and MAX penalties (percentile composite)."""
+
+    name = "momentum_volatility_score"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        vol_window: int = 21,
+        max_window: int = 21,
+        vol_weight: float = 0.5,
+        max_weight: float = 0.3,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.vol_window = vol_window
+        self.max_window = max_window
+        self.vol_weight = vol_weight
+        self.max_weight = max_weight
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        mom = prices_panel.shift(self.skip_window) / prices_panel.shift(self.mom_window) - 1
+        vol = rets.rolling(self.vol_window, min_periods=self.vol_window // 2).std()
+        max_ret = rets.rolling(self.max_window, min_periods=self.max_window // 2).max()
+
+        mem = membership.reindex_like(prices_panel).fillna(False)
+        mom_pct = mom.where(mem).rank(axis=1, pct=True, na_option="keep")
+        vol_pct = vol.where(mem).rank(axis=1, pct=True, na_option="keep")
+        max_pct = max_ret.where(mem).rank(axis=1, pct=True, na_option="keep")
+
+        score = mom_pct - self.vol_weight * vol_pct - self.max_weight * max_pct
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H276: NegativeSkewnessAvoidance
+# ---------------------------------------------------------------------------
+
+
+class NegativeSkewnessAvoidance(CrossSectionalStrategy):
+    """H276: Long most-positive-skew stocks (Harvey & Siddique 2000)."""
+
+    name = "negative_skewness_avoidance"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        skew_window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.skew_window = skew_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        skewness = rets.rolling(self.skew_window, min_periods=self.skew_window // 4).skew()
+
+        # ascending=True: most positive skew = best (lowest rank value in "ascending" sense is worst)
+        # We want HIGH skewness → ascending=False actually makes sense:
+        # ascending=False means higher score is better → higher skewness is better
+        daily_w = _sector_neutral_weights(
+            skewness, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H277: CoskewnessPortfolioPenalty
+# ---------------------------------------------------------------------------
+
+
+class CoskewnessPortfolioPenalty(CrossSectionalStrategy):
+    """H277: Long low-coskewness stocks — diversification value (Harvey & Siddique 2000)."""
+
+    name = "coskewness_portfolio_penalty"
+
+    def __init__(
+        self,
+        spy_prices: pd.Series,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.spy_prices = spy_prices
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        spy_rets = self.spy_prices.pct_change().reindex(prices_panel.index)
+
+        # Rolling demeaned returns
+        ri_mean = rets.rolling(self.window, min_periods=self.window // 4).mean()
+        rm_mean = spy_rets.rolling(self.window, min_periods=self.window // 4).mean()
+
+        ri_dm = rets - ri_mean
+        rm_dm = (spy_rets - rm_mean).fillna(0.0)
+        rm_dm2 = rm_dm**2
+
+        # Coskewness numerator: rolling mean of (ri - μi)(rm - μm)²
+        cross = ri_dm.multiply(rm_dm2, axis=0)
+        cosk_num = cross.rolling(self.window, min_periods=self.window // 4).mean()
+
+        sigma_i = rets.rolling(self.window, min_periods=self.window // 4).std()
+        sigma_m = spy_rets.rolling(self.window, min_periods=self.window // 4).std()
+        denom = sigma_i.multiply((sigma_m**2), axis=0)
+
+        coskewness = cosk_num / denom.where(denom.abs() > 1e-12)
+
+        # ascending=True: most negative coskewness = best (lowest score → best rank)
+        daily_w = _sector_neutral_weights(
+            coskewness, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H278: LeftTailLossFactor
+# ---------------------------------------------------------------------------
+
+
+class LeftTailLossFactor(CrossSectionalStrategy):
+    """H278: Long lowest-CVaR stocks — conditional value at risk signal."""
+
+    name = "left_tail_loss_factor"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        window: int = 252,
+        cvar_pct: float = 0.05,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.sectors = sectors
+        self.window = window
+        self.cvar_pct = cvar_pct
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        n_tail = max(1, int(self.window * self.cvar_pct))
+
+        # CVaR: mean of worst n_tail returns in each rolling window
+        # Use expanding then rolling: nsmallest approach via apply
+        cvar = rets.rolling(self.window, min_periods=self.window // 4).apply(
+            lambda x: np.sort(x)[:n_tail].mean(), raw=True
+        )
+
+        # ascending=False: highest CVaR value = least negative = lowest tail loss = best
+        daily_w = _sector_neutral_weights(
+            cvar, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H279: CrashSensitivityRegime
+# ---------------------------------------------------------------------------
+
+
+class CrashSensitivityRegime(CrossSectionalStrategy):
+    """H279: Low coskewness + regime tightening when SPY vol > 30%."""
+
+    name = "crash_sensitivity_regime"
+
+    def __init__(
+        self,
+        spy_prices: pd.Series,
+        sectors: pd.Series,
+        window: int = 252,
+        cvar_pct: float = 0.05,
+        base_quantile: float = 0.20,
+        stress_quantile: float = 0.10,
+        spy_stress_window: int = 21,
+        spy_stress_vol_threshold: float = 0.30,
+    ):
+        self.spy_prices = spy_prices
+        self.sectors = sectors
+        self.window = window
+        self.cvar_pct = cvar_pct
+        self.base_quantile = base_quantile
+        self.stress_quantile = stress_quantile
+        self.spy_stress_window = spy_stress_window
+        self.spy_stress_vol_threshold = spy_stress_vol_threshold
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        spy_rets = self.spy_prices.pct_change().reindex(prices_panel.index)
+
+        # Coskewness
+        ri_mean = rets.rolling(self.window, min_periods=self.window // 4).mean()
+        rm_mean = spy_rets.rolling(self.window, min_periods=self.window // 4).mean()
+        ri_dm = rets - ri_mean
+        rm_dm = (spy_rets - rm_mean).fillna(0.0)
+        rm_dm2 = rm_dm**2
+        cross = ri_dm.multiply(rm_dm2, axis=0)
+        cosk_num = cross.rolling(self.window, min_periods=self.window // 4).mean()
+        sigma_i = rets.rolling(self.window, min_periods=self.window // 4).std()
+        sigma_m = spy_rets.rolling(self.window, min_periods=self.window // 4).std()
+        denom = sigma_i.multiply((sigma_m**2), axis=0)
+        coskewness = cosk_num / denom.where(denom.abs() > 1e-12)
+
+        # CVaR for stress regime additional filter
+        n_tail = max(1, int(self.window * self.cvar_pct))
+        cvar = rets.rolling(self.window, min_periods=self.window // 4).apply(
+            lambda x: np.sort(x)[:n_tail].mean(), raw=True
+        )
+
+        # SPY stress regime flag (21d annualized vol > threshold)
+        spy_vol_21d = spy_rets.rolling(
+            self.spy_stress_window, min_periods=self.spy_stress_window // 2
+        ).std() * np.sqrt(252)
+        stress = spy_vol_21d > self.spy_stress_vol_threshold
+
+        # Base weights: top-quintile low coskewness
+        base_w = _sector_neutral_weights(
+            coskewness, membership, self.sectors, self.base_quantile, ascending=True
+        )
+
+        # Stress weights: top-decile low coskewness AND better-half CVaR (less negative = lower tail loss)
+        mem_f = membership.reindex_like(cvar).fillna(False)
+        cvar_rank = cvar.where(mem_f).rank(axis=1, pct=True, na_option="keep")
+        stress_mem = membership & (cvar_rank >= 0.50).fillna(False)
+        stress_w = _sector_neutral_weights(
+            coskewness, stress_mem, self.sectors, self.stress_quantile, ascending=True
+        )
+
+        # Switch between base and stress by date
+        stress_mask = stress.reindex(prices_panel.index).fillna(False)
+        daily_w = base_w.copy()
+        daily_w[stress_mask] = stress_w[stress_mask]
+
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H280: SkewAdjustedMomentum
+# ---------------------------------------------------------------------------
+
+
+class SkewAdjustedMomentum(CrossSectionalStrategy):
+    """H280: Momentum minus coskewness and CVaR penalties (percentile composite)."""
+
+    name = "skew_adjusted_momentum"
+
+    def __init__(
+        self,
+        spy_prices: pd.Series,
+        sectors: pd.Series,
+        mom_window: int = 252,
+        skip_window: int = 21,
+        cosk_window: int = 252,
+        cvar_window: int = 252,
+        cvar_pct: float = 0.05,
+        cosk_weight: float = 0.4,
+        cvar_weight: float = 0.3,
+        within_sector_quantile: float = 0.20,
+    ):
+        self.spy_prices = spy_prices
+        self.sectors = sectors
+        self.mom_window = mom_window
+        self.skip_window = skip_window
+        self.cosk_window = cosk_window
+        self.cvar_window = cvar_window
+        self.cvar_pct = cvar_pct
+        self.cosk_weight = cosk_weight
+        self.cvar_weight = cvar_weight
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rets = prices_panel.pct_change()
+        spy_rets = self.spy_prices.pct_change().reindex(prices_panel.index)
+
+        # Momentum 12-1
+        mom = prices_panel.shift(self.skip_window) / prices_panel.shift(self.mom_window) - 1
+
+        # Coskewness
+        ri_mean = rets.rolling(self.cosk_window, min_periods=self.cosk_window // 4).mean()
+        rm_mean = spy_rets.rolling(self.cosk_window, min_periods=self.cosk_window // 4).mean()
+        ri_dm = rets - ri_mean
+        rm_dm = (spy_rets - rm_mean).fillna(0.0)
+        rm_dm2 = rm_dm**2
+        cross = ri_dm.multiply(rm_dm2, axis=0)
+        cosk_num = cross.rolling(self.cosk_window, min_periods=self.cosk_window // 4).mean()
+        sigma_i = rets.rolling(self.cosk_window, min_periods=self.cosk_window // 4).std()
+        sigma_m = spy_rets.rolling(self.cosk_window, min_periods=self.cosk_window // 4).std()
+        denom = sigma_i.multiply((sigma_m**2), axis=0)
+        coskewness = cosk_num / denom.where(denom.abs() > 1e-12)
+
+        # CVaR
+        n_tail = max(1, int(self.cvar_window * self.cvar_pct))
+        cvar = rets.rolling(self.cvar_window, min_periods=self.cvar_window // 4).apply(
+            lambda x: np.sort(x)[:n_tail].mean(), raw=True
+        )
+
+        mem = membership.reindex_like(prices_panel).fillna(False)
+        mom_pct = mom.where(mem).rank(axis=1, pct=True, na_option="keep")
+        cosk_pct = coskewness.where(mem).rank(axis=1, pct=True, na_option="keep")
+        # negate CVaR so rank 1.0 = most negative CVaR (worst tail risk) = maximal penalty
+        cvar_pct_rank = (-cvar).where(mem).rank(axis=1, pct=True, na_option="keep")
+
+        score = mom_pct - self.cosk_weight * cosk_pct - self.cvar_weight * cvar_pct_rank
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)

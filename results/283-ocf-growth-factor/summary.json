@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H283",
+  "name": "ocf-growth-factor",
+  "strategy_class": "OCFGrowthFactor",
+  "family": "cross-sectional fundamental growth",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.6916,
+  "ci_low": 0.2871,
+  "ci_high": 1.1027,
+  "cagr": 0.0804,
+  "max_drawdown": -0.389,
+  "n_trades": 1,
+  "h001_corr": -0.0202,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.388,
+    1.899,
+    0.858,
+    1.67,
+    0.879,
+    0.968
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY operating cash flow growth: (OCF - OCF.shift(252)) / |OCF.shift(252)|, clipped [-5,5]. OCF growth as standalone signal; distinct from H183 (OCF/NI ratio as filter). Tests whether cash generation expansion predicts returns. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "yoy_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

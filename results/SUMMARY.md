@@ -489,4 +489,27 @@ H276 NegativeSkewnessAvoidance (Sharpe 1.062). Best risk-adjusted: H278 CVaR fac
 
 ---
 
+### Batch 7: Fundamental Growth Signals (H281–H285)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 281 | GrossProfitImprovementFactor | fund growth | kept | 0.775 | [0.366, 1.188] | 9.24% | −35.70% | −0.015 | YoY GP$ growth; level>change confirmed (H268: 0.922 > H281: 0.775) |
+| 282 | RevenueGrowthFactor | fund growth | kept | 0.756 | [0.353, 1.166] | 8.83% | −36.62% | −0.023 | YoY revenue$ growth; distinct from H181 (requires NI+rev both positive) |
+| 283 | OCFGrowthFactor | fund growth | kept | 0.692 | [0.287, 1.103] | 8.04% | −38.90% | −0.020 | YoY OCF$ growth; weakest of the three; OCF volatility hurts ranking |
+| 284 | LowCoverageMomentumProxy | mom lifecycle | kept | 0.974 | [0.571, 1.389] | 18.44% | −51.36% | +0.002 | z(mom) - z(ivol_ratio); idio-vol ratio vs total-vol (H271); batch champion |
+| 285 | FundamentalMomentumComposite | fund growth | kept | 0.740 | [0.331, 1.158] | 8.87% | −36.76% | −0.011 | z(GP_change)+z(NI_change)+z(6m_mom); composite dilution: H284 (0.974)>H285 (0.740) |
+
+**Batch 7 summary:** All 5 KEEP. H284 LowCoverageMomentumProxy (0.974) is the batch champion —
+a pure price signal using idiosyncratic vol ratio (idio_vol_63d / idio_vol_252d) as an
+analyst-coverage proxy, consistent with Hong, Lim & Stein (2000). The three fundamental growth
+signals (H281-H283) all pass at Sharpe 0.692-0.775, confirming the level > change pattern:
+GP dollar growth (H281: 0.775) < GP/TA level (H268: 0.922). H285 confirms composite dilution:
+adding GP and NI change to momentum weakens signal (0.740 vs H284: 0.974). OCF growth (H283:
+0.692) is the noisiest — quarterly cash flow volatility makes YoY ranking unstable.
+
+Notable: H281-H283 (fundamental) have H001 corr ∈ [−0.023, −0.011] (slight negative) due to
+EDGAR data gap in folds 0-5. H284-H285 follow the respective patterns of their components.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

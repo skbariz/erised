@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H282",
+  "name": "revenue-growth-factor",
+  "strategy_class": "RevenueGrowthFactor",
+  "family": "cross-sectional fundamental growth",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7557,
+  "ci_low": 0.3526,
+  "ci_high": 1.1664,
+  "cagr": 0.0883,
+  "max_drawdown": -0.3662,
+  "n_trades": 1,
+  "h001_corr": -0.023,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.435,
+    2.129,
+    0.838,
+    1.592,
+    1.006,
+    1.142
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "YoY revenue dollar growth: (Rev - Rev.shift(252)) / |Rev.shift(252)|, clipped [-5,5]. Pure top-line growth signal. Distinct from H181 (requires NI+Rev both positive), H267 (GP margin change), H281 (GP dollar growth). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "yoy_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

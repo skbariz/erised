@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H285",
+  "name": "fundamental-momentum-composite",
+  "strategy_class": "FundamentalMomentumComposite",
+  "family": "cross-sectional fundamental growth",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7403,
+  "ci_low": 0.3309,
+  "ci_high": 1.1576,
+  "cagr": 0.0887,
+  "max_drawdown": -0.3676,
+  "n_trades": 1,
+  "h001_corr": -0.0112,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.321,
+    1.974,
+    0.725,
+    1.884,
+    1.081,
+    1.01
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Earnings attention composite: z(GP_change) + z(NI_change) + z(6m_mom). Combines GP improvement (H281 signal), NI improvement (H180 signal), and 6m price confirmation. Distinct from H184 (NI+63d_mom only). Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "yoy_window": 252,
+    "mom_window": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

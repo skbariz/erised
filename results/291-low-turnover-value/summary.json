@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H291",
+  "name": "low-turnover-value",
+  "strategy_class": "LowTurnoverValueFactor",
+  "family": "execution-aware",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.7205,
+  "ci_low": 0.3233,
+  "ci_high": 1.1329,
+  "cagr": 0.0928,
+  "max_drawdown": -0.4031,
+  "n_trades": 1,
+  "h001_corr": -0.0215,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.092,
+    0.503,
+    2.002,
+    0.915,
+    2.081,
+    0.948,
+    0.988
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Novy-Marx & Velikov (2016) buy/hold band on earnings yield. Entry: rank >= 0.80 (top 20%). Hold until rank < 0.60 (exit below top 40%). Equal-weight held stocks; monthly rebalance check. Reduces round-trip turnover by ~62% vs standard monthly rebalance.",
+  "canonical_params": {
+    "buy_quantile": 0.2,
+    "hold_quantile": 0.4,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

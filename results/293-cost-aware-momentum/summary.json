@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H293",
+  "name": "cost-aware-momentum",
+  "strategy_class": "CostAwareMomentumLongHold",
+  "family": "execution-aware",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.9564,
+  "ci_low": 0.5573,
+  "ci_high": 1.3723,
+  "cagr": 0.1872,
+  "max_drawdown": -0.5024,
+  "n_trades": 1,
+  "h001_corr": 0.0014,
+  "fold_sharpes": [
+    1.564,
+    1.069,
+    1.203,
+    1.571,
+    1.095,
+    -0.155,
+    0.773,
+    2.356,
+    1.021,
+    1.686,
+    1.056,
+    0.804
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1 month momentum sector-neutral top-quintile. Bi-monthly rebalance (42 days) reduces turnover ~40% vs monthly. Tests momentum IC decay at 6-week horizon: H090 showed risk parity OK at monthly; momentum may degrade faster due to faster signal decay.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 42
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

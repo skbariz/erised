@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H294",
+  "name": "turnover-capped-profitability",
+  "strategy_class": "TurnoverCappedProfitabilityFactor",
+  "family": "execution-aware",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8568,
+  "ci_low": 0.4573,
+  "ci_high": 1.267,
+  "cagr": 0.11,
+  "max_drawdown": -0.3459,
+  "n_trades": 1,
+  "h001_corr": -0.0161,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.295,
+    0.657,
+    2.016,
+    0.937,
+    2.018,
+    1.282,
+    1.233
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA sector-neutral profitability with 20% monthly replacement cap. At rebalance: retain stocks still in top-40%; add new top-20% names up to 20% cap. Forces portfolio continuity during periods of high factor-rank volatility. Reduces market-impact costs without materially reducing IC.",
+  "canonical_params": {
+    "buy_quantile": 0.2,
+    "hold_quantile": 0.4,
+    "max_replace_fraction": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

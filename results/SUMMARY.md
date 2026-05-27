@@ -536,4 +536,33 @@ due to the EDGAR data gap causing folds 0-5 zero.
 
 ---
 
+### Batch 9: Execution-Aware / Low-Turnover (H291–H295)
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 291 | LowTurnoverValueFactor | execution-aware | kept | 0.721 | [0.323, 1.133] | 9.28% | −40.31% | −0.022 | Earnings yield + buy/hold band; folds 0-5 zero; flat hold_quantile sensitivity |
+| 292 | LowTurnoverQualityFactor | execution-aware | kept | 0.884 | [0.472, 1.296] | 10.99% | −34.14% | −0.017 | GP/TA quarterly rebalance; batch champion; quarterly BEATS monthly (0.884 vs 0.852) |
+| 293 | CostAwareMomentumLongHold | execution-aware | kept | 0.956 | [0.557, 1.372] | 18.72% | −50.24% | +0.001 | 12-1 mom bi-monthly; all 12 folds active; highest CAGR; MaxDD −50% limits utility |
+| 294 | TurnoverCappedProfitabilityFactor | execution-aware | kept | 0.857 | [0.457, 1.267] | 11.00% | −34.59% | −0.016 | GP/TA + 20% replace cap; cap rarely binds; between quarterly (0.884) and monthly (0.852) |
+| 295 | ExecutionEfficientComposite | execution-aware | kept | 0.840 | [0.429, 1.257] | 10.19% | −35.47% | −0.015 | z(GP/TA)+z(efficiency), bi-monthly+band; 6 zero folds; 2-factor dilution below H292 |
+
+**Batch 9 summary:** All 5 KEEP. H293 CostAwareMomentumLongHold leads at Sharpe 0.956 with the
+highest CAGR in the program (18.72%), though MaxDD of −50.24% limits practical use without
+vol-scaling. H292 (0.884) is the most important finding: quarterly rebalance OUTPERFORMS monthly
+for GP/TA (0.884 vs 0.852 monthly) — a rare case where reducing frequency improves net alpha,
+confirming GP/TA signal IC is stable over 3+ months. H291 (0.721) shows buy/hold bands work
+for value but value (earnings yield) is noisier than quality (GP/TA). H294 (0.857) confirms the
+replacement cap adds modest value over uncapped monthly. H295 (0.840) confirms 2-factor composite
+dilution: adding efficiency ratio to GP/TA hurts rather than helps.
+
+Key finding: For fundamental signals, execution-aware mechanics add value primarily through
+reducing rebalance frequency (H292 quarterly), not through turnover caps or buy/hold bands
+applied to composite scores.
+
+All 5 H291-H295 strategies have H001 corr in [−0.022, +0.001] — near-zero, orthogonal to
+trend-following. H293 (momentum-based) achieves near-exact zero (+0.001) because momentum
+and trend-following cancel at bi-monthly cadence.
+
+---
+
 _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._

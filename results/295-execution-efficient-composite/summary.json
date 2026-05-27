@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H295",
+  "name": "execution-efficient-composite",
+  "strategy_class": "ExecutionEfficientComposite",
+  "family": "execution-aware",
+  "run_date": "2026-05-26",
+  "oos_sharpe": 0.8401,
+  "ci_low": 0.4286,
+  "ci_high": 1.2569,
+  "cagr": 0.1019,
+  "max_drawdown": -0.3547,
+  "n_trades": 1,
+  "h001_corr": -0.0154,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.435,
+    2.232,
+    0.974,
+    1.863,
+    1.152,
+    1.258
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(GP/TA) + z(revenue_growth / capex_intensity) sector-neutral composite. Combines program's best fundamental signal (GP/TA, H227) with best capital-efficiency signal (efficiency ratio, H287). Buy/hold band (buy top-20%, hold until top-50%) + bi-monthly (42d) rebalance. Execution-aware version of H290 3-factor composite \u2014 2 factors avoids dilution.",
+  "canonical_params": {
+    "buy_quantile": 0.2,
+    "hold_quantile": 0.5,
+    "rebalance_period": 42,
+    "window": 252,
+    "capex_floor": 0.01
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

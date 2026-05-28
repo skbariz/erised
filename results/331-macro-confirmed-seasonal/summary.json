@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H331",
+  "name": "macro-confirmed-seasonal",
+  "strategy_class": "MacroConfirmedSeasonal",
+  "family": "calendar",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.3382,
+  "ci_low": -0.0533,
+  "ci_high": 0.7193,
+  "cagr": 0.0291,
+  "max_drawdown": -0.2506,
+  "n_trades": 2042,
+  "h001_corr": 0.2836,
+  "fold_sharpes": [
+    0.248,
+    0.565,
+    0.649,
+    -0.002,
+    0.193,
+    0.749,
+    -0.573,
+    0.742,
+    0.734,
+    0.665,
+    0.315,
+    0.323
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H078 seasonal framework + macro gate in Nov-Apr. Gate: VRP>0 OR TLT 252d > SHY 252d -> H021 weights; else fallback 60% SPY / 40% TLT. May-Oct: 100% TLT.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "term_lookback": 252,
+    "fallback_spy": 0.6,
+    "fallback_tlt": 0.4
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

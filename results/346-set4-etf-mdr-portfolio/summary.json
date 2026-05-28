@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H346",
+  "name": "set4-etf-mdr-portfolio",
+  "strategy_class": "Set4ETFMDRPortfolio",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.678,
+  "ci_low": 0.2825,
+  "ci_high": 1.0758,
+  "cagr": 0.0507,
+  "max_drawdown": -0.1697,
+  "n_trades": 0,
+  "h001_corr": 0.5339,
+  "fold_sharpes": [
+    -0.72,
+    0.392,
+    1.265,
+    0.953,
+    0.596,
+    0.855,
+    -0.134,
+    0.983,
+    1.626,
+    0.701,
+    0.787,
+    0.209
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over 28 kept H301-H340 ETF strategies (excludes H321-H325 ensembles and H341-H345 sleeve blends). EW baseline: Sharpe 0.678. Top MDR weights: {'H335': 0.4941449973810383, 'H337': 0.24294695178175751, 'H339': 0.2629080508372042}.",
+  "canonical_params": {
+    "method": "MDR_SLSQP",
+    "n_strategies": 28
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

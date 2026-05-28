@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H347",
+  "name": "cross-program-etf-mdr",
+  "strategy_class": "CrossProgramETFMDR",
+  "family": "cross-program ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.8735,
+  "ci_low": 0.4811,
+  "ci_high": 1.2599,
+  "cagr": 0.044,
+  "max_drawdown": -0.0958,
+  "n_trades": 0,
+  "h001_corr": 0.8332,
+  "fold_sharpes": [
+    0.01,
+    0.691,
+    1.045,
+    0.823,
+    0.964,
+    1.238,
+    0.272,
+    0.966,
+    1.588,
+    1.418,
+    0.212,
+    0.875
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over 65 ETF strategies: 37 H001-H100 + 28 H301-H340. EW baseline: Sharpe 0.765. Top MDR weights: {'H016': 0.19686660862257374, 'H031': 0.0063012179988690235, 'H035': 0.09985382849403432, 'H043': 0.16885991216835383, 'H051': 0.013315233053750195, 'H060': 0.04815638908041987, 'H065': 0.0967955140083227, 'H068': 0.15445167647307992, 'H076': 0.12978690663893871, 'H078': 0.04539971289110518, 'H097': 0.03564360493688387}.",
+  "canonical_params": {
+    "method": "MDR_SLSQP",
+    "n_h001_h100": 37,
+    "n_h301_h340": 28
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

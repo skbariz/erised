@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H338",
+  "name": "double-check-h080",
+  "strategy_class": "DoubleCheckH080",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6695,
+  "ci_low": 0.2731,
+  "ci_high": 1.0635,
+  "cagr": 0.0571,
+  "max_drawdown": -0.2059,
+  "n_trades": 5023,
+  "h001_corr": 0.4896,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.369,
+    0.783,
+    0.74,
+    0.805,
+    -0.046,
+    0.973,
+    1.854,
+    0.387,
+    0.685,
+    0.019
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H080 yield curve overlay + HYG/LQD credit double-confirm. Both curve+credit: SPY \u00d7 0.60; curve only: SPY \u00d7 0.85; credit only or neither: H021 full.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "curve_days": 63,
+    "credit_lookback": 63,
+    "both_scale": 0.6,
+    "curve_only_scale": 0.85
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

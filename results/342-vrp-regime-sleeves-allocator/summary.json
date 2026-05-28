@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H342",
+  "name": "vrp-regime-sleeves-allocator",
+  "strategy_class": "VRPRegimeSleevesAllocator",
+  "family": "sleeve allocation",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6732,
+  "ci_low": 0.2744,
+  "ci_high": 1.0637,
+  "cagr": 0.0549,
+  "max_drawdown": -0.2127,
+  "n_trades": 12585,
+  "h001_corr": 0.4637,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.471,
+    0.675,
+    0.692,
+    0.887,
+    -0.244,
+    1.049,
+    1.668,
+    0.61,
+    0.673,
+    0.164
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Runner-level ensemble: H086 + H021 + H078 blended via 252d rolling VRP percentile. High VRP (>67th): 60/30/10; Low VRP (<33rd): 10/40/50; Normal: 30/50/20. Percentile-based threshold adapts to structural VRP changes over time. Signal lagged 1 day to avoid lookahead.",
+  "canonical_params": {
+    "high_vrp_threshold": 0.67,
+    "low_vrp_threshold": 0.33,
+    "vrp_pctile_window": 252,
+    "vrp_realized_window": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

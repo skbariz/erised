@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H339",
+  "name": "vrp-correlation-regime",
+  "strategy_class": "VRPCorrelationRegime",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6232,
+  "ci_low": 0.2356,
+  "ci_high": 1.0178,
+  "cagr": 0.0545,
+  "max_drawdown": -0.2055,
+  "n_trades": 2764,
+  "h001_corr": 0.3451,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.296,
+    0.611,
+    0.483,
+    0.601,
+    0.04,
+    0.955,
+    1.745,
+    0.476,
+    0.771,
+    0.087
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H097 (correlation crisis: 60d SPY-TLT corr>0 -> 90% TLT) + VRP boost in normal regime: corr<0 AND VRP>252d median -> SPY \u00d7 1.10.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "corr_lookback": 60,
+    "crisis_tlt": 0.9,
+    "vrp_window": 252,
+    "vrp_boost": 1.1
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

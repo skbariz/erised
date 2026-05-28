@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H320",
+  "name": "defensive-macro-state-machine",
+  "strategy_class": "DefensiveMacroStateMachine",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6364,
+  "ci_low": 0.2359,
+  "ci_high": 1.0315,
+  "cagr": 0.055,
+  "max_drawdown": -0.2088,
+  "n_trades": 5023,
+  "h001_corr": 0.4958,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.271,
+    0.808,
+    0.607,
+    0.775,
+    -0.181,
+    1.082,
+    1.774,
+    0.614,
+    0.461,
+    -0.001
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-state machine: Risk-On (VRP>0 AND SPY>0 AND SPY63d>TLT63d) 1.15x; Risk-Off (VIX>28 OR SPY252d<0) SPY*0.65 freed -> TLT; Neutral 1.0x. Hysteresis: calm_days=5 consecutive non-triggering days to exit Risk-Off.",
+  "canonical_params": {
+    "vix_threshold": 28,
+    "calm_days": 5,
+    "risk_off_spy_scale": 0.65
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

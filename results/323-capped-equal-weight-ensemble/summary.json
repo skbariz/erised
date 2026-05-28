@@ -1,0 +1,66 @@
+{
+  "hypothesis": "H323",
+  "name": "capped-equal-weight-ensemble",
+  "strategy_class": "CappedEqualWeightEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.9043,
+  "ci_low": 0.516,
+  "ci_high": 1.2929,
+  "cagr": 0.0891,
+  "max_drawdown": -0.161,
+  "n_trades": 0,
+  "h001_corr": 0.903,
+  "fold_sharpes": [
+    -0.191,
+    0.157,
+    1.441,
+    1.078,
+    1.074,
+    0.955,
+    -0.138,
+    1.46,
+    1.833,
+    1.383,
+    0.199,
+    0.67
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Top 10 H001-H100 kept strategies by OOS Sharpe, equal-weighted at 10% each. Selection: ['H065', 'H076', 'H019', 'H063', 'H088', 'H008', 'H001', 'H021', 'H007', 'H090']. Compare H095 (MDR over 35): Sharpe 1.133, MaxDD -7.16%. Compare H048 (EW 35): Sharpe 0.800, MaxDD -23.35%.",
+  "canonical_params": {
+    "top_n": 10,
+    "selection": "oos_sharpe_rank",
+    "weighting": "equal",
+    "selected_strategies": [
+      "H065",
+      "H076",
+      "H019",
+      "H063",
+      "H088",
+      "H008",
+      "H001",
+      "H021",
+      "H007",
+      "H090"
+    ],
+    "top_weights": {
+      "H065": 0.1,
+      "H076": 0.1,
+      "H019": 0.1,
+      "H063": 0.1,
+      "H088": 0.1,
+      "H008": 0.1,
+      "H001": 0.1,
+      "H021": 0.1,
+      "H007": 0.1,
+      "H090": 0.1
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

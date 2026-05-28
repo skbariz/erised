@@ -1,0 +1,47 @@
+{
+  "hypothesis": "H333",
+  "name": "multi-calendar-ensemble",
+  "strategy_class": "MultiCalendarEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.4668,
+  "ci_low": 0.0874,
+  "ci_high": 0.848,
+  "cagr": 0.0348,
+  "max_drawdown": -0.1789,
+  "n_trades": 0,
+  "h001_corr": 0.6762,
+  "fold_sharpes": [
+    -0.59,
+    -0.182,
+    1.084,
+    0.358,
+    -0.03,
+    0.884,
+    -0.113,
+    0.289,
+    1.053,
+    1.17,
+    0.079,
+    0.763
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Equal-weight blend of 5 calendar strategies: H023 SellInMay + H025 JanuaryBarometer + H043 SellInMayBondConfirm + H046 HalloweenMomentumConfirm + H078 SeasonalRiskParity. Runner-only strategy (no new class); blends combined_returns.",
+  "canonical_params": {
+    "components": [
+      "H023",
+      "H025",
+      "H043",
+      "H046",
+      "H078"
+    ],
+    "weights": "equal"
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

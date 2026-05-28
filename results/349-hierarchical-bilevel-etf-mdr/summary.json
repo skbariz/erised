@@ -1,0 +1,46 @@
+{
+  "hypothesis": "H349",
+  "name": "hierarchical-bilevel-etf-mdr",
+  "strategy_class": "HierarchicalBilevelETFMDR",
+  "family": "cross-program ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.8005,
+  "ci_low": 0.4112,
+  "ci_high": 1.1925,
+  "cagr": 0.0476,
+  "max_drawdown": -0.1152,
+  "n_trades": 0,
+  "h001_corr": 0.6914,
+  "fold_sharpes": [
+    -0.368,
+    0.557,
+    1.242,
+    0.938,
+    0.776,
+    1.091,
+    0.013,
+    1.026,
+    1.693,
+    1.038,
+    0.603,
+    0.486
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "2-tier ETF-only MDR: Tier1=37 H001-H100 strategies (50%), Tier2=28 H301-H340 strategies (50%). MDR applied within each tier; tiers blended 50/50. T1 top: H016: 0.197. T2 top: H335: 0.494.",
+  "canonical_params": {
+    "tier1_n": 37,
+    "tier2_n": 28,
+    "tier_weights": [
+      0.5,
+      0.5
+    ],
+    "method": "MDR_SLSQP"
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H318",
+  "name": "regime-classifier",
+  "strategy_class": "RegimeClassifier",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6861,
+  "ci_low": 0.2968,
+  "ci_high": 1.0749,
+  "cagr": 0.0598,
+  "max_drawdown": -0.172,
+  "n_trades": 5023,
+  "h001_corr": 0.5623,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.451,
+    0.834,
+    0.895,
+    0.642,
+    -0.073,
+    1.069,
+    1.761,
+    0.554,
+    0.407,
+    0.001
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with 4-state macro regime: Growth (SPY>0 AND VIX<20) 1.15x, Recovery (SPY>0 AND VIX 20-30) 1.00x, Stress (SPY<0 OR VIX>30) 0.70x, Caution (else) 0.90x. All signals lagged 1 bar. No lookahead.",
+  "canonical_params": {
+    "vix_low": 20,
+    "vix_high": 30
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

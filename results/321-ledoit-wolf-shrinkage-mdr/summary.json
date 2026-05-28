@@ -1,0 +1,55 @@
+{
+  "hypothesis": "H321",
+  "name": "ledoit-wolf-shrinkage-mdr",
+  "strategy_class": "LedoitWolfShrinkageMDR",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.863,
+  "ci_low": 0.4694,
+  "ci_high": 1.2487,
+  "cagr": 0.0436,
+  "max_drawdown": -0.0955,
+  "n_trades": 0,
+  "h001_corr": 0.8333,
+  "fold_sharpes": [
+    0.007,
+    0.665,
+    1.026,
+    0.793,
+    0.975,
+    1.229,
+    0.239,
+    0.96,
+    1.576,
+    1.433,
+    0.176,
+    0.888
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR with Ledoit-Wolf shrinkage covariance over 35 H001-H100 kept strategies. Same universe as H095 (sample cov MDR, Sharpe 1.133, MaxDD -7.16%). Top weights: {'H016': 0.1963146024527771, 'H031': 0.008854599477271432, 'H034': 0.005650924276516496, 'H035': 0.09981893754290967, 'H043': 0.16592637038617955, 'H051': 0.015231480878584489, 'H060': 0.05088873556073315, 'H065': 0.09730908472207568, 'H068': 0.14932376951230902, 'H076': 0.13476090694808726, 'H078': 0.07119699279797438}.",
+  "canonical_params": {
+    "n_strategies": 35,
+    "method": "SLSQP",
+    "covariance": "LedoitWolf",
+    "top_weights": {
+      "H016": 0.1963146024527771,
+      "H031": 0.008854599477271432,
+      "H034": 0.005650924276516496,
+      "H035": 0.09981893754290967,
+      "H043": 0.16592637038617955,
+      "H051": 0.015231480878584489,
+      "H060": 0.05088873556073315,
+      "H065": 0.09730908472207568,
+      "H068": 0.14932376951230902,
+      "H076": 0.13476090694808726,
+      "H078": 0.07119699279797438
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

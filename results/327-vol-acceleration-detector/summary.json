@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H327",
+  "name": "vol-acceleration-detector",
+  "strategy_class": "VolAccelerationDetector",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6646,
+  "ci_low": 0.2664,
+  "ci_high": 1.0596,
+  "cagr": 0.0482,
+  "max_drawdown": -0.2036,
+  "n_trades": 5023,
+  "h001_corr": 0.5335,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.416,
+    0.68,
+    0.809,
+    0.785,
+    -0.399,
+    1.078,
+    1.865,
+    0.719,
+    0.769,
+    -0.161
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H086 with acceleration-aware penalty: scale*0.75 when 21d>1.5x63d, scale*1.15 (capped at 1.0) when 21d<0.75x63d.",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "accel_threshold": 1.5,
+    "decel_threshold": 0.75,
+    "accel_penalty": 0.75,
+    "decel_bonus": 1.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

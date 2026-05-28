@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H326",
+  "name": "dual-frequency-vol-target",
+  "strategy_class": "DualFrequencyVolTarget",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6778,
+  "ci_low": 0.2817,
+  "ci_high": 1.0701,
+  "cagr": 0.0464,
+  "max_drawdown": -0.1876,
+  "n_trades": 5023,
+  "h001_corr": 0.5394,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.404,
+    0.692,
+    0.776,
+    0.805,
+    -0.328,
+    1.041,
+    1.901,
+    0.708,
+    0.752,
+    -0.104
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H086 variant using max(21d, 63d) realized vol in the denominator. More conservative than H086 during short-term vol spikes.",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "short_window": 21,
+    "long_window": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

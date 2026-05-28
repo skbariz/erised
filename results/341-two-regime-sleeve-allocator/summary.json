@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H341",
+  "name": "two-regime-sleeve-allocator",
+  "strategy_class": "TwoRegimeSleeveAllocator",
+  "family": "sleeve allocation",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.5614,
+  "ci_low": 0.1605,
+  "ci_high": 0.9553,
+  "cagr": 0.0474,
+  "max_drawdown": -0.2213,
+  "n_trades": 7562,
+  "h001_corr": 0.3968,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.486,
+    0.327,
+    0.361,
+    0.825,
+    -0.282,
+    1.015,
+    1.51,
+    0.435,
+    0.594,
+    0.248
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Runner-level ensemble: H021 + H078 blended via VRP + term-spread regime. Favorable (VRP>0 AND TLT_252d>SHY_252d): 70/30; Unfavorable (both negative): 30/70; Mixed: 50/50. Signal lagged 1 day to avoid lookahead.",
+  "canonical_params": {
+    "w_h021_favorable": 0.7,
+    "w_h021_unfavorable": 0.3,
+    "w_h021_mixed": 0.5,
+    "vrp_lookback": 21,
+    "mom_lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

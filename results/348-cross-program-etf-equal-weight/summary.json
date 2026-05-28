@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H348",
+  "name": "cross-program-etf-equal-weight",
+  "strategy_class": "CrossProgramETFEqualWeight",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.7652,
+  "ci_low": 0.3744,
+  "ci_high": 1.1555,
+  "cagr": 0.0582,
+  "max_drawdown": -0.1566,
+  "n_trades": 0,
+  "h001_corr": 0.7365,
+  "fold_sharpes": [
+    -0.487,
+    -0.041,
+    1.474,
+    0.882,
+    0.82,
+    0.84,
+    -0.225,
+    1.189,
+    1.842,
+    1.107,
+    0.414,
+    0.277
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight over 65 ETF strategies: 37 H001-H100 + 28 H301-H340. EW baseline for H347 MDR comparison. H001-H100 only EW: Sharpe 0.780; H301-H340 only EW: Sharpe 0.678.",
+  "canonical_params": {
+    "n_strategies": 65,
+    "method": "equal_weight"
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

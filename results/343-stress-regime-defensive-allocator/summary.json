@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H343",
+  "name": "stress-regime-defensive-allocator",
+  "strategy_class": "StressRegimeDefensiveAllocator",
+  "family": "sleeve allocation",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.5842,
+  "ci_low": 0.1876,
+  "ci_high": 0.9814,
+  "cagr": 0.0469,
+  "max_drawdown": -0.1831,
+  "n_trades": 7703,
+  "h001_corr": 0.4467,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.547,
+    0.57,
+    0.482,
+    0.623,
+    -0.078,
+    1.056,
+    1.353,
+    0.459,
+    0.722,
+    0.019
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Runner-level ensemble: H021 + H043 + H078 blended via VIX level. High stress (VIX>28): 0/20/80 H021/H043/H078; Medium stress (VIX 20-28): 40/30/30; Normal (VIX<20): 70/0/30. VIX signal lagged 1 day to avoid lookahead. H043 uses walk_forward (single-asset Strategy); H021/H078 use walk_forward_multi.",
+  "canonical_params": {
+    "vix_crisis_threshold": 28,
+    "vix_medium_threshold": 20,
+    "w_crisis_h021": 0.0,
+    "w_crisis_h043": 0.2,
+    "w_crisis_h078": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

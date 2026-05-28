@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H332",
+  "name": "vrp-enhanced-halloween",
+  "strategy_class": "VRPEnhancedHalloween",
+  "family": "calendar",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.3071,
+  "ci_low": -0.0714,
+  "ci_high": 0.6989,
+  "cagr": 0.0353,
+  "max_drawdown": -0.6027,
+  "n_trades": 286,
+  "h001_corr": 0.5657,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.765,
+    0.1,
+    0.347,
+    1.047,
+    -0.746,
+    0.773,
+    0.794,
+    0.951,
+    0.074,
+    1.096
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H046 Halloween framework + VRP scaler in Oct-Apr window. SPY weight = H046_base \u00d7 VRP_mod; VRP_mod=1.10 if VRP>0 else 0.90. May-Sep: 100% TLT.",
+  "canonical_params": {
+    "momentum_days": 126,
+    "vrp_up": 1.1,
+    "vrp_down": 0.9
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

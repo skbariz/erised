@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H336",
+  "name": "vrp-refined-h060",
+  "strategy_class": "VRPRefinedH060",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.4413,
+  "ci_low": 0.0352,
+  "ci_high": 0.8421,
+  "cagr": 0.0434,
+  "max_drawdown": -0.2609,
+  "n_trades": 370,
+  "h001_corr": 0.435,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.328,
+    0.7,
+    0.958,
+    0.213,
+    -0.334,
+    0.837,
+    1.864,
+    -0.092,
+    -0.125,
+    0.395
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H060 (carry+momentum SPY/TLT) + VRP overlay: when H060 is 100% SPY AND VRP < 0, reduce to vrp_cut (0.70) SPY + (1-vrp_cut) TLT.",
+  "canonical_params": {
+    "mom_days": 63,
+    "spy_ma": 200,
+    "vrp_cut": 0.7
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

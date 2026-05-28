@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H328",
+  "name": "vol-percentile-exposure",
+  "strategy_class": "VolPercentileExposure",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6144,
+  "ci_low": 0.2252,
+  "ci_high": 1.0077,
+  "cagr": 0.0509,
+  "max_drawdown": -0.2559,
+  "n_trades": 5023,
+  "h001_corr": 0.518,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.353,
+    0.647,
+    0.836,
+    0.72,
+    -0.648,
+    0.978,
+    1.861,
+    0.644,
+    0.741,
+    -0.112
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-tier H021 exposure driven by 252d rolling vol percentile. <33rd: 1.20x; 33rd-67th: 1.0x; >67th: vol-target-down.",
+  "canonical_params": {
+    "low_threshold": 0.33,
+    "high_threshold": 0.67,
+    "low_scale": 1.2,
+    "vol_target": 0.08
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

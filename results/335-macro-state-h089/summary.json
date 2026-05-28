@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H335",
+  "name": "macro-state-h089",
+  "strategy_class": "MacroStateH089",
+  "family": "calendar",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6263,
+  "ci_low": 0.2336,
+  "ci_high": 1.0228,
+  "cagr": 0.0472,
+  "max_drawdown": -0.1799,
+  "n_trades": 5033,
+  "h001_corr": 0.5746,
+  "fold_sharpes": [
+    -0.682,
+    0.482,
+    0.974,
+    1.141,
+    0.573,
+    0.854,
+    0.035,
+    0.651,
+    1.24,
+    0.84,
+    0.979,
+    0.319
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H089 (50% H043 + 50% H021) with H306 macro stress scaler on H021 half only. Scaler = 0.70 + 0.60*(1-stress) in [0.70, 1.30]. H043 half fixed.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "tlt_ma_period": 200,
+    "stress_sensitivity": 0.6,
+    "vix_pctile_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

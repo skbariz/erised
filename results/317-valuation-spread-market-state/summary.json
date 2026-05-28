@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H317",
+  "name": "valuation-spread-market-state",
+  "strategy_class": "ValuationSpreadMarketState",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.7014,
+  "ci_low": 0.3008,
+  "ci_high": 1.1,
+  "cagr": 0.0606,
+  "max_drawdown": -0.1936,
+  "n_trades": 5023,
+  "h001_corr": 0.5407,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.431,
+    0.866,
+    0.582,
+    0.846,
+    -0.045,
+    1.121,
+    1.773,
+    0.697,
+    0.711,
+    -0.008
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 scaled by IVW vs IVE 252d return spread. Growth-on (IVW > IVE) -> 1.10x; value-on (IVE > IVW) -> 0.90x. Pre-2000: pure H021. IVW/IVE folds 0-1 produce zero OOS (acceptable).",
+  "canonical_params": {
+    "growth_scale": 1.1,
+    "value_scale": 0.9,
+    "ivw_lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

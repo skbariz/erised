@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H337",
+  "name": "funding-stress-h077",
+  "strategy_class": "FundingStressH077",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.5679,
+  "ci_low": 0.17,
+  "ci_high": 0.9725,
+  "cagr": 0.0504,
+  "max_drawdown": -0.2304,
+  "n_trades": 3908,
+  "h001_corr": 0.4627,
+  "fold_sharpes": [
+    -0.493,
+    -0.508,
+    1.293,
+    0.824,
+    0.518,
+    0.796,
+    -0.505,
+    1.16,
+    1.783,
+    0.466,
+    0.31,
+    0.109
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H077 (SPY 12m momentum gate on H021) + funding stress override. Override: VIX>30 AND HYG 63d<LQD 63d -> 80% TLT / 20% SPY. Pre-HYG era: VIX>30 only.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "mom_days": 252,
+    "vix_threshold": 30.0,
+    "crisis_tlt": 0.8,
+    "credit_lookback": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

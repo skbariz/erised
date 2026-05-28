@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H330",
+  "name": "ratchet-vol-target",
+  "strategy_class": "RatchetVolTarget",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.6518,
+  "ci_low": 0.2501,
+  "ci_high": 1.041,
+  "cagr": 0.0441,
+  "max_drawdown": -0.1584,
+  "n_trades": 5023,
+  "h001_corr": 0.5561,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.372,
+    0.628,
+    0.737,
+    0.707,
+    -0.268,
+    1.045,
+    1.871,
+    0.613,
+    0.689,
+    -0.154
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Combines H086 vol-scale with H087 drawdown-scale: position = min(vol_scale, drawdown_scale) x H021. Most conservative de-risking mechanism always wins.",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "drawdown_sensitivity": 3.0
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

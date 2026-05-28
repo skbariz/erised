@@ -1,0 +1,25 @@
+{
+  "hypothesis": "H325",
+  "name": "hierarchical-risk-parity-ensemble",
+  "strategy_class": "HierarchicalRiskParityEnsemble",
+  "family": "ensemble",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 1.5197,
+  "ci_low": 1.1216,
+  "ci_high": 1.9058,
+  "cagr": 0.0631,
+  "max_drawdown": -0.0813,
+  "n_trades": 6019,
+  "h001_corr": 0.5357,
+  "fold_sharpes": [],
+  "decision": "keep",
+  "kept": true,
+  "notes": "2-tier MDR ensemble: Tier1=37 H001-H100 ETF strategies (50%), Tier2=9 H150-H199 cross-sectional strategies (50%). MDR weights applied within each tier; tiers blended 50/50.",
+  "canonical_params": {},
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

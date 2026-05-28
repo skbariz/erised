@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H316",
+  "name": "quarterly-macro-state-overlay",
+  "strategy_class": "QuarterlyMacroStateOverlay",
+  "family": "macro timing",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.7221,
+  "ci_low": 0.3284,
+  "ci_high": 1.1072,
+  "cagr": 0.0614,
+  "max_drawdown": -0.1974,
+  "n_trades": 5023,
+  "h001_corr": 0.552,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    1.431,
+    0.74,
+    0.7,
+    0.916,
+    -0.127,
+    1.15,
+    1.732,
+    0.703,
+    0.704,
+    0.104
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H021 with quarterly-resampled 3-signal composite (term spread + equity momentum + growth/value IVW vs IVE). Composite forward-filled daily; updates at most 4x/yr. IVW/IVE available from 2000 -- folds 0-1 use 2-signal version.",
+  "canonical_params": {
+    "high_scale": 1.2,
+    "low_scale": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

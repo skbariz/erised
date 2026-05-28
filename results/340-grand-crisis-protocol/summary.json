@@ -1,0 +1,49 @@
+{
+  "hypothesis": "H340",
+  "name": "grand-crisis-protocol",
+  "strategy_class": "GrandCrisisProtocol",
+  "family": "vol control",
+  "run_date": "2026-05-27",
+  "oos_sharpe": 0.3254,
+  "ci_low": -0.0562,
+  "ci_high": 0.7198,
+  "cagr": 0.0326,
+  "max_drawdown": -0.6027,
+  "n_trades": 1811,
+  "h001_corr": 0.5006,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.441,
+    0.886,
+    0.537,
+    0.726,
+    -0.112,
+    1.012,
+    1.719,
+    0.582,
+    0.87,
+    -0.127
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "4 crisis signals (H097 corr, H079 DD+VIX, H306 stress, VRP<-0.005). 2+ signals: 20% SPY / 80% TLT. 1 signal: 40% SPY / 60% TLT. 0 signals: H021 inverse-vol weights.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "corr_lookback": 60,
+    "dd_threshold": 0.15,
+    "vix_threshold": 30.0,
+    "stress_high": 0.67,
+    "vrp_severe": -0.005,
+    "spy_one": 0.4,
+    "tlt_one": 0.6,
+    "spy_two": 0.2,
+    "tlt_two": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

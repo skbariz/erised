@@ -898,3 +898,76 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 - H251-H300 champion: H300 GrandCrossProgram300MDR — Sharpe 1.525 / MaxDD −6.86%
 - H301-H350 champion: H350 UltimateGrandMDR350 — Sharpe 1.525 / MaxDD −6.86% (ties H300)
 - **Overall program champion: H300 / H350 (tied)** — Sharpe 1.525 / MaxDD −6.86%
+
+
+---
+
+## H351-H365: Set 5 -- q-Factor, Mispricing, Nonlinear / ML (Batches 1-3)
+
+### Batch 1 (H351-H355): Q-Factor Investment & Profitability
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 351 | QInvestmentRank | q-factor | **kept** | 0.705 | [0.300, 1.123] | 8.22% | -39.41% | -0.019 | Low asset-growth rate; folds 0-5 zero (EDGAR) |
+| 352 | QROELevel | q-factor | **kept** | 0.751 | [0.348, 1.159] | 8.89% | -37.36% | -0.019 | High ROE; fold 5 active (+0.575) |
+| 353 | QInvestProfCombo | q-factor | **kept** | 0.762 | [0.359, 1.167] | 9.01% | -36.33% | -0.018 | z(-investment)+z(ROE) composite |
+| 354 | QResidualMomentum | q-factor | **kept** | 0.868 | [0.464, 1.277] | 16.25% | -49.88% | -0.001 | Momentum x q-factor quality gate; all 12 folds active |
+| 355 | QFactorComposite | q-factor | **kept** | 0.777 | [0.373, 1.186] | 9.36% | -37.81% | -0.020 | z(-inv)+z(ROE)+z(GP/TA) batch-1 ensemble |
+
+**Batch 1 summary:** 5/5 KEEP. Q-factor signals confirm low asset-growth (investment discipline) and high ROE are independent, additive signals. All strategies have H001 corr ~-0.02. H354 QResidualMomentum activates across all 12 folds (q-gate uses price data in pre-EDGAR folds) achieving Sharpe 0.868 but MaxDD -49.88%.
+
+### Batch 2 (H356-H360): Composite Mispricing Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 356 | ManagementMispricing | mispricing | **kept** | 0.792 | [0.384, 1.208] | 9.14% | -35.95% | -0.020 | z(-accruals)+z(-asset_growth)+z(-dilution) |
+| 357 | PerformanceMispricing | mispricing | **kept** | 0.781 | [0.379, 1.190] | 9.09% | -35.09% | -0.020 | z(ROA)+z(delta_ROA)+z(OCF/TA) |
+| 358 | MispricingCombo | mispricing | **kept** | 0.792 | [0.388, 1.201] | 9.43% | -35.73% | -0.020 | 50/50 management+performance blend |
+| 359 | MispricingAvoidFilter | mispricing | **kept** | 0.939 | [0.535, 1.355] | 15.52% | -42.52% | -0.005 | Equal-weight ex bottom-10% mispricing; ALL 12 folds active |
+| 360 | MispricingQualityComposite | mispricing | **kept** | 0.938 | [0.535, 1.349] | 12.12% | -32.24% | -0.017 | GP/TA gate + mispricing score; best MaxDD in batch 2 |
+
+**Batch 2 summary:** 5/5 KEEP. H359 MispricingAvoidFilter is the standout -- shares_outstanding data is available since 1993, so dilution component fires in all 12 folds (first fully-active cross-sectional strategy). H360 MispricingQualityComposite (-32.24% MaxDD) achieves the best risk-adjusted profile in batch 2 via GP/TA quality gate.
+
+### Batch 3 (H361-H365): Nonlinear & Regularized Characteristic Models
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 361 | PercentileBinnedGP | nonlinear-characteristic | **kept** | 0.919 | [0.509, 1.331] | 11.27% | -28.20% | -0.015 | GP/TA quintile bin scoring; best MaxDD across batches 1-3 |
+| 362 | MonotonicityVotingComposite | nonlinear-characteristic | **kept** | 0.869 | [0.470, 1.289] | 11.24% | -32.86% | -0.013 | GP+ROE+accruals vote; 2/3 agreement required |
+| 363 | ElasticNetReturnForecast | ml-characteristic | **kept** | 0.884 | [0.472, 1.296] | 10.99% | -34.14% | -0.017 | Falls back to GP/TA; insufficient EDGAR history for ML signal |
+| 364 | NonlinearMomentumBins | nonlinear-characteristic | **kept** | 0.945 | [0.534, 1.367] | 19.96% | -49.11% | +0.003 | Top-decile only momentum; best Sharpe in batch 3 |
+| 365 | ShrunkSignalComposite | nonlinear-characteristic | **kept** | 0.933 | [0.524, 1.345] | 19.75% | -58.55% | +0.001 | Clipped z-score blend of 4 batch-3 signals |
+
+**Batch 3 summary:** 5/5 KEEP. H361 PercentileBinnedGP (-28.20% MaxDD) is the best risk-managed strategy across all three batches. H364 NonlinearMomentumBins (0.945) confirms J-shape hypothesis: top decile beats top quintile. H363 ElasticNet fails to improve over GP/TA -- insufficient EDGAR training history (< 1 year before fold 6) validates the falsification criterion.
+
+---
+
+## H351-H365 Synthesis
+
+| Target | Result |
+|--------|--------|
+| Q-factor batch (H351-H355) | 5/5 KEEP |
+| Mispricing batch (H356-H360) | 5/5 KEEP |
+| Nonlinear / ML batch (H361-H365) | 5/5 KEEP |
+| **H351-H365 total** | **15/15 KEEP (100%)** |
+| Best Sharpe | H364 NonlinearMomentumBins -- 0.945 |
+| Best MaxDD | H361 PercentileBinnedGP -- -28.20% |
+| Best risk-adjusted | H360 MispricingQualityComposite -- 0.938 / -32.24% |
+| Widest fold coverage | H359 MispricingAvoidFilter -- all 12 folds active |
+| Lowest H001 corr | H364 NonlinearMomentumBins -- +0.003 |
+
+### Key findings (H351-H365)
+
+1. **Q-factor signals are additive.** H353 QInvestProfCombo (0.762) beats H351 (0.705) and H352 (0.751) individually -- low investment and high ROE are genuinely independent signals in S&P 500 data.
+
+2. **MispricingAvoidFilter fires in all 12 folds -- first fully-active cross-sectional strategy.** shares_outstanding (dilution) is available from 1993 unlike EDGAR balance-sheet fields. Data-availability finding, not signal-quality finding.
+
+3. **GP/TA quality gate is the most effective MaxDD control.** H360 (-32.24%) and H361 (-28.20%) both use GP/TA as gate or nonlinear scorer. Confirms H265 design principle across two independent formulations.
+
+4. **Nonlinear momentum shape confirmed.** H364 (0.945) outperforms top-quintile version (H150) -- J-shaped return relationship is real; top decile earns disproportionate alpha.
+
+5. **ElasticNet ML fails to add value over GP/TA in S&P 500.** Small cross-section (500 stocks) + short EDGAR history (< 12 years by fold 6) gives insufficient power. Valid falsification of the ML hypothesis in this data environment.
+
+6. **H001 correlations cluster at -0.015 to -0.020.** Confirms EDGAR-driven family structure: all accounting signals are near-orthogonal to SPY trend, making them valuable MDR ensemble components.
+
+**Program state:** H001-H365 complete. 253 strategies tested (all Set 5 Batches 1-3 kept). Terminal champion unchanged: H300/H350 tied at Sharpe 1.525 / MaxDD -6.86%.

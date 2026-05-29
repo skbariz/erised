@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H375",
+  "name": "macro-state-gb-rank",
+  "strategy_class": "MacroStateGBRank",
+  "family": "ml-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9229,
+  "ci_low": 0.5172,
+  "ci_high": 1.3338,
+  "cagr": 0.1798,
+  "max_drawdown": -0.5079,
+  "n_trades": 1,
+  "h001_corr": -0.0039,
+  "fold_sharpes": [
+    1.47,
+    0.732,
+    0.947,
+    1.764,
+    1.189,
+    0.534,
+    0.405,
+    2.154,
+    0.881,
+    1.775,
+    1.03,
+    1.269
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GB with 9 features: price+EDGAR + SPY 200d MA state. Chen-Pelger-Zhu 2023.",
+  "canonical_params": {
+    "ma_window": 200,
+    "max_depth": 3,
+    "n_estimators": 100,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

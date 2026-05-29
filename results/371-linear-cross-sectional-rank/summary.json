@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H371",
+  "name": "linear-cross-sectional-rank",
+  "strategy_class": "LinearCrossSectionalRank",
+  "family": "ml-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8754,
+  "ci_low": 0.4684,
+  "ci_high": 1.2917,
+  "cagr": 0.1094,
+  "max_drawdown": -0.3496,
+  "n_trades": 1,
+  "h001_corr": -0.0135,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.742,
+    2.12,
+    1.03,
+    1.994,
+    1.305,
+    1.086
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "OLS cross-sectional regression on 8 features. Required ML ladder baseline. Falls back to GP/TA.",
+  "canonical_params": {
+    "train_window": 756,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

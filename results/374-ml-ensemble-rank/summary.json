@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H374",
+  "name": "ml-ensemble-rank",
+  "strategy_class": "MLEnsembleRank",
+  "family": "ml-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9401,
+  "ci_low": 0.5351,
+  "ci_high": 1.356,
+  "cagr": 0.1892,
+  "max_drawdown": -0.5217,
+  "n_trades": 1,
+  "h001_corr": -0.0051,
+  "fold_sharpes": [
+    1.546,
+    0.462,
+    0.766,
+    2.059,
+    1.362,
+    0.369,
+    0.992,
+    2.108,
+    0.716,
+    1.822,
+    1.067,
+    1.249
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight blend of OLS+ElasticNet(0.3)+GB predictions. Full ML ladder ensemble.",
+  "canonical_params": {
+    "train_window": 756,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

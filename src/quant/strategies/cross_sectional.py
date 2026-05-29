@@ -11161,7 +11161,7 @@ class GreenProxyQuality(CrossSectionalStrategy):
             if t in green_mem.columns:
                 green_mem[t] = membership[t]
         n_green = green_mem.sum(axis=1).replace(0, np.nan)
-        if (n_green < 5).all():
+        if (n_green < 2).all():
             n = membership.sum(axis=1).replace(0, np.nan)
             return _periodic_rebalance(
                 membership.astype(float).div(n, axis=0).fillna(0.0), self.rebalance_period

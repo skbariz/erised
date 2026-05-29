@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H377",
+  "name": "earnings-surprise-drift",
+  "strategy_class": "EarningsSurpriseDrift",
+  "family": "earnings-event",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.2025,
+  "ci_low": -0.2019,
+  "ci_high": 0.5968,
+  "cagr": 0.0182,
+  "max_drawdown": -0.4167,
+  "n_trades": 65,
+  "h001_corr": -0.0094,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.03,
+    0.929,
+    0.522,
+    0.238,
+    0.287,
+    0.129
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "PEAD: positive dNI/TA as surprise magnitude. Monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

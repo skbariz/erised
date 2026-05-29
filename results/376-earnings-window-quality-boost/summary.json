@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H376",
+  "name": "earnings-window-quality-boost",
+  "strategy_class": "EarningsWindowQualityBoost",
+  "family": "earnings-event",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8839,
+  "ci_low": 0.4709,
+  "ci_high": 1.2953,
+  "cagr": 0.1099,
+  "max_drawdown": -0.3414,
+  "n_trades": 1,
+  "h001_corr": -0.0168,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.748,
+    2.057,
+    1.027,
+    2.04,
+    1.22,
+    1.183
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality with 1.5x weight boost in +-5d post-filing window. Engelberg-McLean-Pontiff 2018.",
+  "canonical_params": {
+    "filing_window_days": 5,
+    "filing_boost": 1.5,
+    "base_scale": 0.8,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

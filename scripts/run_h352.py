@@ -73,7 +73,7 @@ def main() -> None:
             spy_returns=spy_rets,
         )
         lo_s, hi_s = bootstrap_sharpe_ci(r.combined_returns, n_boot=1000)
-        print(f"  q={_q:.0%}  Sharpe {r.combined_report.sharpe:.3f}  CI [{lo_s:.3f}, {hi_s:.3f}]  MaxDD {r.combined_report.max_drawdown:.2%}")
+        print(f"  q={q:.0%}  Sharpe {r.combined_report.sharpe:.3f}  CI [{lo_s:.3f}, {hi_s:.3f}]  MaxDD {r.combined_report.max_drawdown:.2%}")
 
     print("\nPer-fold Sharpe:")
     for i, fold_result in enumerate(wf.fold_results):

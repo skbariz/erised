@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H384",
+  "name": "governance-quality-composite",
+  "strategy_class": "GovernanceQualityComposite",
+  "family": "governance",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9457,
+  "ci_low": 0.5397,
+  "ci_high": 1.3574,
+  "cagr": 0.1226,
+  "max_drawdown": -0.3222,
+  "n_trades": 1,
+  "h001_corr": -0.0171,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.944,
+    2.188,
+    0.87,
+    1.986,
+    1.232,
+    1.267
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Capital discipline governance filtered by GP/TA > median. Edmans 2011.",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

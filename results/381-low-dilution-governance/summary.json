@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H381",
+  "name": "low-dilution-governance",
+  "strategy_class": "LowDilutionGovernance",
+  "family": "governance",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7342,
+  "ci_low": 0.3326,
+  "ci_high": 1.144,
+  "cagr": 0.0847,
+  "max_drawdown": -0.3969,
+  "n_trades": 1,
+  "h001_corr": -0.0209,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.566,
+    2.18,
+    0.824,
+    1.793,
+    1.003,
+    0.915
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long lowest-quartile annual dilution rate. Gompers-Ishii-Metrick 2003 governance proxy.",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

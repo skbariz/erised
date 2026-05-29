@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H385",
+  "name": "governance-mdr-composite",
+  "strategy_class": "GovernanceMDRComposite",
+  "family": "governance",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.806,
+  "ci_low": 0.4042,
+  "ci_high": 1.2073,
+  "cagr": 0.0991,
+  "max_drawdown": -0.3464,
+  "n_trades": 1,
+  "h001_corr": -0.0194,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.702,
+    2.083,
+    0.903,
+    1.927,
+    0.924,
+    1.142
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Clipped z-score blend: z(-dilution)+z(buyback)+z(-accruals)+z(GP/TA). Batch-7 ensemble.",
+  "canonical_params": {
+    "clip_val": 2.0,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

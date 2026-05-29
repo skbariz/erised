@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H387",
+  "name": "low-carbon-sector-neutral",
+  "strategy_class": "LowCarbonSectorNeutral",
+  "family": "esg-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9058,
+  "ci_low": 0.4994,
+  "ci_high": 1.3164,
+  "cagr": 0.1132,
+  "max_drawdown": -0.3125,
+  "n_trades": 1,
+  "h001_corr": -0.0173,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.643,
+    2.089,
+    1.32,
+    1.991,
+    1.239,
+    1.212
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sector-neutral GP/TA excluding Energy. Low-carbon quality proxy (Bolton-Kacperczyk 2021).",
+  "canonical_params": {
+    "excluded_sector": "Energy",
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

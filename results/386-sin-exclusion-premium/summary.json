@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H386",
+  "name": "sin-exclusion-premium",
+  "strategy_class": "SinExclusionPremium",
+  "family": "esg-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9269,
+  "ci_low": 0.5254,
+  "ci_high": 1.3429,
+  "cagr": 0.1154,
+  "max_drawdown": -0.3289,
+  "n_trades": 66,
+  "h001_corr": -0.0084,
+  "fold_sharpes": [
+    1.341,
+    1.256,
+    0.91,
+    1.587,
+    1.094,
+    0.27,
+    0.66,
+    2.165,
+    0.834,
+    1.928,
+    1.034,
+    1.019
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight S&P 500 ex Consumer Staples. Sin-exclusion proxy (Hong-Kacperczyk 2009).",
+  "canonical_params": {
+    "excluded_sector": "Consumer Staples",
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

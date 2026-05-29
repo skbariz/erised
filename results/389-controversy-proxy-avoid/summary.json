@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H389",
+  "name": "controversy-proxy-avoid",
+  "strategy_class": "ControversyProxyAvoid",
+  "family": "esg-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8613,
+  "ci_low": 0.4527,
+  "ci_high": 1.2633,
+  "cagr": 0.1095,
+  "max_drawdown": -0.349,
+  "n_trades": 1,
+  "h001_corr": -0.015,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.764,
+    2.069,
+    1.045,
+    1.919,
+    1.251,
+    1.072
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality avoiding worst-decile z(leverage)+z(dilution)+z(-GP/TA). ESG controversy proxy.",
+  "canonical_params": {
+    "exclude_pct": 0.1,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

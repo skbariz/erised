@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H355",
+  "name": "q-factor-composite",
+  "strategy_class": "QFactorComposite",
+  "family": "q-factor",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7767,
+  "ci_low": 0.3725,
+  "ci_high": 1.1863,
+  "cagr": 0.0936,
+  "max_drawdown": -0.3781,
+  "n_trades": 1,
+  "h001_corr": -0.0201,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.345,
+    0.824,
+    2.186,
+    0.81,
+    1.913,
+    0.934,
+    0.951
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Batch-1 ensemble: z(-investment) + z(ROE) + z(GP/TA). Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "ta_lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

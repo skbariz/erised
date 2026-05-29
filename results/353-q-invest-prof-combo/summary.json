@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H353",
+  "name": "q-invest-prof-combo",
+  "strategy_class": "QInvestProfCombo",
+  "family": "q-factor",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7622,
+  "ci_low": 0.3585,
+  "ci_high": 1.1667,
+  "cagr": 0.0901,
+  "max_drawdown": -0.3633,
+  "n_trades": 1,
+  "h001_corr": -0.0183,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.341,
+    0.753,
+    2.146,
+    0.848,
+    1.878,
+    0.919,
+    0.916
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Dual q-factor: z(-investment_rate) + z(ROE). Sector-neutral top 20%, quarterly rebalance.",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

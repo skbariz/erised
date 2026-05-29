@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H370",
+  "name": "decay-adjusted-composite",
+  "strategy_class": "DecayAdjustedComposite",
+  "family": "anomaly-decay",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8293,
+  "ci_low": 0.4247,
+  "ci_high": 1.2348,
+  "cagr": 0.1015,
+  "max_drawdown": -0.3527,
+  "n_trades": 1,
+  "h001_corr": -0.016,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.699,
+    1.98,
+    0.855,
+    2.093,
+    0.947,
+    1.254
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight blend: recent-epoch GP + shrunk composite + GP/TA anchor. Batch-4 ensemble.",
+  "canonical_params": {
+    "clip_val": 2.0,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

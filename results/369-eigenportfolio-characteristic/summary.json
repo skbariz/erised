@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H369",
+  "name": "eigenportfolio-characteristic",
+  "strategy_class": "EigenportfolioCharacteristic",
+  "family": "anomaly-decay",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8838,
+  "ci_low": 0.4717,
+  "ci_high": 1.2957,
+  "cagr": 0.1099,
+  "max_drawdown": -0.3414,
+  "n_trades": 1,
+  "h001_corr": -0.0169,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.751,
+    2.06,
+    1.024,
+    2.041,
+    1.218,
+    1.18
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "PCA on GP/TA+ROE+accruals+asset_growth+momentum. PC1 as ranking signal. Green-Hand-Zhang 2017.",
+  "canonical_params": {
+    "n_components": 1,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

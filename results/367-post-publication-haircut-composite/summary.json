@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H367",
+  "name": "post-publication-haircut-composite",
+  "strategy_class": "PostPublicationHaircutComposite",
+  "family": "anomaly-decay",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8099,
+  "ci_low": 0.4075,
+  "ci_high": 1.218,
+  "cagr": 0.096,
+  "max_drawdown": -0.335,
+  "n_trades": 1,
+  "h001_corr": -0.0155,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.796,
+    1.919,
+    0.837,
+    1.812,
+    1.0,
+    1.273
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP+ROE+accruals composite with inverse-volatility shrinkage. Approximates post-publication decay.",
+  "canonical_params": {
+    "shrink_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

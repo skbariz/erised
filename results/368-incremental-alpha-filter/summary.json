@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H368",
+  "name": "incremental-alpha-filter",
+  "strategy_class": "IncrementalAlphaFilter",
+  "family": "anomaly-decay",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8012,
+  "ci_low": 0.395,
+  "ci_high": 1.2133,
+  "cagr": 0.0975,
+  "max_drawdown": -0.3456,
+  "n_trades": 1,
+  "h001_corr": -0.0206,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.868,
+    1.939,
+    0.753,
+    1.856,
+    0.936,
+    1.08
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Keep only signals with |t-stat|>1.5 vs GP+momentum controls. Feng-Giglio-Xiu 2020.",
+  "canonical_params": {
+    "t_threshold": 1.5,
+    "train_window": 756,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

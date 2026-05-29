@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H356",
+  "name": "management-mispricing",
+  "strategy_class": "ManagementMispricing",
+  "family": "mispricing",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7921,
+  "ci_low": 0.3842,
+  "ci_high": 1.2077,
+  "cagr": 0.0914,
+  "max_drawdown": -0.3595,
+  "n_trades": 1,
+  "h001_corr": -0.0198,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.475,
+    2.087,
+    0.98,
+    2.096,
+    0.988,
+    1.081
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Management mispricing cluster (Stambaugh-Yuan 2017): z(-accruals)+z(-asset_growth)+z(-dilution).",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

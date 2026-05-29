@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H357",
+  "name": "performance-mispricing",
+  "strategy_class": "PerformanceMispricing",
+  "family": "mispricing",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7812,
+  "ci_low": 0.379,
+  "ci_high": 1.1901,
+  "cagr": 0.0909,
+  "max_drawdown": -0.3509,
+  "n_trades": 1,
+  "h001_corr": -0.0196,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.368,
+    0.738,
+    1.991,
+    0.986,
+    1.903,
+    0.932,
+    1.04
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Performance mispricing cluster (Stambaugh-Yuan 2017): z(ROA)+z(delta_ROA)+z(OCF/TA).",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

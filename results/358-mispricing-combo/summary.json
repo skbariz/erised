@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H358",
+  "name": "mispricing-combo",
+  "strategy_class": "MispricingCombo",
+  "family": "mispricing",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.7924,
+  "ci_low": 0.3882,
+  "ci_high": 1.2009,
+  "cagr": 0.0943,
+  "max_drawdown": -0.3573,
+  "n_trades": 1,
+  "h001_corr": -0.0202,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.368,
+    0.74,
+    1.989,
+    1.018,
+    2.059,
+    0.924,
+    1.039
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "50/50 blend of management+performance mispricing clusters (Stambaugh-Yuan 2017).",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

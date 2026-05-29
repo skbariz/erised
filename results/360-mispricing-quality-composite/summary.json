@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H360",
+  "name": "mispricing-quality-composite",
+  "strategy_class": "MispricingQualityComposite",
+  "family": "mispricing",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9379,
+  "ci_low": 0.5352,
+  "ci_high": 1.3487,
+  "cagr": 0.1212,
+  "max_drawdown": -0.3224,
+  "n_trades": 1,
+  "h001_corr": -0.0174,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.962,
+    2.147,
+    0.832,
+    2.045,
+    1.138,
+    1.288
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Batch-2 ensemble: mispricing combo filtered by GP/TA quality gate (GP > median). Sector-neutral top 20%.",
+  "canonical_params": {
+    "lookback": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

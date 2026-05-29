@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H359",
+  "name": "mispricing-avoid-filter",
+  "strategy_class": "MispricingAvoidFilter",
+  "family": "mispricing",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9387,
+  "ci_low": 0.5354,
+  "ci_high": 1.3552,
+  "cagr": 0.1552,
+  "max_drawdown": -0.4252,
+  "n_trades": 15,
+  "h001_corr": -0.0053,
+  "fold_sharpes": [
+    1.333,
+    1.274,
+    0.915,
+    1.608,
+    1.12,
+    0.269,
+    0.754,
+    2.126,
+    0.853,
+    1.925,
+    1.009,
+    0.988
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight S&P 500 excluding bottom 10% combined mispricing. Long-only avoid strategy.",
+  "canonical_params": {
+    "lookback": 252,
+    "exclude_pct": 0.1,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

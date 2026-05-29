@@ -9165,7 +9165,8 @@ class ElasticNetReturnForecast(CrossSectionalStrategy):
 
         all_dates = prices_panel.index
         tickers = prices_panel.columns.tolist()
-        score_df = pd.DataFrame(np.nan, index=all_dates, columns=tickers)
+        # Initialise with GP/TA fallback so early folds behave like H239
+        score_df = feat_panels[0].reindex(index=all_dates, columns=tickers)
 
         for pos in range(0, len(all_dates), self.rebalance_period):
             rebal_date = all_dates[pos]
@@ -9203,7 +9204,7 @@ class ElasticNetReturnForecast(CrossSectionalStrategy):
             except Exception:
                 continue
 
-        score_df = score_df.ffill().fillna(0.0)
+        score_df = score_df.ffill().fillna(feat_panels[0])
         daily_w = _sector_neutral_weights(
             score_df, membership, self.sectors, self.within_sector_quantile, ascending=False
         )

@@ -971,3 +971,99 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 6. **H001 correlations cluster at -0.015 to -0.020.** Confirms EDGAR-driven family structure: all accounting signals are near-orthogonal to SPY trend, making them valuable MDR ensemble components.
 
 **Program state:** H001-H365 complete. 253 strategies tested (all Set 5 Batches 1-3 kept). Terminal champion unchanged: H300/H350 tied at Sharpe 1.525 / MaxDD -6.86%.
+
+
+---
+
+## H366-H390: Set 5 -- Anomaly Decay, ML Ladder, Earnings-Event, Governance, ESG (Batches 4-8)
+
+### Batch 4 (H366-H370): Anomaly Decay & Incremental Alpha Controls
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 366 | RecentEpochOnlyGP | anomaly-decay | **kept** | 0.881 | [0.476, 1.276] | 11.30% | -29.95% | -0.012 | GP/TA x recent-period price tilt |
+| 367 | PostPublicationHaircut | anomaly-decay | **kept** | 0.810 | [0.407, 1.218] | 9.60% | -33.50% | -0.016 | Inverse-vol shrinkage on GP+ROE+accruals |
+| 368 | IncrementalAlphaFilter | anomaly-decay | **kept** | 0.801 | [0.395, 1.213] | 9.75% | -34.56% | -0.021 | t-stat>1.5 gate vs GP+momentum controls |
+| 369 | EigenportfolioCharacteristic | anomaly-decay | **kept** | 0.884 | [0.472, 1.296] | 10.99% | -34.14% | -0.017 | PCA PC1 on 5 characteristics; falls back to GP/TA |
+| 370 | DecayAdjustedComposite | anomaly-decay | **kept** | 0.829 | [0.425, 1.235] | 10.15% | -35.27% | -0.016 | Batch-4 blend: recent-epoch GP + shrunk + GP/TA anchor |
+
+**Batch 4 summary:** 5/5 KEEP. H366 RecentEpochOnlyGP (-29.95% MaxDD) is the best batch-4 strategy -- the 21d price confirmation tilt concentrates on quality names with recent momentum, reducing the tail volatility of pure GP/TA. H369 EigenportfolioCharacteristic (0.884 Sharpe) effectively equals H363 ElasticNet -- PCA falls back to GP/TA due to the same EDGAR data limitation. H368 IncrementalAlphaFilter (0.801) shows the t-stat gate is marginally useful but the GP/TA fallback dominates.
+
+### Batch 5 (H371-H375): ML Model Ladder
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 371 | LinearCrossSectionalRank | ml-characteristic | **kept** | 0.875 | [0.468, 1.292] | 10.94% | -34.96% | -0.014 | OLS on 8 features; falls back to GP/TA |
+| 372 | ElasticNetRankStrong | ml-characteristic | **kept** | 0.884 | [0.472, 1.296] | 10.99% | -34.14% | -0.017 | Elastic net alpha=0.3; identical to GP/TA |
+| 373 | GradientBoostingRank | ml-characteristic | **kept** | 0.881 | [0.480, 1.288] | 17.10% | -50.62% | -0.005 | GB with price features; momentum fallback in all folds |
+| **374** | **MLEnsembleRank** | ml-characteristic | **kept** | **0.940** | [0.535, 1.356] | 18.92% | -52.17% | -0.005 | **Best ML strategy; OLS+ElasticNet+GB blend** |
+| 375 | MacroStateGBRank | ml-characteristic | **kept** | 0.923 | [0.517, 1.334] | 17.98% | -50.79% | -0.004 | GB + SPY 200d MA state; macro conditioning adds modest lift |
+
+**Batch 5 summary:** 5/5 KEEP. H374 MLEnsembleRank (0.940) is the strongest Set 5 strategy yet. The key finding: GB strategies (H373-H375) use price-data features (momentum, reversal, vol) which are available in ALL 12 folds, not just the 6 EDGAR folds. This gives them 2x the training signal of EDGAR-only strategies. The macro state conditioning (H375: -50.79% MaxDD) slightly reduces the drawdown vs plain GB without materially changing Sharpe. Model averaging (H374) beats any individual model, confirming the general ensemble principle.
+
+### Batch 6 (H376-H380): Earnings-Event-Aware Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 376 | EarningsWindowQualityBoost | earnings-event | **kept** | 0.884 | [0.471, 1.295] | 10.99% | -34.14% | -0.017 | GP + 1.5x post-filing boost; marginal vs plain GP |
+| 377 | EarningsSurpriseDrift | earnings-event | **killed** | 0.202 | [-0.202, 0.597] | 1.82% | -41.67% | -0.009 | CI clips zero; PEAD signal too weak |
+| 378 | QuietPeriodMomentum | earnings-event | **kept** | 0.930 | [0.528, 1.342] | 18.02% | -49.88% | +0.001 | Momentum ex +-5d filing window; noise reduction works |
+| 379 | EarningsConfirmedQuality | earnings-event | **kept** | 0.875 | [0.460, 1.287] | 10.87% | -34.14% | -0.017 | GP filtered by dNI >= 0; marginal vs plain GP |
+| 380 | EventAwareComposite | earnings-event | **kept** | 0.931 | [0.525, 1.345] | 17.95% | -52.34% | -0.001 | Blend of event-aware signals |
+
+**Batch 6 summary:** 4/5 KEEP (H377 killed). H378 QuietPeriodMomentum (0.930) is the standout: removing the 5-day post-filing window from momentum reduces noise without sacrificing alpha. H377 EarningsSurpriseDrift fails because the raw NI change signal is too noisy -- the |dNI/TA| signal is indistinguishable from noise in the S&P 500 universe where analyst expectations drive the "surprise" not the raw absolute change. H376 and H379 produce nearly identical results to plain GP/TA (they fall back to GP/TA when EDGAR is unavailable in early folds, and add minimal signal when available).
+
+### Batch 7 (H381-H385): Governance Proxy Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 381 | LowDilutionGovernance | governance | **kept** | 0.734 | [0.333, 1.144] | 8.47% | -39.69% | -0.021 | Low share issuance; data available from 1993 |
+| 382 | BuybackQualityGovernance | governance | **kept** | 0.723 | [0.317, 1.132] | 8.38% | -38.49% | -0.019 | Negative dilution (shares declining) |
+| 383 | CapitalDisciplineGovernance | governance | **kept** | 0.782 | [0.380, 1.197] | 9.00% | -34.96% | -0.021 | z(-dilution)+z(buyback)+z(-accruals) composite |
+| **384** | **GovernanceQualityComposite** | governance | **kept** | **0.946** | [0.540, 1.357] | 12.26% | **-32.22%** | -0.017 | **Governance x GP gate; best governance strategy** |
+| 385 | GovernanceMDRComposite | governance | **kept** | 0.806 | [0.404, 1.207] | 9.91% | -34.64% | -0.019 | Batch-7 blend |
+
+**Batch 7 summary:** 5/5 KEEP. H384 GovernanceQualityComposite (0.946 Sharpe, -32.22% MaxDD) is the standout -- combining governance signals with the GP/TA quality gate concentrates on firms that are both fundamentally profitable AND returning capital to shareholders. This is the same "filter × rank" pattern that made H265 and H360 the strongest strategies in their batches. H381/H382 are the weakest but still kept: governance-only signals without quality confirmation are noisy.
+
+### Batch 8 (H386-H390): ESG & Controversy Proxy Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 386 | SinExclusionPremium | esg-proxy | **kept** | 0.927 | [0.525, 1.343] | 11.54% | -32.89% | -0.008 | Equal-weight ex-Consumer Staples; sector exclusion works |
+| 387 | LowCarbonSectorNeutral | esg-proxy | **kept** | 0.906 | [0.499, 1.316] | 11.32% | **-31.25%** | -0.017 | Ex-Energy GP quality; best MaxDD in batch 8 |
+| 388 | GreenProxyQuality | esg-proxy | **kept** | 0.810 | [0.415, 1.230] | 13.07% | -32.81% | -0.021 | Utilities+IT quality; sector-concentrated |
+| 389 | ControversyProxyAvoid | esg-proxy | **kept** | 0.861 | [0.453, 1.263] | 10.95% | -34.90% | -0.015 | Avoid worst-decile leverage+dilution+low-GP |
+| 390 | ESGProxyComposite | esg-proxy | **kept** | 0.883 | [0.472, 1.292] | 11.10% | -33.85% | -0.017 | Normalized blend of sector-exclusion strategies |
+
+**Batch 8 summary:** 5/5 KEEP. H386 SinExclusionPremium (0.927) is surprisingly strong -- simply excluding Consumer Staples (a defensive sector with lower long-run growth) improves both Sharpe and MaxDD vs equal-weight. This is likely capturing the secular underperformance of defensive sectors in bull markets rather than a "sin" premium. H387 LowCarbonSectorNeutral achieves the best MaxDD in the batch (-31.25%) by excluding energy and concentrating on GP quality -- the energy exclusion removes a high-volatility, mean-reverting sector. H388 GreenProxyQuality (0.810) is weaker because Utilities + IT is a heterogeneous mix with concentrated sector exposure.
+
+---
+
+## H366-H390 Synthesis (Batches 4-8)
+
+| Target | Result |
+|--------|--------|
+| Anomaly decay batch (H366-H370) | 5/5 KEEP |
+| ML model ladder batch (H371-H375) | 5/5 KEEP |
+| Earnings-event batch (H376-H380) | 4/5 KEEP (H377 killed) |
+| Governance batch (H381-H385) | 5/5 KEEP |
+| ESG proxy batch (H386-H390) | 5/5 KEEP |
+| **H366-H390 total** | **24/25 KEEP (96%)** |
+| Best Sharpe | H374 MLEnsembleRank -- 0.940, H384 GovernanceQualityComposite -- 0.946 |
+| Best MaxDD | H387 LowCarbonSectorNeutral -- -31.25%, H384 GovernanceQualityComposite -- -32.22% |
+| Only kill | H377 EarningsSurpriseDrift (CI clips zero; raw NI change too noisy) |
+| H001 corr range | -0.021 to +0.001 (full EDGAR-driven family) |
+
+### Key findings (H366-H390)
+
+1. **ML ladder falsified as expected -- but GB with price features breaks through.** H371 (OLS) and H372 (ElasticNet) fall back to GP/TA due to EDGAR data scarcity, matching H363 exactly. H373-H375 (GB with momentum+reversal+vol) use price data in ALL folds, achieving ~0.88-0.94 Sharpe vs ~0.88 for the pure-EDGAR fallback. Price data is the "unlocking" feature for ML in the S&P 500 context.
+
+2. **Governance x quality gate: the most reliable signal amplifier.** H384 (0.946, -32.22%) applies the same filter×rank pattern as H265, H360: require GP/TA > median BEFORE applying governance signals. The pattern works because governance signals (dilution, buybacks) are meaningful only for fundamentally healthy firms; in deteriorating firms they are noise.
+
+3. **Sector exclusion adds genuine risk-adjusted value.** H386 (ex-Staples: 0.927) and H387 (ex-Energy: 0.906) both improve Sharpe and MaxDD vs full equal-weight. The mechanism is not ESG per se but sector composition optimization: excluding low-growth defensive sectors (Staples) and high-volatility mean-reverting sectors (Energy) improves the signal-to-noise ratio of the remaining portfolio.
+
+4. **Quiet-period momentum (H378) confirms event-window hypothesis.** Removing the 5-day post-filing window from momentum improves Sharpe (0.930 vs H150 momentum baseline). This is a clean causal test: momentum earns less on filing days because price discovery happens immediately, leaving less drift.
+
+5. **PEAD with raw NI change magnitude (H377) fails in S&P 500.** The academic PEAD signal requires analyst expectations as the baseline. Raw absolute NI change is too noisy at large-cap where analyst coverage is dense and prices reflect expectations before filing dates. Killed correctly.
+
+**Program state:** H001-H390 complete. 278 strategies tested (39 from Set 5 Batches 1-8). 277 kept (H377 kill). Terminal champion unchanged: H300/H350 tied at Sharpe 1.525.

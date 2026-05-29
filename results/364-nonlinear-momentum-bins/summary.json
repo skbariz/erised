@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H364",
+  "name": "nonlinear-momentum-bins",
+  "strategy_class": "NonlinearMomentumBins",
+  "family": "nonlinear-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9449,
+  "ci_low": 0.5336,
+  "ci_high": 1.3665,
+  "cagr": 0.1996,
+  "max_drawdown": -0.4911,
+  "n_trades": 1,
+  "h001_corr": 0.0032,
+  "fold_sharpes": [
+    1.535,
+    0.799,
+    1.291,
+    1.544,
+    1.063,
+    -0.2,
+    0.701,
+    2.354,
+    0.812,
+    1.411,
+    1.141,
+    0.956
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Top-decile only 12-1 momentum (J-shaped nonlinear selection; Freyberger et al. 2020). Monthly rebalance.",
+  "canonical_params": {
+    "mom_window": 252,
+    "skip_window": 21,
+    "top_decile": 0.1
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

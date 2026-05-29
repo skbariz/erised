@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H362",
+  "name": "monotonicity-voting-composite",
+  "strategy_class": "MonotonicityVotingComposite",
+  "family": "nonlinear-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8692,
+  "ci_low": 0.4699,
+  "ci_high": 1.2894,
+  "cagr": 0.1124,
+  "max_drawdown": -0.3286,
+  "n_trades": 1,
+  "h001_corr": -0.0133,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.542,
+    2.201,
+    1.043,
+    1.757,
+    0.905,
+    1.344
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Vote across GP/TA, ROE, accruals; include only if >=2/3 agree (Green-Hand-Zhang 2017). Quarterly.",
+  "canonical_params": {
+    "vote_quantile": 0.2,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

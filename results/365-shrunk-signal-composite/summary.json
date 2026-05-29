@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H365",
+  "name": "shrunk-signal-composite",
+  "strategy_class": "ShrunkSignalComposite",
+  "family": "nonlinear-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9327,
+  "ci_low": 0.5239,
+  "ci_high": 1.3453,
+  "cagr": 0.1975,
+  "max_drawdown": -0.5855,
+  "n_trades": 1,
+  "h001_corr": 0.0007,
+  "fold_sharpes": [
+    1.373,
+    0.643,
+    1.117,
+    1.88,
+    1.128,
+    -0.403,
+    0.655,
+    1.947,
+    1.022,
+    1.912,
+    1.248,
+    1.213
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Batch-3 ensemble: clip(z(GP_bin))+clip(z(votes))+clip(z(top_mom))+clip(z(GP/TA)). Kozak et al. 2020.",
+  "canonical_params": {
+    "clip_val": 2.0,
+    "n_bins": 5,
+    "vote_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

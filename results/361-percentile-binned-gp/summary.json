@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H361",
+  "name": "percentile-binned-gp",
+  "strategy_class": "PercentileBinnedGP",
+  "family": "nonlinear-characteristic",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9195,
+  "ci_low": 0.5091,
+  "ci_high": 1.3306,
+  "cagr": 0.1127,
+  "max_drawdown": -0.282,
+  "n_trades": 1,
+  "h001_corr": -0.0151,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.903,
+    2.083,
+    0.901,
+    1.874,
+    1.048,
+    1.354
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA scored by quintile bins (nonlinear shape test; Freyberger et al. 2020). Top 20% sector-neutral.",
+  "canonical_params": {
+    "n_bins": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

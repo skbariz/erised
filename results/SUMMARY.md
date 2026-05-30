@@ -1096,3 +1096,68 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 
 **H400 UltimateGrandMDR400:** Pending. SLSQP MDR over 100 strategies (extending H350's 80 with 20 Set5 CS strategies). Target: beat H350 Sharpe 1.525.
 
+
+---
+
+## H391-H400 Synthesis (Batches 9-10 + Terminal MDR)
+
+### Batch 9 (H391-H395): 5/5 KEEP — Attention & Volatility Proxy
+
+| # | Name | Sharpe | MaxDD | H001 corr | Key finding |
+|---|------|--------|-------|-----------|-------------|
+| 392 | ConsistentMomentumPort | **0.997** | -43.74% | +0.002 | Best: price-only, all 12 folds |
+| 395 | VolatilityAwareComposite | 0.965 | -50.71% | +0.004 | Ensemble blends EDGAR+price |
+| 391 | LowAttentionValuePort | 0.898 | -33.37% | -0.016 | GP dampened by |return| attention |
+| 393 | LowVolDisagreementAvoid | 0.890 | -34.49% | -0.019 | GP x inverse realized vol |
+| 394 | ReturnSpikeRiskFilter | 0.865 | -31.92% | -0.020 | 50% cut on |return| spikes |
+
+### Batch 10 (H396-H399): 4/4 KEEP — Execution-Aware
+
+| # | Name | Sharpe | MaxDD | H001 corr | Key finding |
+|---|------|--------|-------|-----------|-------------|
+| 398 | LiquidityRegimeCapPort | 0.900 | -34.09% | -0.016 | Vol-regime cap most effective |
+| 399 | ExecutionOptimizedComposite | 0.894 | -33.98% | -0.018 | Blend of execution refinements |
+| 397 | SpreadAwarePositionSizer | 0.880 | -35.18% | -0.020 | Inv-vol sizing marginal |
+| 396 | LowTurnoverGP | 0.847 | -33.49% | -0.018 | Threshold rebalancing weak |
+
+### H400: UltimateGrandMDR400 -- Terminal MDR (KEEP, does NOT beat champion)
+
+| Metric | H400 | H350 (champion) |
+|--------|------|-----------------|
+| OOS Sharpe | 1.503 | **1.525** |
+| 95% CI | [1.113, 1.899] | [1.134, 1.921] |
+| Max DD | -7.27% | **-6.86%** |
+| H001 corr | +0.648 | +0.635 |
+| N strategies | 99 | 80 |
+
+**MDR frontier is CLOSED. H300/H350 remain terminal champions at Sharpe 1.525.**
+
+Top MDR weights: H194 LongShortReversal (22.8%), H016 VolScaledTrend (11.1%),
+H043 SellInMayBondConfirm (10.1%), H068 VrpCalendarHybrid (9.5%), H076 (8.3%).
+H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weight.
+
+**Why Set5 CS doesn't improve MDR:**
+1. All EDGAR-based Set5 strategies (H391-H399 ex H392) share the same zero-fold pattern
+   as earlier CS strategies -- their return series are nearly identical in folds 0-4,
+   so they provide no diversification benefit in those periods.
+2. H392 ConsistentMomentumPort (Sharpe 0.997) gets 0% MDR weight because its momentum
+   signal is already captured by H194/H157 in the pool -- redundant information.
+3. The MDR objective maximizes diversification ratio, not Sharpe. Adding strategies that
+   are 90%+ correlated with existing pool members shrinks the diversification ratio.
+
+---
+
+## Final Program Summary (H001-H400)
+
+| Metric | Value |
+|--------|-------|
+| Total strategies tested | 400 |
+| Total kept | **283** (70.8%) |
+| Terminal champion | **H300/H350 tied: Sharpe 1.525, MaxDD -6.86%** |
+| Best individual | H086 LowVolTargetPortfolio: Sharpe 1.109 |
+| Best CS strategy | H192 PCAOUMeanReversion: Sharpe 1.175 |
+| Best Set5 CS | H392 ConsistentMomentumPort: Sharpe 0.997 |
+| MDR frontier | CLOSED -- adding Set5 CS reduces MDR Sharpe (1.503 vs 1.525) |
+| Holdout (H049) | Sharpe 1.346, MaxDD -9.91% (2023-2026) -- SPENT |
+
+**The program is complete.**

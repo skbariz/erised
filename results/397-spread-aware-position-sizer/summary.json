@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H397",
+  "name": "spread-aware-position-sizer",
+  "strategy_class": "SpreadAwarePositionSizer",
+  "family": "execution-aware",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8798,
+  "ci_low": 0.4631,
+  "ci_high": 1.2919,
+  "cagr": 0.1073,
+  "max_drawdown": -0.3518,
+  "n_trades": 1,
+  "h001_corr": -0.0199,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.643,
+    0.686,
+    2.038,
+    1.009,
+    2.359,
+    1.194,
+    1.149
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sustainability-filtered GP/TA + accruals + asset-growth with position weights inversely proportional to 63d realized vol (spread proxy).",
+  "canonical_params": {
+    "vol_window": 63,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H396",
+  "name": "low-turnover-gp",
+  "strategy_class": "LowTurnoverGP",
+  "family": "execution-aware",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.8465,
+  "ci_low": 0.4406,
+  "ci_high": 1.2513,
+  "cagr": 0.1077,
+  "max_drawdown": -0.3349,
+  "n_trades": 1,
+  "h001_corr": -0.0176,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.227,
+    0.645,
+    2.013,
+    1.032,
+    2.125,
+    1.191,
+    1.206
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA rank with threshold rebalancing: only rebalance when rank changes >2 deciles (20% threshold). Reduces turnover vs standard monthly.",
+  "canonical_params": {
+    "n_deciles": 10,
+    "threshold_deciles": 2,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

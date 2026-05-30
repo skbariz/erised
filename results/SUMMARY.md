@@ -1087,14 +1087,12 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 
 | # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
 |---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
-| 396 | LowTurnoverGP | execution-aware | *running* | -- | -- | -- | -- | -- | Threshold rebalancing (>2 decile change triggers only) |
+| 396 | LowTurnoverGP | execution-aware | **kept** | 0.847 | [0.441, 1.251] | 10.77% | -33.49% | -0.018 | Threshold rebalancing (>2 decile change triggers only) |
 | 397 | SpreadAwarePositionSizer | execution-aware | **kept** | 0.880 | [0.463, 1.292] | 10.73% | -35.18% | -0.020 | Sust-filtered GP + inv-vol position sizing (spread proxy) |
 | 398 | LiquidityRegimeCapPort | execution-aware | **kept** | 0.900 | [0.482, 1.311] | 11.19% | -34.09% | -0.016 | 50% cap in quiet regime; 30% cap in stress regime |
 | 399 | ExecutionOptimizedComposite | execution-aware | **kept** | 0.894 | [0.476, 1.305] | 10.96% | -33.98% | -0.018 | Blend: spread-aware + regime-capped + plain GP anchor |
 
-**Batch 10 partial (H397-H399):** 3/3 KEEP. Execution refinements yield consistent Sharpe ~0.88-0.90 -- slightly below the GP/TA baseline family but with similar MaxDD. The inv-vol position sizing (H397, H399) doesn't substantially outperform equal-weighting within the quality basket, suggesting that within S&P 500 large-caps, spread differences are too small to justify the added complexity. H398 LiquidityRegimeCapPort (0.900) is the strongest -- the vol-regime cap provides a mild but consistent risk reduction.
-
-**H396 LowTurnoverGP:** Running. Result to be added once complete.
+**Batch 10 (H396-H399): 4/4 KEEP.** Execution refinements yield consistent Sharpe 0.847-0.900. H398 LiquidityRegimeCapPort (0.900) is the strongest -- the vol-regime cap provides mild but consistent risk reduction. H396 LowTurnoverGP (0.847) is the weakest: threshold rebalancing occasionally holds stale weights that have drifted, and the cost reduction doesn't offset the tracking error in S&P 500 large-caps (where spreads are already narrow). Inv-vol position sizing (H397, H399) ~0.88-0.89 -- spread differences within S&P 500 are too small to justify the added complexity.
 
 **H400 UltimateGrandMDR400:** Pending. SLSQP MDR over 100 strategies (extending H350's 80 with 20 Set5 CS strategies). Target: beat H350 Sharpe 1.525.
 

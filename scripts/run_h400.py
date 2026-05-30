@@ -312,6 +312,7 @@ def main():
     rev = load_fundamentals_panel(panel_tickers, "revenue", panel.index)
     shares = load_fundamentals_panel(panel_tickers, "shares_outstanding", panel.index)
     be = load_fundamentals_panel(panel_tickers, "book_equity", panel.index)
+    ltd = load_fundamentals_panel(panel_tickers, "long_term_debt", panel.index)
 
     folds_aa = make_folds(spy, train_years=5, test_years=2)
     folds_cs = make_folds(panel, train_years=5, test_years=2)
@@ -410,12 +411,12 @@ def main():
         "H364": lambda tp, tm: NonlinearMomentumBins(sectors=sectors),
         "H365": lambda tp, tm: ElasticNetRankStrong(
             gross_profit=gp, total_assets=ta, net_income=net_income,
-            operating_cf=ocf, sectors=sectors,
+            book_equity=be, operating_cf=ocf, long_term_debt=ltd, sectors=sectors,
         ),
         # Batch 5 - ML ladder
         "H374": lambda tp, tm: GradientBoostingRank(
             gross_profit=gp, total_assets=ta, net_income=net_income,
-            operating_cf=ocf, sectors=sectors,
+            book_equity=be, operating_cf=ocf, sectors=sectors,
         ),
         # Batch 7 - governance
         "H384": lambda tp, tm: GovernanceQualityComposite(
@@ -427,15 +428,15 @@ def main():
         ),
         # Batch 8 - ESG proxy
         "H390": lambda tp, tm: ESGProxyComposite(
-            gross_profit=gp, total_assets=ta, net_income=net_income,
-            operating_cf=ocf, sectors=sectors,
+            gross_profit=gp, total_assets=ta, long_term_debt=ltd,
+            shares_outstanding=shares, sectors=sectors,
         ),
         "H388": lambda tp, tm: GreenProxyQuality(
             gross_profit=gp, total_assets=ta, sectors=sectors,
         ),
         "H389": lambda tp, tm: ControversyProxyAvoid(
-            gross_profit=gp, total_assets=ta, net_income=net_income,
-            operating_cf=ocf, sectors=sectors,
+            gross_profit=gp, total_assets=ta, long_term_debt=ltd,
+            shares_outstanding=shares, sectors=sectors,
         ),
         # Batch 9 - attention/vol proxy
         "H391": lambda tp, tm: LowAttentionValuePort(

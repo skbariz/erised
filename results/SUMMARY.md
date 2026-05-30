@@ -1067,3 +1067,34 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 5. **PEAD with raw NI change magnitude (H377) fails in S&P 500.** The academic PEAD signal requires analyst expectations as the baseline. Raw absolute NI change is too noisy at large-cap where analyst coverage is dense and prices reflect expectations before filing dates. Killed correctly.
 
 **Program state:** H001-H390 complete. 278 strategies tested (39 from Set 5 Batches 1-8). 277 kept (H377 kill). Terminal champion unchanged: H300/H350 tied at Sharpe 1.525.
+
+
+---
+
+### Batch 9 (H391-H395): Attention & Volatility Proxy Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 391 | LowAttentionValuePort | attention-proxy | **kept** | 0.898 | [0.498, 1.304] | 11.71% | -33.37% | -0.016 | GP/TA dampened by price-activity attention ratio; neglected quality |
+| 392 | **ConsistentMomentumPort** | attention-proxy | **kept** | **0.997** | [0.597, 1.401] | 18.86% | -43.74% | +0.002 | 12m+3m agreement gate; active all 12 folds (price-only) |
+| 393 | LowVolDisagreementAvoid | attention-proxy | **kept** | 0.890 | [0.470, 1.301] | 10.85% | -34.49% | -0.019 | GP x inverse realized vol; high vol = disagreement |
+| 394 | ReturnSpikeRiskFilter | attention-proxy | **kept** | 0.865 | [0.459, 1.269] | 10.74% | -31.92% | -0.019 | Sustainability-filtered GP + 50% cut on |return| spikes |
+| 395 | **VolatilityAwareComposite** | attention-proxy | **kept** | **0.965** | [0.558, 1.376] | 20.78% | -50.71% | +0.004 | Batch-9 ensemble: neglect + consistent mom + vol-inv + spike-filtered |
+
+**Batch 9 summary:** 5/5 KEEP. H392 ConsistentMomentumPort (0.997) is the standout -- requiring both 12m and 3m momentum above median is a pure price-based filter that works in ALL 12 folds (no EDGAR dependency). The near-zero H001 correlations (-0.016 to +0.004) confirm price-based proxies are genuinely uncorrelated with the trend-following family. H391/H393/H394 all depend on EDGAR data (zero folds 0-4) but show strong Sharpe 0.865-0.898 in active folds. H395 composite dilutes the pure price-signal of H392 but achieves 0.965 by blending EDGAR and price components.
+
+### Batch 10 (H396-H399): Execution-Aware & Turnover-Conscious Signals
+
+| # | Name | Family | Status | OOS Sharpe | 95% CI | CAGR | Max DD | H001 corr | Notes |
+|---|------|--------|--------|-----------|--------|------|--------|-----------|-------|
+| 396 | LowTurnoverGP | execution-aware | *running* | -- | -- | -- | -- | -- | Threshold rebalancing (>2 decile change triggers only) |
+| 397 | SpreadAwarePositionSizer | execution-aware | **kept** | 0.880 | [0.463, 1.292] | 10.73% | -35.18% | -0.020 | Sust-filtered GP + inv-vol position sizing (spread proxy) |
+| 398 | LiquidityRegimeCapPort | execution-aware | **kept** | 0.900 | [0.482, 1.311] | 11.19% | -34.09% | -0.016 | 50% cap in quiet regime; 30% cap in stress regime |
+| 399 | ExecutionOptimizedComposite | execution-aware | **kept** | 0.894 | [0.476, 1.305] | 10.96% | -33.98% | -0.018 | Blend: spread-aware + regime-capped + plain GP anchor |
+
+**Batch 10 partial (H397-H399):** 3/3 KEEP. Execution refinements yield consistent Sharpe ~0.88-0.90 -- slightly below the GP/TA baseline family but with similar MaxDD. The inv-vol position sizing (H397, H399) doesn't substantially outperform equal-weighting within the quality basket, suggesting that within S&P 500 large-caps, spread differences are too small to justify the added complexity. H398 LiquidityRegimeCapPort (0.900) is the strongest -- the vol-regime cap provides a mild but consistent risk reduction.
+
+**H396 LowTurnoverGP:** Running. Result to be added once complete.
+
+**H400 UltimateGrandMDR400:** Pending. SLSQP MDR over 100 strategies (extending H350's 80 with 20 Set5 CS strategies). Target: beat H350 Sharpe 1.525.
+

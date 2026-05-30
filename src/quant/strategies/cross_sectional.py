@@ -7795,15 +7795,15 @@ def _buy_hold_band(
     n_dates = len(dates)
     n_stocks = len(tickers)
 
-    strict_arr = (strict_w.values > 0)
-    extended_arr = (extended_w.values > 0)
+    strict_arr = strict_w.values > 0
+    extended_arr = extended_w.values > 0
     mem_arr = membership.reindex_like(strict_w).fillna(False).values
 
     held = np.zeros(n_stocks, dtype=bool)
     out = np.zeros((n_dates, n_stocks))
 
     for i in range(n_dates):
-        is_rebal = (i % rebalance_period == 0)
+        is_rebal = i % rebalance_period == 0
         mem_today = mem_arr[i]
 
         if is_rebal:
@@ -8008,15 +8008,15 @@ class TurnoverCappedProfitabilityFactor(CrossSectionalStrategy):
         n_dates = len(dates)
         n_stocks = len(tickers)
 
-        strict_arr = (strict_w.values > 0)
-        extended_arr = (extended_w.values > 0)
+        strict_arr = strict_w.values > 0
+        extended_arr = extended_w.values > 0
         mem_arr = membership.reindex_like(prices_panel).fillna(False).values
 
         held = np.zeros(n_stocks, dtype=bool)
         out = np.zeros((n_dates, n_stocks))
 
         for i in range(n_dates):
-            is_rebal = (i % self.rebalance_period == 0)
+            is_rebal = i % self.rebalance_period == 0
             mem_today = mem_arr[i]
 
             if is_rebal:
@@ -8025,8 +8025,10 @@ class TurnoverCappedProfitabilityFactor(CrossSectionalStrategy):
                 potential_new = strict_arr[i] & ~held & mem_today
 
                 n_held = int(held.sum())
-                max_new = max(1, int(self.max_replace_fraction * n_held)) if n_held > 0 else int(
-                    strict_arr[i].sum()
+                max_new = (
+                    max(1, int(self.max_replace_fraction * n_held))
+                    if n_held > 0
+                    else int(strict_arr[i].sum())
                 )
 
                 # Rank potential new additions by score (best first)
@@ -8208,7 +8210,9 @@ class TailRiskFilteredCrossProgram(CrossSectionalStrategy):
         # Build filtered membership: exclude bottom-decile tail-risk stocks
         tail_rank = tail_score.rank(axis=1, pct=True, na_option="keep")
         high_tail_risk = tail_rank <= self.exclude_quantile
-        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & ~high_tail_risk.fillna(False)
+        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & ~high_tail_risk.fillna(
+            False
+        )
 
         # GP/TA signal on filtered universe
         gp = _align_fund(self.gross_profit, prices_panel)
@@ -8287,9 +8291,9 @@ class DistressScreenedValueQuality(CrossSectionalStrategy):
         neg_mom = -(
             prices_panel.shift(self.mom_skip) / prices_panel.shift(self.mom_window) - 1
         ).clip(-5, 5)
-        vol12m = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 4).std() * np.sqrt(
-            252
-        )
+        vol12m = daily_rets.rolling(
+            self.vol_window, min_periods=self.vol_window // 4
+        ).std() * np.sqrt(252)
         nwc = (ca - cl) / ta_safe
         neg_nwc = (-nwc).clip(-5, 5)
 
@@ -8304,7 +8308,9 @@ class DistressScreenedValueQuality(CrossSectionalStrategy):
         # Filter: keep bottom-half distress (low distress firms)
         distress_rank = distress_score.rank(axis=1, pct=True, na_option="keep")
         low_distress = distress_rank <= self.distress_pct
-        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & low_distress.fillna(False)
+        filtered_mem = membership.reindex_like(prices_panel).fillna(False) & low_distress.fillna(
+            False
+        )
 
         # Value-quality score on filtered universe
         gp_ta = gp / ta_safe
@@ -8556,7 +8562,9 @@ class QResidualMomentum(CrossSectionalStrategy):
         ni = _align_fund(self.net_income, prices_panel)
         be = _align_fund(self.book_equity, prices_panel)
         ta_safe = ta.where(ta > 0)
-        inv_rate = ((ta - ta.shift(self.ta_lookback)) / ta_safe.shift(self.ta_lookback)).clip(-1.0, 5.0)
+        inv_rate = ((ta - ta.shift(self.ta_lookback)) / ta_safe.shift(self.ta_lookback)).clip(
+            -1.0, 5.0
+        )
         roe = (ni / be.where(be > 0)).clip(-2.0, 5.0)
         q_score = _cs_zscore(-inv_rate).fillna(0.0) + _cs_zscore(roe).fillna(0.0)
         q_median = q_score.median(axis=1)
@@ -8614,7 +8622,9 @@ class QFactorComposite(CrossSectionalStrategy):
         be = _align_fund(self.book_equity, prices_panel)
         gp = _align_fund(self.gross_profit, prices_panel)
         ta_safe = ta.where(ta > 0)
-        inv_rate = ((ta - ta.shift(self.ta_lookback)) / ta_safe.shift(self.ta_lookback)).clip(-1.0, 5.0)
+        inv_rate = ((ta - ta.shift(self.ta_lookback)) / ta_safe.shift(self.ta_lookback)).clip(
+            -1.0, 5.0
+        )
         roe = (ni / be.where(be > 0)).clip(-2.0, 5.0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
         score = (
@@ -8675,7 +8685,9 @@ class ManagementMispricing(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         avg_ta_safe = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
         accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
-        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(-1.0, 5.0)
+        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(
+            -1.0, 5.0
+        )
         sh_lag = sh.shift(self.lookback)
         dilution = ((sh - sh_lag) / sh_lag.where(sh_lag > 0)).clip(-0.5, 2.0)
         score = (
@@ -8792,7 +8804,9 @@ class MispricingCombo(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         avg_ta_safe = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
         accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
-        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(-1.0, 5.0)
+        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(
+            -1.0, 5.0
+        )
         sh_lag = sh.shift(self.lookback)
         dilution = ((sh - sh_lag) / sh_lag.where(sh_lag > 0)).clip(-0.5, 2.0)
         mgmt = (
@@ -8862,7 +8876,9 @@ class MispricingAvoidFilter(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         avg_ta_safe = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
         accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
-        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(-1.0, 5.0)
+        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(
+            -1.0, 5.0
+        )
         sh_lag = sh.shift(self.lookback)
         dilution = ((sh - sh_lag) / sh_lag.where(sh_lag > 0)).clip(-0.5, 2.0)
         roa = (ni / ta_safe).clip(-1.0, 2.0)
@@ -8937,7 +8953,9 @@ class MispricingQualityComposite(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         avg_ta_safe = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
         accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
-        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(-1.0, 5.0)
+        asset_growth = ((ta - ta.shift(self.lookback)) / ta_safe.shift(self.lookback)).clip(
+            -1.0, 5.0
+        )
         sh_lag = sh.shift(self.lookback)
         dilution = ((sh - sh_lag) / sh_lag.where(sh_lag > 0)).clip(-0.5, 2.0)
         roa = (ni / ta_safe).clip(-1.0, 2.0)
@@ -9005,7 +9023,9 @@ class PercentileBinnedGP(CrossSectionalStrategy):
         mem = membership.reindex_like(gp_ta).fillna(False)
         pct_rank = gp_ta.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
         bin_score = (
-            (pct_rank * self.n_bins).clip(upper=self.n_bins).fillna(0.0)
+            (pct_rank * self.n_bins)
+            .clip(upper=self.n_bins)
+            .fillna(0.0)
             .apply(lambda x: x.astype(int))
             .astype(float)
         )
@@ -9315,7 +9335,9 @@ class ShrunkSignalComposite(CrossSectionalStrategy):
 
         pct_rank = gp_ta.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
         bin_score = (
-            (pct_rank * self.n_bins).clip(upper=self.n_bins).fillna(0.0)
+            (pct_rank * self.n_bins)
+            .clip(upper=self.n_bins)
+            .fillna(0.0)
             .apply(lambda x: x.astype(int))
             .astype(float)
         )
@@ -9545,7 +9567,9 @@ class IncrementalAlphaFilter(CrossSectionalStrategy):
             passing_signals = []
             for cname, cand_panel in candidates.items():
                 X_rows, y_rows = [], []
-                for tp in range(train_start, train_end - self.rebalance_period, self.rebalance_period):
+                for tp in range(
+                    train_start, train_end - self.rebalance_period, self.rebalance_period
+                ):
                     t_d = all_dates[tp]
                     t_f = all_dates[min(tp + self.rebalance_period, len(all_dates) - 1)]
                     try:
@@ -9555,7 +9579,9 @@ class IncrementalAlphaFilter(CrossSectionalStrategy):
                     except Exception:
                         continue
                     mem_t = membership.loc[t_d].reindex(tickers).fillna(False).values
-                    fwd = (prices_panel.loc[t_f] / prices_panel.loc[t_d] - 1).reindex(tickers).values
+                    fwd = (
+                        (prices_panel.loc[t_f] / prices_panel.loc[t_d] - 1).reindex(tickers).values
+                    )
                     valid = mem_t & np.isfinite(fwd) & np.isfinite(X).all(axis=1)
                     if valid.sum() < 20:
                         continue
@@ -9568,6 +9594,7 @@ class IncrementalAlphaFilter(CrossSectionalStrategy):
                 y_tr = np.concatenate(y_rows)
                 try:
                     from numpy.linalg import lstsq
+
                     X_aug = np.column_stack([np.ones(len(X_tr)), X_tr])
                     coef, _, _, _ = lstsq(X_aug, y_tr, rcond=None)
                     residuals = y_tr - X_aug @ coef
@@ -9884,6 +9911,7 @@ class LinearCrossSectionalRank(CrossSectionalStrategy):
             y_tr = np.concatenate(y_rows)
             try:
                 from sklearn.preprocessing import StandardScaler
+
                 sc = StandardScaler()
                 Xs = sc.fit_transform(X_tr)
                 coef, _, _, _ = np.linalg.lstsq(
@@ -10379,7 +10407,11 @@ class MacroStateGBRank(CrossSectionalStrategy):
         avg_ta_safe = ((ta + ta.shift(252)) / 2).where(ta > 0)
 
         spy_ma = self.spy_prices.reindex(prices_panel.index).ffill()
-        macro_state = (spy_ma > spy_ma.rolling(self.ma_window, min_periods=100).mean()).astype(float).fillna(0.5)
+        macro_state = (
+            (spy_ma > spy_ma.rolling(self.ma_window, min_periods=100).mean())
+            .astype(float)
+            .fillna(0.5)
+        )
 
         feat_panels = [
             prices_panel.pct_change(252).shift(21).fillna(0.0).clip(-1.0, 5.0),
@@ -10431,7 +10463,9 @@ class MacroStateGBRank(CrossSectionalStrategy):
                 )
                 model.fit(Xs, y_tr)
                 ms_cur = macro_state.loc[rebal_date] if rebal_date in macro_state.index else 0.5
-                X_pred_base = np.column_stack([fp.loc[rebal_date, tickers].values for fp in feat_panels])
+                X_pred_base = np.column_stack(
+                    [fp.loc[rebal_date, tickers].values for fp in feat_panels]
+                )
                 X_pred = np.column_stack([X_pred_base, np.full(len(tickers), ms_cur)])
                 preds = model.predict(scaler.transform(X_pred))
                 score_df.loc[rebal_date, tickers] = preds
@@ -10563,7 +10597,11 @@ class EarningsSurpriseDrift(CrossSectionalStrategy):
         positive_surprise = surprise_raw.where(surprise_raw > 0, 0.0)
 
         daily_w = _sector_neutral_weights(
-            positive_surprise, membership, self.sectors, self.within_sector_quantile, ascending=False
+            positive_surprise,
+            membership,
+            self.sectors,
+            self.within_sector_quantile,
+            ascending=False,
         )
         return _monthly_rebalance(daily_w, prices_panel)
 
@@ -10864,7 +10902,6 @@ class CapitalDisciplineGovernance(CrossSectionalStrategy):
         sh_lag = sh.shift(self.lookback)
         dilution = ((sh - sh_lag) / sh_lag.where(sh_lag > 0)).clip(-0.5, 2.0)
         net_buyback = (-dilution).clip(lower=0.0)
-        ta_safe = ta.where(ta > 0)
         avg_ta_safe = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
         accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
         score = (
@@ -11046,9 +11083,7 @@ class SinExclusionPremium(CrossSectionalStrategy):
         prices_panel: pd.DataFrame,
         membership: pd.DataFrame,
     ) -> pd.DataFrame:
-        excluded_tickers = set(
-            self.sectors[self.sectors == self.excluded_sector].index.tolist()
-        )
+        excluded_tickers = set(self.sectors[self.sectors == self.excluded_sector].index.tolist())
         mem = membership.copy()
         for t in excluded_tickers:
             if t in mem.columns:
@@ -11099,9 +11134,7 @@ class LowCarbonSectorNeutral(CrossSectionalStrategy):
         ta = _align_fund(self.total_assets, prices_panel)
         ta_safe = ta.where(ta > 0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
-        excluded_tickers = set(
-            self.sectors[self.sectors == self.excluded_sector].index.tolist()
-        )
+        excluded_tickers = set(self.sectors[self.sectors == self.excluded_sector].index.tolist())
         filtered_mem = membership.copy()
         for t in excluded_tickers:
             if t in filtered_mem.columns:
@@ -11153,9 +11186,7 @@ class GreenProxyQuality(CrossSectionalStrategy):
         ta = _align_fund(self.total_assets, prices_panel)
         ta_safe = ta.where(ta > 0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
-        green_tickers = set(
-            self.sectors[self.sectors.isin(self.green_sectors)].index.tolist()
-        )
+        green_tickers = set(self.sectors[self.sectors.isin(self.green_sectors)].index.tolist())
         green_mem = pd.DataFrame(False, index=membership.index, columns=membership.columns)
         for t in green_tickers:
             if t in green_mem.columns:
@@ -11333,7 +11364,622 @@ class ESGProxyComposite(CrossSectionalStrategy):
             gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
 
-        combined = (daily_w1 + daily_w2 + daily_w3 + daily_w4)
+        combined = daily_w1 + daily_w2 + daily_w3 + daily_w4
+        row_sum = combined.sum(axis=1).replace(0, np.nan)
+        daily_w = combined.div(row_sum, axis=0).fillna(0.0)
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class LowAttentionValuePort(CrossSectionalStrategy):
+    """H391: GP/TA quality rank dampened by recent price-activity (attention proxy).
+
+    Attention proxy = trailing 21d mean(|daily_return|) / trailing 63d mean(|daily_return|).
+    High ratio = stock is drawing attention; low ratio = neglected.
+    Signal = z(GP/TA) * (1 - clip(z(attention_ratio), 0, 2) * 0.3).
+    Neglected quality stocks reprice more slowly without event-risk noise.
+    Antweiler-Frank 2004. Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "low_attention_value_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        short_window: int = 21,
+        long_window: int = 63,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.short_window = short_window
+        self.long_window = long_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+
+        daily_abs_ret = prices_panel.pct_change().abs()
+        short_act = daily_abs_ret.rolling(self.short_window, min_periods=5).mean()
+        long_act = daily_abs_ret.rolling(self.long_window, min_periods=20).mean()
+        attention_ratio = (short_act / long_act.replace(0, np.nan)).clip(0.0, 5.0)
+
+        z_gp = _cs_zscore(gp_ta).fillna(0.0)
+        z_att = _cs_zscore(attention_ratio).clip(0.0, 2.0).fillna(0.0)
+        score = z_gp * (1.0 - 0.3 * z_att)
+
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H392: ConsistentMomentumPort  (both 12m and 3m momentum agree = confirmed)
+# ---------------------------------------------------------------------------
+
+
+class ConsistentMomentumPort(CrossSectionalStrategy):
+    """H392: 12-1 momentum filtered by 3-month momentum agreement (consistency gate).
+
+    Only hold momentum stocks where both 12m and 3m momentum are positive and
+    in the top half of the cross-section. Consistent trend = "crowd-confirmed"
+    signal. Chen-De-Hu-Hwang 2014: crowd agreement strengthens anomaly signals.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "consistent_momentum_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        long_window: int = 252,
+        skip_window: int = 21,
+        short_window: int = 63,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.sectors = sectors
+        self.long_window = long_window
+        self.skip_window = skip_window
+        self.short_window = short_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        mom_long = prices_panel.pct_change(self.long_window).shift(self.skip_window)
+        mom_short = prices_panel.pct_change(self.short_window)
+        mem = membership.reindex_like(mom_long).fillna(False)
+        med_long = mom_long.where(mem).median(axis=1)
+        med_short = mom_short.where(mem).median(axis=1)
+        # Gate: both signals must be above their cross-sectional median
+        confirmed = mom_long.ge(med_long, axis=0) & mom_short.ge(med_short, axis=0)
+        gated_mom = mom_long.where(confirmed, np.nan)
+        daily_w = _sector_neutral_weights(
+            gated_mom, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H393: LowVolDisagreementAvoid  (GP quality weighted by inverse realized vol)
+# ---------------------------------------------------------------------------
+
+
+class LowVolDisagreementAvoid(CrossSectionalStrategy):
+    """H393: GP/TA quality weighted by inverse realized volatility.
+
+    Position weight inversely proportional to 21d realized vol (high vol =
+    high disagreement → reduce weight). Antweiler-Frank 2004: disagreement
+    predicts volatility. Penalising high-vol names improves Sharpe.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "low_vol_disagreement_avoid"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        vol_window: int = 21,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        daily_ret = prices_panel.pct_change()
+        realized_vol = daily_ret.rolling(self.vol_window, min_periods=5).std().shift(1)
+        inv_vol = (1.0 / realized_vol.replace(0, np.nan)).clip(0.0, 100.0)
+        base_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        scaled = (base_w * inv_vol).fillna(0.0)
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
+        return _monthly_rebalance(rescaled, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H394: ReturnSpikeRiskFilter  (GP composite with large-return event risk cut)
+# ---------------------------------------------------------------------------
+
+
+class ReturnSpikeRiskFilter(CrossSectionalStrategy):
+    """H394: GP/TA quality with 50% weight cut when |return| spikes > 2 sigma.
+
+    Detects event risk via absolute return z-score. If a stock's 5d mean
+    absolute return exceeds 2 sigma of its trailing 63d distribution, cut
+    position weight by 50%. Reduces exposure to M&A, earnings gaps, short
+    squeezes. Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "return_spike_risk_filter"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        spike_window: int = 5,
+        lookback_window: int = 63,
+        spike_threshold: float = 2.0,
+        cut_factor: float = 0.5,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.spike_window = spike_window
+        self.lookback_window = lookback_window
+        self.spike_threshold = spike_threshold
+        self.cut_factor = cut_factor
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta_safe = ((ta + ta.shift(252)) / 2).where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
+        asset_growth = ((ta - ta.shift(252)) / ta_safe.shift(252)).clip(-1.0, 5.0)
+        # Sustainability filter (H265-style) then GP rank
+        sust = _cs_zscore(-accruals).fillna(0.0) + _cs_zscore(-asset_growth).fillna(0.0)
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        sust_rank = sust.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        filtered_mem = membership & (sust_rank >= 0.50).fillna(False)
+        base_w = _sector_neutral_weights(
+            gp_ta, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        # Spike detection
+        abs_ret = prices_panel.pct_change().abs()
+        recent_act = abs_ret.rolling(self.spike_window, min_periods=1).mean()
+        hist_mean = (
+            abs_ret.rolling(self.lookback_window, min_periods=20).mean().shift(self.spike_window)
+        )
+        hist_std = (
+            abs_ret.rolling(self.lookback_window, min_periods=20).std().shift(self.spike_window)
+        )
+        z_spike = (recent_act - hist_mean) / hist_std.replace(0, np.nan)
+        spike_flag = z_spike.gt(self.spike_threshold).fillna(False)
+        scale = spike_flag.astype(float) * (self.cut_factor - 1.0) + 1.0
+        scaled = (base_w * scale).clip(lower=0.0)
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
+        return _monthly_rebalance(rescaled, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H395: VolatilityAwareComposite  (batch-9 attention ensemble)
+# ---------------------------------------------------------------------------
+
+
+class VolatilityAwareComposite(CrossSectionalStrategy):
+    """H395: Equal-weight blend of batch-9 volatility/attention-aware signals.
+
+    Combines: neglected quality (GP dampened by activity), consistent momentum
+    (12m+3m agreement), GP x inverse-vol, and spike-filtered GP.
+    Tests whether price-based attention proxies diversify vs pure EDGAR quality.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "volatility_aware_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        clip_val: float = 2.0,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.clip_val = clip_val
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta_safe = ((ta + ta.shift(252)) / 2).where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
+        asset_growth = ((ta - ta.shift(252)) / ta_safe.shift(252)).clip(-1.0, 5.0)
+        daily_abs_ret = prices_panel.pct_change().abs()
+        short_act = daily_abs_ret.rolling(21, min_periods=5).mean()
+        long_act = daily_abs_ret.rolling(63, min_periods=20).mean()
+        attention_ratio = (short_act / long_act.replace(0, np.nan)).clip(0.0, 5.0)
+        mom_long = prices_panel.pct_change(252).shift(21)
+        mom_short = prices_panel.pct_change(63)
+        realized_vol = prices_panel.pct_change().rolling(21, min_periods=5).std().shift(1)
+        inv_vol = (1.0 / realized_vol.replace(0, np.nan)).clip(0.0, 100.0)
+
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        med_long = mom_long.where(mem).median(axis=1)
+        med_short = mom_short.where(mem).median(axis=1)
+        confirmed_mom = mom_long.where(
+            mom_long.ge(med_long, axis=0) & mom_short.ge(med_short, axis=0), np.nan
+        )
+
+        z_gp = _cs_zscore(gp_ta)
+        z_att = _cs_zscore(attention_ratio).clip(0.0, 2.0).fillna(0.0)
+        neglect_score = (z_gp * (1.0 - 0.3 * z_att)).fillna(0.0)
+
+        sust = _cs_zscore(-accruals).fillna(0.0) + _cs_zscore(-asset_growth).fillna(0.0)
+        sust_rank = sust.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        filtered_mem = membership & (sust_rank >= 0.50).fillna(False)
+
+        z1 = _cs_zscore(neglect_score).clip(-self.clip_val, self.clip_val).fillna(0.0)
+        z2 = _cs_zscore(confirmed_mom).clip(-self.clip_val, self.clip_val).fillna(0.0)
+        z3 = _cs_zscore(gp_ta * inv_vol).clip(-self.clip_val, self.clip_val).fillna(0.0)
+        z4 = _cs_zscore(gp_ta.where(filtered_mem)).clip(-self.clip_val, self.clip_val).fillna(0.0)
+        score = z1 + z2 + z3 + z4
+
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _monthly_rebalance(daily_w, prices_panel)
+
+
+# ---------------------------------------------------------------------------
+# H396: LowTurnoverGP  (threshold rebalancing for GP rank)
+# ---------------------------------------------------------------------------
+
+
+class LowTurnoverGP(CrossSectionalStrategy):
+    """H396: GP/TA rank with threshold rebalancing (only when rank moves >2 deciles).
+
+    Rebalances a stock's weight only when its GP/TA rank changes by more than
+    threshold_deciles × (1/n_deciles) of the cross-section. Average rebalance
+    frequency halved vs quarterly. Hendershott et al. 2011: turnover costs
+    compound; threshold rebalancing captures most signal at lower cost.
+    Sector-neutral, threshold rebalance.
+    """
+
+    name = "low_turnover_gp"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        n_deciles: int = 10,
+        threshold_deciles: int = 2,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.n_deciles = n_deciles
+        self.threshold_deciles = threshold_deciles
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        pct_rank = (
+            gp_ta.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep").fillna(0.0)
+        )
+
+        # Compute base sector-neutral weights at monthly frequency
+        base_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        base_w_monthly = _periodic_rebalance(base_w, self.rebalance_period)
+
+        # Apply threshold: only update if rank changed by > threshold_deciles
+        threshold = self.threshold_deciles / self.n_deciles
+        prev_rank = pct_rank.shift(self.rebalance_period)
+        rank_change = (pct_rank - prev_rank).abs()
+        rebalance_needed = rank_change.gt(threshold) | rank_change.isna()
+
+        # Build thresholded weights: carry forward when no rebalance needed
+        final_w = base_w_monthly.copy()
+        for i in range(1, len(final_w)):
+            for t in final_w.columns:
+                if not rebalance_needed.iloc[i][t]:
+                    final_w.iloc[i, final_w.columns.get_loc(t)] = final_w.iloc[
+                        i - 1, final_w.columns.get_loc(t)
+                    ]
+
+        # Renormalize rows
+        row_sum = final_w.sum(axis=1).replace(0, np.nan)
+        return final_w.div(row_sum, axis=0).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H397: SpreadAwarePositionSizer  (GP quality weighted by inverse vol-proxy spread)
+# ---------------------------------------------------------------------------
+
+
+class SpreadAwarePositionSizer(CrossSectionalStrategy):
+    """H397: GP/TA quality with position sizes inversely proportional to realized vol.
+
+    Realized vol proxies for effective spread (higher vol = wider spread for
+    large caps). Weights scaled by inv_vol within the selected top-quality basket.
+    Hendershott et al. 2011: effective spread varies even within S&P 500.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "spread_aware_position_sizer"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        vol_window: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta_safe = ((ta + ta.shift(252)) / 2).where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
+        asset_growth = ((ta - ta.shift(252)) / ta_safe.shift(252)).clip(-1.0, 5.0)
+        sust = _cs_zscore(-accruals).fillna(0.0) + _cs_zscore(-asset_growth).fillna(0.0)
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        sust_rank = sust.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        filtered_mem = membership & (sust_rank >= 0.50).fillna(False)
+        base_w = _sector_neutral_weights(
+            gp_ta, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        realized_vol = (
+            prices_panel.pct_change().rolling(self.vol_window, min_periods=20).std().shift(1)
+        )
+        inv_vol = (1.0 / realized_vol.replace(0, np.nan)).clip(0.0, 100.0)
+        # Scale within selected basket
+        selected = base_w > 0
+        scaled = base_w * inv_vol.where(selected, 0.0)
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
+        return _periodic_rebalance(rescaled, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H398: LiquidityRegimeCapPort  (ML ensemble with low-vol regime cap)
+# ---------------------------------------------------------------------------
+
+
+class LiquidityRegimeCapPort(CrossSectionalStrategy):
+    """H398: GP/TA quality with liquidity-regime participation cap.
+
+    When a stock's realized vol drops below its 10th historical percentile
+    (unusual quiet = potential liquidity event ahead), cap position at 50%.
+    When realized vol is above 90th percentile (illiquid stress), cap at 30%.
+    Normal regime: full weight. Hendershott et al. 2011: liquidity regime matters.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "liquidity_regime_cap_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        vol_window: int = 21,
+        lookback: int = 252,
+        low_pct: float = 0.10,
+        high_pct: float = 0.90,
+        low_cap: float = 0.50,
+        high_cap: float = 0.30,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.lookback = lookback
+        self.low_pct = low_pct
+        self.high_pct = high_pct
+        self.low_cap = low_cap
+        self.high_cap = high_cap
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        base_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        realized_vol = (
+            prices_panel.pct_change().rolling(self.vol_window, min_periods=5).std().shift(1)
+        )
+        vol_low = realized_vol.rolling(self.lookback, min_periods=63).quantile(self.low_pct)
+        vol_high = realized_vol.rolling(self.lookback, min_periods=63).quantile(self.high_pct)
+        in_low_regime = realized_vol.lt(vol_low)
+        in_high_regime = realized_vol.gt(vol_high)
+        cap = pd.DataFrame(1.0, index=prices_panel.index, columns=prices_panel.columns)
+        cap = cap.where(~in_low_regime, self.low_cap)
+        cap = cap.where(~in_high_regime, self.high_cap)
+        scaled = (base_w * cap).clip(lower=0.0)
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
+        return _periodic_rebalance(rescaled, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H399: ExecutionOptimizedComposite  (batch-10 execution ensemble)
+# ---------------------------------------------------------------------------
+
+
+class ExecutionOptimizedComposite(CrossSectionalStrategy):
+    """H399: Normalized blend of batch-10 execution-refined signals.
+
+    Combines: spread-aware GP (vol-scaled), liquidity-regime capped GP, and
+    plain GP/TA anchor. Tests whether execution cost adjustments collectively
+    improve net-of-cost risk-adjusted returns.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "execution_optimized_composite"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta_safe = ((ta + ta.shift(252)) / 2).where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        accruals = ((ni - ocf) / avg_ta_safe).clip(-1.0, 1.0)
+        asset_growth = ((ta - ta.shift(252)) / ta_safe.shift(252)).clip(-1.0, 5.0)
+        sust = _cs_zscore(-accruals).fillna(0.0) + _cs_zscore(-asset_growth).fillna(0.0)
+        mem = membership.reindex_like(gp_ta).fillna(False)
+        sust_rank = sust.where(mem).rank(axis=1, pct=True, ascending=True, na_option="keep")
+        filtered_mem = membership & (sust_rank >= 0.50).fillna(False)
+        # Component 1: spread-aware (inv-vol scaled) within quality filter
+        realized_vol = prices_panel.pct_change().rolling(63, min_periods=20).std().shift(1)
+        inv_vol = (1.0 / realized_vol.replace(0, np.nan)).clip(0.0, 100.0)
+        base_filt = _sector_neutral_weights(
+            gp_ta, filtered_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        spread_w = base_filt * inv_vol.where(base_filt > 0, 0.0)
+        rs1 = spread_w.sum(axis=1).replace(0, np.nan)
+        w1 = spread_w.div(rs1, axis=0).fillna(0.0)
+        # Component 2: liquidity-regime capped plain GP
+        vol_low = realized_vol.rolling(252, min_periods=63).quantile(0.10)
+        vol_high = realized_vol.rolling(252, min_periods=63).quantile(0.90)
+        in_low = realized_vol.lt(vol_low)
+        in_high = realized_vol.gt(vol_high)
+        cap = pd.DataFrame(1.0, index=prices_panel.index, columns=prices_panel.columns)
+        cap = cap.where(~in_low, 0.50).where(~in_high, 0.30)
+        base_plain = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        regime_w = (base_plain * cap).clip(lower=0.0)
+        rs2 = regime_w.sum(axis=1).replace(0, np.nan)
+        w2 = regime_w.div(rs2, axis=0).fillna(0.0)
+        # Component 3: plain GP anchor
+        w3 = base_plain.copy()
+        combined = w1 + w2 + w3
         row_sum = combined.sum(axis=1).replace(0, np.nan)
         daily_w = combined.div(row_sum, axis=0).fillna(0.0)
         return _periodic_rebalance(daily_w, self.rebalance_period)

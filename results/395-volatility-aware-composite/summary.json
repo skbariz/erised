@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H395",
+  "name": "volatility-aware-composite",
+  "strategy_class": "VolatilityAwareComposite",
+  "family": "attention-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9651,
+  "ci_low": 0.5582,
+  "ci_high": 1.376,
+  "cagr": 0.2078,
+  "max_drawdown": -0.5071,
+  "n_trades": 1,
+  "h001_corr": 0.0036,
+  "fold_sharpes": [
+    1.326,
+    0.798,
+    0.993,
+    1.823,
+    1.134,
+    -0.383,
+    0.524,
+    2.166,
+    1.091,
+    1.582,
+    1.251,
+    1.193
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight blend: neglected GP + consistent momentum + GP\u00d7inv-vol + spike-filtered GP. Tests if price-based proxies diversify EDGAR quality.",
+  "canonical_params": {
+    "clip_val": 2.0,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

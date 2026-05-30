@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H391",
+  "name": "low-attention-value-port",
+  "strategy_class": "LowAttentionValuePort",
+  "family": "attention-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.898,
+  "ci_low": 0.4983,
+  "ci_high": 1.3035,
+  "cagr": 0.1171,
+  "max_drawdown": -0.3337,
+  "n_trades": 1,
+  "h001_corr": -0.016,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.579,
+    0.747,
+    2.207,
+    0.874,
+    2.219,
+    1.078,
+    1.213
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality dampened by price-activity attention ratio (short/long rolling |return|). Sector-neutral top 20% monthly.",
+  "canonical_params": {
+    "short_window": 21,
+    "long_window": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

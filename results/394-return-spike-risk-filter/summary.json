@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H394",
+  "name": "return-spike-risk-filter",
+  "strategy_class": "ReturnSpikeRiskFilter",
+  "family": "attention-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.865,
+  "ci_low": 0.4592,
+  "ci_high": 1.2695,
+  "cagr": 0.1074,
+  "max_drawdown": -0.3192,
+  "n_trades": 1,
+  "h001_corr": -0.0195,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.485,
+    0.787,
+    1.717,
+    0.927,
+    2.134,
+    1.232,
+    1.238
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sustainability-filtered GP/TA with 50% weight cut when 5d |return| > 2-sigma of 63d distribution.",
+  "canonical_params": {
+    "spike_window": 5,
+    "lookback_window": 63,
+    "spike_threshold": 2.0,
+    "cut_factor": 0.5,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

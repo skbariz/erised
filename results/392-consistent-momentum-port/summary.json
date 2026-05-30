@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H392",
+  "name": "consistent-momentum-port",
+  "strategy_class": "ConsistentMomentumPort",
+  "family": "attention-proxy",
+  "run_date": "2026-05-29",
+  "oos_sharpe": 0.9966,
+  "ci_low": 0.5972,
+  "ci_high": 1.4014,
+  "cagr": 0.1886,
+  "max_drawdown": -0.4374,
+  "n_trades": 1,
+  "h001_corr": 0.0018,
+  "fold_sharpes": [
+    1.211,
+    0.927,
+    1.191,
+    1.638,
+    1.357,
+    -0.051,
+    0.773,
+    2.302,
+    1.15,
+    1.37,
+    1.065,
+    1.024
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "12-1 momentum gated by 3m agreement (both above cross-sectional median). Sector-neutral top 20% monthly.",
+  "canonical_params": {
+    "long_window": 252,
+    "skip_window": 21,
+    "short_window": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

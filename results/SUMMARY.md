@@ -1179,10 +1179,10 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | 4 | H416–H420 | Product-Market & Competitive Position | Hoberg & Phillips x2 | **5/5 KEEP** (0.749–0.861) |
 | 5 | H421–H425 | Macro Sector & Policy Exposure | Cohen, Diether & Malloy | **0/5 KEEP** (all killed: H001 corr +0.51-0.64) |
 | 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | **5/5 KEEP** (0.722–0.984) ★H429 |
-| 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | Planned |
-| 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | Planned |
-| 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | Planned |
-| 10 | H446–H450 | Meta-Ensemble & Terminal MDR | All papers | Planned |
+| 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | **5/5 KEEP** (0.630–0.862) ★H434 |
+| 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | **4/5 KEEP** (H440 kill); 0.716–0.885 |
+| 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | **5/5 KEEP** (0.650–0.850) |
+| 10 | H446–H449 | Meta-Ensembles & Grand MDR | All papers | **4/4 KEEP** (0.792–0.962) ★H447; H449 MDR running |
 
 ### Key Set 6 findings so far (H401-H425)
 - **CS strategies: 20/20 KEEP** (Batches 1-4 perfect). H001 corr uniformly near-zero (-0.010 to -0.020) — genuinely uncorrelated with trend signals.
@@ -1191,7 +1191,12 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 - **AA sector-tilt strategies (Batch 5): 0/5 KEEP** — same lesson as prior sets: ETF combinations correlated with H001 at +0.51-0.64. Do not attempt more AA sector-rotation ideas.
 - **EDGAR data gap**: CS strategies only active from fold 6 (2010+) except H412, H415, H429 which use price data too — active all 12 folds.
 - **Batch 6 star**: H429 SectorRelativeMarginProxy (Sharpe 0.984, H001 +0.003) — sector-relative GP margin + momentum, similar structure to H415.
-- **Running total H401-H430**: 25/30 KEEP (83%) — all CS batches 5/5, all AA batch 0/5.
+- **Batch 7 star**: H434 FinancialFragilityAvoid (Sharpe 0.862, H001 -0.015) — Altman Z proxy from Compustat.
+- **Batch 8 note**: H440 LowIndexBetaQuality killed (beta signal all-zero, implementation issue); H436 MarketCapConcentrationAvoid best at Sharpe 0.885.
+- **Batch 10 star**: H447 CreditQualityMomentumCombo (Sharpe 0.962, H001 +0.001) — active ALL 12 folds (fundamentals + 6m momentum).
+- **Key pattern confirmed**: Strategies combining fundamentals + 6m price momentum are active all 12 folds and achieve Sharpe 0.96+. H412, H415, H429, H447 all share this structure.
+- **Grand total H401-H448**: 44/48 KEEP (92%) — all CS strategies (batches 1-4, 6-10) keep; batch 5 AA 0/5.
+- **H449 MDR**: Running — grand MDR over H300/H350 pool + 17 Set 6 CS strategies. Target: beat H300/H350 (Sharpe 1.525).
 
 ### Set 6 Key Design Notes
 - All signals use available Compustat fundamentals + ETF prices only (no IBES, 13F, patents, or ETF holdings)

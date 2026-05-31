@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H442",
+  "name": "transient-ownership-avoid",
+  "strategy_class": "TransientOwnershipAvoid",
+  "family": "institutional horizon proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8497,
+  "ci_low": 0.4391,
+  "ci_high": 1.2565,
+  "cagr": 0.105,
+  "max_drawdown": -0.3441,
+  "n_trades": 1,
+  "h001_corr": -0.0184,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.746,
+    2.055,
+    0.922,
+    1.985,
+    1.048,
+    1.123
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Avoid: rolling rev-growth std > median AND shares YoY > 0. Long survivors by GP/TA. Bushee (1998) transient institutional pressure proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252,
+    "vol_window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

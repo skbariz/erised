@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H446",
+  "name": "earnings-quality-composite",
+  "strategy_class": "EarningsQualityComposite",
+  "family": "Set6 meta-ensemble",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7916,
+  "ci_low": 0.3889,
+  "ci_high": 1.2015,
+  "cagr": 0.0955,
+  "max_drawdown": -0.3829,
+  "n_trades": 1,
+  "h001_corr": -0.0193,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.537,
+    0.697,
+    1.988,
+    0.862,
+    1.987,
+    0.971,
+    1.048
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(-accruals) + z(NI/TA growth + OCF/TA growth) + z(OCF>NI fraction 504d). Three PEAD-proxy signals unified. Composites of H401/H402/H405 signals.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252,
+    "persistence_window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

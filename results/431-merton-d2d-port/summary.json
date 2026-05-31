@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H431",
+  "name": "merton-d2d-port",
+  "strategy_class": "MertonD2DPort",
+  "family": "credit risk",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.6836,
+  "ci_low": 0.287,
+  "ci_high": 1.083,
+  "cagr": 0.0799,
+  "max_drawdown": -0.3674,
+  "n_trades": 1,
+  "h001_corr": -0.0231,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.394,
+    0.898,
+    2.126,
+    0.857,
+    1.809,
+    0.827,
+    0.813
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "D2D = BE/(BE+LTD) / realized_vol_21d. High equity fraction + low vol = far from default. Merton (1974) structural credit model proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "vol_window": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

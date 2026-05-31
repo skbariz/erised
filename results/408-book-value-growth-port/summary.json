@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H408",
+  "name": "book-value-growth-port",
+  "strategy_class": "BookValueGrowthPort",
+  "family": "financial disclosure quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7843,
+  "ci_low": 0.3778,
+  "ci_high": 1.2041,
+  "cagr": 0.0922,
+  "max_drawdown": -0.3622,
+  "n_trades": 1,
+  "h001_corr": -0.0161,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.47,
+    2.129,
+    1.035,
+    1.7,
+    1.019,
+    1.058
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "BE growth = (BE - BE.shift(252)) / |BE.shift(252)|. Long top-20% book-equity growers quarterly. Li (2010) FLS proxy: growing book equity = retained earnings quality.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

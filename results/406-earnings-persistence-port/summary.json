@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H406",
+  "name": "earnings-persistence-port",
+  "strategy_class": "EarningsPersistencePort",
+  "family": "financial disclosure quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.6404,
+  "ci_low": 0.2398,
+  "ci_high": 1.0547,
+  "cagr": 0.0789,
+  "max_drawdown": -0.4219,
+  "n_trades": 1,
+  "h001_corr": -0.0203,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.245,
+    2.135,
+    0.589,
+    1.826,
+    0.81,
+    0.854
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Stability = 1/std(NI/TA, 504 days). Long top-20% stable earners. Li (2008) readability proxy: stable earnings = readable, reliable disclosure.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

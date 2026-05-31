@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H407",
+  "name": "cash-flow-reliability-port",
+  "strategy_class": "CashFlowReliabilityPort",
+  "family": "financial disclosure quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7652,
+  "ci_low": 0.3576,
+  "ci_high": 1.1748,
+  "cagr": 0.0905,
+  "max_drawdown": -0.3657,
+  "n_trades": 1,
+  "h001_corr": -0.0204,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.537,
+    0.712,
+    1.932,
+    0.94,
+    1.765,
+    0.993,
+    0.973
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Fraction of 504-day window where OCF > NI. Long top-20% reliable cash earners. Li (2010) FLS durability proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

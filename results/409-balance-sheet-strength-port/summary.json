@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H409",
+  "name": "balance-sheet-strength-port",
+  "strategy_class": "BalanceSheetStrengthPort",
+  "family": "financial disclosure quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7964,
+  "ci_low": 0.3858,
+  "ci_high": 1.2031,
+  "cagr": 0.0928,
+  "max_drawdown": -0.3574,
+  "n_trades": 1,
+  "h001_corr": -0.0191,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.508,
+    2.166,
+    1.1,
+    1.856,
+    0.971,
+    1.058
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Z-score composite: -(LTD/TA change) + OCF/TA change + BE/TA change. Long top-20% BS improvers. Li (2010) FLS trajectory proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

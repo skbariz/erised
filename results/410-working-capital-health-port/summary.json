@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H410",
+  "name": "working-capital-health-port",
+  "strategy_class": "WorkingCapitalHealthPort",
+  "family": "financial disclosure quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7642,
+  "ci_low": 0.3589,
+  "ci_high": 1.178,
+  "cagr": 0.0863,
+  "max_drawdown": -0.3566,
+  "n_trades": 1,
+  "h001_corr": -0.0203,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    1.956,
+    0.912,
+    1.882,
+    0.968,
+    0.987
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "WC/Rev = (CA-CL)/Revenue YoY change. Long top-20% WC efficiency improvers quarterly. Operational discipline proxy for Li (2010) positive FLS tone.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

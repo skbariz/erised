@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H441",
+  "name": "shareholder-aligned-port",
+  "strategy_class": "ShareholderAlignedPort",
+  "family": "institutional horizon proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7759,
+  "ci_low": 0.3655,
+  "ci_high": 1.1851,
+  "cagr": 0.0936,
+  "max_drawdown": -0.3643,
+  "n_trades": 1,
+  "h001_corr": -0.0162,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.727,
+    1.907,
+    0.937,
+    1.51,
+    0.708,
+    1.182
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Triple filter: shares growth<=0 (no dilution) AND OCF>0 AND 6m price>0. Rank survivors by GP/TA. Yan & Zhang (2009) dedicated owner proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H414",
+  "name": "earnings-variability-avoid",
+  "strategy_class": "EarningsVariabilityAvoid",
+  "family": "sentiment proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.6413,
+  "ci_low": 0.2376,
+  "ci_high": 1.0567,
+  "cagr": 0.0791,
+  "max_drawdown": -0.4219,
+  "n_trades": 1,
+  "h001_corr": -0.0179,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.26,
+    2.142,
+    0.591,
+    1.824,
+    0.797,
+    0.852
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Rolling std(NI/TA, 504 days). Long lowest-20% variability (ascending=True). Mayew & Venkatachalam (2012) uncertainty proxy: low NI variance = low vocal stress.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

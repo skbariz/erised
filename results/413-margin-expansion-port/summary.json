@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H413",
+  "name": "margin-expansion-port",
+  "strategy_class": "MarginExpansionPort",
+  "family": "sentiment proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7491,
+  "ci_low": 0.3431,
+  "ci_high": 1.1681,
+  "cagr": 0.0861,
+  "max_drawdown": -0.3539,
+  "n_trades": 1,
+  "h001_corr": -0.0136,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.194,
+    1.839,
+    0.898,
+    1.559,
+    1.229,
+    1.146
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/Revenue YoY change where revenue > revenue.shift(252). Long top-20% margin expanders with revenue confirm. Mayew & Venkatachalam management confidence proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

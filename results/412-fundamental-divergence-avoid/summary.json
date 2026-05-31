@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H412",
+  "name": "fundamental-divergence-avoid",
+  "strategy_class": "FundamentalDivergenceAvoid",
+  "family": "sentiment proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.9614,
+  "ci_low": 0.5598,
+  "ci_high": 1.3722,
+  "cagr": 0.2157,
+  "max_drawdown": -0.5577,
+  "n_trades": 1,
+  "h001_corr": -0.001,
+  "fold_sharpes": [
+    1.504,
+    1.297,
+    0.928,
+    1.668,
+    1.053,
+    0.66,
+    0.676,
+    2.129,
+    0.595,
+    1.69,
+    1.157,
+    0.988
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Divergence = z(NI/TA_yoy_growth) - z(6m price return). Long positive divergence. Monthly rebalance. Torpedo risk (Skinner & Sloan) + Mayew voice proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "fundamental_lookback": 252,
+    "price_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

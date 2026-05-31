@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H415",
+  "name": "stable-margin-momentum",
+  "strategy_class": "StableMarginMomentum",
+  "family": "sentiment proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.9868,
+  "ci_low": 0.5814,
+  "ci_high": 1.3963,
+  "cagr": 0.1874,
+  "max_drawdown": -0.49,
+  "n_trades": 1,
+  "h001_corr": 0.0017,
+  "fold_sharpes": [
+    1.4,
+    0.648,
+    1.177,
+    1.847,
+    1.409,
+    -0.103,
+    0.735,
+    2.123,
+    0.894,
+    1.802,
+    1.148,
+    1.138
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(-std(GP/Rev, 504d)) + z(6m price momentum). Long top-20% composite monthly. Mayew proxy: stable margins = credible management + price confirm = double validation.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "margin_window": 504,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

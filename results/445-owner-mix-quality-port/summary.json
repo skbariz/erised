@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H445",
+  "name": "owner-mix-quality-port",
+  "strategy_class": "OwnerMixQualityPort",
+  "family": "institutional horizon proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7816,
+  "ci_low": 0.3755,
+  "ci_high": 1.1913,
+  "cagr": 0.0946,
+  "max_drawdown": -0.3976,
+  "n_trades": 1,
+  "h001_corr": -0.0179,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.537,
+    0.728,
+    2.014,
+    0.789,
+    1.962,
+    1.096,
+    0.966
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(-shares_growth) + z(OCF>NI fraction, 504d) + z(BE YoY growth). Low dilution + cash reliability + book value growth = dedicated-owner composite.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252,
+    "reliability_window": 504
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

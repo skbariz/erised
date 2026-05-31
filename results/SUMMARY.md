@@ -1101,7 +1101,7 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 
 ## H391-H400 Synthesis (Batches 9-10 + Terminal MDR)
 
-### Batch 9 (H391-H395): 5/5 KEEP � Attention & Volatility Proxy
+### Batch 9 (H391-H395): 5/5 KEEP � Attention & Volatility Proxy
 
 | # | Name | Sharpe | MaxDD | H001 corr | Key finding |
 |---|------|--------|-------|-----------|-------------|
@@ -1111,7 +1111,7 @@ _See `results/<id>-<name>/stats.md` for full metrics on each hypothesis._
 | 393 | LowVolDisagreementAvoid | 0.890 | -34.49% | -0.019 | GP x inverse realized vol |
 | 394 | ReturnSpikeRiskFilter | 0.865 | -31.92% | -0.020 | 50% cut on |return| spikes |
 
-### Batch 10 (H396-H399): 4/4 KEEP � Execution-Aware
+### Batch 10 (H396-H399): 4/4 KEEP � Execution-Aware
 
 | # | Name | Sharpe | MaxDD | H001 corr | Key finding |
 |---|------|--------|-------|-----------|-------------|
@@ -1159,5 +1159,35 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | Best Set5 CS | H392 ConsistentMomentumPort: Sharpe 0.997 |
 | MDR frontier | CLOSED -- adding Set5 CS reduces MDR Sharpe (1.503 vs 1.525) |
 | Holdout (H049) | Sharpe 1.346, MaxDD -9.91% (2023-2026) -- SPENT |
+
+---
+
+## Set 6 Program: H401–H450 (IN PROGRESS)
+
+**Theme:** Corporate events + information architecture — when is firm-specific information slow to reach prices?  
+**Source:** sp500_quant_paper_learnings_set6_for_10_algo_batches.txt (20 papers)  
+**Start date:** 2026-05-30  
+**GitHub issue:** #333
+
+### Batch Map
+
+| Batch | H# | Theme | Papers | Status |
+|-------|-----|-------|--------|--------|
+| 1 | H401–H405 | Earnings Quality & PEAD Proxies | Bernard & Thomas, Skinner & Sloan, So | Implemented — pending run |
+| 2 | H406–H410 | Financial Disclosure Quality | Li (2010), Li (2008) | Implemented — pending run |
+| 3 | H411–H415 | Sentiment & Tone Proxies | Mayew & Venkatachalam | Implemented — pending run |
+| 4 | H416–H420 | Product-Market & Competitive Position | Hoberg & Phillips x2 | Planned |
+| 5 | H421–H425 | Macro Sector & Policy Exposure | Cohen, Diether & Malloy | Planned |
+| 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | Planned |
+| 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | Planned |
+| 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | Planned |
+| 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | Planned |
+| 10 | H446–H450 | Meta-Ensemble & Terminal MDR | All papers | Planned |
+
+### Set 6 Key Design Notes
+- All signals use available Compustat fundamentals + ETF prices only (no IBES, 13F, patents, or ETF holdings)
+- Sector-neutral via GICS, quarterly rebalance (63-day default)
+- Keep bar: Sharpe > 0.51, CI lower > 0
+- Target: H450 MDR beats H300/H350 (Sharpe 1.525) by adding CS-dimension diversifiers
 
 **The program is complete.**

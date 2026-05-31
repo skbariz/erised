@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H436",
+  "name": "market-cap-concentration-avoid",
+  "strategy_class": "MarketCapConcentrationAvoid",
+  "family": "ETF crowding proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8849,
+  "ci_low": 0.4746,
+  "ci_high": 1.2963,
+  "cagr": 0.1101,
+  "max_drawdown": -0.3432,
+  "n_trades": 1,
+  "h001_corr": -0.0171,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.751,
+    2.06,
+    1.024,
+    2.041,
+    1.209,
+    1.192
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Exclude top 10% market cap (price*shares) within sector. GP/TA quality in mid-cap S&P 500. Ben-David et al. (2018) passive crowding proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "cap_exclude_pct": 0.1
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

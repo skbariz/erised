@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H438",
+  "name": "inverse-index-weight-momentum",
+  "strategy_class": "InverseIndexWeightMomentum",
+  "family": "ETF crowding proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8175,
+  "ci_low": 0.4113,
+  "ci_high": 1.2228,
+  "cagr": 0.1025,
+  "max_drawdown": -0.3773,
+  "n_trades": 1,
+  "h001_corr": -0.0129,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.637,
+    0.78,
+    1.998,
+    1.014,
+    1.81,
+    0.97,
+    1.046
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Score = 6m momentum * (cap_rank / n_members). Smaller names get larger signal weight. Ben-David et al. (2018) ETF crowding proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

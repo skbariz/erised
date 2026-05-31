@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H437",
+  "name": "sector-ew-divergence",
+  "strategy_class": "SectorEWDivergence",
+  "family": "ETF crowding proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7162,
+  "ci_low": 0.3193,
+  "ci_high": 1.1252,
+  "cagr": 0.0958,
+  "max_drawdown": -0.476,
+  "n_trades": 1,
+  "h001_corr": -0.0052,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.612,
+    1.945,
+    0.434,
+    1.492,
+    1.085,
+    1.137
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Long biggest 5d within-sector underperformers where NI/TA YoY > 0. Weekly rebalance. ETF flow dislocation proxy (Israeli et al. 2017).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5,
+    "reversal_window": 5,
+    "ni_lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

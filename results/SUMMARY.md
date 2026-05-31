@@ -1182,7 +1182,7 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | **5/5 KEEP** (0.630–0.862) ★H434 |
 | 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | **4/5 KEEP** (H440 kill); 0.716–0.885 |
 | 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | **5/5 KEEP** (0.650–0.850) |
-| 10 | H446–H449 | Meta-Ensembles & Grand MDR | All papers | **4/4 KEEP** (0.792–0.962) ★H447; H449 MDR running |
+| 10 | H446–H449 | Meta-Ensembles & Grand MDR | All papers | **4/4 KEEP** (0.792–0.962) ★H447; H449 MDR 1.164 |
 
 ### Key Set 6 findings so far (H401-H425)
 - **CS strategies: 20/20 KEEP** (Batches 1-4 perfect). H001 corr uniformly near-zero (-0.010 to -0.020) — genuinely uncorrelated with trend signals.
@@ -1196,7 +1196,22 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 - **Batch 10 star**: H447 CreditQualityMomentumCombo (Sharpe 0.962, H001 +0.001) — active ALL 12 folds (fundamentals + 6m momentum).
 - **Key pattern confirmed**: Strategies combining fundamentals + 6m price momentum are active all 12 folds and achieve Sharpe 0.96+. H412, H415, H429, H447 all share this structure.
 - **Grand total H401-H448**: 44/48 KEEP (92%) — all CS strategies (batches 1-4, 6-10) keep; batch 5 AA 0/5.
-- **H449 MDR**: Running — grand MDR over H300/H350 pool + 17 Set 6 CS strategies. Target: beat H300/H350 (Sharpe 1.525).
+- **H449 MDR**: KEEP Sharpe 1.164, MaxDD -9.53%. Does NOT beat H300/H350 (1.525). Same MDR saturation as H400: EDGAR gap in folds 0-5 prevents CS strategies from getting large MDR weights. ETF strategies dominate (H043 25%, H035 15%, H060 11%). Equal-weight 31-strategy baseline: Sharpe 1.154.
+- **Set 6 final**: 44/49 KEEP (90%). The strategy family is highly productive individually but doesn't push the MDR frontier past H300/H350.
+- **Most valuable Set 6 finding**: Fundamental+momentum composites (H412, H415, H429, H447) — Sharpe ~0.96, H001 corr ~0, active all 12 folds. These are prime candidates for the MDR ensemble in a future set that includes them with their full history.
+
+---
+
+## Final Program Summary (H001-H449)
+
+| Metric | Value |
+|--------|-------|
+| Total strategies tested (H001-H449) | 449 |
+| Total kept (estimated) | ~327 |
+| Program champion | H300/H350 tied: Sharpe 1.525 MaxDD -6.86% |
+| Best Set 6 individual | H415 StableMarginMomentum: Sharpe 0.987 |
+| Set 6 MDR (H449) | Sharpe 1.164 -- below H300/H350 terminal champion |
+| MDR frontier | Remains CLOSED at H300/H350 |
 
 ### Set 6 Key Design Notes
 - All signals use available Compustat fundamentals + ETF prices only (no IBES, 13F, patents, or ETF holdings)

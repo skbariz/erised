@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H427",
+  "name": "capital-productivity-port",
+  "strategy_class": "CapitalProductivityPort",
+  "family": "innovation proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8045,
+  "ci_low": 0.3902,
+  "ci_high": 1.2099,
+  "cagr": 0.0938,
+  "max_drawdown": -0.3458,
+  "n_trades": 1,
+  "h001_corr": -0.0127,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.465,
+    1.991,
+    0.91,
+    1.972,
+    1.136,
+    1.131
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA growth rate = GP/TA - GP/TA.shift(252). Change vs level (H239). Kogan et al. (2017) patent-value shock proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H428",
+  "name": "growth-reinvestment-quality",
+  "strategy_class": "GrowthReinvestmentQuality",
+  "family": "innovation proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8414,
+  "ci_low": 0.4449,
+  "ci_high": 1.2497,
+  "cagr": 0.1057,
+  "max_drawdown": -0.3531,
+  "n_trades": 1,
+  "h001_corr": -0.0173,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.732,
+    2.126,
+    0.788,
+    1.793,
+    1.117,
+    1.193
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(GP/TA) + z(rev growth) + z(BE growth). 3-factor composite. Eberhart et al. (2004) disciplined reinvestment proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H426",
+  "name": "asset-efficiency-growth",
+  "strategy_class": "AssetEfficiencyGrowth",
+  "family": "innovation proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.78,
+  "ci_low": 0.3723,
+  "ci_high": 1.193,
+  "cagr": 0.0891,
+  "max_drawdown": -0.3701,
+  "n_trades": 1,
+  "h001_corr": -0.0178,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.638,
+    2.09,
+    0.835,
+    1.685,
+    0.971,
+    1.125
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Revenue/TA YoY improvement = asset turnover growth. Long top-20% quarterly. Innovation efficiency proxy (Hirshleifer et al. 2013).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

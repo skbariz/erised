@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H430",
+  "name": "operating-leverage-improvement",
+  "strategy_class": "OperatingLeverageImprovement",
+  "family": "innovation proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7216,
+  "ci_low": 0.3134,
+  "ci_high": 1.1381,
+  "cagr": 0.0844,
+  "max_drawdown": -0.3759,
+  "n_trades": 1,
+  "h001_corr": -0.0162,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.372,
+    2.031,
+    0.771,
+    1.814,
+    1.08,
+    0.857
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/NI (where NI>0) YoY improvement. Rising ratio = operating leverage building. Long top-20% quarterly. Kogan et al. (2017) scalable growth proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

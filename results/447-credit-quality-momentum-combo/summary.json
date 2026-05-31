@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H447",
+  "name": "credit-quality-momentum-combo",
+  "strategy_class": "CreditQualityMomentumCombo",
+  "family": "Set6 meta-ensemble",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.9616,
+  "ci_low": 0.5576,
+  "ci_high": 1.3726,
+  "cagr": 0.1813,
+  "max_drawdown": -0.49,
+  "n_trades": 1,
+  "h001_corr": 0.0011,
+  "fold_sharpes": [
+    1.4,
+    0.648,
+    1.177,
+    1.847,
+    1.409,
+    -0.11,
+    0.784,
+    2.026,
+    0.911,
+    1.774,
+    0.956,
+    1.101
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "4-factor z-score: z(GP/TA) + z(-LTD/TA) + z(OCF/TA) + z(6m momentum). Credit + quality + momentum unified. Monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

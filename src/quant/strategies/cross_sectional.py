@@ -11983,3 +11983,809 @@ class ExecutionOptimizedComposite(CrossSectionalStrategy):
         row_sum = combined.sum(axis=1).replace(0, np.nan)
         daily_w = combined.div(row_sum, axis=0).fillna(0.0)
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H401–H415: Earnings Quality, Disclosure Quality & Tone Proxies
+# ===========================================================================
+
+
+# ---------------------------------------------------------------------------
+# H401: AccrualQualityPort  (Bernard & Thomas PEAD proxy via accruals)
+# ---------------------------------------------------------------------------
+
+
+class AccrualQualityPort(CrossSectionalStrategy):
+    """H401: Long low-accrual stocks — cash earnings dominance as PEAD proxy.
+
+    Accruals = (NI − OCF) / avg_TA. Low accruals = high-quality cash earnings.
+    Market overvalues accrual-heavy earnings; corrects when cash reality hits
+    (Sloan 1996; proxy for Bernard & Thomas delayed price response).
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "accrual_quality_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta = ((ta + ta.shift(252)) / 2).where(ta > 0)
+        # Accruals: lower is better (ascending=True in selection)
+        accruals = ((ni - ocf) / avg_ta).clip(-1.0, 1.0)
+        # ascending=True → smallest accruals rank first (best)
+        daily_w = _sector_neutral_weights(
+            accruals, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H402: EarningsMomentumQuality  (confirmed earnings growth — PEAD proxy)
+# ---------------------------------------------------------------------------
+
+
+class EarningsMomentumQuality(CrossSectionalStrategy):
+    """H402: Long top-quintile stocks by NI growth confirmed by OCF growth.
+
+    Both NI/TA YoY growth and OCF/TA YoY growth positive and growing together
+    signals genuine earnings quality (not accrual-inflated). Proxy for PEAD:
+    stocks with persistent positive earnings surprises continue to outperform.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "earnings_momentum_quality"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ocf_ta = (ocf / ta_safe).clip(-2.0, 5.0)
+        ni_growth = ni_ta - ni_ta.shift(self.lookback)
+        ocf_growth = ocf_ta - ocf_ta.shift(self.lookback)
+        composite = _cs_zscore(ni_growth).fillna(0.0) + _cs_zscore(ocf_growth).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H403: TorpedoRiskAvoid  (Skinner & Sloan: high P/B + declining NI → avoid)
+# ---------------------------------------------------------------------------
+
+
+class TorpedoRiskAvoid(CrossSectionalStrategy):
+    """H403: Long high book/market + positive NI growth (torpedo-safe zone).
+
+    Skinner & Sloan (2002): expensive growth stocks (low B/M) punished severely
+    on negative earnings surprise. We avoid the torpedo quadrant (low B/M + NI
+    declining) and concentrate on cheap/quality names. Market cap = price × shares.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "torpedo_risk_avoid"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        # Market cap proxy; shares in millions, price in dollars
+        mktcap = (prices_panel * shares.clip(lower=0.0)).replace(0, np.nan)
+        bm_ratio = (be / mktcap).clip(0.0, 10.0)
+        # NI growth (YoY change in NI/TA)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growth = ni_ta - ni_ta.shift(self.lookback)
+        ni_growth_positive = (ni_growth > 0).astype(float)
+        # Torpedo-safe score: high B/M × positive NI growth
+        torpedo_safe = _cs_zscore(bm_ratio).fillna(0.0) + _cs_zscore(ni_growth_positive).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            torpedo_safe, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H404: RevenueEarningsAcceleration  (2nd derivative PEAD proxy)
+# ---------------------------------------------------------------------------
+
+
+class RevenueEarningsAcceleration(CrossSectionalStrategy):
+    """H404: Long top-quintile by simultaneous revenue AND NI growth acceleration.
+
+    2nd derivative signal: Δ(revenue growth YoY) + Δ(NI growth YoY) > 0.
+    Acceleration captures regime shift from poor to improving earnings — the
+    setup for a positive surprise that hasn't been priced yet (PEAD proxy).
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "revenue_earnings_acceleration"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        annual_lag: int = 252,
+        accel_lag: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.revenue = revenue
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.annual_lag = annual_lag
+        self.accel_lag = accel_lag
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        rev_safe = rev.where(rev.shift(self.annual_lag) > 0)
+        # YoY growth rates
+        rev_growth = (rev - rev.shift(self.annual_lag)) / rev.shift(self.annual_lag).abs().clip(lower=1.0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growth = ni_ta - ni_ta.shift(self.annual_lag)
+        # 2nd derivative: acceleration vs one quarter ago
+        rev_accel = rev_growth - rev_growth.shift(self.accel_lag)
+        ni_accel = ni_growth - ni_growth.shift(self.accel_lag)
+        composite = _cs_zscore(rev_accel.clip(-2.0, 2.0)).fillna(0.0) + _cs_zscore(ni_accel.clip(-2.0, 2.0)).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H405: CashEarningsPersistence  (So 2013: analyst error proxy via OCF dominance)
+# ---------------------------------------------------------------------------
+
+
+class CashEarningsPersistence(CrossSectionalStrategy):
+    """H405: Long stocks with persistently cash-dominant earnings.
+
+    Rolling fraction of periods where OCF > 0 AND NI > 0 AND OCF/NI > 0.8.
+    High persistence = analyst error risk is low → less torpedo risk → better returns.
+    Proxy for So (2013): predictable analyst forecast errors from historical earnings patterns.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "cash_earnings_persistence"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 504,
+        ocf_ni_threshold: float = 0.8,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.window = window
+        self.ocf_ni_threshold = ocf_ni_threshold
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        # Indicator: OCF > 0, NI > 0, and OCF/NI >= threshold
+        ni_pos = ni > 0
+        ocf_pos = ocf > 0
+        ocf_ni_ratio = (ocf / ni.replace(0, np.nan)).clip(0.0, 10.0)
+        cash_dominant = (ni_pos & ocf_pos & (ocf_ni_ratio >= self.ocf_ni_threshold)).astype(float)
+        # Rolling fraction of qualifying periods
+        persistence = cash_dominant.rolling(self.window, min_periods=self.window // 2).mean()
+        daily_w = _sector_neutral_weights(
+            persistence, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H406: EarningsPersistencePort  (Li 2008 readability → stable NI proxy)
+# ---------------------------------------------------------------------------
+
+
+class EarningsPersistencePort(CrossSectionalStrategy):
+    """H406: Long stocks with most-stable NI/TA over 2 years (low earnings variance).
+
+    Stability = 1 / rolling_std(NI/TA, 2 years). Stable earnings = higher-quality
+    disclosure (Li 2008 readability proxy) → better future earnings persistence.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "earnings_persistence_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        rolling_std = ni_ta.rolling(self.window, min_periods=self.window // 4).std()
+        # Stability = inverse of variance; low std = high stability
+        stability = 1.0 / rolling_std.replace(0, np.nan).clip(lower=1e-6)
+        daily_w = _sector_neutral_weights(
+            stability, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H407: CashFlowReliabilityPort  (Li 2010 FLS durability proxy)
+# ---------------------------------------------------------------------------
+
+
+class CashFlowReliabilityPort(CrossSectionalStrategy):
+    """H407: Long stocks where OCF consistently exceeds NI over 2 years.
+
+    Rolling fraction of periods with OCF > NI. High fraction = cash earnings
+    reliably dominate accruals → durable financial quality. Proxy for Li (2010):
+    positive forward-looking tone firms have more durable earnings.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "cash_flow_reliability_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ocf_exceeds_ni = (ocf > ni).astype(float)
+        reliability = ocf_exceeds_ni.rolling(self.window, min_periods=self.window // 4).mean()
+        daily_w = _sector_neutral_weights(
+            reliability, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H408: BookValueGrowthPort  (retained earnings quality / FLS proxy)
+# ---------------------------------------------------------------------------
+
+
+class BookValueGrowthPort(CrossSectionalStrategy):
+    """H408: Long top-quintile by annual book equity growth rate.
+
+    Book equity growth = book_equity / book_equity.shift(252) - 1. Growing book
+    equity = retained earnings quality = management reinvesting profits confidently.
+    Proxy for Li (2010) forward-looking positive tone.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "book_value_growth_port"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        be_lag = be.shift(self.lookback)
+        be_safe_lag = be_lag.where(be_lag.abs() > 0)
+        be_growth = ((be - be_lag) / be_safe_lag.abs()).clip(-1.0, 5.0)
+        daily_w = _sector_neutral_weights(
+            be_growth, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H409: BalanceSheetStrengthPort  (composite BS improvement — FLS trajectory proxy)
+# ---------------------------------------------------------------------------
+
+
+class BalanceSheetStrengthPort(CrossSectionalStrategy):
+    """H409: Long top-quintile by composite balance sheet improvement.
+
+    Z-score composite of: (1) debt/assets declining YoY, (2) OCF/TA improving YoY,
+    (3) book equity/TA improving YoY. All three signals together proxy for positive
+    disclosure trajectory (Li 2010 forward-looking statements content).
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "balance_sheet_strength_port"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.book_equity = book_equity
+        self.long_term_debt = long_term_debt
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        # Ratios
+        debt_ratio = (ltd / ta_safe).clip(0.0, 5.0)
+        ocf_ratio = (ocf / ta_safe).clip(-2.0, 5.0)
+        be_ratio = (be / ta_safe).clip(-1.0, 5.0)
+        # YoY improvements
+        debt_improve = -(debt_ratio - debt_ratio.shift(self.lookback))   # negative = improving
+        ocf_improve = ocf_ratio - ocf_ratio.shift(self.lookback)
+        be_improve = be_ratio - be_ratio.shift(self.lookback)
+        composite = (
+            _cs_zscore(debt_improve).fillna(0.0)
+            + _cs_zscore(ocf_improve).fillna(0.0)
+            + _cs_zscore(be_improve).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H410: WorkingCapitalHealthPort  (WC efficiency improvement — operational signal)
+# ---------------------------------------------------------------------------
+
+
+class WorkingCapitalHealthPort(CrossSectionalStrategy):
+    """H410: Long top-quintile by improving (CA − CL) / Revenue ratio.
+
+    Working capital efficiency = (CA − CL) / Revenue. YoY improvement = better
+    operational discipline and cash conversion. Proxy for Li (2010) FLS: improving
+    operational signals correlate with positive forward-looking tone.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "working_capital_health_port"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.revenue = revenue
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        wc = ca - cl
+        wc_ratio = (wc / rev_safe).clip(-2.0, 5.0)
+        wc_improve = wc_ratio - wc_ratio.shift(self.lookback)
+        daily_w = _sector_neutral_weights(
+            wc_improve, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H411: ConsistentGrowthStreak  (Mayew proxy: persistent positive growth streak)
+# ---------------------------------------------------------------------------
+
+
+class ConsistentGrowthStreak(CrossSectionalStrategy):
+    """H411: Long stocks with persistent simultaneous revenue + NI growth.
+
+    Rolling fraction of days over 2 years where YoY revenue growth > 0 AND
+    YoY NI growth > 0. High fraction = persistent positive management tone proxy
+    (Mayew & Venkatachalam 2012): confident management → better future performance.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "consistent_growth_streak"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        growth_lookback: int = 252,
+        streak_window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.revenue = revenue
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.growth_lookback = growth_lookback
+        self.streak_window = streak_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        rev_growth_pos = (rev > rev.shift(self.growth_lookback)).astype(float)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growth_pos = (ni_ta > ni_ta.shift(self.growth_lookback)).astype(float)
+        both_growing = rev_growth_pos * ni_growth_pos
+        streak = both_growing.rolling(self.streak_window, min_periods=self.streak_window // 4).mean()
+        daily_w = _sector_neutral_weights(
+            streak, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H412: FundamentalDivergenceAvoid  (torpedo risk: price up / fundamentals down)
+# ---------------------------------------------------------------------------
+
+
+class FundamentalDivergenceAvoid(CrossSectionalStrategy):
+    """H412: Long stocks where fundamentals outpace price; avoid the reverse.
+
+    Divergence score = z(NI/TA YoY growth) − z(6m price return). Positive divergence
+    = fundamentals running ahead of price (value opportunity). Negative divergence
+    = price running ahead of fundamentals (torpedo risk). Monthly rebalance to capture
+    price dynamics. Sector-neutral top 20%.
+    """
+
+    name = "fundamental_divergence_avoid"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        fundamental_lookback: int = 252,
+        price_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.fundamental_lookback = fundamental_lookback
+        self.price_lookback = price_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growth = (ni_ta - ni_ta.shift(self.fundamental_lookback)).clip(-2.0, 5.0)
+        price_ret = prices_panel / prices_panel.shift(self.price_lookback) - 1
+        divergence = _cs_zscore(ni_growth).fillna(0.0) - _cs_zscore(price_ret).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            divergence, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H413: MarginExpansionPort  (positive management tone proxy via margin dynamics)
+# ---------------------------------------------------------------------------
+
+
+class MarginExpansionPort(CrossSectionalStrategy):
+    """H413: Long top-quintile by gross margin expansion + revenue growth confirm.
+
+    GP/Revenue YoY change (margin expansion) with revenue growth > 0 filter.
+    Expanding margins with growing revenue = pricing power + competitive advantage.
+    Mayew & Venkatachalam proxy: confident management → improving margins.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "margin_expansion_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        margin_expansion = gp_margin - gp_margin.shift(self.lookback)
+        rev_growth_pos = (rev > rev.shift(self.lookback)).astype(float)
+        # Only consider stocks with positive revenue growth
+        score = margin_expansion.where(rev_growth_pos.astype(bool))
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H414: EarningsVariabilityAvoid  (low NI volatility = low uncertainty proxy)
+# ---------------------------------------------------------------------------
+
+
+class EarningsVariabilityAvoid(CrossSectionalStrategy):
+    """H414: Long stocks with lowest NI/TA rolling variance (stable earnings).
+
+    Low NI volatility = predictable, stable earnings environment. Proxy for
+    Mayew & Venkatachalam (2012): uncertain management (high vocal stress) predicts
+    weaker future performance. Low NI variance = low management uncertainty proxy.
+    Sector-neutral bottom-20%-variance (ascending=True), quarterly rebalance.
+    """
+
+    name = "earnings_variability_avoid"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        variability = ni_ta.rolling(self.window, min_periods=self.window // 4).std()
+        # ascending=True: lowest variability gets selected (best quality)
+        daily_w = _sector_neutral_weights(
+            variability, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H415: StableMarginMomentum  (stable business model + price confirmation)
+# ---------------------------------------------------------------------------
+
+
+class StableMarginMomentum(CrossSectionalStrategy):
+    """H415: Composite of low GP/Revenue volatility + 6m price momentum.
+
+    Stable gross margins (low GP/Revenue rolling std) combined with positive
+    6m price momentum. Stocks with both confirmed price trend AND stable business
+    model have double confirmation. Proxy for credible, consistent management.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "stable_margin_momentum"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        margin_window: int = 504,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.margin_window = margin_window
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        margin_std = gp_margin.rolling(self.margin_window, min_periods=self.margin_window // 4).std()
+        # Low margin std = stable; negate so high stability = high score
+        margin_stability = -margin_std
+        # 6m momentum
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        composite = _cs_zscore(margin_stability).fillna(0.0) + _cs_zscore(momentum).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

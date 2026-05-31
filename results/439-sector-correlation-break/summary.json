@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H439",
+  "name": "sector-correlation-break",
+  "strategy_class": "SectorCorrelationBreak",
+  "family": "ETF crowding proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8838,
+  "ci_low": 0.4717,
+  "ci_high": 1.2957,
+  "cagr": 0.1099,
+  "max_drawdown": -0.3414,
+  "n_trades": 1,
+  "h001_corr": -0.0169,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.751,
+    2.06,
+    1.024,
+    2.041,
+    1.218,
+    1.18
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality positions scaled 50% when within-sector 63d corr > 75th pctile. Israeli et al. (2017) synchronicity as ETF crowding proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "corr_window": 63,
+    "high_corr_scale": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

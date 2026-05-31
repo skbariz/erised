@@ -1173,16 +1173,23 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 
 | Batch | H# | Theme | Papers | Status |
 |-------|-----|-------|--------|--------|
-| 1 | H401–H405 | Earnings Quality & PEAD Proxies | Bernard & Thomas, Skinner & Sloan, So | Implemented — pending run |
-| 2 | H406–H410 | Financial Disclosure Quality | Li (2010), Li (2008) | Implemented — pending run |
-| 3 | H411–H415 | Sentiment & Tone Proxies | Mayew & Venkatachalam | Implemented — pending run |
-| 4 | H416–H420 | Product-Market & Competitive Position | Hoberg & Phillips x2 | Planned |
-| 5 | H421–H425 | Macro Sector & Policy Exposure | Cohen, Diether & Malloy | Planned |
-| 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | Planned |
+| 1 | H401–H405 | Earnings Quality & PEAD Proxies | Bernard & Thomas, Skinner & Sloan, So | **5/5 KEEP** (0.705–0.816) |
+| 2 | H406–H410 | Financial Disclosure Quality | Li (2010), Li (2008) | **5/5 KEEP** (0.640–0.796) |
+| 3 | H411–H415 | Sentiment & Tone Proxies | Mayew & Venkatachalam | **5/5 KEEP** (0.641–0.987) ★H412,H415 |
+| 4 | H416–H420 | Product-Market & Competitive Position | Hoberg & Phillips x2 | **5/5 KEEP** (0.749–0.861) |
+| 5 | H421–H425 | Macro Sector & Policy Exposure | Cohen, Diether & Malloy | **0/5 KEEP** (all killed: H001 corr +0.51-0.64) |
+| 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | In progress |
 | 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | Planned |
 | 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | Planned |
 | 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | Planned |
 | 10 | H446–H450 | Meta-Ensemble & Terminal MDR | All papers | Planned |
+
+### Key Set 6 findings so far (H401-H425)
+- **CS strategies: 20/20 KEEP** (Batches 1-4 perfect). H001 corr uniformly near-zero (-0.010 to -0.020) — genuinely uncorrelated with trend signals.
+- **H412 FundamentalDivergenceAvoid: Sharpe 0.961**, H001 corr -0.001, active ALL 12 folds. Near-zero correlation with all ETF strategies — highest-value diversifier found so far.
+- **H415 StableMarginMomentum: Sharpe 0.987**, H001 corr +0.002, active ALL 12 folds. Price + stable fundamentals double confirmation.
+- **AA sector-tilt strategies (Batch 5): 0/5 KEEP** — same lesson as prior sets: ETF combinations correlated with H001 at +0.51-0.64. Do not attempt more AA sector-rotation ideas.
+- **EDGAR data gap**: CS strategies only active from fold 6 (2010+) except H412 and H415 which use price data too.
 
 ### Set 6 Key Design Notes
 - All signals use available Compustat fundamentals + ETF prices only (no IBES, 13F, patents, or ETF holdings)

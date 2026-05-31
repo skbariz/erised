@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H443",
+  "name": "dedicated-owner-proxy",
+  "strategy_class": "DedicatedOwnerProxy",
+  "family": "institutional horizon proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.818,
+  "ci_low": 0.4116,
+  "ci_high": 1.2183,
+  "cagr": 0.0993,
+  "max_drawdown": -0.3651,
+  "n_trades": 1,
+  "h001_corr": -0.015,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.652,
+    0.775,
+    2.019,
+    0.925,
+    1.797,
+    1.094,
+    1.083
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(-shares_growth) + z(NI/TA YoY) + z(GP/TA level). Buyback + earnings improvement + quality = dedicated institution selection criteria.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H444",
+  "name": "smart-accumulation-proxy",
+  "strategy_class": "SmartAccumulationProxy",
+  "family": "institutional horizon proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.6503,
+  "ci_low": 0.2482,
+  "ci_high": 1.0595,
+  "cagr": 0.08,
+  "max_drawdown": -0.3288,
+  "n_trades": 1,
+  "h001_corr": -0.0114,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.075,
+    1.634,
+    1.049,
+    0.99,
+    0.606,
+    1.417
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Triple filter: price > 200d MA AND NI/TA > NI/TA.shift(252) AND GP/TA > GP/TA.shift(252). Yan & Zhang (2009) smart money signal.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "ma_window": 200,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

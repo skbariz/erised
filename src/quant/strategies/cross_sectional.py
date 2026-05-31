@@ -13282,3 +13282,1051 @@ class OperatingLeverageImprovement(CrossSectionalStrategy):
             op_lev_change, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H431–H435: Credit Risk & Distance-to-Default
+# ===========================================================================
+
+
+class MertonD2DPort(CrossSectionalStrategy):
+    """H431: Simplified distance-to-default proxy from available fundamentals.
+
+    D2D proxy = (BE / (BE + LTD)) / realized_vol_21d.
+    High equity fraction + low volatility = high D2D = far from default.
+    Merton (1974): equity is call option; D2D = strikes distance.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "merton_d2d_port"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        sectors: pd.Series,
+        vol_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.book_equity = book_equity
+        self.long_term_debt = long_term_debt
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        total_cap = (be + ltd.clip(lower=0.0)).replace(0, np.nan)
+        equity_fraction = (be / total_cap).clip(0.0, 1.0)
+        realized_vol = (
+            prices_panel.pct_change()
+            .rolling(self.vol_window, min_periods=5)
+            .std()
+            .shift(1)
+            .replace(0, np.nan)
+        )
+        d2d = (equity_fraction / realized_vol).clip(0.0, 100.0)
+        daily_w = _sector_neutral_weights(
+            d2d, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class LeverageAdjustedMomentum(CrossSectionalStrategy):
+    """H432: 6m price momentum filtered to low-leverage names (LTD/TA < median).
+
+    Avramov et al. (2007): momentum profits stronger in high-quality firms.
+    Conditioning on leverage removes distress tail risk from momentum signal.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "leverage_adjusted_momentum"
+
+    def __init__(
+        self,
+        long_term_debt: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.long_term_debt = long_term_debt
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        leverage = (ltd / ta_safe).clip(0.0, 5.0)
+        mem_f = membership.reindex_like(leverage).fillna(False)
+        leverage_median = leverage.where(mem_f).median(axis=1)
+        low_leverage = (leverage.le(leverage_median, axis=0)).fillna(False)
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        quality_mem = membership & low_leverage
+        daily_w = _sector_neutral_weights(
+            momentum, quality_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CreditHealthQuality(CrossSectionalStrategy):
+    """H433: Credit-healthy quality composite: GP/TA + low leverage + OCF/TA.
+
+    z(GP/TA) + z(-LTD/TA) + z(OCF/TA). Credit-healthy quality portfolio.
+    Vassalou & Xing (2004): default risk must be handled with controls.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "credit_health_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.long_term_debt = long_term_debt
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        ltd_ta = (ltd / ta_safe).clip(0.0, 5.0)
+        ocf_ta = (ocf / ta_safe).clip(-2.0, 5.0)
+        composite = (
+            _cs_zscore(gp_ta).fillna(0.0)
+            + _cs_zscore(-ltd_ta).fillna(0.0)
+            + _cs_zscore(ocf_ta).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class FinancialFragilityAvoid(CrossSectionalStrategy):
+    """H434: Altman Z-score proxy from available Compustat fundamentals.
+
+    Z_proxy = 1.2*(CA-CL)/TA + 1.4*(NI/TA rolling mean) + 3.3*(GP/TA)
+              + 0.6*(BE/max(LTD,1)) + 1.0*(Rev/TA)
+    Long top 20% most financially sound (highest Z proxy).
+    Kisgen (2006): firms near rating thresholds behave differently.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "financial_fragility_avoid"
+
+    def __init__(
+        self,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        ni_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.gross_profit = gross_profit
+        self.book_equity = book_equity
+        self.long_term_debt = long_term_debt
+        self.revenue = revenue
+        self.sectors = sectors
+        self.ni_window = ni_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ltd_safe = ltd.where(ltd > 0).fillna(1.0)
+        # Altman Z components (simplified with available data)
+        z1 = ((ca - cl) / ta_safe).clip(-2.0, 2.0)
+        z2 = (ni / ta_safe).rolling(self.ni_window, min_periods=63).mean().clip(-2.0, 2.0)
+        z3 = (gp / ta_safe).clip(0.0, 5.0)
+        z4 = (be / ltd_safe).clip(0.0, 20.0)
+        z5 = (rev / ta_safe).clip(0.0, 10.0)
+        z_proxy = 1.2 * z1 + 1.4 * z2 + 3.3 * z3 + 0.6 * z4 + 1.0 * z5
+        daily_w = _sector_neutral_weights(
+            z_proxy, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CreditConditionedQualityPort(CrossSectionalStrategy):
+    """H435: GP/TA quality restricted to credit-healthy subsample.
+
+    Membership filter: LTD/TA < sector median AND OCF > 0.
+    Applies GP/TA quality signal only to financially healthy names.
+    Vassalou & Xing (2004): quality signals must control for default risk.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "credit_conditioned_quality_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.long_term_debt = long_term_debt
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        leverage = (ltd / ta_safe).clip(0.0, 5.0)
+        mem_f = membership.reindex_like(leverage).fillna(False)
+        lev_median = leverage.where(mem_f).median(axis=1)
+        low_lev = leverage.le(lev_median, axis=0).fillna(False)
+        ocf_pos = (ocf > 0).fillna(False)
+        credit_healthy = membership & low_lev & ocf_pos
+        daily_w = _sector_neutral_weights(
+            gp_ta, credit_healthy, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H436–H440: ETF Crowding & Passive Ownership Proxies
+# ===========================================================================
+
+
+class SectorEWDivergence(CrossSectionalStrategy):
+    """H437: Long sector-relative 5d reversal when fundamentals are positive.
+
+    Stocks that underperformed their sector equal-weight return over 5 days
+    (ETF-flow-driven dislocation) and have positive NI growth should mean-revert.
+    Israeli et al. (2017): ETF flows create non-fundamental dislocations.
+    Quality filter: NI/TA YoY growth > 0. Sector-neutral top 20%, weekly rebalance.
+    """
+
+    name = "sector_ew_divergence"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        reversal_window: int = 5,
+        ni_lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 5,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.reversal_window = reversal_window
+        self.ni_lookback = ni_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growing = (ni_ta > ni_ta.shift(self.ni_lookback)).fillna(False)
+        ret_5d = prices_panel.pct_change(self.reversal_window)
+        # Sector-relative 5d return: stock return minus sector equal-weight
+        mem_f = membership.reindex_like(ret_5d).fillna(False)
+        sector_rel = pd.DataFrame(0.0, index=ret_5d.index, columns=ret_5d.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in ret_5d.columns]
+            if not tickers:
+                continue
+            sec_r = ret_5d[tickers].where(mem_f[tickers])
+            sec_mean = sec_r.mean(axis=1)
+            sector_rel[tickers] = sec_r.sub(sec_mean, axis=0).fillna(0.0).values
+        # Reverse: long most negative sector-relative return (biggest laggards)
+        score = (-sector_rel).where(ni_growing, other=np.nan)
+        daily_w = _sector_neutral_weights(
+            score, membership & ni_growing, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class MarketCapConcentrationAvoid(CrossSectionalStrategy):
+    """H436: GP/TA quality in mid-cap S&P 500 names (exclude mega-cap passive-crowded).
+
+    Market cap = prices * shares. Within each sector, exclude top cap_exclude_pct
+    by market cap (most passive-owned) and apply GP/TA quality to remainder.
+    Ben-David et al. (2018): high ETF ownership -> higher vol, less idiosyncratic signal.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "market_cap_concentration_avoid"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        cap_exclude_pct: float = 0.10,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.cap_exclude_pct = cap_exclude_pct
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        mktcap = (prices_panel * shares.clip(lower=0.0)).replace(0, np.nan)
+        mem_f = membership.reindex_like(mktcap).fillna(False)
+        # Exclude top cap_exclude_pct within each sector (mega-caps)
+        mega_cap = pd.DataFrame(False, index=prices_panel.index, columns=prices_panel.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            if not tickers:
+                continue
+            sec_cap = mktcap[tickers].where(mem_f[tickers])
+            n_mem = mem_f[tickers].sum(axis=1)
+            thresh = (n_mem * (1.0 - self.cap_exclude_pct)).clip(lower=1)
+            rank = sec_cap.rank(axis=1, ascending=True, na_option="keep")
+            mega_cap[tickers] = rank.gt(thresh, axis=0)
+        mid_cap_mem = membership & ~mega_cap
+        daily_w = _sector_neutral_weights(
+            gp_ta, mid_cap_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class InverseIndexWeightMomentum(CrossSectionalStrategy):
+    """H438: 6m momentum weighted inversely by market cap rank within sector.
+
+    Smaller S&P 500 names get larger positions (less passive-owned).
+    Ben-David et al. (2018): ETF-heavy names have less information advantage.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "inverse_index_weight_momentum"
+
+    def __init__(
+        self,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        mktcap = (prices_panel * shares.clip(lower=0.0)).replace(0, np.nan)
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        mem_f = membership.reindex_like(mktcap).fillna(False)
+        # Inverse cap rank score within sector
+        inv_cap = pd.DataFrame(0.0, index=prices_panel.index, columns=prices_panel.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            if not tickers:
+                continue
+            sec_cap = mktcap[tickers].where(mem_f[tickers])
+            n_mem = mem_f[tickers].sum(axis=1).replace(0, np.nan)
+            cap_rank = sec_cap.rank(axis=1, ascending=False, na_option="keep")
+            inv_cap[tickers] = (cap_rank / n_mem.values[:, None]).fillna(0.0)
+        # Score = momentum * inverse_cap_weight
+        score = momentum * inv_cap.where(inv_cap > 0, np.nan)
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SectorCorrelationBreak(CrossSectionalStrategy):
+    """H439: GP/TA quality with position sizing reduced when within-sector correlation spikes.
+
+    High rolling within-sector correlation = ETF arbitrage dominating = shrink positions.
+    Low correlation = stocks moving independently = full position.
+    Israeli et al. (2017): high return synchronicity = ETF crowding.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "sector_correlation_break"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        corr_window: int = 63,
+        high_corr_scale: float = 0.50,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.corr_window = corr_window
+        self.high_corr_scale = high_corr_scale
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        base_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        daily_rets = prices_panel.pct_change()
+        # Mean within-sector pairwise correlation per day
+        mem_f = membership.reindex_like(prices_panel).fillna(False)
+        sector_corr = pd.Series(0.0, index=prices_panel.index)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            if len(tickers) < 2:
+                continue
+            sec_ret = daily_rets[tickers].where(mem_f[tickers])
+            roll_corr = sec_ret.rolling(self.corr_window, min_periods=20).corr().groupby(level=0).mean().mean(axis=1)
+            sector_corr = sector_corr.add(roll_corr.reindex(prices_panel.index).fillna(0.0), fill_value=0.0)
+        # Normalize by n_sectors
+        n_sectors = len(self.sectors.dropna().unique())
+        mean_corr = (sector_corr / max(n_sectors, 1)).clip(0.0, 1.0)
+        # Scale factor: reduce to high_corr_scale when corr > 75th pctile
+        corr_thresh = mean_corr.rolling(252, min_periods=63).quantile(0.75)
+        high_corr_regime = mean_corr.gt(corr_thresh.fillna(1.0))
+        scale = pd.Series(1.0, index=prices_panel.index).where(~high_corr_regime, self.high_corr_scale)
+        scaled = base_w.mul(scale, axis=0)
+        row_sum = scaled.sum(axis=1).replace(0, np.nan)
+        rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
+        return _periodic_rebalance(rescaled, self.rebalance_period)
+
+
+class LowIndexBetaQuality(CrossSectionalStrategy):
+    """H440: GP/TA quality prioritized for low-beta (less passive-crowded) names.
+
+    Score = GP/TA * (1 / beta) where beta = rolling 252d market beta.
+    Low-beta S&P 500 names = less ETF-dominated = stronger fundamentals-to-price link.
+    Ben-David et al. (2018): ETF-heavy names have higher index beta.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "low_index_beta_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        spy_rets: pd.Series,
+        sectors: pd.Series,
+        beta_window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.spy_rets = spy_rets
+        self.sectors = sectors
+        self.beta_window = beta_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.beta_window // 2
+        cov = daily_rets.rolling(self.beta_window, min_periods=min_p).cov(spy)
+        var = spy.rolling(self.beta_window, min_periods=min_p).var()
+        beta = (cov / var.replace(0, np.nan)).clip(0.01, 5.0).shift(1)
+        # Low beta = high inv_beta weight bonus
+        inv_beta = (1.0 / beta).clip(0.0, 10.0)
+        score = gp_ta * inv_beta
+        daily_w = _sector_neutral_weights(
+            score, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H441–H445: Institutional Horizon Proxies
+# ===========================================================================
+
+
+class ShareholderAlignedPort(CrossSectionalStrategy):
+    """H441: Low dilution + positive OCF + 6m momentum = dedicated-holder proxy.
+
+    Shares YoY growth <= 0 (no dilution) AND OCF/TA > 0 AND 6m price > 0.
+    All three conditions. Rank qualifiers by GP/TA quality.
+    Yan & Zhang (2009): dedicated long-horizon institutions prefer these firms.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "shareholder_aligned_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.lookback = lookback
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        no_dilution = (shares <= shares.shift(self.lookback)).fillna(False)
+        ocf_pos = (ocf > 0).fillna(False)
+        mom_pos = (prices_panel > prices_panel.shift(self.mom_lookback)).fillna(False)
+        aligned_mem = membership & no_dilution & ocf_pos & mom_pos
+        daily_w = _sector_neutral_weights(
+            gp_ta, aligned_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class TransientOwnershipAvoid(CrossSectionalStrategy):
+    """H442: Avoid high revenue volatility + share issuance (transient ownership signal).
+
+    Filter: rolling std(rev growth) high AND shares YoY increasing -> avoid.
+    Bushee (1998): transient institutions pressure short-term EPS -> revenue instability.
+    Long survivors ranked by GP/TA quality. Sector-neutral top 20%, quarterly.
+    """
+
+    name = "transient_ownership_avoid"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        revenue: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        vol_window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.revenue = revenue
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.lookback = lookback
+        self.vol_window = vol_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        rev_safe = rev.where(rev.shift(self.lookback) > 0)
+        rev_growth = ((rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        rev_vol = rev_growth.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
+        # High revenue volatility: above cross-sectional median
+        mem_f = membership.reindex_like(rev_vol).fillna(False)
+        vol_median = rev_vol.where(mem_f).median(axis=1)
+        high_rev_vol = rev_vol.gt(vol_median, axis=0).fillna(False)
+        # Shares increasing (dilution)
+        share_diluting = (shares > shares.shift(self.lookback)).fillna(False)
+        transient_signal = high_rev_vol & share_diluting
+        safe_mem = membership & ~transient_signal
+        daily_w = _sector_neutral_weights(
+            gp_ta, safe_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class DedicatedOwnerProxy(CrossSectionalStrategy):
+    """H443: Consistent buyback + positive NI trend + GP/TA quality = dedicated-owner proxy.
+
+    z(-shares_growth) + z(NI/TA growth) + z(GP/TA level). Three-factor composite.
+    Yan & Zhang (2009): dedicated institutions accumulate in these firms.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "dedicated_owner_proxy"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growth = ni_ta - ni_ta.shift(self.lookback)
+        shares_lag = shares.shift(self.lookback)
+        shares_growth = ((shares - shares_lag) / shares_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        composite = (
+            _cs_zscore(-shares_growth).fillna(0.0)
+            + _cs_zscore(ni_growth).fillna(0.0)
+            + _cs_zscore(gp_ta).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SmartAccumulationProxy(CrossSectionalStrategy):
+    """H444: Price > 200d MA + NI/TA improving + GP/TA improving = smart accumulation.
+
+    All three conditions required. Rank qualifiers by composite improvement score.
+    Yan & Zhang (2009): short-term institutional accumulation predicts earnings surprises.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "smart_accumulation_proxy"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        ma_window: int = 200,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.sectors = sectors
+        self.ma_window = ma_window
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        price_ma = prices_panel.rolling(self.ma_window, min_periods=self.ma_window // 2).mean()
+        price_above_ma = (prices_panel > price_ma).fillna(False)
+        ni_improving = (ni_ta > ni_ta.shift(self.lookback)).fillna(False)
+        gp_ta_improving = (gp_ta > gp_ta.shift(self.lookback)).fillna(False)
+        accumulation_mem = membership & price_above_ma & ni_improving & gp_ta_improving
+        score = (
+            _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0)
+            + _cs_zscore(gp_ta - gp_ta.shift(self.lookback)).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            score, accumulation_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class OwnerMixQualityPort(CrossSectionalStrategy):
+    """H445: Low dilution + OCF reliability + book equity growth = owner mix quality.
+
+    z(-shares_growth) + z(OCF/NI fraction) + z(BE growth). Three-factor composite.
+    Bushee & Yan & Zhang: mix of owner horizons reflected in these fundamental signals.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "owner_mix_quality_port"
+
+    def __init__(
+        self,
+        book_equity: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        reliability_window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.book_equity = book_equity
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.lookback = lookback
+        self.reliability_window = reliability_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        be = _align_fund(self.book_equity, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        shares_lag = shares.shift(self.lookback)
+        shares_growth = ((shares - shares_lag) / shares_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        ocf_exceeds_ni = (ocf > ni).astype(float)
+        ocf_reliability = ocf_exceeds_ni.rolling(self.reliability_window, min_periods=self.reliability_window // 4).mean()
+        be_lag = be.shift(self.lookback)
+        be_growth = ((be - be_lag) / be_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        composite = (
+            _cs_zscore(-shares_growth).fillna(0.0)
+            + _cs_zscore(ocf_reliability).fillna(0.0)
+            + _cs_zscore(be_growth).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H446–H449: Meta-Ensemble Composites
+# ===========================================================================
+
+
+class EarningsQualityComposite(CrossSectionalStrategy):
+    """H448: Accruals + earnings momentum + cash persistence composite.
+
+    z(-accruals) + z(NI+OCF growth) + z(OCF dominance fraction).
+    Three PEAD-proxy signals in one composite. Pure earnings quality.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "earnings_quality_composite"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        persistence_window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.persistence_window = persistence_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        avg_ta = ((ta + ta.shift(self.lookback)) / 2).where(ta > 0)
+        # Accruals (low = high quality)
+        accruals = ((ni - ocf) / avg_ta).clip(-1.0, 1.0)
+        # Earnings + OCF momentum
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ocf_ta = (ocf / ta_safe).clip(-2.0, 5.0)
+        earn_mom = _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0) + \
+                   _cs_zscore(ocf_ta - ocf_ta.shift(self.lookback)).fillna(0.0)
+        # OCF dominance fraction
+        ocf_dom = (ocf > ni).astype(float).rolling(self.persistence_window, min_periods=self.persistence_window // 4).mean()
+        composite = _cs_zscore(-accruals).fillna(0.0) + earn_mom + _cs_zscore(ocf_dom).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CreditQualityMomentumCombo(CrossSectionalStrategy):
+    """H447: Credit health + quality + leverage-adjusted momentum composite.
+
+    z(GP/TA) + z(-LTD/TA) + z(OCF/TA) + z(6m mom where low leverage).
+    Credit risk + quality + momentum in one composite. Sector-neutral top 20%.
+    Vassalou & Xing (2004) + Avramov et al. (2007) combined signal.
+    """
+
+    name = "credit_quality_momentum_combo"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.long_term_debt = long_term_debt
+        self.operating_cf = operating_cf
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        ltd_ta = (ltd / ta_safe).clip(0.0, 5.0)
+        ocf_ta = (ocf / ta_safe).clip(-2.0, 5.0)
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        composite = (
+            _cs_zscore(gp_ta).fillna(0.0)
+            + _cs_zscore(-ltd_ta).fillna(0.0)
+            + _cs_zscore(ocf_ta).fillna(0.0)
+            + _cs_zscore(momentum).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class Set6FundamentalQualityBlend(CrossSectionalStrategy):
+    """H449: Balance sheet strength + Altman Z proxy + shareholder alignment composite.
+
+    z(BS improvement) + z(Altman Z proxy) + z(low dilution + OCF).
+    Multi-dimensional fundamental quality across all three Set 6 quality themes.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "set6_fundamental_quality_blend"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        net_income: pd.DataFrame,
+        operating_cf: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        long_term_debt: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        revenue: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.net_income = net_income
+        self.operating_cf = operating_cf
+        self.book_equity = book_equity
+        self.long_term_debt = long_term_debt
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.revenue = revenue
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ltd = _align_fund(self.long_term_debt, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        cl = _align_fund(self.current_liabilities, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ltd_safe = ltd.where(ltd > 0).fillna(1.0)
+        # Balance sheet improvement (like H409)
+        debt_improve = -(ltd / ta_safe - (ltd / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
+        ocf_improve = (ocf / ta_safe - (ocf / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
+        be_improve = (be / ta_safe - (be / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
+        bs_score = _cs_zscore(debt_improve).fillna(0.0) + _cs_zscore(ocf_improve).fillna(0.0) + _cs_zscore(be_improve).fillna(0.0)
+        # Altman Z proxy (like H434)
+        ni_mean = (ni / ta_safe).rolling(self.lookback, min_periods=63).mean().clip(-2.0, 2.0)
+        z_proxy = 1.2 * ((ca - cl) / ta_safe).clip(-2.0, 2.0) + 1.4 * ni_mean + 3.3 * (gp / ta_safe).clip(0.0, 5.0) + 0.6 * (be / ltd_safe).clip(0.0, 20.0) + 1.0 * (rev / ta_safe).clip(0.0, 10.0)
+        # Shareholder alignment (like H441 simplified)
+        no_dilution = (shares <= shares.shift(self.lookback)).fillna(False).astype(float)
+        ocf_pos = (ocf > 0).fillna(False).astype(float)
+        alignment_score = _cs_zscore(no_dilution + ocf_pos).fillna(0.0)
+        composite = _cs_zscore(bs_score).fillna(0.0) + _cs_zscore(z_proxy).fillna(0.0) + alignment_score
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

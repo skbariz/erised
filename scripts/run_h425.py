@@ -1,6 +1,6 @@
-"""H425: MacroRegimeSectorBlend -- 3-signal composite macro regime → sector blended allocation.
+﻿"""H425: MacroRegimeSectorBlend -- 3-signal composite macro regime â†’ sector blended allocation.
 
-Signals: VIX<25, TLT>63dMA, HYG improving. 3 bullish→80/20; 2→55/25/10/10; 0-1→30/40/15/15.
+Signals: VIX<25, TLT>63dMA, HYG improving. 3 bullish->80/20; 2->55/25/10/10; 0-1->30/40/15/15.
 
 Run: uv run python scripts/run_h425.py
 """
@@ -51,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

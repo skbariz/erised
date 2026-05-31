@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H418",
+  "name": "peer-group-momentum",
+  "strategy_class": "PeerGroupMomentum",
+  "family": "product-market proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7485,
+  "ci_low": 0.3434,
+  "ci_high": 1.1571,
+  "cagr": 0.0895,
+  "max_drawdown": -0.3892,
+  "n_trades": 1,
+  "h001_corr": -0.0136,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.512,
+    1.779,
+    1.146,
+    1.679,
+    0.986,
+    0.931
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sector-relative 6m momentum filtered to NI/TA growing stocks. Monthly rebalance. Peer information spillover proxy (Hoberg & Phillips 2016).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "mom_lookback": 126,
+    "ni_lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

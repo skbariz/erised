@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H421",
+  "name": "regulated-sector-timing",
+  "strategy_class": "RegulatedSectorTiming",
+  "family": "macro sector proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.3473,
+  "ci_low": -0.037,
+  "ci_high": 0.7465,
+  "cagr": 0.0347,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5102,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.433,
+    0.836,
+    0.664,
+    0.915,
+    -0.049,
+    0.999,
+    1.768,
+    0.647,
+    0.832,
+    -0.005
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + TLT>200dMA gate reduces SPY 15%, adds 7.5% XLP + 7.5% XLU. Rate-falling regime benefits regulated defensives (Cohen et al. 2013 policy proxy).",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "tlt_ma": 200,
+    "tilt_pct": 0.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

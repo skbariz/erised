@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H425",
+  "name": "macro-regime-sector-blend",
+  "strategy_class": "MacroRegimeSectorBlend",
+  "family": "macro sector proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.4478,
+  "ci_low": 0.0614,
+  "ci_high": 0.8397,
+  "cagr": 0.0499,
+  "max_drawdown": -0.6027,
+  "n_trades": 588,
+  "h001_corr": 0.6412,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.758,
+    0.922,
+    0.923,
+    1.08,
+    -0.053,
+    1.274,
+    1.736,
+    0.743,
+    0.816,
+    -0.204
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "3 signals: VIX<25, TLT>63dMA, HYG improving. n_bull=3: 80/20; n=2: 55/25/10/10; n<=1: 30/40/15/15 (SPY/TLT/XLP/XLU).",
+  "canonical_params": {
+    "vix_threshold": 25.0,
+    "tlt_ma": 63,
+    "credit_lookback": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

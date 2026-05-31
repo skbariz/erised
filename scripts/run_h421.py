@@ -1,4 +1,4 @@
-"""H421: RegulatedSectorTiming -- H021 + TLT trend gate → XLP/XLU defensive tilt.
+﻿"""H421: RegulatedSectorTiming -- H021 + TLT trend gate â†’ XLP/XLU defensive tilt.
 
 When TLT > 200d MA (rates falling): reduce SPY by 15%, split into XLP + XLU.
 Cohen, Diether & Malloy (2013): policy events benefit regulated defensive sectors.
@@ -19,7 +19,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H421: RegulatedSectorTiming (TLT trend → XLP+XLU tilt)\n{SEP}")
+    print(f"H421: RegulatedSectorTiming (TLT trend -> XLP+XLU tilt)\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     xlp = load_research("XLP")[["adj_close"]].rename(columns={"adj_close": "xlp_close"})
@@ -51,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

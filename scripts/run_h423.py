@@ -1,4 +1,4 @@
-"""H423: CreditCycleSectorFilter -- HYG vs LQD credit spread gates sector tilt into XLP+XLU.
+﻿"""H423: CreditCycleSectorFilter -- HYG vs LQD credit spread gates sector tilt into XLP+XLU.
 
 When HYG 63d return < LQD 63d return (credit widening): reduce SPY 20%, add XLP+XLU.
 
@@ -18,7 +18,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H423: CreditCycleSectorFilter (HYG/LQD spread → sector tilt)\n{SEP}")
+    print(f"H423: CreditCycleSectorFilter (HYG/LQD spread -> sector tilt)\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     hyg = load_research("HYG")[["adj_close"]].rename(columns={"adj_close": "hyg_close"})
@@ -45,9 +45,10 @@ def main():
         family="macro sector proxy", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="HYG 63d ret < LQD 63d ret → reduce SPY 20%, add 10% XLP + 10% XLU. Credit cycle = policy risk regime signal.",
+        notes="HYG 63d ret < LQD 63d ret â†’ reduce SPY 20%, add 10% XLP + 10% XLU. Credit cycle = policy risk regime signal.",
         canonical_params={"vol_lookback": 60, "credit_lookback": 63, "tilt_pct": 0.20},
     )
 
 if __name__ == "__main__":
     main()
+

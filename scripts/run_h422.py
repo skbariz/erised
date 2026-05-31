@@ -1,4 +1,4 @@
-"""H422: PolicyRateSectorRotate -- yield curve signal (TLT vs SHY) tilts into XLP+XLU.
+﻿"""H422: PolicyRateSectorRotate -- yield curve signal (TLT vs SHY) tilts into XLP+XLU.
 
 When TLT 12m return > SHY 12m return (rates falling): reduce SPY, add XLU+XLP.
 
@@ -18,7 +18,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H422: PolicyRateSectorRotate (yield curve → XLP+XLU tilt)\n{SEP}")
+    print(f"H422: PolicyRateSectorRotate (yield curve -> XLP+XLU tilt)\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     shy = load_research("SHY")[["adj_close"]].rename(columns={"adj_close": "shy_close"})
@@ -44,9 +44,10 @@ def main():
         family="macro sector proxy", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="TLT 12m return > SHY 12m return → reduce SPY 15%, add 7.5% XLU + 7.5% XLP. Yield curve rate signal for sector tilt.",
+        notes="TLT 12m return > SHY 12m return â†’ reduce SPY 15%, add 7.5% XLU + 7.5% XLP. Yield curve rate signal for sector tilt.",
         canonical_params={"vol_lookback": 60, "curve_lookback": 252, "tilt_pct": 0.15},
     )
 
 if __name__ == "__main__":
     main()
+

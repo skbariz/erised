@@ -1,4 +1,4 @@
-"""H424: CommodityExposureTiming -- DBC momentum → commodity regime tilt SPY vs XLP.
+﻿"""H424: CommodityExposureTiming -- DBC momentum â†’ commodity regime tilt SPY vs XLP.
 
 DBC downtrend (< 63d MA): reduce SPY 15%, add XLP defensively.
 DBC uptrend: standard H021 (commodity inflation = growth regime).
@@ -19,7 +19,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H424: CommodityExposureTiming (DBC trend → SPY vs XLP)\n{SEP}")
+    print(f"H424: CommodityExposureTiming (DBC trend -> SPY vs XLP)\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     dbc = load_research("DBC")[["adj_close"]].rename(columns={"adj_close": "dbc_close"})
@@ -44,9 +44,10 @@ def main():
         family="macro sector proxy", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="DBC < 63d MA → reduce SPY 15%, add XLP defensive. DBC uptrend = standard H021. Commodity regime policy signal.",
+        notes="DBC < 63d MA â†’ reduce SPY 15%, add XLP defensive. DBC uptrend = standard H021. Commodity regime policy signal.",
         canonical_params={"vol_lookback": 60, "dbc_ma": 63, "tilt_pct": 0.15},
     )
 
 if __name__ == "__main__":
     main()
+

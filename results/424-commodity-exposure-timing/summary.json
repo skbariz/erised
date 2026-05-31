@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H424",
+  "name": "commodity-exposure-timing",
+  "strategy_class": "CommodityExposureTiming",
+  "family": "macro sector proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.347,
+  "ci_low": -0.0363,
+  "ci_high": 0.7422,
+  "cagr": 0.0349,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5232,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.443,
+    0.824,
+    0.677,
+    0.854,
+    -0.065,
+    1.058,
+    1.799,
+    0.569,
+    0.857,
+    -0.069
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "DBC < 63d MA \u00e2\u2020\u2019 reduce SPY 15%, add XLP defensive. DBC uptrend = standard H021. Commodity regime policy signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "dbc_ma": 63,
+    "tilt_pct": 0.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

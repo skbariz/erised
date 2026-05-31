@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H422",
+  "name": "policy-rate-sector-rotate",
+  "strategy_class": "PolicyRateSectorRotate",
+  "family": "macro sector proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.3564,
+  "ci_low": -0.0265,
+  "ci_high": 0.7553,
+  "cagr": 0.0358,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5153,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.428,
+    0.877,
+    0.713,
+    0.986,
+    -0.062,
+    1.019,
+    1.77,
+    0.656,
+    0.819,
+    -0.036
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "TLT 12m return > SHY 12m return \u00e2\u2020\u2019 reduce SPY 15%, add 7.5% XLU + 7.5% XLP. Yield curve rate signal for sector tilt.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "curve_lookback": 252,
+    "tilt_pct": 0.15
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

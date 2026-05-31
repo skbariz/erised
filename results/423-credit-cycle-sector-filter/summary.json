@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H423",
+  "name": "credit-cycle-sector-filter",
+  "strategy_class": "CreditCycleSectorFilter",
+  "family": "macro sector proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.3573,
+  "ci_low": -0.025,
+  "ci_high": 0.7539,
+  "cagr": 0.036,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5237,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.443,
+    0.824,
+    0.759,
+    0.939,
+    -0.172,
+    1.146,
+    1.764,
+    0.534,
+    0.853,
+    0.032
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "HYG 63d ret < LQD 63d ret \u00e2\u2020\u2019 reduce SPY 20%, add 10% XLP + 10% XLU. Credit cycle = policy risk regime signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "credit_lookback": 63,
+    "tilt_pct": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

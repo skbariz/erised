@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H402",
+  "name": "earnings-momentum-quality",
+  "strategy_class": "EarningsMomentumQuality",
+  "family": "earnings quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7703,
+  "ci_low": 0.3615,
+  "ci_high": 1.1884,
+  "cagr": 0.0875,
+  "max_drawdown": -0.3623,
+  "n_trades": 1,
+  "h001_corr": -0.0183,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.359,
+    1.949,
+    0.964,
+    1.914,
+    0.939,
+    1.136
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NI/TA YoY growth + OCF/TA YoY growth composite z-score. Long top-20% confirmed quality earners. Proxy for PEAD: consistent positive earnings surprise.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

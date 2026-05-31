@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H403",
+  "name": "torpedo-risk-avoid",
+  "strategy_class": "TorpedoRiskAvoid",
+  "family": "earnings quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8156,
+  "ci_low": 0.4151,
+  "ci_high": 1.2282,
+  "cagr": 0.1059,
+  "max_drawdown": -0.4231,
+  "n_trades": 1,
+  "h001_corr": -0.0189,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.349,
+    1.341,
+    1.998,
+    0.956,
+    1.773,
+    0.925,
+    0.928
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "B/M = book_equity/(price*shares). Torpedo-safe composite = high B/M z-score + positive NI growth z-score. Avoids expensive names with deteriorating earnings (Skinner & Sloan 2002).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

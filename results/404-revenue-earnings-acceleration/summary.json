@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H404",
+  "name": "revenue-earnings-acceleration",
+  "strategy_class": "RevenueEarningsAcceleration",
+  "family": "earnings quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7053,
+  "ci_low": 0.3026,
+  "ci_high": 1.1094,
+  "cagr": 0.0802,
+  "max_drawdown": -0.3714,
+  "n_trades": 1,
+  "h001_corr": -0.019,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.004,
+    2.187,
+    1.016,
+    1.852,
+    0.825,
+    0.997
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "2nd derivative: accel = \u0394(rev_growth_yoy) + \u0394(ni_ta_growth_yoy). Long top-20% accelerators quarterly. Captures improving earnings regime before it's priced (PEAD).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "annual_lag": 252,
+    "accel_lag": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

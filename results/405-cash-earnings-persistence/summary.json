@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H405",
+  "name": "cash-earnings-persistence",
+  "strategy_class": "CashEarningsPersistence",
+  "family": "earnings quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.712,
+  "ci_low": 0.3079,
+  "ci_high": 1.1278,
+  "cagr": 0.0862,
+  "max_drawdown": -0.3954,
+  "n_trades": 1,
+  "h001_corr": -0.0202,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.55,
+    0.754,
+    2.045,
+    0.489,
+    1.827,
+    0.904,
+    0.895
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Fraction of 504-day window where OCF>0 AND NI>0 AND OCF/NI>=0.8. Long top-20% persistent cash earners. So (2013) analyst error proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "window": 504,
+    "ocf_ni_threshold": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

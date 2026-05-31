@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H401",
+  "name": "accrual-quality-port",
+  "strategy_class": "AccrualQualityPort",
+  "family": "earnings quality",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7717,
+  "ci_low": 0.3605,
+  "ci_high": 1.1833,
+  "cagr": 0.089,
+  "max_drawdown": -0.3522,
+  "n_trades": 1,
+  "h001_corr": -0.0174,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.427,
+    2.004,
+    0.771,
+    1.863,
+    1.096,
+    1.153
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Accruals=(NI-OCF)/avg_TA; long bottom-20% accruals sector-neutral quarterly. Bernard & Thomas PEAD proxy: low accruals = cash earnings quality = persistent positive surprise.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "accrual_clip": [
+      -1.0,
+      1.0
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

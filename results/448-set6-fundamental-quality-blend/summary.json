@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H448",
+  "name": "set6-fundamental-quality-blend",
+  "strategy_class": "Set6FundamentalQualityBlend",
+  "family": "Set6 meta-ensemble",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8148,
+  "ci_low": 0.4099,
+  "ci_high": 1.2214,
+  "cagr": 0.0994,
+  "max_drawdown": -0.3707,
+  "n_trades": 1,
+  "h001_corr": -0.0185,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.636,
+    0.766,
+    2.148,
+    0.949,
+    1.894,
+    1.008,
+    1.039
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(BS improvement) + z(Altman Z proxy) + z(no-dilution + OCF>0). Three fundamental quality dimensions from Set 6.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

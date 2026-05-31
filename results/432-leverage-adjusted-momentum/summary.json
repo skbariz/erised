@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H432",
+  "name": "leverage-adjusted-momentum",
+  "strategy_class": "LeverageAdjustedMomentum",
+  "family": "credit risk",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.6297,
+  "ci_low": 0.233,
+  "ci_high": 1.0395,
+  "cagr": 0.0816,
+  "max_drawdown": -0.3875,
+  "n_trades": 1,
+  "h001_corr": -0.014,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.179,
+    0.568,
+    1.477,
+    0.86,
+    1.78,
+    0.751,
+    0.949
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "6m momentum filtered to LTD/TA < sector cross-sectional median. Avramov et al. (2007) credit-conditioned momentum.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

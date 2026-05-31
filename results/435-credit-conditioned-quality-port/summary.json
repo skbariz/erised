@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H435",
+  "name": "credit-conditioned-quality-port",
+  "strategy_class": "CreditConditionedQualityPort",
+  "family": "credit risk",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.7331,
+  "ci_low": 0.3284,
+  "ci_high": 1.1345,
+  "cagr": 0.0898,
+  "max_drawdown": -0.3513,
+  "n_trades": 1,
+  "h001_corr": -0.0184,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.203,
+    1.149,
+    0.98,
+    1.674,
+    1.082,
+    1.322
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality, membership filter: LTD/TA < sector median AND OCF > 0. Credit-healthy quality universe only.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

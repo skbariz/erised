@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H434",
+  "name": "financial-fragility-avoid",
+  "strategy_class": "FinancialFragilityAvoid",
+  "family": "credit risk",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8624,
+  "ci_low": 0.4435,
+  "ci_high": 1.2765,
+  "cagr": 0.1076,
+  "max_drawdown": -0.3672,
+  "n_trades": 1,
+  "h001_corr": -0.0153,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.725,
+    2.374,
+    1.044,
+    1.97,
+    1.239,
+    1.086
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Altman Z proxy: 1.2*(CA-CL)/TA + 1.4*NI/TA_252d_mean + 3.3*GP/TA + 0.6*BE/LTD + 1.0*Rev/TA. Kisgen (2006) rating threshold proxy.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "ni_window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

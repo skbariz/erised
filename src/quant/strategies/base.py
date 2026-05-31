@@ -5855,3 +5855,230 @@ class GrandCrisisProtocol(MultiAssetStrategy):
         w_tlt = w_tlt.where(tlt_avail, 0.0)
 
         return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt}, index=prices.index)
+
+
+# ===========================================================================
+# SET 6 — H421–H425: Macro Sector & Policy Exposure Proxies
+# ===========================================================================
+
+
+class RegulatedSectorTiming(MultiAssetStrategy):
+    """H421: H021 + TLT trend gate to tilt into regulated defensive sectors.
+
+    When TLT > 200d MA (rates falling = policy tailwind for defensives):
+      SPY weight reduced by tilt_pct, split evenly between XLP and XLU.
+    Otherwise: pure H021. Cohen, Diether & Malloy (2013): policy events
+    benefit regulated utility and consumer staples sectors.
+    """
+
+    name = "regulated_sector_timing"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        tlt_ma: int = 200,
+        tilt_pct: float = 0.15,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.tlt_ma = tlt_ma
+        self.tilt_pct = tilt_pct
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        xlp_avail = prices["xlp_close"].notna() if "xlp_close" in prices.columns else pd.Series(False, index=prices.index)
+        xlu_avail = prices["xlu_close"].notna() if "xlu_close" in prices.columns else pd.Series(False, index=prices.index)
+        tlt_ma_s = prices["tlt_close"].rolling(self.tlt_ma, min_periods=self.tlt_ma // 2).mean()
+        rate_falling = (prices["tlt_close"] > tlt_ma_s) & tlt_avail & xlp_avail & xlu_avail
+        half_tilt = self.tilt_pct / 2.0
+        w_spy_adj = w_spy.where(~rate_falling, w_spy * (1.0 - self.tilt_pct))
+        w_xlp = pd.Series(0.0, index=prices.index).where(~rate_falling, w_spy * half_tilt)
+        w_xlu = pd.Series(0.0, index=prices.index).where(~rate_falling, w_spy * half_tilt)
+        w_spy_adj = w_spy_adj.where(tlt_avail, 1.0)
+        w_tlt_final = w_tlt.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_final, "XLP": w_xlp, "XLU": w_xlu}, index=prices.index)
+
+
+class PolicyRateSectorRotate(MultiAssetStrategy):
+    """H422: H021 with yield-curve tilt into rate-sensitive defensive sectors.
+
+    When TLT 12m return > SHY 12m return (rates falling, bonds outperforming):
+      Reduce SPY, add XLU + XLP weight.
+    Policy rate changes most directly affect utility/consumer staples sectors.
+    """
+
+    name = "policy_rate_sector_rotate"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        curve_lookback: int = 252,
+        tilt_pct: float = 0.15,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.curve_lookback = curve_lookback
+        self.tilt_pct = tilt_pct
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        has_shy = "shy_close" in prices.columns
+        has_xlp = "xlp_close" in prices.columns
+        has_xlu = "xlu_close" in prices.columns
+        tlt_ret = prices["tlt_close"] / prices["tlt_close"].shift(self.curve_lookback) - 1
+        shy_ret = prices["shy_close"] / prices["shy_close"].shift(self.curve_lookback) - 1 if has_shy else pd.Series(0.0, index=prices.index)
+        shy_avail = prices["shy_close"].notna() if has_shy else pd.Series(False, index=prices.index)
+        xlp_avail = prices["xlp_close"].notna() if has_xlp else pd.Series(False, index=prices.index)
+        xlu_avail = prices["xlu_close"].notna() if has_xlu else pd.Series(False, index=prices.index)
+        rate_falling = (tlt_ret > shy_ret) & tlt_avail & shy_avail & xlp_avail & xlu_avail & tlt_ret.notna()
+        half_tilt = self.tilt_pct / 2.0
+        w_spy_adj = w_spy.where(~rate_falling, w_spy * (1.0 - self.tilt_pct))
+        w_xlp = pd.Series(0.0, index=prices.index).where(~rate_falling, w_spy * half_tilt)
+        w_xlu = pd.Series(0.0, index=prices.index).where(~rate_falling, w_spy * half_tilt)
+        w_spy_adj = w_spy_adj.where(tlt_avail, 1.0)
+        w_tlt_final = w_tlt.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_final, "XLP": w_xlp, "XLU": w_xlu}, index=prices.index)
+
+
+class CreditCycleSectorFilter(MultiAssetStrategy):
+    """H423: Credit cycle gates sector tilt into defensive XLP/XLU.
+
+    When HYG 63d return < LQD 63d return (credit spreading → risk-off):
+      Reduce SPY, add XLP + XLU as defensive sectors.
+    Credit improving: pure H021. Cohen et al. (2013): credit stress = policy risk.
+    """
+
+    name = "credit_cycle_sector_filter"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        credit_lookback: int = 63,
+        tilt_pct: float = 0.20,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.credit_lookback = credit_lookback
+        self.tilt_pct = tilt_pct
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        has_hyg = "hyg_close" in prices.columns
+        has_lqd = "lqd_close" in prices.columns
+        has_xlp = "xlp_close" in prices.columns
+        has_xlu = "xlu_close" in prices.columns
+        hyg_ret = prices["hyg_close"].pct_change(self.credit_lookback) if has_hyg else pd.Series(np.nan, index=prices.index)
+        lqd_ret = prices["lqd_close"].pct_change(self.credit_lookback) if has_lqd else pd.Series(np.nan, index=prices.index)
+        hyg_avail = prices["hyg_close"].notna() if has_hyg else pd.Series(False, index=prices.index)
+        lqd_avail = prices["lqd_close"].notna() if has_lqd else pd.Series(False, index=prices.index)
+        xlp_avail = prices["xlp_close"].notna() if has_xlp else pd.Series(False, index=prices.index)
+        xlu_avail = prices["xlu_close"].notna() if has_xlu else pd.Series(False, index=prices.index)
+        credit_stress = (hyg_ret < lqd_ret) & hyg_avail & lqd_avail & xlp_avail & xlu_avail & hyg_ret.notna()
+        half_tilt = self.tilt_pct / 2.0
+        w_spy_adj = w_spy.where(~credit_stress, w_spy * (1.0 - self.tilt_pct))
+        w_xlp = pd.Series(0.0, index=prices.index).where(~credit_stress, w_spy * half_tilt)
+        w_xlu = pd.Series(0.0, index=prices.index).where(~credit_stress, w_spy * half_tilt)
+        w_spy_adj = w_spy_adj.where(tlt_avail, 1.0)
+        w_tlt_final = w_tlt.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_final, "XLP": w_xlp, "XLU": w_xlu}, index=prices.index)
+
+
+class CommodityExposureTiming(MultiAssetStrategy):
+    """H424: DBC momentum signals commodity regime; tilt SPY vs XLP defensively.
+
+    DBC downtrend (DBC < 63d MA): reduce SPY, add XLP (defensive staples).
+    DBC uptrend: standard H021 (commodity inflation = broad growth environment).
+    """
+
+    name = "commodity_exposure_timing"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        dbc_ma: int = 63,
+        tilt_pct: float = 0.15,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.dbc_ma = dbc_ma
+        self.tilt_pct = tilt_pct
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        w_spy, w_tlt = _h021_weights(spy_r, tlt_r, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        has_dbc = "dbc_close" in prices.columns
+        has_xlp = "xlp_close" in prices.columns
+        if has_dbc:
+            dbc_ma_s = prices["dbc_close"].rolling(self.dbc_ma, min_periods=self.dbc_ma // 2).mean()
+            dbc_avail = prices["dbc_close"].notna()
+            xlp_avail = prices["xlp_close"].notna() if has_xlp else pd.Series(False, index=prices.index)
+            dbc_downtrend = (prices["dbc_close"] < dbc_ma_s) & dbc_avail & xlp_avail & dbc_ma_s.notna()
+        else:
+            dbc_downtrend = pd.Series(False, index=prices.index)
+        w_spy_adj = w_spy.where(~dbc_downtrend, w_spy * (1.0 - self.tilt_pct))
+        w_xlp = pd.Series(0.0, index=prices.index).where(~dbc_downtrend, w_spy * self.tilt_pct)
+        w_spy_adj = w_spy_adj.where(tlt_avail, 1.0)
+        w_tlt_final = w_tlt.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": w_spy_adj, "TLT": w_tlt_final, "XLP": w_xlp}, index=prices.index)
+
+
+class MacroRegimeSectorBlend(MultiAssetStrategy):
+    """H425: 3-signal macro regime → sector-blended allocation.
+
+    Signals: (1) VIX < 25, (2) TLT > 63d MA, (3) HYG > HYG.shift(63).
+    3 bullish: 80% SPY / 20% TLT.
+    2 bullish: 55% SPY / 25% TLT / 10% XLP / 10% XLU.
+    0-1 bullish: 30% SPY / 40% TLT / 15% XLP / 15% XLU.
+    """
+
+    name = "macro_regime_sector_blend"
+
+    def __init__(
+        self,
+        vix_threshold: float = 25.0,
+        tlt_ma: int = 63,
+        credit_lookback: int = 63,
+    ) -> None:
+        self.vix_threshold = vix_threshold
+        self.tlt_ma = tlt_ma
+        self.credit_lookback = credit_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        tlt_avail = prices["tlt_close"].notna()
+        has_hyg = "hyg_close" in prices.columns
+        has_xlp = "xlp_close" in prices.columns
+        has_xlu = "xlu_close" in prices.columns
+        vix_low = prices["vix_close"] < self.vix_threshold
+        tlt_ma_s = prices["tlt_close"].rolling(self.tlt_ma, min_periods=self.tlt_ma // 2).mean()
+        tlt_up = (prices["tlt_close"] > tlt_ma_s) & tlt_avail
+        if has_hyg:
+            hyg_avail = prices["hyg_close"].notna()
+            hyg_up = (prices["hyg_close"] > prices["hyg_close"].shift(self.credit_lookback)) & hyg_avail
+        else:
+            hyg_up = pd.Series(False, index=prices.index)
+        xlp_avail = prices["xlp_close"].notna() if has_xlp else pd.Series(False, index=prices.index)
+        xlu_avail = prices["xlu_close"].notna() if has_xlu else pd.Series(False, index=prices.index)
+        can_sector = tlt_avail & xlp_avail & xlu_avail
+        n_bull = vix_low.astype(int) + tlt_up.astype(int) + hyg_up.astype(int)
+        w_spy = pd.Series(1.0, index=prices.index)
+        w_tlt = pd.Series(0.0, index=prices.index)
+        w_xlp = pd.Series(0.0, index=prices.index)
+        w_xlu = pd.Series(0.0, index=prices.index)
+        cond3 = (n_bull == 3) & can_sector
+        w_spy = w_spy.where(~cond3, 0.80); w_tlt = w_tlt.where(~cond3, 0.20)
+        cond2 = (n_bull == 2) & can_sector
+        w_spy = w_spy.where(~cond2, 0.55); w_tlt = w_tlt.where(~cond2, 0.25)
+        w_xlp = w_xlp.where(~cond2, 0.10); w_xlu = w_xlu.where(~cond2, 0.10)
+        cond01 = (n_bull <= 1) & can_sector
+        w_spy = w_spy.where(~cond01, 0.30); w_tlt = w_tlt.where(~cond01, 0.40)
+        w_xlp = w_xlp.where(~cond01, 0.15); w_xlu = w_xlu.where(~cond01, 0.15)
+        w_spy = w_spy.where(tlt_avail, 1.0); w_tlt = w_tlt.where(tlt_avail, 0.0)
+        w_xlp = w_xlp.where(can_sector, 0.0); w_xlu = w_xlu.where(can_sector, 0.0)
+        return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt, "XLP": w_xlp, "XLU": w_xlu}, index=prices.index)

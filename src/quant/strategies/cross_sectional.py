@@ -12789,3 +12789,496 @@ class StableMarginMomentum(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H416–H420: Product-Market & Competitive Position Proxies
+# ===========================================================================
+
+
+class DifferentiatedMarginPort(CrossSectionalStrategy):
+    """H416: Long firms with high AND stable gross margins (differentiation proxy).
+
+    z(GP/Revenue level) + z(-std(GP/Revenue, 2yr)). Persistently high, stable
+    margins = product differentiation (Hoberg & Phillips 2016 TNIC proxy).
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "differentiated_margin_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        stability_window: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.stability_window = stability_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        margin_std = gp_margin.rolling(self.stability_window, min_periods=self.stability_window // 4).std()
+        composite = _cs_zscore(gp_margin).fillna(0.0) + _cs_zscore(-margin_std).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CompetitivePressureAvoid(CrossSectionalStrategy):
+    """H417: Avoid margin compression + revenue decel; rank rest by GP/TA quality.
+
+    Filter: GP/Revenue declining AND revenue growth decelerating = losing market
+    position (Hoberg, Phillips & Prabhala 2014). Remove these, rank survivors.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "competitive_pressure_avoid"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        accel_lag: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.accel_lag = accel_lag
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        rev_safe = rev.where(rev > 0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        margin_declining = gp_margin < gp_margin.shift(self.lookback)
+        rev_growth = (rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)
+        rev_decelerating = rev_growth < rev_growth.shift(self.accel_lag)
+        under_threat = (margin_declining & rev_decelerating).fillna(False)
+        safe_mem = membership & ~under_threat
+        daily_w = _sector_neutral_weights(
+            gp_ta, safe_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class PeerGroupMomentum(CrossSectionalStrategy):
+    """H418: Sector-relative 6m momentum winners with NI growth confirmation.
+
+    Proxy for peer group information spillover: sector leaders with improving
+    fundamentals likely benefiting from positive peer earnings signals
+    (Hoberg & Phillips 2016). Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "peer_group_momentum"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        ni_lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.ni_lookback = ni_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
+        ni_growing = (ni_ta > ni_ta.shift(self.ni_lookback)).fillna(False)
+        mom = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        mem_f = membership.reindex_like(mom).fillna(False)
+        rel_mom = pd.DataFrame(0.0, index=mom.index, columns=mom.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in mom.columns]
+            if not tickers:
+                continue
+            sec_m = mom[tickers].where(mem_f[tickers])
+            med = sec_m.median(axis=1)
+            rel_mom[tickers] = sec_m.sub(med, axis=0).fillna(0.0).values
+        quality_mem = membership & ni_growing
+        daily_w = _sector_neutral_weights(
+            rel_mom, quality_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CashDefenseProxy(CrossSectionalStrategy):
+    """H419: Avoid firms building defensive cash under competitive threat.
+
+    Filter: CA/TA rising AND GP/Revenue declining = defensive cash hoarding.
+    Hoberg, Phillips & Prabhala (2014): product market threat triggers cash buildup.
+    Long survivors ranked by GP/TA quality. Sector-neutral top 20%, quarterly.
+    """
+
+    name = "cash_defense_proxy"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        rev_safe = rev.where(rev > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        ca_ratio = (ca / ta_safe).clip(0.0, 2.0)
+        ca_rising = (ca_ratio > ca_ratio.shift(self.lookback)).fillna(False)
+        margin_declining = (gp_margin < gp_margin.shift(self.lookback)).fillna(False)
+        defensive_hoarding = ca_rising & margin_declining
+        safe_mem = membership & ~defensive_hoarding
+        daily_w = _sector_neutral_weights(
+            gp_ta, safe_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class MarketShareProxy(CrossSectionalStrategy):
+    """H420: Long top-quintile sector-relative revenue growth (market share gainers).
+
+    Revenue growth - sector median revenue growth. Proxy for market share gains
+    (Hoberg & Phillips 2016 without product text). Sector-neutral top 20%, quarterly.
+    """
+
+    name = "market_share_proxy"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.revenue = revenue
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_lag = rev.shift(self.lookback)
+        rev_growth = ((rev - rev_lag) / rev_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        mem_f = membership.reindex_like(rev_growth).fillna(False)
+        sec_rel_rev = pd.DataFrame(0.0, index=rev_growth.index, columns=rev_growth.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in rev_growth.columns]
+            if not tickers:
+                continue
+            sec_g = rev_growth[tickers].where(mem_f[tickers])
+            med = sec_g.median(axis=1)
+            sec_rel_rev[tickers] = sec_g.sub(med, axis=0).fillna(0.0).values
+        daily_w = _sector_neutral_weights(
+            sec_rel_rev, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 6 — H426–H430: Innovation & R&D Efficiency Proxies
+# ===========================================================================
+
+
+class AssetEfficiencyGrowth(CrossSectionalStrategy):
+    """H426: Long top-quintile by improving Revenue/TA (asset turnover growth).
+
+    Innovation efficiency = output per input. Revenue/TA improvement proxies
+    for increasing return on knowledge capital (Hirshleifer et al. 2013).
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "asset_efficiency_growth"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        at = (rev / ta_safe).clip(0.0, 10.0)
+        at_growth = at - at.shift(self.lookback)
+        daily_w = _sector_neutral_weights(
+            at_growth, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CapitalProductivityPort(CrossSectionalStrategy):
+    """H427: Long top-quintile by GP/TA YoY growth (knowledge capital productivity).
+
+    GP/TA growth rate (different from H239 GP/TA level). Captures improving
+    return on capital — proxy for Kogan et al. (2017) patent-value shocks.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "capital_productivity_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        gp_ta_growth = gp_ta - gp_ta.shift(self.lookback)
+        daily_w = _sector_neutral_weights(
+            gp_ta_growth, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class GrowthReinvestmentQuality(CrossSectionalStrategy):
+    """H428: Quality + growth + retention composite as disciplined reinvestment proxy.
+
+    z(GP/TA) + z(revenue growth) + z(book equity growth). Three factors.
+    Proxy for Eberhart et al. (2004): unexpected R&D with balance-sheet strength.
+    Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "growth_reinvestment_quality"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        revenue: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.revenue = revenue
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        rev_growth = ((rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        be_growth = ((be - be.shift(self.lookback)) / be.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        composite = (
+            _cs_zscore(gp_ta).fillna(0.0)
+            + _cs_zscore(rev_growth).fillna(0.0)
+            + _cs_zscore(be_growth).fillna(0.0)
+        )
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SectorRelativeMarginProxy(CrossSectionalStrategy):
+    """H429: Sector-relative GP/Revenue premium + 6m momentum composite.
+
+    z(GP/Revenue - sector median) + z(6m momentum). Above-sector-median GP margin
+    = innovation/intangible intensity vs peers (Hirshleifer et al. 2013 proxy).
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "sector_relative_margin_proxy"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        mem_f = membership.reindex_like(gp_margin).fillna(False)
+        sec_rel = pd.DataFrame(0.0, index=gp_margin.index, columns=gp_margin.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [t for t in self.sectors[self.sectors == sector].index if t in gp_margin.columns]
+            if not tickers:
+                continue
+            sec_m = gp_margin[tickers].where(mem_f[tickers])
+            med = sec_m.median(axis=1)
+            sec_rel[tickers] = sec_m.sub(med, axis=0).fillna(0.0).values
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        composite = _cs_zscore(sec_rel).fillna(0.0) + _cs_zscore(momentum).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class OperatingLeverageImprovement(CrossSectionalStrategy):
+    """H430: Long top-quintile by GP/NI YoY improvement (operating leverage building).
+
+    Rising GP/NI = gross profit growing faster than net income = building scalable
+    operating leverage. Proxy for Kogan et al. (2017) firms investing in growth.
+    Only defined where NI > 0. Sector-neutral top 20%, quarterly rebalance.
+    """
+
+    name = "operating_leverage_improvement"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        net_income: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.net_income = net_income
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ni = _align_fund(self.net_income, prices_panel)
+        ni_safe = ni.where(ni > 0)
+        op_lev = (gp / ni_safe).clip(0.0, 20.0)
+        op_lev_change = op_lev - op_lev.shift(self.lookback)
+        daily_w = _sector_neutral_weights(
+            op_lev_change, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

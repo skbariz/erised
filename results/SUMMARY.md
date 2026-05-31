@@ -1178,7 +1178,7 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | 3 | H411–H415 | Sentiment & Tone Proxies | Mayew & Venkatachalam | **5/5 KEEP** (0.641–0.987) ★H412,H415 |
 | 4 | H416–H420 | Product-Market & Competitive Position | Hoberg & Phillips x2 | **5/5 KEEP** (0.749–0.861) |
 | 5 | H421–H425 | Macro Sector & Policy Exposure | Cohen, Diether & Malloy | **0/5 KEEP** (all killed: H001 corr +0.51-0.64) |
-| 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | In progress |
+| 6 | H426–H430 | Innovation & R&D Proxies | Hirshleifer et al., Kogan et al., Eberhart et al. | **5/5 KEEP** (0.722–0.984) ★H429 |
 | 7 | H431–H435 | Credit Risk & Distance-to-Default | Merton, Vassalou & Xing, Avramov et al., Kisgen | Planned |
 | 8 | H436–H440 | ETF Crowding & Passive Ownership | Ben-David et al., Israeli et al. | Planned |
 | 9 | H441–H445 | Institutional Horizon Proxies | Bushee, Yan & Zhang | Planned |
@@ -1189,7 +1189,9 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 - **H412 FundamentalDivergenceAvoid: Sharpe 0.961**, H001 corr -0.001, active ALL 12 folds. Near-zero correlation with all ETF strategies — highest-value diversifier found so far.
 - **H415 StableMarginMomentum: Sharpe 0.987**, H001 corr +0.002, active ALL 12 folds. Price + stable fundamentals double confirmation.
 - **AA sector-tilt strategies (Batch 5): 0/5 KEEP** — same lesson as prior sets: ETF combinations correlated with H001 at +0.51-0.64. Do not attempt more AA sector-rotation ideas.
-- **EDGAR data gap**: CS strategies only active from fold 6 (2010+) except H412 and H415 which use price data too.
+- **EDGAR data gap**: CS strategies only active from fold 6 (2010+) except H412, H415, H429 which use price data too — active all 12 folds.
+- **Batch 6 star**: H429 SectorRelativeMarginProxy (Sharpe 0.984, H001 +0.003) — sector-relative GP margin + momentum, similar structure to H415.
+- **Running total H401-H430**: 25/30 KEEP (83%) — all CS batches 5/5, all AA batch 0/5.
 
 ### Set 6 Key Design Notes
 - All signals use available Compustat fundamentals + ETF prices only (no IBES, 13F, patents, or ETF holdings)

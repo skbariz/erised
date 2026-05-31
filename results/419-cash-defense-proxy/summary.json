@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H419",
+  "name": "cash-defense-proxy",
+  "strategy_class": "CashDefenseProxy",
+  "family": "product-market proxy",
+  "run_date": "2026-05-30",
+  "oos_sharpe": 0.8217,
+  "ci_low": 0.41,
+  "ci_high": 1.2287,
+  "cagr": 0.1027,
+  "max_drawdown": -0.3509,
+  "n_trades": 1,
+  "h001_corr": -0.0177,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.709,
+    2.039,
+    0.815,
+    1.954,
+    1.238,
+    0.984
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Filter: CA/TA rising AND GP/Rev declining = defensive cash hoard under competitive threat. Long survivors by GP/TA quality. Hoberg et al. (2014).",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "lookback": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,1325 @@
+S&P 500 QUANT PAPER LEARNINGS - SET 5
+Fifth non-overlapping set of 20 papers for planning 10 additional batches of trading algorithms
+
+Purpose:
+This file is a chatbot-ready research brief. It summarizes a fifth set of 20 quant trading,
+financial modeling, machine-learning asset pricing, governance, ESG, text, crowd-sentiment, and
+execution papers that were not used as core papers in Sets 1, 2, 3, or 4. It then turns those
+papers into 10 practical development batches for S&P 500 strategy research in Claude Code CLI.
+
+Important:
+This is research and software-planning material, not financial advice. Every strategy must be
+tested with point-in-time data, realistic transaction costs, conservative execution assumptions,
+and strict out-of-sample validation.
+
+================================================================================
+HOW SET 5 IS DIFFERENT FROM SETS 1-4
+================================================================================
+
+Set 1 built the core alpha engine:
+- momentum, trend, value, quality, profitability, defensive factors, PEAD, liquidity reversal,
+  pairs/stat-arb, and ML ranking.
+
+Set 2 added more anomaly and event signals:
+- industry and residual momentum, reversals, seasonality, issuance, buybacks, analyst/insider/short
+  signals, options-informed signals, attention, and sentiment.
+
+Set 3 added harder-data signal families:
+- lottery risk, distress, accounting sustainability, R&D/intangibles, customer-supplier links,
+  volume/visibility, text tone, index events, fund-flow pressure, and cost survival.
+
+Set 4 added the market and portfolio layer:
+- equity premium prediction, forecast combinations, variance risk premium, option-implied risk,
+  liquidity/funding stress, robust portfolio construction, and backtest governance.
+
+Set 5 focuses on the research factory itself and richer modern signals:
+- factor zoo reduction and anomaly decay
+- q-factor and mispricing-factor controls
+- machine-learning and nonlinear characteristic models
+- IPCA/latent factor modeling
+- no-arbitrage deep learning for asset pricing
+- corporate governance and entrenchment
+- employee satisfaction and human-capital intangibles
+- sin stocks, carbon risk, and green return decomposition
+- firm-specific news language and social/crowd opinion
+- algorithmic trading and execution/liquidity effects
+
+The main use of Set 5 is to make the strategy platform better at deciding:
+- which characteristics are worth keeping
+- whether ML adds real out-of-sample value
+- whether an anomaly is just an omitted risk/factor exposure
+- whether governance, climate, human-capital, and social/crowd data add incremental signal
+- whether execution conditions should change trade aggressiveness
+
+================================================================================
+CHATBOT PROMPT TO USE WITH THIS FILE
+================================================================================
+
+Paste this file into a chatbot with this prompt:
+
+"You are helping me build S&P 500 quant trading algorithms in Claude Code CLI. Use this Set 5
+research brief to design 10 development batches. For each batch, specify exact features, data
+tables, configs, tests, backtest assumptions, validation checks, and compact output artifacts.
+Favor token-efficient CLI workflows: cached Parquet features, YAML configs, small JSON summaries,
+and reusable tests. Build factor-zoo triage and ML baselines before complex ESG/social-media data.
+Do not implement everything at once."
+
+================================================================================
+IMPLEMENTATION WARNINGS FOR THIS SET
+================================================================================
+
+1. Factor zoo work can explode in scope.
+   Start with a registry of characteristics and a small canonical subset. Do not build 300 factors
+   before you have timing tests, missingness reports, and out-of-sample evaluation.
+
+2. ML models need stronger baselines than normal.
+   Every ML model should be compared against:
+   - equal-weight top-decile rank
+   - linear model
+   - elastic net
+   - gradient boosting
+   - simple factor-neutral rank
+
+3. Alternative data needs timestamp discipline.
+   Governance databases, employee-satisfaction lists, ESG data, carbon data, news, and social media
+   often have publication delays or vendor backfills.
+
+4. S&P 500 results may be weaker than all-stock results.
+   Many anomaly papers get power from small, illiquid, or neglected names. For S&P 500, treat these
+   signals as overlays, quality filters, or ensemble inputs unless standalone evidence is strong.
+
+5. Text and social data can burn tokens quickly.
+   Never paste raw news, filings, social posts, or article bodies into routine prompts. Cache compact
+   feature tables first.
+
+6. Execution is not a footnote.
+   Algorithmic trading and liquidity papers should influence how the backtester models spreads,
+   adverse selection, volume participation, and intraday execution windows.
+
+================================================================================
+20 ADDITIONAL PAPERS AND IMPLEMENTATION LEARNINGS
+================================================================================
+
+01. Hou, Xue, and Zhang (2015)
+Title: Digesting Anomalies: An Investment Approach
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2508322
+
+Core idea:
+The q-factor model, built around market, size, investment, and profitability factors, explains many
+published anomalies. Investment and profitability are economically central return predictors.
+
+Trading translation:
+Use q-factor exposures as controls and as signal families. Before accepting a new alpha, ask whether
+it is just investment/profitability exposure wearing a costume.
+
+Features to implement:
+- investment_to_assets
+- ROE or profitability proxy
+- q_factor_exposure_market
+- q_factor_exposure_size
+- q_factor_exposure_investment
+- q_factor_exposure_profitability
+- q_alpha_residual
+
+Strategy ideas:
+- q-factor baseline portfolio.
+- Alpha residualization against q factors.
+- Investment/profitability composite overlay for every value and quality model.
+
+Main caveats:
+- Factor construction choices matter.
+- S&P 500 has less microcap anomaly exposure.
+- Use q-factor controls as diagnostics, not as a magic truth model.
+
+02. Stambaugh and Yuan (2017)
+Title: Mispricing Factors
+Source: https://academic.oup.com/rfs/article/30/4/1270/2965095
+
+Core idea:
+A model using market, size, and two composite mispricing factors can explain many anomalies better
+than several standard alternatives.
+
+Trading translation:
+Create composite mispricing scores rather than treating every anomaly as independent. Mispricing
+signals often cluster.
+
+Features to implement:
+- management_related_mispricing_score
+- performance_related_mispricing_score
+- composite_mispricing_rank
+- mispricing_factor_exposure
+- anomaly_cluster_id
+
+Strategy ideas:
+- Mispricing composite long/short research sleeve.
+- Long-only avoid list for stocks with bad composite mispricing scores.
+- Conflict engine: keep signals that survive mispricing-factor controls.
+
+Main caveats:
+- Requires mapping anomalies into coherent groups.
+- Mispricing factors can become crowded.
+- Composite construction must be fixed before backtesting.
+
+03. Feng, Giglio, and Xiu (2020)
+Title: Taming the Factor Zoo: A Test of New Factors
+Source: https://ideas.repec.org/a/bla/jfinan/v75y2020i3p1327-1370.html
+
+Core idea:
+Many proposed factors do not add independent information once existing factors and multiple-testing
+issues are handled. The paper provides a way to test new factors against a large existing factor set.
+
+Trading translation:
+Build a factor-admission gate. A new S&P 500 signal should not enter the production ensemble unless
+it adds incremental value beyond existing signals and survives multiple-testing controls.
+
+Features and controls to implement:
+- candidate_factor_return
+- existing_factor_exposure
+- incremental_alpha
+- factor_tstat_adjusted
+- multiple_test_group_id
+- factor_admission_status
+
+Strategy ideas:
+- Factor zoo triage dashboard.
+- Signal admission test before adding features to the ensemble.
+- Periodic pruning of redundant signals.
+
+Main caveats:
+- Testing too many variants still creates data mining risk.
+- Incremental value can be regime-specific.
+- Keep a record of rejected factors.
+
+04. Green, Hand, and Zhang (2017)
+Title: The Characteristics that Provide Independent Information about Average U.S. Monthly Stock Returns
+Source: https://ideas.repec.org/a/oup/rfinst/v30y2017i12p4389-4436..html
+
+Core idea:
+When many characteristics are tested simultaneously and microcap/data-snooping issues are addressed,
+only a smaller subset provides independent information, and post-2003 predictability weakens.
+
+Trading translation:
+For S&P 500 strategies, more characteristics are not automatically better. Use simultaneous feature
+selection, post-2003 validation, and non-microcap relevance tests.
+
+Features and controls to implement:
+- characteristic_registry
+- independent_information_flag
+- post_2003_oos_score
+- microcap_dependency_flag
+- feature_redundancy_group
+- characteristic_decay_score
+
+Strategy ideas:
+- Characteristic pruning engine.
+- Post-2003 robustness screen.
+- S&P 500-only independent feature test.
+
+Main caveats:
+- A characteristic can be useful in an ensemble even if standalone alpha is weak.
+- Avoid selecting features based on the full sample.
+- Keep feature definitions frozen while testing.
+
+05. Freyberger, Neuhierl, and Weber (2020)
+Title: Dissecting Characteristics Nonparametrically
+Source: https://colab.ws/articles/10.1093/rfs/hhz123
+
+Core idea:
+A nonparametric method with adaptive group LASSO can select characteristics and estimate nonlinear
+relationships between characteristics and expected returns.
+
+Trading translation:
+Many signals are not linear. A stock in the 95th percentile of a variable may behave differently
+from a stock in the 70th percentile. Use nonlinear transformations and monotonicity checks.
+
+Features and controls to implement:
+- spline_transformed_characteristics
+- nonlinear_feature_importance
+- adaptive_group_lasso_selection
+- partial_dependence_by_feature
+- monotonicity_violation_flag
+
+Strategy ideas:
+- Nonlinear characteristic rank model.
+- Feature shape diagnostics for each signal.
+- Replace raw z-scores with learned percentile-shape scores.
+
+Main caveats:
+- Nonparametric models can overfit.
+- Interpretability requires saved shape plots or compact shape summaries.
+- Train only on past data in walk-forward windows.
+
+06. Kozak, Nagel, and Santosh (2020)
+Title: Shrinking the Cross-Section
+Source: https://cir.nii.ac.jp/crid/1360294646276443136
+
+Core idea:
+Regularization and shrinkage are essential in high-dimensional stochastic discount factor and
+cross-sectional return models.
+
+Trading translation:
+Use shrinkage everywhere when the feature count is high. Penalize extreme expected-return estimates
+and unstable weights.
+
+Features and controls to implement:
+- shrinkage_penalty
+- regularized_sdf_score
+- characteristic_covariance_penalty
+- expected_return_shrunk
+- signal_stability_score
+
+Strategy ideas:
+- Regularized cross-sectional expected return model.
+- Shrunk score ensemble.
+- Penalized portfolio weights for noisy characteristic predictions.
+
+Main caveats:
+- Choice of penalty can dominate results.
+- Shrinkage should be selected out of sample.
+- Report raw and shrunk forecasts side by side.
+
+07. Kelly, Pruitt, and Su (2019)
+Title: Characteristics Are Covariances: A Unified Model of Risk and Return
+Source: https://asu.elsevierpure.com/en/publications/characteristics-are-covariances-a-unified-model-of-risk-and-retur/
+
+Core idea:
+Characteristics can be interpreted as instruments for time-varying risk exposures. IPCA extracts
+latent factors and conditional betas from firm characteristics.
+
+Trading translation:
+Do not treat characteristics only as alpha labels. Some characteristics may proxy for conditional
+risk exposures that should influence hedging and factor controls.
+
+Features and controls to implement:
+- ipca_factor_scores
+- conditional_beta_estimates
+- characteristic_instrument_matrix
+- latent_factor_return
+- anomaly_intercept_after_ipca
+
+Strategy ideas:
+- IPCA risk model for S&P 500.
+- Characteristic-based beta forecasts.
+- Residual alpha after IPCA factor exposure controls.
+
+Main caveats:
+- IPCA is more complex than standard PCA.
+- Needs careful rolling estimation and missing data handling.
+- Keep the first version small: limited characteristics and monthly returns.
+
+08. Chen, Pelger, and Zhu (2023)
+Title: Deep Learning in Asset Pricing
+Source: https://pubsonline.informs.org/doi/10.1287/mnsc.2023.4695
+
+Core idea:
+Deep neural networks can estimate flexible conditional asset pricing models with no-arbitrage
+structure and macroeconomic state extraction, outperforming benchmark approaches in the paper.
+
+Trading translation:
+Deep learning should be used only after robust baselines exist. The useful idea is not "throw a
+giant network at returns," but "enforce structure, use macro states, and validate out of sample."
+
+Features and controls to implement:
+- neural_sdf_score
+- adversarial_test_asset_loss
+- macro_state_embedding
+- firm_characteristic_embedding
+- no_arbitrage_penalty
+- neural_model_oos_rank
+
+Strategy ideas:
+- Deep-learning meta-ranker after linear/boosted baselines.
+- Macro-state-aware expected return model.
+- Neural factor exposure model for risk management.
+
+Main caveats:
+- Easy to overfit.
+- Requires strong experiment tracking.
+- Use small models first; save compact summaries and feature importances.
+
+09. Engelberg, McLean, and Pontiff (2018)
+Title: Anomalies and News
+Source: https://rady.ucsd.edu/faculty/directory/engelberg/pub/portfolios/ANOMALIES_NEWS.pdf
+
+Core idea:
+Anomaly returns are much higher on corporate news days and especially earnings announcement days,
+consistent with biased expectations being corrected when news arrives.
+
+Trading translation:
+Anomaly signals should be event-aware. Some anomaly payoff happens around news, not smoothly every
+day.
+
+Features to implement:
+- corporate_news_day_flag
+- earnings_news_day_flag
+- anomaly_signal_x_news
+- anomaly_signal_x_earnings
+- event_window_return
+- anomaly_news_payoff_share
+
+Strategy ideas:
+- News-aware anomaly sizing.
+- Hold anomaly positions more aggressively around scheduled news if risk controls allow.
+- Diagnose which existing signals earn returns on news days versus quiet days.
+
+Main caveats:
+- News timestamps matter.
+- Earnings-day exposure carries gap risk.
+- S&P 500 news coverage is dense, so define abnormal news intensity.
+
+10. McLean and Pontiff (2016)
+Title: Does Academic Research Destroy Stock Return Predictability?
+Source: https://colab.ws/articles/10.1111/jofi.12365
+
+Core idea:
+Published return predictors weaken out of sample and weaken more after publication, consistent with
+data mining and arbitrage learning.
+
+Trading translation:
+Every academic anomaly should get a decay haircut. A strategy discovered decades ago should not be
+expected to earn the same return today.
+
+Features and controls to implement:
+- publication_date
+- post_publication_flag
+- anomaly_age_years
+- post_publication_decay_score
+- oos_decay_score
+- alpha_haircut
+
+Strategy ideas:
+- Publication-decay adjustment for all academic signals.
+- Recent-period-only strategy score.
+- Anomaly retirement rule when live/OOS performance decays.
+
+Main caveats:
+- Some anomalies decay but remain useful as risk controls.
+- A post-publication decline is not proof the anomaly is dead.
+- Keep live paper-trading evidence separate from backtest evidence.
+
+11. Gompers, Ishii, and Metrick (2003)
+Title: Corporate Governance and Equity Prices
+Source: https://academic.oup.com/qje/article-pdf/118/1/107/5406871/118-1-107.pdf
+
+Core idea:
+Firms with stronger shareholder rights had higher value and stronger performance in the paper's
+sample. Governance provisions can be economically relevant.
+
+Trading translation:
+Governance can be a slow-moving quality and risk feature. For S&P 500 names, use governance as a
+tilt or avoid overlay rather than a high-turnover signal.
+
+Features to implement:
+- governance_index
+- shareholder_rights_score
+- anti_takeover_provisions_count
+- governance_change_flag
+- governance_rank_within_sector
+
+Strategy ideas:
+- Governance quality overlay.
+- Avoid weak-governance firms when fundamentals and momentum are also weak.
+- Governance-adjusted quality score.
+
+Main caveats:
+- Governance databases update slowly.
+- Governance alpha may have weakened after becoming well known.
+- Avoid lookahead from restated governance histories.
+
+12. Bebchuk, Cohen, and Ferrell (2009)
+Title: What Matters in Corporate Governance?
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1331874
+
+Core idea:
+Only a subset of governance provisions, summarized in an entrenchment index, appears especially
+important for firm value and abnormal returns.
+
+Trading translation:
+Use targeted governance features, not giant noisy governance composites. Entrenchment may matter
+more than broad ESG/governance scores.
+
+Features to implement:
+- entrenchment_index
+- staggered_board_flag
+- poison_pill_flag
+- golden_parachute_flag
+- supermajority_requirement_flag
+- bylaw_limit_flag
+
+Strategy ideas:
+- Entrenchment avoid overlay.
+- Governance-improvement event signal.
+- Entrenchment-adjusted valuation rank.
+
+Main caveats:
+- Governance provisions change infrequently.
+- Data coverage may be expensive.
+- Effects can be regime- and sample-period-dependent.
+
+13. Edmans (2011)
+Title: Does the Stock Market Fully Value Intangibles? Employee Satisfaction and Equity Prices
+Source: https://colab.ws/articles/10.1016%2Fj.jfineco.2011.03.021
+
+Core idea:
+Companies with high employee satisfaction, measured by the "100 Best Companies to Work For" list,
+earned positive abnormal returns in the sample, suggesting the market may underprice human-capital
+intangibles.
+
+Trading translation:
+Human capital quality can be an intangible asset signal. It should be tested as a slow-moving
+quality overlay and earnings-surprise predictor.
+
+Features to implement:
+- employee_satisfaction_flag
+- employer_award_score
+- employee_review_score_if_available
+- human_capital_quality_score
+- employee_satisfaction_change
+
+Strategy ideas:
+- Human-capital quality tilt.
+- Earnings surprise confirmation from employee satisfaction.
+- Avoid low employee sentiment when labor intensity is high.
+
+Main caveats:
+- Public lists are sparse.
+- Vendor employee-review data can have selection bias.
+- Use publication dates for lists and reviews.
+
+14. Hong and Kacperczyk (2009)
+Title: The Price of Sin: The Effects of Social Norms on Markets
+Source: https://ideas.repec.org/a/eee/jfinec/v93y2009i1p15-36.html
+
+Core idea:
+Stocks in socially controversial industries may earn higher expected returns because some investors
+avoid them, reducing investor base and increasing required returns.
+
+Trading translation:
+Excluded or controversial stocks can behave differently. For S&P 500, sin/controversy exposure is
+more useful as a sector/industry tilt, risk label, and ESG-conflict feature than as a standalone
+strategy.
+
+Features to implement:
+- sin_industry_flag
+- controversial_business_exposure
+- institutional_avoidance_proxy
+- ESG_exclusion_pressure
+- controversy_rank
+
+Strategy ideas:
+- Exclusion-pressure return premium test.
+- ESG-constrained benchmark comparison.
+- Controversy-aware risk reporting.
+
+Main caveats:
+- Definitions of "sin" or controversy change over time.
+- Political and regulatory risks can dominate expected return.
+- Do not hard-code modern classifications into old dates.
+
+15. Bolton and Kacperczyk (2021)
+Title: Do Investors Care about Carbon Risk?
+Source: https://www.scirp.org/reference/referencespapers?referenceid=3758292
+
+Core idea:
+Carbon emissions and carbon risk are priced in equity markets. Investors may require compensation
+for holding high-emission firms.
+
+Trading translation:
+Carbon intensity can be both a risk premium and a transition-risk warning. Test carbon data as a
+cross-sectional signal and as a sector-neutral risk overlay.
+
+Features to implement:
+- scope1_emissions
+- scope2_emissions
+- carbon_intensity_sales
+- carbon_intensity_market_cap
+- emissions_growth
+- carbon_beta
+
+Strategy ideas:
+- Carbon risk premium test.
+- Sector-neutral low-carbon quality tilt.
+- Carbon transition risk avoid overlay during climate policy shock windows.
+
+Main caveats:
+- Carbon data has reporting lags and estimation noise.
+- Industry normalization is mandatory.
+- High carbon can mean risk premium, mispricing, or future regulation risk.
+
+16. Pastor, Stambaugh, and Taylor (2022)
+Title: Dissecting Green Returns
+Source: https://www.scirp.org/reference/referencespapers?referenceid=3699113
+
+Core idea:
+Green asset returns can reflect changing investor tastes, climate concerns, and realized cash-flow
+effects. Green outperformance is not a simple permanent free lunch.
+
+Trading translation:
+Separate expected green premium from realized repricing. A green return strategy needs to know
+whether it is betting on future preference shifts, fundamentals, or risk.
+
+Features to implement:
+- green_score
+- brown_score
+- green_minus_brown_factor
+- ESG_preference_shift_proxy
+- climate_news_attention
+- green_repricing_state
+
+Strategy ideas:
+- Green/brown factor monitor.
+- ESG preference-shift regime filter.
+- Combine green score with valuation to avoid overpaying for already-repriced green stocks.
+
+Main caveats:
+- ESG ratings disagree across vendors.
+- Green stocks can become expensive.
+- Separate long-horizon risk premium from short-horizon repricing.
+
+17. Tetlock, Saar-Tsechansky, and Macskassy (2008)
+Title: More Than Words: Quantifying Language to Measure Firms' Fundamentals
+Source: https://www.columbia.edu/~pt2238/papers/TSM_More_Than_Words_02_07.pdf
+
+Core idea:
+Firm-specific news language, especially negative words, contains information about future firm
+fundamentals and stock returns.
+
+Trading translation:
+Build compact firm-news NLP features that predict fundamentals, not only immediate sentiment.
+
+Features to implement:
+- firm_news_negative_tone
+- firm_news_positive_tone
+- abnormal_news_tone
+- news_tone_change
+- tone_forecasted_earnings_change
+- tone_forecasted_return_signal
+
+Strategy ideas:
+- News-tone fundamental forecast.
+- Negative-tone avoid overlay when fundamentals are weak.
+- Positive-tone confirmation for earnings and revenue momentum.
+
+Main caveats:
+- News vendor coverage changes over time.
+- Raw news text must be timestamped and cached into features.
+- Tone dictionaries should be finance-aware.
+
+18. Antweiler and Frank (2004)
+Title: Is All That Talk Just Noise? The Information Content of Internet Stock Message Boards
+Source: https://colab.ws/articles/10.1111%2Fj.1540-6261.2004.00662.x
+
+Core idea:
+Internet message-board activity and bullishness contain information, especially for volatility and
+trading activity, even if return prediction is noisy.
+
+Trading translation:
+Social chatter may be better as a volatility/attention feature than as a direct alpha signal.
+
+Features to implement:
+- message_volume
+- message_bullishness
+- message_disagreement
+- abnormal_message_activity
+- social_attention_vol_forecast
+- social_sentiment_rank
+
+Strategy ideas:
+- Social attention volatility warning.
+- Avoid chasing high-chatter, high-MAX stocks.
+- Use social disagreement to widen risk controls.
+
+Main caveats:
+- Platforms change over time.
+- Bots and spam matter.
+- S&P 500 names have uneven social coverage.
+
+19. Chen, De, Hu, and Hwang (2014)
+Title: Wisdom of Crowds: The Value of Stock Opinions Transmitted Through Social Media
+Source: https://academic.oup.com/rfs/article/27/5/1367/1581938
+
+Core idea:
+Investor opinions on social investing platforms, including articles and comments, can predict
+future stock returns and earnings surprises.
+
+Trading translation:
+Crowd opinions can be useful when authors or commenters have skill and when signals are aggregated
+carefully. Treat it as an alternative-data earnings and sentiment feature.
+
+Features to implement:
+- article_sentiment
+- comment_sentiment
+- author_skill_score
+- crowd_opinion_score
+- crowd_disagreement
+- social_alpha_decay
+
+Strategy ideas:
+- Crowd-confirmed earnings drift.
+- Author-skill-weighted sentiment rank.
+- Crowd disagreement risk overlay.
+
+Main caveats:
+- Survivorship bias in author skill is easy.
+- Content publication timestamps matter.
+- Social data licensing and API availability can change.
+
+20. Hendershott, Jones, and Menkveld (2011)
+Title: Does Algorithmic Trading Improve Liquidity?
+Source: https://research.vu.nl/en/publications/does-algorithmic-trading-improve-liquidity/
+
+Core idea:
+Algorithmic trading is associated with narrower spreads, lower adverse selection, and improved
+liquidity, especially for large stocks.
+
+Trading translation:
+Execution models should account for changing market structure. Large-cap S&P 500 stocks may be
+cheap to trade in normal conditions, but execution quality still varies by liquidity regime,
+intraday time, and adverse-selection risk.
+
+Features to implement:
+- effective_spread_proxy
+- quoted_spread_proxy
+- intraday_liquidity_window
+- adverse_selection_proxy
+- execution_cost_estimate
+- algorithmic_liquidity_regime
+
+Strategy ideas:
+- Intraday execution window optimizer.
+- Spread-aware rebalance scheduling.
+- Liquidity regime-aware participation caps.
+
+Main caveats:
+- The paper is about market quality, not direct alpha.
+- Intraday data is needed for the best implementation.
+- Normal large-cap liquidity can disappear in stress.
+
+================================================================================
+NEW STRATEGY PRIMITIVES FROM SET 5
+================================================================================
+
+Primitive 1: Factor admission gate
+- A new signal must add incremental value beyond existing factors and survive multiple-testing
+  controls before it enters the ensemble.
+
+Primitive 2: Characteristic registry
+- Every characteristic needs a definition, source table, lag rule, missingness report, and decay
+  score.
+
+Primitive 3: Nonlinear characteristic scoring
+- Replace raw z-scores with learned shape functions only after walk-forward validation.
+
+Primitive 4: Shrunk expected returns
+- Penalize unstable, high-dimensional forecasts and extreme portfolio weights.
+
+Primitive 5: Latent factor diagnostics
+- Use IPCA or related models to distinguish alpha from conditional risk exposure.
+
+Primitive 6: ML with structure
+- Deep learning should use economic constraints, macro states, and strong baselines.
+
+Primitive 7: News-aware anomaly timing
+- Some anomaly payoff is concentrated around news and earnings announcement windows.
+
+Primitive 8: Alternative-data quality overlays
+- Governance, human capital, carbon, green, and controversy features are slow-moving overlays.
+
+Primitive 9: Crowd sentiment as conditional signal
+- Social/crowd data should be author-weighted, timestamped, and often used for volatility/attention
+  or earnings confirmation rather than raw return prediction.
+
+Primitive 10: Execution-aware liquidity state
+- Backtests need spread, adverse-selection, and intraday execution assumptions for rebalances.
+
+================================================================================
+10 ADDITIONAL ALGORITHM DEVELOPMENT BATCHES
+================================================================================
+
+BATCH 1: Factor Zoo Triage and Signal Admission
+Source papers:
+- Feng, Giglio, and Xiu (2020)
+- Green, Hand, and Zhang (2017)
+- McLean and Pontiff (2016)
+
+Objective:
+Create a signal admission system that prevents the strategy factory from adding redundant,
+decayed, or overfit characteristics.
+
+Algorithms:
+1. Characteristic registry with lag rules and source definitions.
+2. Incremental alpha test versus existing factor set.
+3. Post-publication and recent-period decay score.
+4. Signal admission status: accept, watch, reject, or risk-control-only.
+
+Required data:
+- Existing feature store.
+- Existing strategy returns.
+- Publication dates for academic signals.
+- Monthly S&P 500 returns and benchmark factor returns.
+
+Implementation tasks for Claude Code CLI:
+- Build `src/research/characteristic_registry.py`.
+- Build `src/research/factor_admission.py`.
+- Create `configs/set5_batch1_factor_admission.yaml`.
+- Save compact output to `results/set5_batch1_factor_admission_summary.json`.
+
+Validation:
+- Ensure rejected signals remain logged.
+- Test pre-2003, post-2003, and post-publication periods separately.
+- Report which signals add value after costs and after existing controls.
+
+BATCH 2: q-Factor and Mispricing Factor Controls
+Source papers:
+- Hou, Xue, and Zhang (2015)
+- Stambaugh and Yuan (2017)
+
+Objective:
+Build factor-control diagnostics so each strategy can be tested against q-factor and composite
+mispricing explanations.
+
+Algorithms:
+1. q-factor exposure report.
+2. Composite mispricing score.
+3. Alpha residual after q-factor and mispricing controls.
+4. Conflict report for signals that are just factor exposure.
+
+Required data:
+- Monthly strategy returns.
+- Factor return proxies or downloaded academic factors.
+- Investment, profitability, and anomaly cluster features.
+
+Implementation tasks:
+- Build `src/factors/q_mispricing_controls.py`.
+- Add factor regression summaries to every strategy JSON.
+- Save `results/set5_batch2_factor_controls_summary.json`.
+
+Validation:
+- Compare raw alpha, q-factor alpha, and mispricing-factor alpha.
+- Use the same sample dates across models.
+- Report factor loadings and t-statistics compactly.
+
+BATCH 3: Nonlinear Characteristic Model
+Source papers:
+- Freyberger, Neuhierl, and Weber (2020)
+- Green, Hand, and Zhang (2017)
+- Kozak, Nagel, and Santosh (2020)
+
+Objective:
+Build a nonlinear but regularized model for monthly S&P 500 cross-sectional expected returns.
+
+Algorithms:
+1. Percentile-binned characteristic model.
+2. Spline/shape-function model.
+3. Adaptive feature selection or elastic-net fallback.
+4. Shrunk expected-return score.
+
+Required data:
+- Monthly feature panel.
+- Monthly next-period returns.
+- Existing characteristics from Sets 1-4.
+
+Implementation tasks:
+- Build `src/models/nonlinear_characteristic_model.py`.
+- Save learned feature-shape summaries rather than huge plots.
+- Backtest top/bottom quantiles and long-only rank versions.
+- Save `results/set5_batch3_nonlinear_characteristics_summary.json`.
+
+Validation:
+- Use rolling or expanding walk-forward splits.
+- Compare to linear and equal-weight rank baselines.
+- Report feature stability across time.
+
+BATCH 4: IPCA and Latent Factor Risk Model
+Source papers:
+- Kelly, Pruitt, and Su (2019)
+- Kozak, Nagel, and Santosh (2020)
+
+Objective:
+Distinguish alpha signals from conditional risk exposures using a compact latent-factor model.
+
+Algorithms:
+1. IPCA-style factor extraction.
+2. Characteristic-instrumented conditional betas.
+3. Residual alpha after latent factor controls.
+4. Latent risk exposure dashboard.
+
+Required data:
+- Monthly stock returns.
+- Monthly characteristic panel.
+- Sector and industry labels.
+
+Implementation tasks:
+- Build `src/models/ipca_risk_model.py`.
+- Start with 10-20 characteristics only.
+- Save factor returns, stock betas, and residual alphas to Parquet.
+- Save `results/set5_batch4_ipca_summary.json`.
+
+Validation:
+- Compare against PCA and Fama-French/q-factor controls.
+- Report missingness and number of stocks per month.
+- Do not use future characteristics in beta estimation.
+
+BATCH 5: Structured ML and Deep Asset Pricing Baselines
+Source papers:
+- Chen, Pelger, and Zhu (2023)
+- Freyberger, Neuhierl, and Weber (2020)
+- Kozak, Nagel, and Santosh (2020)
+
+Objective:
+Create an ML model ladder that escalates from simple models to neural models only when evidence
+justifies the complexity.
+
+Algorithms:
+1. Linear rank model.
+2. Elastic net model.
+3. Gradient boosting model.
+4. Small neural network model.
+5. No-arbitrage or factor-neutral penalty prototype.
+
+Required data:
+- Feature matrix from the characteristic registry.
+- Monthly returns.
+- Macro state features from Set 4 if available.
+
+Implementation tasks:
+- Build `src/models/set5_ml_model_ladder.py`.
+- Add shared train/test split utilities.
+- Log every model and parameter trial to the trial registry.
+- Save `results/set5_batch5_ml_ladder_summary.json`.
+
+Validation:
+- ML must beat linear and gradient boosting baselines out of sample.
+- Report turnover and cost-adjusted performance.
+- Require feature importance or contribution summaries.
+
+BATCH 6: News-Aware Anomaly Timing
+Source papers:
+- Engelberg, McLean, and Pontiff (2018)
+- Tetlock, Saar-Tsechansky, and Macskassy (2008)
+
+Objective:
+Determine whether existing anomaly strategies earn returns on news days, earnings days, or quiet
+days, and adjust holding/risk rules accordingly.
+
+Algorithms:
+1. News-day payoff decomposition.
+2. Earnings-day anomaly payoff decomposition.
+3. Firm-news tone overlay.
+4. News-aware anomaly position sizing.
+
+Required data:
+- Existing anomaly signal outputs.
+- Corporate news dates and timestamps.
+- Earnings announcement dates.
+- News-tone features.
+
+Implementation tasks:
+- Build `src/analysis/news_anomaly_decomposition.py`.
+- Add `news_day_flag` and `earnings_day_flag` to returns panel.
+- Produce payoff decomposition by signal family.
+- Save `results/set5_batch6_news_anomaly_summary.json`.
+
+Validation:
+- Use timestamped news availability.
+- Distinguish scheduled earnings from unscheduled corporate news.
+- Report gap-risk behavior around earnings.
+
+BATCH 7: Governance, Entrenchment, and Human Capital
+Source papers:
+- Gompers, Ishii, and Metrick (2003)
+- Bebchuk, Cohen, and Ferrell (2009)
+- Edmans (2011)
+
+Objective:
+Build slow-moving governance and human-capital overlays for S&P 500 quality and risk models.
+
+Algorithms:
+1. Governance quality score.
+2. Entrenchment avoid overlay.
+3. Employee satisfaction/human-capital quality tilt.
+4. Governance plus quality composite.
+
+Required data:
+- Governance provisions or vendor governance ratings.
+- Employee satisfaction list/review data.
+- Fundamentals and returns.
+
+Implementation tasks:
+- Build `src/features/features_governance_human_capital.py`.
+- Add publication-date aware feature tables.
+- Backtest quarterly and annual rebalances.
+- Save `results/set5_batch7_governance_human_capital_summary.json`.
+
+Validation:
+- Use data as published, not as restated.
+- Test sector-neutral and sector-unconstrained versions.
+- Report low turnover and holding-period assumptions.
+
+BATCH 8: ESG, Carbon, Green, and Controversy Signals
+Source papers:
+- Hong and Kacperczyk (2009)
+- Bolton and Kacperczyk (2021)
+- Pastor, Stambaugh, and Taylor (2022)
+
+Objective:
+Separate ESG-related risk premia, repricing, and exclusion pressure in S&P 500 names.
+
+Algorithms:
+1. Sin/controversy exposure test.
+2. Carbon risk premium test.
+3. Green-minus-brown factor monitor.
+4. ESG preference-shift regime filter.
+
+Required data:
+- ESG ratings or controversy labels.
+- Carbon emissions and intensity.
+- Sector/industry labels.
+- Climate or ESG news attention proxy.
+
+Implementation tasks:
+- Build `src/features/features_esg_carbon.py`.
+- Normalize carbon and ESG measures within industry.
+- Test as long-only overlay, not just long-short strategy.
+- Save `results/set5_batch8_esg_carbon_summary.json`.
+
+Validation:
+- Report vendor coverage and backfill risk.
+- Test industry-neutral versions.
+- Separate realized green repricing from expected future premium.
+
+BATCH 9: Crowd and Social Opinion Signals
+Source papers:
+- Antweiler and Frank (2004)
+- Chen, De, Hu, and Hwang (2014)
+
+Objective:
+Build timestamped social/crowd features that can support sentiment, attention, volatility, and
+earnings-surprise models.
+
+Algorithms:
+1. Message-volume attention signal.
+2. Social bullishness and disagreement signal.
+3. Author-skill-weighted crowd opinion score.
+4. Crowd-confirmed earnings drift.
+
+Required data:
+- Social/message-board data or vendor social sentiment.
+- Article/comment timestamps.
+- Earnings events.
+- Returns and volume.
+
+Implementation tasks:
+- Build `src/features/features_crowd_social.py`.
+- Store only compact ticker/date sentiment features.
+- Add author-skill estimates using only historical data.
+- Save `results/set5_batch9_crowd_social_summary.json`.
+
+Validation:
+- Avoid author-skill lookahead.
+- Separate attention/volatility prediction from return prediction.
+- Report robustness to bot/spam filters if available.
+
+BATCH 10: Execution Microstructure and Algorithmic Liquidity
+Source papers:
+- Hendershott, Jones, and Menkveld (2011)
+
+Objective:
+Improve the execution assumptions used by all S&P 500 backtests, especially for rebalancing large
+multi-stock portfolios.
+
+Algorithms:
+1. Spread-aware execution cost model.
+2. Effective-spread and adverse-selection proxy.
+3. Intraday execution window preference.
+4. Liquidity-regime participation cap.
+
+Required data:
+- Daily OHLCV at minimum.
+- Intraday bars or TAQ-style data if available.
+- Bid/ask or spread estimates if available.
+
+Implementation tasks:
+- Build `src/execution/execution_microstructure.py`.
+- Add configurable spread and impact model.
+- Add "normal liquidity" versus "stress liquidity" execution modes.
+- Save `results/set5_batch10_execution_microstructure_summary.json`.
+
+Validation:
+- Compare daily proxy cost to intraday/spread data where available.
+- Stress test during high-volatility days.
+- Report strategy sensitivity to cost assumptions.
+
+================================================================================
+SUGGESTED DATA TABLES TO ADD TO YOUR RESEARCH STACK
+================================================================================
+
+1. `characteristic_registry`
+Columns:
+- characteristic_name, source_table, formula_version, lag_rule, publication_reference,
+  first_available_date, missing_policy, feature_family, accepted_status
+
+2. `factor_admission_tests`
+Columns:
+- test_date, characteristic_name, raw_alpha, factor_adjusted_alpha, incremental_alpha,
+  adjusted_t_stat, oos_score, post_publication_decay, admission_status
+
+3. `factor_controls_monthly`
+Columns:
+- date, strategy_name, market_beta, q_size_beta, q_investment_beta, q_profitability_beta,
+  mispricing_mgmt_beta, mispricing_perf_beta, raw_alpha, adjusted_alpha
+
+4. `ml_predictions_monthly`
+Columns:
+- date, ticker, model_name, prediction, prediction_rank, model_version, train_window_id,
+  feature_set_hash, expected_return_shrunk
+
+5. `latent_factor_exposures`
+Columns:
+- date, ticker, latent_factor_1_beta, latent_factor_2_beta, latent_factor_3_beta,
+  residual_alpha_score, model_version
+
+6. `news_anomaly_panel`
+Columns:
+- date, ticker, anomaly_family, anomaly_score, news_day_flag, earnings_day_flag,
+  news_tone, event_window_return
+
+7. `governance_human_capital_features`
+Columns:
+- asof_date, ticker, governance_index, entrenchment_index, employee_satisfaction_score,
+  human_capital_quality_score, data_publication_date
+
+8. `esg_carbon_features`
+Columns:
+- asof_date, ticker, ESG_score, controversy_score, sin_flag, scope1_emissions,
+  scope2_emissions, carbon_intensity, green_score, brown_score, data_publication_date
+
+9. `crowd_social_features`
+Columns:
+- date, ticker, message_volume, bullishness, disagreement, article_sentiment,
+  comment_sentiment, author_skill_weighted_sentiment
+
+10. `execution_liquidity_features`
+Columns:
+- date, ticker, effective_spread_proxy, quoted_spread_proxy, dollar_volume,
+  adverse_selection_proxy, execution_cost_estimate, liquidity_regime
+
+================================================================================
+RECOMMENDED IMPLEMENTATION ORDER
+================================================================================
+
+1. Batch 1: Factor zoo triage and signal admission
+Reason:
+Before adding more features, build a gate that decides whether new features deserve to live.
+
+2. Batch 2: q-factor and mispricing-factor controls
+Reason:
+You need to know whether new strategies are just old factor exposures.
+
+3. Batch 10: Execution microstructure
+Reason:
+Cost assumptions affect every strategy, and S&P 500 strategies often look better than they trade.
+
+4. Batch 3: Nonlinear characteristic model
+Reason:
+Gives better feature-shape diagnostics without jumping straight to deep learning.
+
+5. Batch 5: Structured ML model ladder
+Reason:
+Only after simple nonlinear and shrinkage baselines exist.
+
+6. Batch 4: IPCA latent factor model
+Reason:
+Useful for separating alpha from conditional risk, but more complex than basic controls.
+
+7. Batch 6: News-aware anomaly timing
+Reason:
+Useful if you already have news and earnings dates.
+
+8. Batch 7: Governance and human capital
+Reason:
+Slow-moving, useful overlays, but dependent on vendor/list data.
+
+9. Batch 8: ESG, carbon, and controversy
+Reason:
+Valuable but requires careful industry normalization and data-lag handling.
+
+10. Batch 9: Crowd/social opinion
+Reason:
+Interesting but noisy and data-platform dependent.
+
+================================================================================
+TOKEN-EFFICIENT CLAUDE CODE CLI WORKFLOW
+================================================================================
+
+Use this pattern for each batch:
+
+1. Store every batch config in YAML.
+   Example:
+   - `configs/set5_batch1_factor_admission.yaml`
+
+2. Cache feature panels to Parquet.
+   Example:
+   - `data/features/set5_characteristic_registry.parquet`
+
+3. Save compact JSON summaries.
+   Example:
+   - `results/set5_batch1_factor_admission_summary.json`
+
+4. Keep raw alternative data out of prompts.
+   Do not paste news articles, social posts, employee reviews, or ESG reports into normal Claude
+   Code CLI iterations. Convert them to compact features first.
+
+5. Make every model write an experiment record.
+   Required fields:
+   - model_name
+   - feature_set_hash
+   - train_window
+   - test_window
+   - parameter_grid_id
+   - gross_metrics
+   - net_metrics
+   - accepted_or_rejected
+   - rejection_reason
+
+6. Ask Claude Code CLI to inspect summaries first.
+   Good prompt:
+   "Read only the config and summary JSON. Tell me whether this signal adds incremental alpha after
+   q-factor, mispricing-factor, costs, and post-publication decay controls. Do not inspect the full
+   feature panel unless the summary shows a data issue."
+
+================================================================================
+SOURCE LIST
+================================================================================
+
+01. Hou, Xue, and Zhang, Digesting Anomalies: An Investment Approach
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2508322
+
+02. Stambaugh and Yuan, Mispricing Factors
+    https://academic.oup.com/rfs/article/30/4/1270/2965095
+
+03. Feng, Giglio, and Xiu, Taming the Factor Zoo
+    https://ideas.repec.org/a/bla/jfinan/v75y2020i3p1327-1370.html
+
+04. Green, Hand, and Zhang, The Characteristics that Provide Independent Information about Average U.S. Monthly Stock Returns
+    https://ideas.repec.org/a/oup/rfinst/v30y2017i12p4389-4436..html
+
+05. Freyberger, Neuhierl, and Weber, Dissecting Characteristics Nonparametrically
+    https://colab.ws/articles/10.1093/rfs/hhz123
+
+06. Kozak, Nagel, and Santosh, Shrinking the Cross-Section
+    https://cir.nii.ac.jp/crid/1360294646276443136
+
+07. Kelly, Pruitt, and Su, Characteristics Are Covariances
+    https://asu.elsevierpure.com/en/publications/characteristics-are-covariances-a-unified-model-of-risk-and-retur/
+
+08. Chen, Pelger, and Zhu, Deep Learning in Asset Pricing
+    https://pubsonline.informs.org/doi/10.1287/mnsc.2023.4695
+
+09. Engelberg, McLean, and Pontiff, Anomalies and News
+    https://rady.ucsd.edu/faculty/directory/engelberg/pub/portfolios/ANOMALIES_NEWS.pdf
+
+10. McLean and Pontiff, Does Academic Research Destroy Stock Return Predictability?
+    https://colab.ws/articles/10.1111/jofi.12365
+
+11. Gompers, Ishii, and Metrick, Corporate Governance and Equity Prices
+    https://academic.oup.com/qje/article-pdf/118/1/107/5406871/118-1-107.pdf
+
+12. Bebchuk, Cohen, and Ferrell, What Matters in Corporate Governance?
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1331874
+
+13. Edmans, Does the Stock Market Fully Value Intangibles? Employee Satisfaction and Equity Prices
+    https://colab.ws/articles/10.1016%2Fj.jfineco.2011.03.021
+
+14. Hong and Kacperczyk, The Price of Sin
+    https://ideas.repec.org/a/eee/jfinec/v93y2009i1p15-36.html
+
+15. Bolton and Kacperczyk, Do Investors Care about Carbon Risk?
+    https://www.scirp.org/reference/referencespapers?referenceid=3758292
+
+16. Pastor, Stambaugh, and Taylor, Dissecting Green Returns
+    https://www.scirp.org/reference/referencespapers?referenceid=3699113
+
+17. Tetlock, Saar-Tsechansky, and Macskassy, More Than Words
+    https://www.columbia.edu/~pt2238/papers/TSM_More_Than_Words_02_07.pdf
+
+18. Antweiler and Frank, Is All That Talk Just Noise?
+    https://colab.ws/articles/10.1111%2Fj.1540-6261.2004.00662.x
+
+19. Chen, De, Hu, and Hwang, Wisdom of Crowds
+    https://academic.oup.com/rfs/article/27/5/1367/1581938
+
+20. Hendershott, Jones, and Menkveld, Does Algorithmic Trading Improve Liquidity?
+    https://research.vu.nl/en/publications/does-algorithmic-trading-improve-liquidity/
+
+================================================================================
+FIRST TASK TO GIVE CLAUDE CODE CLI
+================================================================================
+
+Use this exact task:
+
+"Create a Set 5 research scaffold for S&P 500 strategy development using
+`sp500_quant_paper_learnings_set5_for_10_algo_batches.txt`. Implement Batch 1 and Batch 2 first:
+factor zoo triage, signal admission, q-factor controls, and mispricing-factor controls. Use YAML
+configs, cached Parquet outputs, unit tests for lag rules and registry integrity, and compact JSON
+summaries. Do not implement deep learning, ESG/carbon, social media, or raw news parsing yet."
+
+Expected first outputs:
+- `configs/set5_batch1_factor_admission.yaml`
+- `configs/set5_batch2_factor_controls.yaml`
+- `src/research/characteristic_registry.py`
+- `src/research/factor_admission.py`
+- `src/factors/q_mispricing_controls.py`
+- `tests/test_characteristic_registry_lag_rules.py`
+- `tests/test_factor_admission_no_lookahead.py`
+- `results/set5_batch1_factor_admission_summary.json`
+- `results/set5_batch2_factor_controls_summary.json`
+
+================================================================================
+WHAT NOT TO DO FIRST
+================================================================================
+
+Do not start with:
+- deep neural asset pricing models
+- raw social media scraping
+- raw news NLP
+- ESG vendor integration
+- carbon data integration
+- IPCA with hundreds of characteristics
+
+Start with:
+- characteristic registry
+- signal admission tests
+- factor controls
+- anomaly decay controls
+- execution cost model improvements
+- simple nonlinear characteristic diagnostics
+
+These create the guardrails that make later alternative-data and ML work less likely to become a
+beautiful mess with a suspicious Sharpe ratio.
+
+================================================================================
+HIGHEST-ROI SET 5 IDEAS
+================================================================================
+
+1. Build a characteristic registry before adding any more features.
+
+2. Add a factor admission test so new signals must prove incremental value.
+
+3. Add q-factor and mispricing-factor alpha diagnostics to every strategy summary.
+
+4. Add post-publication and recent-period decay haircuts for academic anomalies.
+
+5. Use nonlinear shape diagnostics before jumping to deep learning.
+
+6. Use shrinkage and regularization for every high-dimensional forecast.
+
+7. Treat ML as a model ladder, not a first move: linear, elastic net, boosting, then neural.
+
+8. Test whether anomaly returns happen on news days, earnings days, or quiet days.
+
+9. Add governance, human capital, ESG, carbon, and controversy as slow overlays only after lag rules
+   are nailed down.
+
+10. Improve execution cost and liquidity assumptions before trusting small alpha improvements.
+

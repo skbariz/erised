@@ -1,0 +1,1342 @@
+S&P 500 QUANT PAPER LEARNINGS - SET 4
+Fourth non-overlapping set of 20 papers for planning 10 additional batches of trading algorithms
+
+Purpose:
+This file is a chatbot-ready research brief. It summarizes a fourth set of 20 quant trading,
+financial modeling, portfolio construction, and backtest-validation papers that were not used as
+core papers in Sets 1, 2, or 3. It then turns those papers into 10 practical development batches
+for S&P 500 strategy research in Claude Code CLI.
+
+Important:
+This is research and software-planning material, not financial advice. Every strategy must be
+tested with point-in-time data, realistic transaction costs, conservative execution assumptions,
+out-of-sample validation, and explicit records of how many model variants were tested.
+
+================================================================================
+HOW SET 4 IS DIFFERENT FROM SETS 1, 2, AND 3
+================================================================================
+
+Set 1 focused on the core alpha engine:
+- momentum, trend, value, quality, profitability, low beta, volatility management,
+  earnings drift, liquidity-aware reversal, pairs/stat-arb, and ML ranking.
+
+Set 2 focused on additional cross-sectional anomalies:
+- industry momentum, residual momentum, reversal, seasonality, corporate issuance,
+  analyst/insider/short-seller signals, options-informed signals, attention, and sentiment.
+
+Set 3 focused on robustness and hard-data signal families:
+- lottery risk, distress, accounting sustainability, R&D/intangibles, customer-supplier links,
+  volume/visibility, text tone, index events, fund-flow pressure, and trading-cost survival.
+
+Set 4 focuses on the top-down and portfolio layer:
+- equity premium prediction and market exposure timing
+- forecast combinations instead of single macro predictors
+- consumption-wealth and cross-sectional valuation state variables
+- variance risk premium and option-implied expected returns
+- model-free implied volatility and option-implied skew
+- marketwide liquidity risk and funding-liquidity stress
+- liquidity risk in momentum and earnings drift
+- mutual-fund flow sentiment and flow-induced return pressure
+- robust portfolio construction under estimation error
+- backtest-overfitting controls and research governance
+
+The main use of Set 4 is to make your S&P 500 strategy factory better at:
+- deciding when to take more or less market exposure
+- sizing strategy sleeves by regime
+- managing liquidity and crash risk
+- building portfolios that do not collapse under estimation error
+- rejecting backtests that only look good because too many variants were tried
+
+================================================================================
+CHATBOT PROMPT TO USE WITH THIS FILE
+================================================================================
+
+Paste this file into a chatbot with this prompt:
+
+"You are helping me build S&P 500 quant trading algorithms in Claude Code CLI. Use this Set 4
+research brief to design 10 development batches. For each batch, specify exact features, data
+tables, configs, tests, backtest assumptions, validation checks, and compact output artifacts.
+Favor token-efficient CLI workflows: cached Parquet features, YAML configs, small JSON summaries,
+and reusable tests. Build market timing and portfolio-construction infrastructure before complex
+options or fund-flow data. Do not implement everything at once."
+
+================================================================================
+IMPLEMENTATION WARNINGS FOR THIS SET
+================================================================================
+
+1. Macro timing is fragile.
+   Equity premium prediction papers disagree. Treat market timing as a cautious exposure scaler,
+   not an all-in/all-out switch.
+
+2. Most predictors are low signal-to-noise.
+   Use forecast combinations, sign constraints, nonnegative expected return constraints, and
+   walk-forward validation.
+
+3. Option-implied variables require careful calendars.
+   Align option data by quote date, expiration, moneyness, and option availability. Do not mix
+   today's VIX or option surface into yesterday's rebalance.
+
+4. Liquidity and funding stress are regime variables.
+   They may not produce daily signals. Use them to size risk, widen no-trade bands, reduce
+   leverage, and change turnover limits.
+
+5. Portfolio optimization can overfit faster than alpha signals.
+   Start with equal weight, capped equal weight, inverse-vol, shrinkage covariance, and no-short
+   constrained minimum variance before using expected-return optimizers.
+
+6. Backtest governance is part of the alpha.
+   Save every parameter trial. If you do not know how many strategies were tested, you cannot
+   honestly judge the best Sharpe ratio.
+
+================================================================================
+20 ADDITIONAL PAPERS AND IMPLEMENTATION LEARNINGS
+================================================================================
+
+01. Goyal and Welch (2008)
+Title: A Comprehensive Look at The Empirical Performance of Equity Premium Prediction
+Source: https://faculty.washington.edu/ezivot/econ589/goyalWelchRFS2008.pdf
+
+Core idea:
+Many popular equity premium predictors look good in-sample but fail out-of-sample. Forecasting the
+market return is hard, unstable, and vulnerable to data mining.
+
+Trading translation:
+Do not trust a single macro timing variable. Use this paper as the "skeptic baseline" for every
+SPY exposure model. A timing overlay must beat the historical average or simple trend/risk rules
+out of sample, net of turnover.
+
+Features to implement:
+- dividend_yield
+- earnings_price
+- book_to_market_market
+- term_spread
+- default_spread
+- treasury_bill_rate
+- inflation
+- net_equity_issuance
+- historical_average_equity_premium
+
+Strategy ideas:
+- Market-timing benchmark: compare every predictor to historical average return.
+- Predictor graveyard report: list variables that work in-sample but fail out-of-sample.
+- Exposure scaler only if forecast survives OOS tests and costs.
+
+Main caveats:
+- The lesson is not "never time the market"; it is "assume market timing is guilty until proven
+  robust."
+- Macroeconomic series have revisions and publication lags.
+- Avoid tuning sample start dates to make a predictor look good.
+
+02. Campbell and Thompson (2008)
+Title: Predicting Excess Stock Returns Out of Sample: Can Anything Beat the Historical Average?
+Source: https://dash.harvard.edu/entities/publication/73120378-7dd1-6bd4-e053-0100007fdf3b
+
+Core idea:
+Weak economic restrictions can improve out-of-sample equity premium forecasts. Examples include
+forcing coefficients to have economically sensible signs and setting negative equity premium
+forecasts to zero.
+
+Trading translation:
+Build constrained forecasts. If a predictor says expected stock excess return is sharply negative
+from a variable that should have a positive relationship, clip or reject the signal.
+
+Features to implement:
+- constrained_predictor_forecast
+- positive_slope_constraint
+- nonnegative_equity_premium_forecast
+- rolling_oos_r2
+- forecast_volatility
+- model_turnover
+
+Strategy ideas:
+- Constrained macro exposure: scale SPY between 0 and 1.25 based on clipped expected return.
+- Forecast sign guardrail: reject coefficient signs that violate prior economics.
+- Steady-state valuation forecast: smooth valuation ratios before forecasting.
+
+Main caveats:
+- Constraints reduce nonsense but do not create strong signal by themselves.
+- Use expanding-window or walk-forward fitting only.
+- Forecast evaluation must be out-of-sample.
+
+03. Rapach, Strauss, and Zhou (2010)
+Title: Out-of-Sample Equity Premium Prediction: Combination Forecasts and Links to the Real Economy
+Source: https://ideas.repec.org/a/oup/rfinst/v23y2010i2p821-862.html
+
+Core idea:
+Combining forecasts from many predictors can outperform relying on any single predictor. Forecast
+combination reduces instability and links equity premium forecasts to real economic conditions.
+
+Trading translation:
+Use a macro forecast ensemble. A median or trimmed-mean forecast across predictors is often more
+stable than the best-looking individual regression.
+
+Features to implement:
+- forecast_dp
+- forecast_ep
+- forecast_term
+- forecast_default
+- forecast_inflation
+- forecast_net_issuance
+- combo_mean_forecast
+- combo_median_forecast
+- combo_trimmed_forecast
+- combo_dispersion
+
+Strategy ideas:
+- Combination equity premium forecast.
+- Regime confidence score: lower exposure when predictors disagree.
+- Predictor contribution report for token-efficient debugging.
+
+Main caveats:
+- Forecast combination can still fail if all inputs are weak.
+- Store every individual forecast, not just the final combined value.
+- Watch for macro data revisions.
+
+04. Lettau and Ludvigson (2001)
+Title: Consumption, Aggregate Wealth, and Expected Stock Returns
+Source: https://colab.ws/articles/10.1111%2F0022-1082.00347
+
+Core idea:
+The consumption-wealth ratio, often referred to as cay, can predict aggregate stock returns and
+reflect time-varying expected returns.
+
+Trading translation:
+Use cay-like variables as slow-moving market state indicators. They are not daily trading signals,
+but they can help set medium-term risk exposure.
+
+Features to implement:
+- cay_proxy
+- consumption_growth
+- asset_wealth_growth
+- labor_income_growth
+- cay_zscore
+- cay_regime
+
+Strategy ideas:
+- Quarterly market exposure scaler using cay regime.
+- Risk budget increase when expected returns are high and volatility is not extreme.
+- Combine cay with variance risk premium and valuation forecasts.
+
+Main caveats:
+- Exact cay construction can be difficult.
+- Macro data revisions are serious.
+- Quarterly frequency means limited sample size.
+
+05. Kelly and Pruitt (2013)
+Title: Market Expectations in the Cross Section of Present Values
+Source: https://sethpruitt.net/2013/10/31/market-expectations-in-the-cross-section-of-present-values/
+
+Core idea:
+Aggregate market return expectations can be extracted from the cross section of valuation ratios,
+such as book-to-market spreads, using latent-factor methods.
+
+Trading translation:
+Let the cross section speak about the aggregate market. Instead of using only one market-level
+valuation ratio, extract a state variable from valuation spreads across industries or factors.
+
+Features to implement:
+- cross_sectional_bm_factor
+- valuation_spread_growth_vs_value
+- industry_valuation_spread
+- factor_valuation_spread
+- pls_market_forecast
+- cross_section_expected_return_state
+
+Strategy ideas:
+- Market exposure scaler from valuation-spread state.
+- Sector allocation tilt when valuation spreads imply changing discount rates.
+- Combine cross-sectional present-value state with macro forecast ensemble.
+
+Main caveats:
+- Latent-factor methods can overfit.
+- Keep the factor extraction pipeline simple and walk-forward.
+- Document which portfolios or industries are used to build the state variable.
+
+06. Bollerslev, Tauchen, and Zhou (2009)
+Title: Expected Stock Returns and Variance Risk Premia
+Source: https://academic.oup.com/rfs/article-pdf/22/11/4463/5369494/hhp008.pdf
+
+Core idea:
+The variance risk premium, the gap between option-implied variance and realized variance, predicts
+aggregate stock market returns. High variance risk premia often indicate high compensation for
+bearing equity risk.
+
+Trading translation:
+Use VRP as a market exposure and risk-budget signal. It can help distinguish "expensive fear" from
+ordinary realized volatility.
+
+Features to implement:
+- implied_variance_30d
+- realized_variance_21d
+- realized_variance_63d
+- variance_risk_premium
+- vrp_zscore
+- vrp_term_proxy
+
+Strategy ideas:
+- VRP market-timing overlay for SPY exposure.
+- Increase equity exposure when VRP is high but trend/liquidity are not broken.
+- Reduce short-volatility or high-beta exposure when VRP collapses.
+
+Main caveats:
+- Requires option-implied variance or VIX-style data.
+- VRP can spike during crises before losses are over.
+- Use trend and liquidity stress as guardrails.
+
+07. Carr and Wu (2009)
+Title: Variance Risk Premiums
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1359527
+
+Core idea:
+Variance risk premium can be measured using option portfolios that approximate variance swap
+rates. The paper studies variance risk premia across indexes and individual stocks.
+
+Trading translation:
+If you have options data, build model-free variance measures rather than relying only on at-the-
+money implied volatility.
+
+Features to implement:
+- synthetic_variance_swap_rate
+- realized_variance_to_expiration
+- index_vrp
+- single_name_vrp
+- vrp_cross_section_rank
+- vrp_change_1m
+
+Strategy ideas:
+- Index VRP exposure overlay.
+- Single-name VRP risk premium research sleeve.
+- Avoid single-name positions where option-implied variance is misaligned with realized risk.
+
+Main caveats:
+- Option surface construction is nontrivial.
+- Single-name options can be illiquid.
+- Use quotes with bid/ask filters and minimum open interest.
+
+08. Jiang and Tian (2005)
+Title: The Model-Free Implied Volatility and Its Information Content
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2220067
+
+Core idea:
+Model-free implied volatility extracted from option prices can contain more information about
+future realized volatility than Black-Scholes implied volatility or past realized volatility.
+
+Trading translation:
+Build option-implied volatility forecasts that use the whole option surface when available, then
+compare them to realized volatility forecasts for risk sizing.
+
+Features to implement:
+- model_free_implied_vol
+- atm_implied_vol
+- historical_vol_21d
+- forecast_realized_vol
+- implied_minus_realized_vol
+- vol_forecast_error
+
+Strategy ideas:
+- Volatility-targeted equity exposure using model-free implied volatility.
+- Risk-budget reduction when implied volatility forecast rises faster than realized volatility.
+- Single-name risk forecast for position caps.
+
+Main caveats:
+- Model-free implied vol needs enough strikes.
+- Bad option quotes can dominate estimates.
+- For many S&P 500 stocks, use ATM IV fallback when option surface is sparse.
+
+09. Martin (2017)
+Title: What is the Expected Return on the Market?
+Source: https://ideas.repec.org/a/oup/qjecon/v132y2017i1p367-433..html
+
+Core idea:
+Option prices can be used to infer a lower bound or estimate of the expected return on the market.
+The option-implied expected return can be especially useful for market timing and risk premia.
+
+Trading translation:
+Use option prices to infer expected market compensation, not just risk. This can complement
+valuation-based equity premium forecasts.
+
+Features to implement:
+- option_implied_expected_market_return
+- martin_bound_proxy
+- option_expected_return_zscore
+- expected_return_minus_realized_vol
+- implied_sharpe_proxy
+
+Strategy ideas:
+- Option-implied SPY exposure scaler.
+- Combine option-implied expected return with VRP and trend.
+- Defensive trigger when option-implied expected return falls while volatility rises.
+
+Main caveats:
+- Requires option data and careful implementation.
+- The measure is market-level, not single-stock alpha.
+- Use as an allocation overlay, not a daily trading switch.
+
+10. Bakshi, Kapadia, and Madan (2003)
+Title: Stock Return Characteristics, Skew Laws, and the Differential Pricing of Individual Equity Options
+Source: https://ideas.repec.org/a/oup/rfinst/v16y2003i1p101-143.html
+
+Core idea:
+Option prices reveal risk-neutral skewness, and individual equity option skews differ from market
+index skews. Skew contains information about downside risk and option pricing differences.
+
+Trading translation:
+Use option-implied skew as a crash-risk and crowding feature. Stocks with steep downside skew may
+need lower position caps or stricter entry requirements.
+
+Features to implement:
+- option_implied_skew
+- put_call_iv_slope
+- risk_neutral_skew_proxy
+- skew_change_1m
+- skew_rank_within_sector
+- skew_x_momentum
+
+Strategy ideas:
+- Downside-skew risk overlay for long portfolios.
+- Options-confirmed crash-risk screen.
+- Skew-aware position sizing for high-momentum names.
+
+Main caveats:
+- Single-name skew is noisy when options are illiquid.
+- Skew can reflect real event risk.
+- Avoid comparing raw skew across sectors without normalization.
+
+11. Pastor and Stambaugh (2003)
+Title: Liquidity Risk and Expected Stock Returns
+Source: https://colab.ws/articles/10.1086%2F374184
+
+Core idea:
+Stocks with higher sensitivity to aggregate liquidity shocks earn higher expected returns. Market
+liquidity is a priced state variable.
+
+Trading translation:
+Liquidity is not just a trading-cost nuisance. Liquidity beta can be a risk exposure and regime
+variable for expected returns.
+
+Features to implement:
+- market_liquidity_proxy
+- liquidity_shock
+- stock_liquidity_beta
+- liquidity_reversal_measure
+- aggregate_liquidity_zscore
+- liquidity_beta_rank
+
+Strategy ideas:
+- Liquidity-beta risk report for every strategy.
+- Liquidity-regime exposure scaler.
+- Prefer high-liquidity-beta stocks only when the portfolio is compensated and funding stress is low.
+
+Main caveats:
+- Estimating liquidity beta is noisy.
+- Liquidity premia can look good until crisis losses arrive.
+- Separate expected trading cost from liquidity beta.
+
+12. Acharya and Pedersen (2005)
+Title: Asset Pricing with Liquidity Risk
+Source: https://www.sciencedirect.com/science/article/pii/S0304405X05000334
+
+Core idea:
+Expected returns depend on expected liquidity and multiple liquidity-risk covariances: return with
+market return, liquidity with market liquidity, liquidity with market return, and return with
+market liquidity.
+
+Trading translation:
+Create liquidity-adjusted expected return and risk measures. A stock is worse if it becomes hard
+to trade exactly when the market is falling.
+
+Features to implement:
+- expected_illiquidity
+- illiquidity_beta_market_return
+- return_beta_market_liquidity
+- illiquidity_beta_market_liquidity
+- liquidity_adjusted_score
+- flight_to_liquidity_flag
+
+Strategy ideas:
+- Liquidity-adjusted ranking: alpha minus liquidity-risk penalty.
+- Crisis-risk overlay: cut names whose liquidity worsens in down markets.
+- Turnover constraint tighter for high liquidity-risk names.
+
+Main caveats:
+- Full LCAPM estimation is data hungry.
+- Daily proxies may be rough but still useful as risk controls.
+- Do not confuse low volume with priced liquidity risk.
+
+13. Brunnermeier and Pedersen (2009)
+Title: Market Liquidity and Funding Liquidity
+Source: https://academic.oup.com/rfs/article/22/6/2201/1592184?login=true
+
+Core idea:
+Market liquidity and funding liquidity reinforce each other. Funding constraints can create
+liquidity spirals, flight to quality, and common liquidity crashes.
+
+Trading translation:
+Build a funding-stress regime monitor. When funding stress is high, reduce gross exposure,
+turnover, leverage, and reliance on crowded or illiquid signals.
+
+Features to implement:
+- funding_stress_proxy
+- credit_spread_change
+- ted_spread_or_funding_proxy
+- vix_level
+- market_liquidity_stress
+- liquidity_spiral_flag
+
+Strategy ideas:
+- Funding-stress risk-off overlay.
+- Reduce leverage and shorting in funding stress.
+- Widen buy/sell bands when liquidity spirals are likely.
+
+Main caveats:
+- Some funding stress proxies are macro series with publication lags.
+- Funding stress is often contemporaneous with drawdowns.
+- Use this mostly as risk control.
+
+14. Sadka (2006)
+Title: Momentum and Post-Earnings-Announcement Drift Anomalies: The Role of Liquidity Risk
+Source: https://www.sciencedirect.com/science/article/pii/S0304405X05001819
+
+Core idea:
+Liquidity risk helps explain momentum and PEAD returns. Unexpected marketwide variation in certain
+liquidity components is priced in these anomaly portfolios.
+
+Trading translation:
+Momentum and earnings drift should be sized by liquidity regime. A PEAD or momentum signal is not
+equally attractive in all liquidity conditions.
+
+Features to implement:
+- liquidity_risk_state
+- momentum_liquidity_beta
+- pead_liquidity_beta
+- abnormal_spread_proxy
+- liquidity_adjusted_momentum_score
+
+Strategy ideas:
+- Liquidity-regime-adjusted momentum sizing.
+- PEAD position caps when liquidity risk is elevated.
+- Avoid high-turnover anomaly sleeves during liquidity stress.
+
+Main caveats:
+- Intraday liquidity components may not be available.
+- Daily proxies are approximations.
+- Liquidity risk can be compensation, not always a reason to avoid exposure.
+
+15. Frazzini and Lamont (2008)
+Title: Dumb Money: Mutual Fund Flows and the Cross-Section of Stock Returns
+Source: https://ideas.repec.org/a/eee/jfinec/v88y2008i2p299-322.html
+
+Core idea:
+Mutual fund flows can proxy for retail investor sentiment. Stocks receiving high sentiment through
+fund flows tend to have lower future returns.
+
+Trading translation:
+Fund-flow demand can identify over-owned or sentiment-driven stocks. It is a slow-moving signal
+for avoiding crowded growth or sentiment names.
+
+Features to implement:
+- fund_flow_sentiment_score
+- stock_flow_allocation
+- flow_weighted_ownership_change
+- high_sentiment_flow_flag
+- flow_sentiment_rank
+
+Strategy ideas:
+- Avoid high fund-flow sentiment stocks with weak valuation or high issuance.
+- Flow sentiment reversal over 1-3 year horizon.
+- Combine fund-flow sentiment with attention and issuance signals from earlier sets.
+
+Main caveats:
+- Fund flow and holdings data are delayed.
+- Flow signals are slow and not suitable for short-term trading.
+- S&P 500 stocks are heavily institutionally owned, so effects may be subtle.
+
+16. Lou (2012)
+Title: A Flow-Based Explanation for Return Predictability
+Source: https://academic.oup.com/rfs/article/25/12/3457/1594242?login=false
+
+Core idea:
+Flow-induced trading creates temporary price pressure. Expected flow-induced trading can forecast
+stock returns, and reversals can occur later.
+
+Trading translation:
+Estimate whether mutual-fund flows mechanically push a stock. This can explain part of momentum
+and future reversal.
+
+Features to implement:
+- flow_induced_trading
+- expected_flow_induced_trading
+- fund_holdings_overlap
+- flow_pressure_12m
+- expected_flow_reversal
+
+Strategy ideas:
+- Flow-confirmed momentum: ride predictable flow pressure cautiously.
+- Flow-reversal: fade stocks after strong flow pressure ages.
+- Flow pressure as a conflict flag for fundamental signals.
+
+Main caveats:
+- Data intensive.
+- Publication delays must be modeled.
+- Flow pressure can overlap with index and ETF pressure.
+
+17. DeMiguel, Garlappi, and Uppal (2009)
+Title: Optimal Versus Naive Diversification: How Inefficient is the 1/N Portfolio Strategy?
+Source: https://academic.oup.com/rfs/article-pdf/22/5/1915/24429471/hhm075.pdf
+
+Core idea:
+Sophisticated optimized portfolios often fail to beat simple equal-weight portfolios out of sample
+because estimation error overwhelms theoretical gains.
+
+Trading translation:
+Every portfolio optimizer must beat equal weight, capped equal weight, and inverse volatility out
+of sample. If it cannot, keep the simple version.
+
+Features and controls to implement:
+- equal_weight_baseline
+- capped_equal_weight
+- inverse_vol_weight
+- optimizer_excess_turnover
+- optimizer_outperformance_vs_1n
+
+Strategy ideas:
+- Equal-weight baseline for every signal.
+- Sleeve allocator benchmarked against 1/N across sleeves.
+- Optimizer kill switch if OOS performance fails baseline.
+
+Main caveats:
+- 1/N is not always best, but it is a hard benchmark.
+- Optimization error rises as asset count grows.
+- Mean estimates are usually the weakest link.
+
+18. Ledoit and Wolf (2004)
+Title: Honey, I Shrunk the Sample Covariance Matrix
+Source: https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID433840_code030812670.pdf?abstractid=433840&mirid=1&type=2
+
+Core idea:
+Sample covariance matrices contain estimation error that can badly distort mean-variance
+optimization. Shrinkage covariance estimators reduce estimation error.
+
+Trading translation:
+If you optimize S&P 500 portfolios, never rely only on the raw sample covariance matrix. Use
+shrinkage or robust covariance estimators.
+
+Features and controls to implement:
+- sample_covariance
+- ledoit_wolf_covariance
+- shrinkage_intensity
+- realized_tracking_error
+- realized_information_ratio
+- covariance_condition_number
+
+Strategy ideas:
+- Minimum-variance portfolio using Ledoit-Wolf covariance.
+- Risk model for strategy sleeve allocation.
+- Position risk caps based on shrinkage covariance.
+
+Main caveats:
+- Shrinkage helps covariance, not expected-return estimation.
+- Still validate realized risk out of sample.
+- Correlation spikes in crises can break calm-period estimates.
+
+19. Jagannathan and Ma (2003)
+Title: Risk Reduction in Large Portfolios: Why Imposing the Wrong Constraints Helps
+Source: https://ideas.repec.org/a/bla/jfinan/v58y2003i4p1651-1683.html
+
+Core idea:
+No-short-sale constraints can reduce realized risk in optimized portfolios even if the constraints
+are theoretically wrong, because they reduce estimation-error damage.
+
+Trading translation:
+Long-only and capped-weight constraints are not just operational restrictions. They can be useful
+regularizers for noisy optimization.
+
+Features and controls to implement:
+- no_short_constraint
+- max_weight_constraint
+- sector_cap_constraint
+- constrained_min_variance_weight
+- realized_risk_reduction
+
+Strategy ideas:
+- Long-only constrained minimum variance.
+- Alpha ranking plus constrained optimizer.
+- Compare unconstrained, no-short, and capped-weight versions.
+
+Main caveats:
+- Constraints can hide risk concentration.
+- Check sector and factor exposures after optimization.
+- Constraints reduce estimation error but do not guarantee alpha.
+
+20. Bailey, Borwein, Lopez de Prado, and Zhu (2016)
+Title: The Probability of Backtest Overfitting
+Source: https://www.davidhbailey.com/dhbpapers/backtest-prob.pdf
+
+Core idea:
+When many strategy variants are tested, the best in-sample performer is likely to disappoint out
+of sample. Probability of Backtest Overfitting, or PBO, estimates this risk.
+
+Trading translation:
+Your research platform should track trials, not just winners. Strategy selection needs a formal
+overfitting penalty.
+
+Features and controls to implement:
+- trial_registry
+- parameter_grid_id
+- in_sample_rank
+- out_of_sample_rank
+- pbo_estimate
+- deflated_sharpe_input
+- rejected_due_to_overfit_flag
+
+Strategy ideas:
+- Combinatorially symmetric cross-validation for strategy variants.
+- PBO report for every parameter search.
+- Research dashboard that ranks strategies by OOS robustness, not best backtest Sharpe.
+
+Main caveats:
+- PBO needs a clear definition of tried variants.
+- Informal human experimentation still counts as search.
+- Do not use PBO as a magic approval stamp; use it as a warning system.
+
+================================================================================
+NEW STRATEGY PRIMITIVES FROM SET 4
+================================================================================
+
+Primitive 1: Skeptical macro timing
+- Market timing must beat simple historical-average and trend baselines out of sample.
+
+Primitive 2: Constrained forecasts
+- Clip nonsensical equity premium forecasts and enforce economically sensible coefficient signs.
+
+Primitive 3: Forecast combinations
+- Use many weak predictors in a stable ensemble instead of trusting one heroic macro variable.
+
+Primitive 4: Cross-sectional market state
+- Extract aggregate expected return information from valuation spreads across sectors or factors.
+
+Primitive 5: Variance risk premium
+- Treat option-implied variance minus realized variance as a market compensation signal.
+
+Primitive 6: Option-implied risk
+- Use model-free implied volatility and option-implied skew for risk sizing and crash awareness.
+
+Primitive 7: Liquidity beta
+- Measure exposure to marketwide liquidity shocks, not only stock-level trading volume.
+
+Primitive 8: Funding-stress regime
+- Reduce gross exposure, leverage, and turnover when market liquidity and funding liquidity are
+  both stressed.
+
+Primitive 9: Flow-induced pressure
+- Separate genuine alpha momentum from demand pressure caused by fund flows.
+
+Primitive 10: Simple portfolio baselines
+- Equal weight, inverse-vol, no-short minimum variance, and shrinkage covariance are mandatory
+  benchmarks.
+
+Primitive 11: Overfit-aware research process
+- A strategy is not accepted unless its trial count, OOS behavior, costs, and selection bias are
+  recorded.
+
+================================================================================
+10 ADDITIONAL ALGORITHM DEVELOPMENT BATCHES
+================================================================================
+
+BATCH 1: Equity Premium Forecasting Baselines
+Source papers:
+- Goyal and Welch (2008)
+- Campbell and Thompson (2008)
+- Rapach, Strauss, and Zhou (2010)
+
+Objective:
+Build a cautious market-timing module that forecasts the S&P 500 equity premium and turns it into
+a bounded SPY exposure overlay.
+
+Algorithms:
+1. Historical-average equity premium baseline.
+2. Individual predictive regressions with walk-forward OOS evaluation.
+3. Campbell-Thompson constrained forecasts.
+4. Rapach-Strauss-Zhou forecast combination.
+
+Required data:
+- Monthly S&P 500 or SPY total returns.
+- Treasury bill returns.
+- Valuation ratios, interest-rate spreads, inflation, net issuance.
+- Data release dates or conservative lags.
+
+Implementation tasks for Claude Code CLI:
+- Build `features_equity_premium_predictors.py`.
+- Build `run_set4_batch1_equity_premium_forecasts.py`.
+- Add expanding-window OOS forecast evaluation.
+- Save all individual forecasts and combination forecasts to Parquet.
+- Save compact summary to `results/set4_batch1_equity_premium_summary.json`.
+
+Validation:
+- Report OOS R2 versus historical average.
+- Report certainty-equivalent return for a bounded exposure strategy.
+- Compare unconstrained, sign-constrained, and combination forecasts.
+- Reject any timing model that only wins in-sample.
+
+BATCH 2: Slow-Moving Macro and Cross-Sectional State Variables
+Source papers:
+- Lettau and Ludvigson (2001)
+- Kelly and Pruitt (2013)
+
+Objective:
+Create quarterly or monthly market-state variables that can influence exposure, risk budget, and
+strategy-sleeve allocation.
+
+Algorithms:
+1. Consumption-wealth ratio proxy state.
+2. Cross-sectional valuation-spread state.
+3. Industry valuation-spread market forecast.
+4. State-aware equity exposure and sleeve weights.
+
+Required data:
+- Consumption, wealth, labor income proxies, or vendor-provided cay.
+- Sector and industry portfolio valuation ratios.
+- S&P 500/sector total returns.
+
+Implementation tasks:
+- Build `features_market_state.py`.
+- Add `cay_proxy` and cross-sectional valuation-spread features.
+- Build a low-frequency state table with monthly as-of dates.
+- Save `results/set4_batch2_market_state_summary.json`.
+
+Validation:
+- Use only data available at each as-of date.
+- Test quarterly and monthly update frequencies separately.
+- Confirm results are not driven by one crisis period.
+
+BATCH 3: Variance Risk Premium Market Timing
+Source papers:
+- Bollerslev, Tauchen, and Zhou (2009)
+- Carr and Wu (2009)
+- Martin (2017)
+
+Objective:
+Use option-implied variance and realized variance to estimate market risk compensation and improve
+SPY exposure sizing.
+
+Algorithms:
+1. VIX-minus-realized variance proxy.
+2. Model-free variance risk premium if option surface data exists.
+3. Option-implied expected return proxy.
+4. VRP plus trend plus liquidity guardrail exposure scaler.
+
+Required data:
+- VIX or option-implied variance.
+- SPY or S&P 500 realized variance.
+- Optional SPX option surface.
+- Daily SPY returns.
+
+Implementation tasks:
+- Build `features_variance_risk_premium.py`.
+- Compute simple VIX-based VRP first.
+- Add a config flag for full model-free option-surface VRP.
+- Backtest monthly and weekly exposure scalers.
+- Save `results/set4_batch3_vrp_timing_summary.json`.
+
+Validation:
+- Lag all implied-volatility observations.
+- Compare VRP-only, trend-only, and VRP-plus-trend versions.
+- Report crisis-period drawdowns separately.
+
+BATCH 4: Option-Implied Volatility and Skew Risk Controls
+Source papers:
+- Jiang and Tian (2005)
+- Bakshi, Kapadia, and Madan (2003)
+
+Objective:
+Use option-implied volatility and skew to improve risk forecasts, crash-risk controls, and position
+caps for S&P 500 stocks and SPY.
+
+Algorithms:
+1. Model-free implied volatility risk forecast.
+2. ATM IV fallback model.
+3. Option-implied skew risk overlay.
+4. Vol/skew-aware position cap.
+
+Required data:
+- Option quotes or vendor IV/skew metrics.
+- Daily realized volatility.
+- Bid/ask, open interest, and volume filters.
+
+Implementation tasks:
+- Build `features_option_implied_risk.py`.
+- Create clean IV and skew feature table.
+- Add position-cap logic to the backtester.
+- Save `results/set4_batch4_option_risk_summary.json`.
+
+Validation:
+- Drop stale or wide-spread option quotes.
+- Require minimum strike coverage for model-free metrics.
+- Compare realized risk forecast errors versus historical volatility.
+
+BATCH 5: Marketwide Liquidity Risk and Liquidity-Adjusted Ranking
+Source papers:
+- Pastor and Stambaugh (2003)
+- Acharya and Pedersen (2005)
+
+Objective:
+Build liquidity beta and liquidity-adjusted expected return features that help the strategy factory
+avoid liquidity-crash exposure.
+
+Algorithms:
+1. Aggregate market liquidity proxy.
+2. Stock liquidity beta.
+3. Liquidity-adjusted alpha score.
+4. Flight-to-liquidity risk overlay.
+
+Required data:
+- Daily returns and volume.
+- Bid/ask or spread proxies if available.
+- Market return and aggregate liquidity proxy.
+
+Implementation tasks:
+- Build `features_liquidity_risk.py`.
+- Estimate rolling liquidity shocks and liquidity betas.
+- Add liquidity penalty to existing alpha rankings.
+- Save `results/set4_batch5_liquidity_risk_summary.json`.
+
+Validation:
+- Check stability of liquidity beta estimates.
+- Compare daily proxy against spread-based data if available.
+- Report liquidity exposure by strategy sleeve.
+
+BATCH 6: Funding-Stress and Anomaly Risk Sizing
+Source papers:
+- Brunnermeier and Pedersen (2009)
+- Sadka (2006)
+
+Objective:
+Create a funding-stress and liquidity-regime module that sizes momentum, PEAD, reversal, and
+high-turnover strategies.
+
+Algorithms:
+1. Funding-stress composite.
+2. Liquidity spiral warning flag.
+3. Liquidity-adjusted momentum sizing.
+4. Liquidity-adjusted PEAD sizing.
+
+Required data:
+- VIX, credit spreads, rate spreads, market drawdown, market volume/spread proxies.
+- Existing momentum and PEAD strategy outputs.
+
+Implementation tasks:
+- Build `features_funding_stress.py`.
+- Add `risk_state` table consumed by all backtests.
+- Modify backtester to support regime-based gross exposure and turnover caps.
+- Save `results/set4_batch6_funding_stress_summary.json`.
+
+Validation:
+- Report strategy behavior in 2008, 2020, and other stress windows if data exists.
+- Confirm turnover falls in stress regimes.
+- Compare drawdown reduction versus lost upside.
+
+BATCH 7: Mutual-Fund Flow Sentiment and Flow-Induced Pressure
+Source papers:
+- Frazzini and Lamont (2008)
+- Lou (2012)
+
+Objective:
+Use mutual-fund flows and holdings to identify demand-driven overpricing, flow-confirmed momentum,
+and future reversals.
+
+Algorithms:
+1. Fund-flow sentiment stock score.
+2. Flow-induced trading pressure score.
+3. Flow-confirmed momentum sleeve.
+4. Flow-pressure reversal sleeve.
+
+Required data:
+- Mutual fund flows.
+- Mutual fund holdings.
+- Stock-level returns and market caps.
+- Publication dates for holdings.
+
+Implementation tasks:
+- Build `features_fund_flow_pressure.py`.
+- Create a delayed as-of flow pressure table.
+- Backtest slow monthly/quarterly flow-pressure signals.
+- Save `results/set4_batch7_fund_flow_summary.json`.
+
+Validation:
+- Enforce reporting delays.
+- Compare flow signal to standard momentum and issuance signals.
+- Report coverage and missingness by year.
+
+BATCH 8: Robust Portfolio Construction Baselines
+Source papers:
+- DeMiguel, Garlappi, and Uppal (2009)
+- Ledoit and Wolf (2004)
+- Jagannathan and Ma (2003)
+
+Objective:
+Build robust portfolio construction methods that serve as mandatory baselines for every alpha
+strategy.
+
+Algorithms:
+1. Equal weight.
+2. Capped equal weight.
+3. Inverse volatility.
+4. Ledoit-Wolf minimum variance.
+5. No-short constrained minimum variance.
+6. Alpha-rank plus risk caps.
+
+Required data:
+- Strategy scores.
+- Daily returns for risk estimation.
+- Sector labels.
+- Cost model.
+
+Implementation tasks:
+- Build `portfolio_construction_robust.py`.
+- Implement equal weight, inverse vol, shrinkage min-var, and no-short constrained min-var.
+- Add sector caps and max-weight caps.
+- Save `results/set4_batch8_portfolio_construction_summary.json`.
+
+Validation:
+- Every optimized portfolio must beat 1/N or explain why it is still useful.
+- Report turnover, realized volatility, drawdown, and concentration.
+- Stress test correlation spikes.
+
+BATCH 9: Regime-Aware Strategy Sleeve Allocation
+Source papers:
+- Rapach, Strauss, and Zhou (2010)
+- Bollerslev, Tauchen, and Zhou (2009)
+- Pastor and Stambaugh (2003)
+- Brunnermeier and Pedersen (2009)
+- DeMiguel, Garlappi, and Uppal (2009)
+
+Objective:
+Allocate across existing strategy sleeves using macro forecast, VRP, liquidity, and funding-stress
+states while keeping portfolio construction simple and robust.
+
+Algorithms:
+1. Equal-weight sleeve allocator baseline.
+2. Regime-weighted sleeve allocator.
+3. Volatility-targeted sleeve allocator.
+4. Stress-regime defensive allocator.
+
+Required data:
+- Existing strategy sleeve returns.
+- Market-state features from Batches 1-6.
+- Costs and turnover by sleeve.
+
+Implementation tasks:
+- Build `run_set4_batch9_sleeve_allocator.py`.
+- Create a sleeve return matrix.
+- Add simple regime rules before ML.
+- Save `results/set4_batch9_sleeve_allocator_summary.json`.
+
+Validation:
+- Compare to equal-weight sleeves.
+- Require OOS validation across multiple market regimes.
+- Report how often allocations change and how much turnover they create.
+
+BATCH 10: Backtest Overfitting and Research Governance
+Source papers:
+- Bailey, Borwein, Lopez de Prado, and Zhu (2016)
+- Goyal and Welch (2008)
+- DeMiguel, Garlappi, and Uppal (2009)
+
+Objective:
+Build a research-governance layer that tracks trials, detects likely overfitting, and prevents the
+best-looking backtest from being accepted without evidence.
+
+Algorithms:
+1. Trial registry for every strategy run.
+2. Parameter-grid tracking.
+3. Walk-forward and combinatorial cross-validation.
+4. Probability of Backtest Overfitting report.
+5. Deflated Sharpe input report.
+
+Required data:
+- All experiment configs.
+- In-sample and out-of-sample returns.
+- Parameter grids.
+- Strategy metadata.
+
+Implementation tasks:
+- Build `research_governance.py`.
+- Create `results/trial_registry.parquet`.
+- Add a required `experiment_id` to every backtest.
+- Add PBO and OOS rank diagnostics.
+- Save `results/set4_batch10_research_governance_summary.json`.
+
+Validation:
+- Confirm repeated runs are logged.
+- Confirm rejected strategies remain visible.
+- Report best IS strategy, best OOS strategy, and rank instability.
+
+================================================================================
+SUGGESTED DATA TABLES TO ADD TO YOUR RESEARCH STACK
+================================================================================
+
+1. `macro_predictors_monthly`
+Columns:
+- asof_date, data_release_date, dividend_yield, earnings_price, book_to_market_market,
+  treasury_bill_rate, long_term_yield, term_spread, default_spread, inflation,
+  net_equity_issuance, cay_proxy
+
+2. `equity_premium_forecasts`
+Columns:
+- date, model_name, predictor_name, raw_forecast, constrained_forecast,
+  combo_forecast, oos_error, oos_r2_to_date
+
+3. `market_state`
+Columns:
+- date, macro_forecast_state, cay_state, cross_section_valuation_state,
+  vrp_state, liquidity_state, funding_stress_state, final_risk_state
+
+4. `option_market_features`
+Columns:
+- date, ticker, implied_variance_30d, model_free_implied_vol, atm_iv,
+  option_implied_skew, vrp, option_expected_return_proxy, quote_quality_flag
+
+5. `liquidity_risk_features`
+Columns:
+- date, ticker, market_liquidity_proxy, liquidity_shock, liquidity_beta,
+  expected_illiquidity, liquidity_adjusted_score
+
+6. `fund_flow_features`
+Columns:
+- asof_date, ticker, fund_flow_sentiment_score, flow_induced_trading,
+  expected_flow_induced_trading, flow_pressure_age, reporting_delay_days
+
+7. `portfolio_risk_models`
+Columns:
+- date, model_name, covariance_type, shrinkage_intensity, condition_number,
+  realized_vol_next_21d, realized_tracking_error_next_21d
+
+8. `trial_registry`
+Columns:
+- experiment_id, run_timestamp, strategy_name, batch_id, config_hash,
+  parameter_grid_id, train_start, train_end, test_start, test_end,
+  in_sample_sharpe, out_of_sample_sharpe, net_turnover, pbo_group_id,
+  accepted_flag, rejection_reason
+
+================================================================================
+RECOMMENDED IMPLEMENTATION ORDER
+================================================================================
+
+1. Batch 10: Research governance skeleton
+Reason:
+Start tracking trials before creating more strategy variants.
+
+2. Batch 8: Robust portfolio construction baselines
+Reason:
+Equal weight, inverse-vol, shrinkage, and no-short constraints are needed across all sets.
+
+3. Batch 1: Equity premium forecasting baselines
+Reason:
+Build the macro timing benchmark before adding option data.
+
+4. Batch 3: Simple VRP timing with VIX proxy
+Reason:
+Useful and practical if VIX and realized variance are available.
+
+5. Batch 6: Funding-stress risk state
+Reason:
+Can improve drawdown control across existing strategies.
+
+6. Batch 5: Liquidity risk
+Reason:
+Useful for sizing and avoiding liquidity-crash exposure.
+
+7. Batch 9: Sleeve allocator
+Reason:
+Only after you have sleeve return histories and risk states.
+
+8. Batch 2: CAY and cross-sectional valuation state
+Reason:
+Useful but slower moving and more macro-data intensive.
+
+9. Batch 4: Option-implied vol/skew
+Reason:
+Powerful but data-cleaning heavy.
+
+10. Batch 7: Fund-flow pressure
+Reason:
+Useful but requires delayed holdings and flow data.
+
+================================================================================
+TOKEN-EFFICIENT CLAUDE CODE CLI WORKFLOW
+================================================================================
+
+Use this pattern for each batch:
+
+1. Store every experiment in YAML.
+   Example:
+   - `configs/set4_batch1_equity_premium.yaml`
+
+2. Cache features to Parquet.
+   Example:
+   - `data/features/set4_equity_premium_forecasts.parquet`
+
+3. Save compact result summaries.
+   Example:
+   - `results/set4_batch1_equity_premium_summary.json`
+
+4. Save large diagnostics only when needed.
+   Example:
+   - `debug/set4_batch1_forecast_panel_sample.csv`
+
+5. Ask Claude Code CLI to inspect summaries first.
+   Good prompt:
+   "Read the config and summary JSON only. Explain whether the constrained forecast improves
+   out-of-sample R2 versus the historical average. Do not inspect full forecast panels unless the
+   summary indicates a data issue."
+
+6. Use a trial registry.
+   Every run should write:
+   - config hash
+   - parameter grid id
+   - run timestamp
+   - train/test dates
+   - gross and net metrics
+   - acceptance/rejection reason
+
+7. Keep raw option and macro data out of prompts.
+   Claude Code should work with:
+   - feature schemas
+   - compact examples
+   - JSON summaries
+   - tests
+
+================================================================================
+SOURCE LIST
+================================================================================
+
+01. Goyal and Welch, A Comprehensive Look at The Empirical Performance of Equity Premium Prediction
+    https://faculty.washington.edu/ezivot/econ589/goyalWelchRFS2008.pdf
+
+02. Campbell and Thompson, Predicting Excess Stock Returns Out of Sample
+    https://dash.harvard.edu/entities/publication/73120378-7dd1-6bd4-e053-0100007fdf3b
+
+03. Rapach, Strauss, and Zhou, Out-of-Sample Equity Premium Prediction
+    https://ideas.repec.org/a/oup/rfinst/v23y2010i2p821-862.html
+
+04. Lettau and Ludvigson, Consumption, Aggregate Wealth, and Expected Stock Returns
+    https://colab.ws/articles/10.1111%2F0022-1082.00347
+
+05. Kelly and Pruitt, Market Expectations in the Cross Section of Present Values
+    https://sethpruitt.net/2013/10/31/market-expectations-in-the-cross-section-of-present-values/
+
+06. Bollerslev, Tauchen, and Zhou, Expected Stock Returns and Variance Risk Premia
+    https://academic.oup.com/rfs/article-pdf/22/11/4463/5369494/hhp008.pdf
+
+07. Carr and Wu, Variance Risk Premiums
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1359527
+
+08. Jiang and Tian, The Model-Free Implied Volatility and Its Information Content
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2220067
+
+09. Martin, What is the Expected Return on the Market?
+    https://ideas.repec.org/a/oup/qjecon/v132y2017i1p367-433..html
+
+10. Bakshi, Kapadia, and Madan, Stock Return Characteristics, Skew Laws, and the Differential Pricing of Individual Equity Options
+    https://ideas.repec.org/a/oup/rfinst/v16y2003i1p101-143.html
+
+11. Pastor and Stambaugh, Liquidity Risk and Expected Stock Returns
+    https://colab.ws/articles/10.1086%2F374184
+
+12. Acharya and Pedersen, Asset Pricing with Liquidity Risk
+    https://www.sciencedirect.com/science/article/pii/S0304405X05000334
+
+13. Brunnermeier and Pedersen, Market Liquidity and Funding Liquidity
+    https://academic.oup.com/rfs/article/22/6/2201/1592184?login=true
+
+14. Sadka, Momentum and Post-Earnings-Announcement Drift Anomalies
+    https://www.sciencedirect.com/science/article/pii/S0304405X05001819
+
+15. Frazzini and Lamont, Dumb Money
+    https://ideas.repec.org/a/eee/jfinec/v88y2008i2p299-322.html
+
+16. Lou, A Flow-Based Explanation for Return Predictability
+    https://academic.oup.com/rfs/article/25/12/3457/1594242?login=false
+
+17. DeMiguel, Garlappi, and Uppal, Optimal Versus Naive Diversification
+    https://academic.oup.com/rfs/article-pdf/22/5/1915/24429471/hhm075.pdf
+
+18. Ledoit and Wolf, Honey, I Shrunk the Sample Covariance Matrix
+    https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID433840_code030812670.pdf?abstractid=433840&mirid=1&type=2
+
+19. Jagannathan and Ma, Risk Reduction in Large Portfolios
+    https://ideas.repec.org/a/bla/jfinan/v58y2003i4p1651-1683.html
+
+20. Bailey, Borwein, Lopez de Prado, and Zhu, The Probability of Backtest Overfitting
+    https://www.davidhbailey.com/dhbpapers/backtest-prob.pdf
+
+================================================================================
+FIRST TASK TO GIVE CLAUDE CODE CLI
+================================================================================
+
+Use this exact task:
+
+"Create a Set 4 research scaffold for S&P 500 strategy development. Start by implementing a trial
+registry and robust portfolio-construction baselines before adding new alpha signals. Use the
+research brief in `sp500_quant_paper_learnings_set4_for_10_algo_batches.txt`. Implement Batch 10
+research governance skeleton and Batch 8 portfolio baselines first. Use YAML configs, cached
+Parquet outputs, unit tests, and compact JSON summaries. Do not implement full options-surface,
+cay, or mutual-fund-flow features yet."
+
+Expected first outputs:
+- `configs/set4_research_governance.yaml`
+- `configs/set4_portfolio_baselines.yaml`
+- `src/research/research_governance.py`
+- `src/portfolio/portfolio_construction_robust.py`
+- `tests/test_trial_registry_records_runs.py`
+- `tests/test_portfolio_baselines_weights.py`
+- `results/set4_batch10_research_governance_summary.json`
+- `results/set4_batch8_portfolio_construction_summary.json`
+
+================================================================================
+WHAT NOT TO DO FIRST
+================================================================================
+
+Do not start with:
+- full SPX option-surface parsing
+- single-name option skew for all S&P 500 constituents
+- cay reconstruction from raw macro series
+- mutual fund holdings and flow joins
+- ML sleeve allocator
+
+Start with:
+- trial registry
+- equal-weight and inverse-vol baselines
+- shrinkage covariance portfolio construction
+- no-short constrained minimum variance
+- simple equity premium forecast benchmark
+- simple VIX-minus-realized VRP proxy
+
+These are easier to validate, useful across all existing strategies, and much less likely to burn
+tokens on raw data problems before the research process is controlled.
+
+================================================================================
+HIGHEST-ROI SET 4 IDEAS
+================================================================================
+
+1. Build a trial registry before running more strategy variants.
+
+2. Force every strategy to beat equal weight, capped equal weight, and inverse volatility baselines.
+
+3. Add Ledoit-Wolf covariance and no-short constraints before using any mean-variance optimizer.
+
+4. Build equity premium forecasts as bounded exposure scalers, not all-in/all-out switches.
+
+5. Use forecast combinations instead of trusting one macro predictor.
+
+6. Add a simple VRP proxy: VIX squared minus trailing realized variance.
+
+7. Add funding-stress risk state to reduce exposure and turnover during liquidity spirals.
+
+8. Add liquidity beta reports for every strategy sleeve.
+
+9. Treat fund-flow pressure as a slow signal with reporting delays, not a fast trading signal.
+
+10. Report probability of backtest overfitting or at least trial-count-adjusted Sharpe diagnostics
+    before accepting any best-looking strategy.
+

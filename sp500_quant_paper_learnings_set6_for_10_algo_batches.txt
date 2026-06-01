@@ -1,0 +1,1478 @@
+S&P 500 QUANT TRADING PAPER LEARNINGS - SET 6
+For planning 10 batches of trading algorithms with Claude Code CLI
+
+Purpose:
+This file summarizes another non-overlapping set of 20 quant trading, accounting,
+corporate finance, market microstructure, and financial economics papers. The
+goal is not to turn every paper into a finished strategy immediately. The goal is
+to give a chatbot enough structured context to plan 10 batches of S&P 500
+algorithm development with fewer wasted tokens, clearer feature specs, and faster
+iteration.
+
+Set 6 theme:
+Corporate events, earnings expectations, SEC filing text, conference-call tone,
+product-market competition, policy exposure, innovation and patents, credit risk,
+ETF/passive ownership, and institutional ownership horizons.
+
+How this set differs from the prior five:
+- Prior sets focused heavily on classic anomalies, factor models, volatility,
+  macro prediction, portfolio construction, machine learning, governance, ESG,
+  sentiment, and intraday liquidity.
+- Set 6 is more "event plus information architecture." It teaches you how to
+  detect when the S&P 500 market is slow to process firm-specific information.
+- Many signals here are lower frequency, but they can be combined with faster
+  price/volume execution logic.
+- Several papers require non-price data. Build them as feature modules first,
+  then attach trading rules only after point-in-time feature validation.
+
+Important guardrails:
+- This is research infrastructure, not financial advice.
+- Most papers use broader U.S. equity universes. For the S&P 500, signal strength
+  may be weaker because large-cap names are more followed and more efficiently
+  priced.
+- Use point-in-time S&P 500 membership, point-in-time accounting data, and
+  delisting-aware returns whenever possible.
+- Do not trust a signal until it survives transaction costs, slippage, realistic
+  announcement timestamps, sector neutrality tests, and walk-forward validation.
+- Avoid shorting hard-to-borrow or high-event-risk names without explicit borrow,
+  liquidity, and gap-risk modeling.
+
+CHATBOT PROMPT TO USE WITH THIS FILE
+
+Paste only the relevant batch section into Claude Code CLI, plus this short task:
+
+"You are helping me build S&P 500 quant trading algorithms. Use the attached
+paper-learning batch as the source of strategy ideas. First create a minimal
+implementation plan, then create feature specs, then write tests, then implement
+one strategy module at a time. Keep outputs token-efficient. Do not re-explain
+the whole literature unless needed. Every signal must include point-in-time data
+requirements, timestamp assumptions, backtest rules, transaction-cost assumptions,
+and failure modes."
+
+TOKEN-EFFICIENT CLAUDE CODE CLI WORKFLOW
+
+1. Save this file in your repo under docs/research/set6_paper_learnings.txt.
+2. Ask Claude Code to read only one batch at a time, for example:
+   "Read docs/research/set6_paper_learnings.txt and use only BATCH 01."
+3. Convert each batch into three small files:
+   - docs/feature_specs/batch_01_earnings_expectations.md
+   - configs/features/batch_01_earnings_expectations.yaml
+   - tests/test_batch_01_earnings_expectations.py
+4. Keep each strategy module narrow:
+   - one data contract
+   - one feature builder
+   - one signal builder
+   - one backtest config
+   - one notebook or CLI report
+5. Do not paste all 20 papers into every prompt. Use rg/search inside the repo:
+   rg "BATCH 07" docs/research/set6_paper_learnings.txt
+6. Store decisions in files, not chat:
+   - assumptions.md
+   - data_dictionary.md
+   - experiment_log.md
+   - rejected_signals.md
+7. Ask Claude for diffs and tests, not essays:
+   "Implement the feature builder and unit tests. Keep explanation under 10 lines."
+
+
+THE 20 PAPERS
+
+PAPER 01: Bernard and Thomas (1989) - Post-Earnings-Announcement Drift
+
+Core idea:
+Post-earnings-announcement drift, or PEAD, shows that stocks with positive
+earnings surprises often continue to outperform after the announcement, while
+negative-surprise stocks often continue to underperform. The paper is useful
+because it frames drift as delayed price response rather than only compensation
+for risk.
+
+Trading lesson:
+The market may underreact to standardized unexpected earnings, especially when
+the earnings information is complex or when investors anchor on old expectations.
+
+S&P 500 implementation:
+- Build a standardized unexpected earnings score using actual EPS minus
+  consensus EPS, scaled by historical surprise volatility or price.
+- Run an event-time strategy after earnings announcements, not before.
+- Delay entry until timestamps are clean. If the announcement is after market
+  close, earliest clean entry is next open or next close, depending on your
+  execution model.
+- Hold for 20 to 60 trading days, then test shorter and longer variants.
+
+Features:
+- EPS surprise percentile
+- revenue surprise percentile
+- gross-margin surprise
+- guidance revision after announcement
+- analyst estimate revision after announcement
+- announcement timing: before open, after close, intraday
+
+Failure modes:
+- Lookahead from incorrect earnings timestamps
+- Using final analyst consensus instead of pre-announcement consensus
+- Treating all surprises equally without sector or volatility controls
+- Ignoring that large-cap S&P 500 names are heavily watched
+
+
+PAPER 02: Skinner and Sloan (2002) - Earnings Surprises, Growth Expectations, and Stock Returns
+
+Core idea:
+High-growth stocks can be punished severely when they miss earnings expectations.
+The market embeds optimistic expectations into growth firms, and negative
+surprises can trigger sharp repricing.
+
+Trading lesson:
+Earnings surprise signals should be conditioned on valuation and embedded growth
+expectations. A negative surprise in an expensive growth stock is not the same as
+a negative surprise in a cheap low-expectation stock.
+
+S&P 500 implementation:
+- Create a "torpedo risk" score before earnings:
+  high valuation + high expected growth + high analyst optimism + high recent
+  multiple expansion.
+- After earnings, short or underweight high-torpedo-risk firms with negative EPS
+  or guidance surprises.
+- For long-only portfolios, use the score as a risk-reduction filter before
+  earnings.
+
+Features:
+- forward P/E percentile
+- price-to-sales percentile
+- sales growth expectation
+- EPS growth expectation
+- analyst optimism vs trailing fundamentals
+- earnings surprise sign and magnitude
+
+Failure modes:
+- Shorting high-quality compounders solely because they are expensive
+- Failing to separate expected high growth from actual delivered high growth
+- Not controlling for sector valuation norms
+
+
+PAPER 03: So (2013) - Predicting Analyst Forecast Errors
+
+Core idea:
+Investors may overweight analyst forecasts. If analyst forecast errors can be
+predicted, then returns can be forecast because prices partially inherit the
+same analyst optimism or pessimism.
+
+Trading lesson:
+Do not use analyst forecasts only as a clean expectation benchmark. Forecasts can
+themselves be biased signals.
+
+S&P 500 implementation:
+- Build a forecast-error prediction model:
+  predicted error = function of forecast revisions, dispersion, past forecast
+  bias, accruals, profitability, valuation, and recent returns.
+- Long firms where analysts appear too pessimistic.
+- Short or underweight firms where analysts appear too optimistic.
+- Combine with earnings announcement windows to capture correction events.
+
+Features:
+- consensus EPS forecast level
+- 1-month and 3-month forecast revision
+- analyst dispersion
+- analyst count
+- historical forecast bias by firm and analyst group
+- predicted forecast error
+
+Failure modes:
+- IBES/forecast data timestamp errors
+- Forecasts issued after price-moving news but treated as prior expectations
+- Overfitting analyst-bias models in small sector samples
+
+
+PAPER 04: Li (2010) - Forward-Looking Statements in Corporate Filings
+
+Core idea:
+Forward-looking statements in MD&A sections of 10-K and 10-Q filings contain
+information about future performance. Simple machine-learning text classification
+can extract useful signal from management's forward-looking language.
+
+Trading lesson:
+SEC filings are not just compliance documents. Management's future-oriented
+sentences can become structured features.
+
+S&P 500 implementation:
+- Parse 10-K and 10-Q MD&A sections.
+- Identify forward-looking sentences using keyword rules first, then a supervised
+  classifier if labels are available.
+- Score positive, negative, uncertain, and modal language in forward-looking
+  sentences.
+- Trade only after SEC filing acceptance timestamps, not fiscal period end dates.
+
+Features:
+- forward-looking sentence count
+- positive FLS ratio
+- negative FLS ratio
+- uncertainty ratio
+- change in FLS tone vs prior filing
+- sector-relative FLS score
+
+Failure modes:
+- Parsing wrong filing sections
+- Using filing dates rather than SEC acceptance timestamps
+- Treating boilerplate forward-looking disclaimers as management information
+- Ignoring changes in disclosure rules and firm templates
+
+
+PAPER 05: Li (2008) - Annual Report Readability, Current Earnings, and Earnings Persistence
+
+Core idea:
+Annual report readability is related to firm performance and earnings
+persistence. More complex or less readable reports can indicate less transparent
+or less persistent earnings.
+
+Trading lesson:
+Text complexity can be a risk feature. Complicated disclosure may degrade the
+quality of earnings signals or indicate hidden operating issues.
+
+S&P 500 implementation:
+- Compute readability and complexity metrics for 10-K filings.
+- Combine readability with earnings quality:
+  strong earnings + readable filing = higher-quality signal;
+  strong earnings + unreadable filing = lower-confidence signal.
+- Use complexity as a risk penalty in earnings, quality, and value strategies.
+
+Features:
+- filing length
+- average sentence length
+- word complexity
+- financial jargon density
+- boilerplate similarity to prior filing
+- readability z-score by firm and sector
+
+Failure modes:
+- Penalizing naturally complex firms such as banks, insurers, and industrial
+  conglomerates without sector controls
+- Confusing longer disclosure with worse disclosure
+- Ignoring changes from prior-year readability
+
+
+PAPER 06: Mayew and Venkatachalam (2012) - The Power of Voice
+
+Core idea:
+Managerial vocal affect during conference calls contains information about firm
+prospects and is associated with market reactions and future performance.
+
+Trading lesson:
+How management says something can contain incremental signal beyond the transcript
+text. Voice stress, emotion, uncertainty, and confidence may help identify
+whether the market is underreacting to call information.
+
+S&P 500 implementation:
+- Start with transcript-only proxies because audio pipelines are slower.
+- Then add optional audio features for firms where recordings are available.
+- Score CEO/CFO prepared remarks separately from Q&A.
+- Look for divergence:
+  positive transcript tone but negative vocal affect, or vice versa.
+
+Features:
+- transcript tone
+- Q&A uncertainty
+- answer evasiveness
+- prepared remarks vs Q&A sentiment gap
+- audio pitch variability
+- speech rate
+- vocal stress/affect score
+
+Failure modes:
+- Poor audio quality
+- Speaker diarization errors
+- Overfitting voice features with small samples
+- Ignoring that call participants, formats, and microphones vary by firm
+
+
+PAPER 07: Hoberg and Phillips (2016) - Text-Based Network Industries and Endogenous Product Differentiation
+
+Core idea:
+10-K product descriptions can be used to build dynamic, text-based industry
+networks. These networks identify competitors more flexibly than static SIC or
+GICS classifications.
+
+Trading lesson:
+Peer relationships are dynamic. Product-similarity networks can detect economic
+exposures and rival shocks that standard sector labels miss.
+
+S&P 500 implementation:
+- Use Hoberg-Phillips TNIC-style similarity data if available, or approximate it
+  from product descriptions in 10-K filings.
+- Build peer baskets for each S&P 500 firm based on product text similarity.
+- Use peer earnings surprises, guidance changes, and return shocks as predictors
+  for firms that have not yet reported.
+
+Features:
+- text-based peer set
+- peer earnings surprise
+- peer revenue surprise
+- peer return shock
+- peer guidance revision
+- own-firm product differentiation score
+
+Failure modes:
+- Static peer lists that ignore product evolution
+- Overlapping peers causing crowded signals
+- Not separating supply-chain links from product-market competition
+
+
+PAPER 08: Hoberg, Phillips, and Prabhala (2014) - Product Market Threats, Payouts, and Financial Flexibility
+
+Core idea:
+Product market threats affect corporate payout policy and cash holdings. Product
+market fluidity captures how rivals' product descriptions move toward a firm's
+product space.
+
+Trading lesson:
+Competitive threat can become a firm-level risk state. When rivals move toward a
+firm's product market, that firm may need cash flexibility and may face weaker
+payout or margin prospects.
+
+S&P 500 implementation:
+- Use product-market fluidity as a slow-moving risk feature.
+- Penalize firms with high fluidity, declining margins, and declining buybacks.
+- Look for defensive cash buildup or payout reductions as confirmation that
+  management sees competitive pressure.
+
+Features:
+- product market fluidity
+- rival similarity increase
+- cash-to-assets change
+- payout reduction
+- repurchase reduction
+- gross-margin compression
+
+Failure modes:
+- Treating all competitive threat as bearish; some firms respond with successful
+  innovation
+- Ignoring industry life cycle
+- Using product text after the market already reacted to the filing
+
+
+PAPER 09: Cohen, Diether, and Malloy (2013) - Legislating Stock Prices
+
+Core idea:
+Legislators' votes can reveal information about how legislation will affect firms
+in their constituencies. The market may not fully process the implications of
+complex legislation immediately.
+
+Trading lesson:
+Policy events can be transformed into firm-level signals when you map legislation
+to affected industries, geographies, and firms.
+
+S&P 500 implementation:
+- Build a policy-event graph:
+  bill -> legislators -> constituent industries/firms -> expected beneficiary or
+  loser.
+- For S&P 500, start with major regulation-heavy sectors:
+  healthcare, defense, energy, utilities, telecom, financials, and industrials.
+- Treat the first version as an event study, not an always-on strategy.
+
+Features:
+- bill passage event timestamp
+- sector/industry exposure
+- state/district revenue or employment exposure
+- legislator interest score
+- vote direction
+- bill complexity proxy
+
+Failure modes:
+- Incorrect firm-to-legislation mapping
+- Public-news leakage before formal vote
+- Partisan or narrative bias in manual labels
+- Low event count for robust backtesting
+
+
+PAPER 10: Hirshleifer, Hsu, and Li (2013) - Innovative Efficiency and Stock Returns
+
+Core idea:
+Innovation efficiency, measured as innovation output relative to R&D input, is
+associated with future operating performance and stock returns.
+
+Trading lesson:
+Do not look only at R&D spending. Look at how much useful innovation a firm gets
+per dollar of R&D.
+
+S&P 500 implementation:
+- Build innovative efficiency:
+  patents or citations divided by R&D capital or R&D expense.
+- Rank firms within sectors because patent intensity differs dramatically across
+  industries.
+- Combine with valuation to avoid overpaying for obvious innovation leaders.
+
+Features:
+- patents per R&D dollar
+- citations per R&D dollar
+- patent growth
+- citation growth
+- R&D capital
+- sector-relative innovation efficiency
+
+Failure modes:
+- Patent grant lags
+- Sector differences in patenting behavior
+- Patent quantity without quality
+- Treating accounting R&D as the only innovation input
+
+
+PAPER 11: Kogan, Papanikolaou, Seru, and Stoffman (2017) - Technological Innovation, Resource Allocation, and Growth
+
+Core idea:
+Patent data can be used to estimate the economic value of innovation. Valuable
+innovation affects firm growth, reallocation, and market value.
+
+Trading lesson:
+Patent value matters more than patent count. The market impact of innovation is
+strongest when the innovation is economically important, not merely numerous.
+
+S&P 500 implementation:
+- If patent-value data is available, use it directly.
+- Otherwise approximate patent value using citations, patent family size,
+  originality, generality, and market reaction around patent grant dates.
+- Use patent-value shocks as medium-horizon features.
+
+Features:
+- patent-value estimate
+- citation-weighted patent count
+- patent originality
+- patent generality
+- technology-class momentum
+- firm patent shock vs history
+
+Failure modes:
+- Grant-date lag and publication-date confusion
+- Survivorship in patent databases
+- Overweighting technology sectors
+- Ignoring acquisitions of patent portfolios
+
+
+PAPER 12: Eberhart, Maxwell, and Siddique (2004) - R&D Increases and Long-Term Abnormal Returns
+
+Core idea:
+Firms that unexpectedly increase R&D expenditures experience positive long-term
+abnormal returns and operating performance. The market may underreact to the
+benefits of R&D investment.
+
+Trading lesson:
+Unexpected R&D increases can be positive when they reflect productive investment,
+not when they reflect desperate spending.
+
+S&P 500 implementation:
+- Identify unexpected R&D increases relative to firm history and industry peers.
+- Confirm with balance-sheet strength, margin stability, and patent output.
+- Use a 6- to 24-month horizon sleeve rather than a short event trade.
+
+Features:
+- R&D expense growth
+- R&D-to-sales change
+- R&D surprise vs historical model
+- cash balance
+- patent follow-through
+- revenue growth follow-through
+
+Failure modes:
+- R&D capitalization/accounting differences
+- Firms that acquire innovation rather than produce it internally
+- Treating all R&D increases as good without balance-sheet and profitability
+  filters
+
+
+PAPER 13: Merton (1974) - On the Pricing of Corporate Debt
+
+Core idea:
+Corporate debt can be modeled through the option-like structure of firm assets.
+Equity resembles a call option on firm value after debt is paid. This framework
+leads to structural default-risk measures such as distance to default.
+
+Trading lesson:
+Equity risk changes nonlinearly as leverage and asset volatility change. Credit
+stress can be translated into equity trading features.
+
+S&P 500 implementation:
+- Estimate a simplified distance-to-default signal using market equity, debt,
+  equity volatility, and a liability threshold.
+- Use changes in distance to default, not only the level.
+- Combine with credit spreads and rating watch events when available.
+
+Features:
+- market leverage
+- equity volatility
+- distance to default
+- change in distance to default
+- debt maturity proxy
+- credit spread proxy
+
+Failure modes:
+- Noisy asset-value estimation
+- Accounting debt updates only quarterly
+- Model assumptions can break during crisis regimes
+- Distress names can rebound violently
+
+
+PAPER 14: Vassalou and Xing (2004) - Default Risk in Equity Returns
+
+Core idea:
+Default-risk measures derived from Merton-style models can be linked to equity
+returns. The paper helps connect credit risk and stock returns.
+
+Trading lesson:
+Default risk is not a simple "high risk equals high return" feature. It must be
+handled with regime, size, value, and liquidity controls.
+
+S&P 500 implementation:
+- Compute default-likelihood proxies for all S&P 500 constituents.
+- Use default-risk changes as a warning overlay for long strategies.
+- Test whether distressed momentum/reversal differs in high-default-risk names.
+
+Features:
+- default likelihood
+- distance-to-default percentile
+- default-risk change
+- CDS spread change when available
+- credit spread beta
+- high-yield spread regime
+
+Failure modes:
+- Low number of true distress firms inside S&P 500 in normal markets
+- Distress rallies after policy interventions
+- Ignoring sector-specific balance-sheet norms
+
+
+PAPER 15: Avramov, Chordia, Jostova, and Philipov (2007) - Momentum and Credit Rating
+
+Core idea:
+Momentum profits are strongly related to credit rating. Momentum can be large
+among low-grade firms and weak or absent among high-grade firms.
+
+Trading lesson:
+Momentum should be conditioned on credit quality. A price trend in a financially
+fragile company is different from a trend in a high-quality company.
+
+S&P 500 implementation:
+- Segment momentum strategies by credit rating buckets:
+  AAA/AA, A, BBB, below investment grade or unrated.
+- For S&P 500, focus on BBB and downgrade-watch names because the index has fewer
+  deep junk firms.
+- Add crash-risk controls for low-grade momentum.
+
+Features:
+- 12-1 momentum
+- 6-1 momentum
+- credit rating bucket
+- rating outlook/watch
+- downgrade event
+- credit spread change
+
+Failure modes:
+- Small sample of low-grade S&P 500 names
+- Momentum crash exposure
+- Rating changes lag market information
+- Credit ratings are discrete and stale
+
+
+PAPER 16: Kisgen (2006) - Credit Ratings and Capital Structure
+
+Core idea:
+Credit ratings affect corporate capital-structure decisions. Firms near a rating
+change may adjust debt issuance, equity issuance, or leverage to protect or
+improve ratings.
+
+Trading lesson:
+Rating thresholds can create predictable corporate behavior. Firms near rating
+boundaries may manage leverage more aggressively.
+
+S&P 500 implementation:
+- Identify firms near rating upgrade or downgrade thresholds.
+- Track net debt issuance, buybacks, dividends, and cash retention.
+- Combine with rating outlook and credit-spread movement to detect likely
+  de-risking or rating pressure.
+
+Features:
+- rating notch distance
+- net debt issuance
+- leverage change
+- payout change
+- cash accumulation
+- rating outlook
+
+Failure modes:
+- Limited public rating granularity
+- Corporate behavior may be driven by management strategy rather than rating
+  targeting
+- Rating agencies lag changes in market-implied credit quality
+
+
+PAPER 17: Ben-David, Franzoni, and Moussawi (2018) - Do ETFs Increase Volatility?
+
+Core idea:
+ETF ownership can increase volatility and turnover in underlying securities. ETF
+arbitrage and flows can transmit non-fundamental trading shocks into component
+stocks.
+
+Trading lesson:
+Passive ownership is not neutral for short-horizon trading. ETF ownership can
+alter volatility, turnover, and liquidity risk.
+
+S&P 500 implementation:
+- Measure ETF ownership and ETF flow exposure for each S&P 500 stock.
+- Use ETF-flow shocks as a volatility and mean-reversion state variable.
+- For SPY/IVV/VOO-heavy names, monitor index-level flow and futures pressure.
+
+Features:
+- ETF ownership percentage
+- ETF ownership change
+- ETF flow exposure
+- intraday volatility
+- turnover shock
+- index-flow beta
+
+Failure modes:
+- ETF ownership is widespread in S&P 500; cross-sectional dispersion may be low
+- ETF flow data can be delayed or expensive
+- Confusing index beta with ETF-specific flow pressure
+
+
+PAPER 18: Israeli, Lee, and Sridharan (2017) - Is There a Dark Side to Exchange Traded Funds?
+
+Core idea:
+Higher ETF ownership is associated with weaker information environment measures,
+including higher trading costs, higher return synchronicity, lower future
+earnings response coefficients, and lower analyst coverage.
+
+Trading lesson:
+ETF ownership can make prices move more with the basket and less with firm-
+specific fundamentals. This can affect both signal strength and risk.
+
+S&P 500 implementation:
+- Treat ETF ownership as a crowding and information-environment feature.
+- Downweight firm-specific signals when ETF ownership is high and return
+  synchronicity is rising.
+- Alternatively, look for delayed firm-specific reactions after ETF-driven moves.
+
+Features:
+- ETF ownership
+- ETF ownership change
+- stock return synchronicity
+- analyst coverage change
+- spread/liquidity change
+- firm-specific return variance
+
+Failure modes:
+- Causality is difficult; ETFs may hold already liquid, index-like names
+- S&P 500 names are inherently index-sensitive
+- Analyst coverage may remain high for mega-caps despite ETF ownership
+
+
+PAPER 19: Bushee (1998) - The Influence of Institutional Investors on Myopic R&D Investment Behavior
+
+Core idea:
+Institutional investor type matters. Transient institutional investors can
+pressure managers toward short-term behavior, while dedicated institutions may
+support long-term investment.
+
+Trading lesson:
+Institutional ownership is not one feature. Investor horizon and style can affect
+corporate decisions and the quality of long-term investment.
+
+S&P 500 implementation:
+- Classify institutional owners into transient, quasi-indexer, and dedicated
+  groups if possible.
+- Use ownership-horizon mix to adjust confidence in R&D and long-horizon
+  innovation signals.
+- Watch for firms with high transient ownership cutting R&D to meet earnings
+  targets.
+
+Features:
+- transient institutional ownership
+- dedicated institutional ownership
+- quasi-indexer ownership
+- change in owner horizon mix
+- R&D cut indicator
+- earnings pressure indicator
+
+Failure modes:
+- 13F data is delayed
+- Institution classification is nontrivial
+- Ownership changes can reflect index flows rather than active information
+
+
+PAPER 20: Yan and Zhang (2009) - Institutional Investors and Equity Returns
+
+Core idea:
+The positive relation between institutional ownership and future stock returns is
+driven by short-term institutions. Short-term institutional trading can forecast
+future returns and future earnings surprises.
+
+Trading lesson:
+Some short-horizon institutional trading may be informed. The ownership signal is
+stronger when you distinguish short-term institutions from long-term holders.
+
+S&P 500 implementation:
+- Use quarterly 13F changes to infer ownership flows by institution type.
+- Create a short-term institutional accumulation signal.
+- Combine with upcoming earnings to test whether accumulation predicts positive
+  surprises.
+
+Features:
+- short-term institution ownership change
+- long-term institution ownership change
+- net institutional accumulation
+- institutional concentration
+- earnings surprise after accumulation
+- ownership-flow acceleration
+
+Failure modes:
+- 13F publication delay
+- Quarterly frequency may be too slow for many strategies
+- Hidden derivatives and non-13F positions
+- Crowded institutional trades can reverse quickly
+
+
+10 DEVELOPMENT BATCHES
+
+BATCH 01: Earnings Surprise and Analyst Expectation Error Engine
+
+Papers used:
+- PAPER 01: Bernard and Thomas
+- PAPER 02: Skinner and Sloan
+- PAPER 03: So
+
+Strategy hypothesis:
+The S&P 500 market still underreacts to earnings information when earnings
+surprises interact with analyst forecast bias, valuation expectations, and
+guidance revisions.
+
+Data needed:
+- point-in-time S&P 500 constituents
+- earnings announcement timestamps
+- actual EPS and revenue
+- pre-announcement consensus EPS and revenue
+- analyst revisions and dispersion
+- price, volume, market cap, sector
+- valuation metrics
+
+Feature build:
+1. Build standardized EPS surprise.
+2. Build standardized revenue surprise.
+3. Build analyst optimism/pessimism score.
+4. Build pre-earnings torpedo-risk score.
+5. Build post-earnings revision-confirmation score.
+
+Signal versions:
+- v1: long top SUE quintile, short bottom SUE quintile after announcement
+- v2: v1 conditioned on analyst forecast-error prediction
+- v3: short expensive high-growth firms after negative surprise
+- v4: long positive surprise only when analyst revisions confirm within 5 days
+
+Backtest rules:
+- enter next open or next close after confirmed announcement timestamp
+- hold 20, 40, and 60 trading days
+- sector-neutral and beta-neutral variants
+- exclude earnings announced during regular hours unless intraday timestamp is
+  reliable
+
+Expected failure tests:
+- remove microcaps is irrelevant, but still test liquidity tiers inside S&P 500
+- compare pre-2005, 2005-2015, and 2016-present
+- test whether results survive mega-cap-only subset
+- test long-only use as an earnings-risk overlay
+
+First Claude Code CLI task:
+"Using BATCH 01, create feature specs and unit tests for SUE, revenue surprise,
+analyst dispersion, analyst revision, and torpedo-risk score. Do not implement a
+backtester yet. Focus on point-in-time data contracts."
+
+
+BATCH 02: SEC Filing Forward-Looking Language and Readability Engine
+
+Papers used:
+- PAPER 04: Li (2010)
+- PAPER 05: Li (2008)
+
+Strategy hypothesis:
+Forward-looking filing language and readability changes contain information about
+future earnings quality, risk, and management confidence that price does not
+fully process immediately.
+
+Data needed:
+- SEC 10-K and 10-Q filings
+- SEC acceptance timestamps
+- item/section parser for MD&A
+- historical filings by firm
+- price and accounting data
+- earnings persistence labels
+
+Feature build:
+1. Parse MD&A sections.
+2. Detect forward-looking sentences.
+3. Score positive, negative, and uncertain forward-looking language.
+4. Compute readability metrics.
+5. Compute year-over-year and quarter-over-quarter changes.
+
+Signal versions:
+- v1: long improving forward-looking tone, short deteriorating tone
+- v2: downweight firms with unreadable filings and aggressive earnings
+- v3: combine positive FLS with improving margins and analyst revisions
+- v4: event trade after 10-Q/10-K acceptance timestamp
+
+Backtest rules:
+- enter after filing acceptance timestamp plus realistic processing delay
+- hold 1, 3, and 6 months
+- sector-neutral ranking
+- test only firms with clean parsed MD&A
+
+Expected failure tests:
+- filings released after market close vs during market hours
+- boilerplate filtering on/off
+- financial sector excluded/included
+- raw readability vs change in readability
+
+First Claude Code CLI task:
+"Using BATCH 02, build a filing-text feature contract. Define parser inputs,
+timestamps, outputs, and tests for MD&A extraction, forward-looking sentence
+detection, readability metrics, and boilerplate filtering."
+
+
+BATCH 03: Earnings Call Tone, Q&A, and Voice Proxy Engine
+
+Papers used:
+- PAPER 06: Mayew and Venkatachalam
+
+Strategy hypothesis:
+Management tone, Q&A uncertainty, and vocal affect contain incremental
+information around earnings calls. The market may underreact to subtle negative
+or positive cues when headline numbers are mixed.
+
+Data needed:
+- earnings call transcripts
+- optional call audio
+- speaker labels
+- earnings announcement timestamps
+- price and volume data
+- analyst questions and management answers
+
+Feature build:
+1. Separate prepared remarks from Q&A.
+2. Separate CEO, CFO, and other speakers.
+3. Score sentiment, uncertainty, and evasiveness.
+4. Build prepared-vs-Q&A tone gap.
+5. Optional: extract audio pitch, pace, pause, and stress features.
+
+Signal versions:
+- v1: long positive Q&A tone after positive earnings surprise
+- v2: short negative Q&A tone despite positive prepared remarks
+- v3: avoid longs when transcript tone and voice affect diverge negatively
+- v4: combine tone gap with analyst revision confirmation
+
+Backtest rules:
+- enter after call transcript/audio availability timestamp
+- use conservative processing delay
+- hold 5, 20, and 40 trading days
+- test transcript-only before adding audio
+
+Expected failure tests:
+- CEO-only vs CFO-only features
+- prepared remarks excluded vs included
+- calls with missing speaker labels excluded
+- sector-neutral and earnings-surprise-neutral variants
+
+First Claude Code CLI task:
+"Using BATCH 03, implement transcript preprocessing and feature specs for
+prepared remarks, Q&A, speaker role, sentiment, uncertainty, and evasiveness.
+Stub audio features but do not require audio in v1."
+
+
+BATCH 04: Product-Market Network and Rival-Shock Engine
+
+Papers used:
+- PAPER 07: Hoberg and Phillips
+- PAPER 08: Hoberg, Phillips, and Prabhala
+
+Strategy hypothesis:
+Dynamic product-market peer networks reveal rival shocks, competitive threats,
+and product similarity exposures missed by GICS sectors. S&P 500 firms may react
+with delays to peer earnings, guidance, and product-market movement.
+
+Data needed:
+- 10-K product descriptions or Hoberg-Phillips TNIC/product similarity data
+- product-market fluidity data if available
+- earnings and guidance data for peers
+- sector and industry classifications
+- price and accounting data
+
+Feature build:
+1. Build text-based peer sets.
+2. Build peer earnings shock score.
+3. Build peer guidance shock score.
+4. Build product-market fluidity score.
+5. Build competitive threat plus margin compression score.
+
+Signal versions:
+- v1: trade firm before its earnings based on already-reported peer surprises
+- v2: underweight high-fluidity firms with margin compression
+- v3: long differentiated firms with positive peer demand shocks
+- v4: pairs/relative-value trades within text-based peer clusters
+
+Backtest rules:
+- only use peer information available before target firm trade timestamp
+- hold through target earnings or fixed 20- to 60-day windows
+- compare GICS peers vs text-based peers
+- neutralize sector and market beta
+
+Expected failure tests:
+- peer leakage from same-day announcements
+- overly broad peer networks
+- product similarity stale after major acquisitions
+- high-fluidity firms that are innovators rather than victims
+
+First Claude Code CLI task:
+"Using BATCH 04, design a product-market peer feature module. Include a fallback
+mode using GICS peers and an advanced mode using text-similarity peers. Write
+tests that prevent peer events after the target trade timestamp."
+
+
+BATCH 05: Legislative and Regulatory Event Graph Engine
+
+Papers used:
+- PAPER 09: Cohen, Diether, and Malloy
+
+Strategy hypothesis:
+Complex legislative and regulatory events create firm-specific winners and losers
+that the market may process slowly, especially when firm exposure is indirect.
+
+Data needed:
+- bill/vote/event timestamps
+- regulatory announcements
+- firm industry, geography, revenue exposure, and government contract exposure
+- sector mappings
+- price and volume data
+
+Feature build:
+1. Create policy-event records.
+2. Map event to affected sectors and firms.
+3. Score likely benefit/harm.
+4. Score event complexity and attention.
+5. Track abnormal returns after event.
+
+Signal versions:
+- v1: event-study only, no live strategy
+- v2: long/short exposed firms after complex bill passage
+- v3: sector-relative trade for heavily exposed firms
+- v4: options/volatility research overlay for binary policy events
+
+Backtest rules:
+- sparse-event backtest with event-time aggregation
+- use strict timestamping
+- manually audit the first 50 events
+- do not automate labels until manual protocol is stable
+
+Expected failure tests:
+- random event dates
+- alternative exposure mappings
+- excluding events covered heavily by front-page news
+- sector ETF hedge vs market hedge
+
+First Claude Code CLI task:
+"Using BATCH 05, create an event-study framework and schema for policy events.
+Do not build a trading strategy first. Build the data model, timestamp rules, and
+manual labeling workflow."
+
+
+BATCH 06: Innovation, Patent Value, and R&D Revaluation Engine
+
+Papers used:
+- PAPER 10: Hirshleifer, Hsu, and Li
+- PAPER 11: Kogan, Papanikolaou, Seru, and Stoffman
+- PAPER 12: Eberhart, Maxwell, and Siddique
+
+Strategy hypothesis:
+The market underreacts to productive innovation, especially when patent quality,
+innovation efficiency, and unexpected R&D increases identify real future growth
+rather than hype.
+
+Data needed:
+- Compustat R&D expense
+- patent grants and citations
+- patent value estimates if available
+- sector classifications
+- accounting fundamentals
+- price and returns
+
+Feature build:
+1. Build R&D capital and R&D surprise.
+2. Build patent count and citation-weighted patent count.
+3. Build innovation efficiency: patent output per R&D input.
+4. Build patent-value shock.
+5. Confirm with operating performance follow-through.
+
+Signal versions:
+- v1: long high innovation efficiency firms
+- v2: long unexpected R&D increases with balance-sheet strength
+- v3: long patent-value shock, sector-neutral
+- v4: avoid expensive innovation firms without patent/R&D follow-through
+
+Backtest rules:
+- hold 6, 12, and 24 months
+- rebalance quarterly
+- sector-neutral ranks
+- test with and without mega-cap tech
+
+Expected failure tests:
+- exclude technology sector
+- citation lag adjustment
+- patent grant date vs application date
+- R&D increases during distress excluded
+
+First Claude Code CLI task:
+"Using BATCH 06, write feature specs for R&D surprise, R&D capital, patent count,
+citation-weighted patents, patent-value proxy, and innovation efficiency. Include
+sector normalization and lag assumptions."
+
+
+BATCH 07: Credit Fragility, Rating Threshold, and Distress-Momentum Engine
+
+Papers used:
+- PAPER 13: Merton
+- PAPER 14: Vassalou and Xing
+- PAPER 15: Avramov, Chordia, Jostova, and Philipov
+- PAPER 16: Kisgen
+
+Strategy hypothesis:
+Credit risk, rating state, and distance-to-default changes improve equity
+signals by identifying fragile trends, downgrade pressure, and firms likely to
+change capital structure.
+
+Data needed:
+- balance-sheet debt
+- market equity
+- equity volatility
+- credit ratings and outlooks
+- credit spreads or CDS when available
+- price and return data
+
+Feature build:
+1. Estimate simplified distance to default.
+2. Build credit rating buckets.
+3. Build rating-notch distance.
+4. Build credit spread change.
+5. Condition momentum and reversal signals on credit state.
+
+Signal versions:
+- v1: avoid long momentum in deteriorating credit names
+- v2: credit-conditioned momentum in BBB/downrating-watch firms
+- v3: short deteriorating distance-to-default plus negative momentum
+- v4: long de-risking firms near rating thresholds if fundamentals improve
+
+Backtest rules:
+- monthly rebalance for credit features
+- weekly or daily overlay for price momentum
+- crisis-regime stress tests
+- no concentrated short book in distressed names
+
+Expected failure tests:
+- 2008, 2020, and 2022 rate-shock subperiods
+- financials excluded/included
+- rating data lagged by publication date
+- distance-to-default change vs level
+
+First Claude Code CLI task:
+"Using BATCH 07, implement a credit feature data contract and tests for distance
+to default, rating bucket, rating-notch distance, and credit-conditioned momentum.
+Keep Merton model v1 simple and documented."
+
+
+BATCH 08: ETF Ownership, Passive Crowding, and Basket-Flow Fragility Engine
+
+Papers used:
+- PAPER 17: Ben-David, Franzoni, and Moussawi
+- PAPER 18: Israeli, Lee, and Sridharan
+
+Strategy hypothesis:
+ETF ownership and ETF flow exposure change the volatility, synchronicity,
+liquidity, and information environment of S&P 500 stocks. These features can
+improve risk sizing and identify delayed firm-specific reactions after basket
+pressure.
+
+Data needed:
+- ETF holdings by underlying stock
+- ETF flows or shares outstanding
+- S&P 500 stock returns and volumes
+- intraday volatility if available
+- spreads/liquidity proxies
+- analyst coverage if available
+
+Feature build:
+1. Build ETF ownership percentage.
+2. Build ETF ownership change.
+3. Build ETF flow exposure by stock.
+4. Build return synchronicity.
+5. Build firm-specific residual return after market/sector/ETF moves.
+
+Signal versions:
+- v1: volatility forecast using ETF ownership and flow exposure
+- v2: mean reversion after ETF-flow-driven residual dislocation
+- v3: downweight firm-specific fundamental signals when synchronicity is high
+- v4: long delayed firm-specific positive news after ETF-driven selloff
+
+Backtest rules:
+- daily or weekly rebalance
+- use realistic holding data lag
+- compare SPY/IVV/VOO-only exposure vs all ETF exposure
+- separate signal generation from risk-sizing overlay
+
+Expected failure tests:
+- mega-cap subset
+- high ETF ownership but no flow shock
+- high beta stocks vs high ETF exposure stocks
+- liquidity regimes
+
+First Claude Code CLI task:
+"Using BATCH 08, design ETF ownership and flow-exposure features. Build them as
+risk overlays first, not alpha signals. Include tests for holding-date lags and
+market/sector beta separation."
+
+
+BATCH 09: Institutional Horizon and 13F Flow Engine
+
+Papers used:
+- PAPER 19: Bushee
+- PAPER 20: Yan and Zhang
+
+Strategy hypothesis:
+Institutional ownership is more informative when separated by investor horizon.
+Short-term institutional accumulation can predict returns and earnings surprises,
+while transient ownership can also pressure management toward short-term
+decisions.
+
+Data needed:
+- 13F holdings
+- institution classification or inferred turnover
+- S&P 500 constituents
+- earnings data
+- fundamentals, especially R&D and payout behavior
+- price and returns
+
+Feature build:
+1. Infer institution turnover/horizon.
+2. Classify owners as short-term, dedicated, or quasi-indexer.
+3. Build ownership-flow features by horizon.
+4. Build institutional accumulation before earnings.
+5. Combine owner-horizon mix with R&D and earnings-pressure features.
+
+Signal versions:
+- v1: long short-term institutional accumulation
+- v2: long accumulation before positive expected earnings surprise
+- v3: downweight R&D signals when transient ownership is high and R&D cuts occur
+- v4: long firms with dedicated ownership supporting high innovation efficiency
+
+Backtest rules:
+- use 13F filing publication date, not quarter-end holdings date
+- quarterly rebalance
+- test with realistic reporting lag
+- compare active institutions vs index-like institutions
+
+Expected failure tests:
+- delayed publication destroys alpha
+- top holders only vs full 13F universe
+- ownership change due to index reconstitution
+- sector and size neutrality
+
+First Claude Code CLI task:
+"Using BATCH 09, create a 13F ownership feature contract. Include publication
+date vs holding date, institution horizon inference, short-term accumulation,
+dedicated ownership, and tests for reporting-lag lookahead."
+
+
+BATCH 10: Set 6 Meta-Ensemble and Research Orchestrator
+
+Papers used:
+- PAPER 01 through PAPER 20
+
+Strategy hypothesis:
+The strongest practical use of Set 6 may be an ensemble that detects when
+firm-specific information is likely to be underprocessed, then chooses the right
+holding period and risk budget.
+
+Data needed:
+- all batch feature outputs
+- common point-in-time security master
+- common event calendar
+- common sector and industry taxonomy
+- price, volume, volatility, and transaction-cost estimates
+- experiment tracking database
+
+Feature families:
+1. Earnings and analyst expectation features
+2. Filing text and readability features
+3. Call tone and voice proxy features
+4. Product-market peer and fluidity features
+5. Policy-event exposure features
+6. Innovation and R&D features
+7. Credit and rating features
+8. ETF/passive crowding features
+9. Institutional ownership horizon features
+
+Meta-signal versions:
+- v1: simple equal-weight composite after z-scoring by sector
+- v2: horizon-specific composite:
+  earnings/calls = days to weeks;
+  filings/credit/ETF = weeks to months;
+  innovation/ownership = quarters
+- v3: machine-learning ranker with strict walk-forward splits
+- v4: risk-budget overlay that reduces exposure when credit fragility, ETF
+  crowding, or event risk is high
+
+Backtest rules:
+- each feature must declare data availability timestamp
+- each signal must declare intended holding period
+- train only on past data
+- use nested walk-forward validation
+- compare against simple baselines:
+  equal-weight S&P 500, sector-neutral value/momentum/quality, and prior batch
+  strategies
+
+Expected failure tests:
+- remove one feature family at a time
+- test by market regime
+- test with higher transaction costs
+- test long-only and long-short
+- test turnover caps
+
+First Claude Code CLI task:
+"Using BATCH 10, design the research orchestrator. Create a feature registry,
+timestamp contract, experiment config schema, and report template. Do not build a
+complex ML model until individual batches have validated feature outputs."
+
+
+RECOMMENDED BUILD ORDER
+
+1. Batch 01 - easiest alpha prototype if you have earnings and analyst data.
+2. Batch 07 - useful risk overlay with mostly standard market/accounting data.
+3. Batch 06 - slow but high-quality medium-horizon innovation sleeve.
+4. Batch 09 - strong if you can handle 13F reporting lags correctly.
+5. Batch 02 - valuable, but parsing and timestamping must be clean.
+6. Batch 08 - start as risk sizing before alpha.
+7. Batch 04 - powerful once product peers are available.
+8. Batch 03 - transcript first, audio later.
+9. Batch 05 - event-study first because label quality matters.
+10. Batch 10 - ensemble only after at least three batches produce validated
+    feature histories.
+
+
+DATA TABLES TO CREATE IN YOUR REPO
+
+security_master:
+- date
+- ticker
+- permid or stable security id
+- gvkey or company id
+- point-in-time S&P 500 membership
+- sector
+- industry
+
+events:
+- event_id
+- firm_id
+- event_type
+- event_timestamp
+- source_timestamp
+- processing_available_timestamp
+- event_payload_json
+
+features:
+- firm_id
+- asof_date
+- feature_name
+- feature_value
+- feature_family
+- available_timestamp
+- source
+
+signals:
+- firm_id
+- signal_date
+- signal_name
+- score
+- direction
+- intended_horizon
+- feature_version
+
+experiments:
+- experiment_id
+- strategy_name
+- start_date
+- end_date
+- rebalance_rule
+- transaction_cost_model
+- universe_rule
+- notes
+
+
+SOURCE LIST
+
+SOURCE 01:
+Bernard, Victor L., and Jacob K. Thomas. 1989. "Post-Earnings-Announcement
+Drift: Delayed Price Response or Risk Premium?" Journal of Accounting Research.
+https://ideas.repec.org/a/bla/joares/v27y1989ip1-36.html
+
+SOURCE 02:
+Skinner, Douglas J., and Richard G. Sloan. 2002. "Earnings Surprises, Growth
+Expectations, and Stock Returns or Don't Let an Earnings Torpedo Sink Your
+Portfolio." Review of Accounting Studies.
+https://ideas.repec.org/a/spr/reaccs/v7y2002i2d10.1023_a1020294523516.html
+
+SOURCE 03:
+So, Eric C. 2013. "A New Approach to Predicting Analyst Forecast Errors: Do
+Investors Overweight Analyst Forecasts?" Journal of Financial Economics.
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1714657
+
+SOURCE 04:
+Li, Feng. 2010. "The Information Content of Forward-Looking Statements in
+Corporate Filings - A Naive Bayesian Machine Learning Approach." Journal of
+Accounting Research.
+https://ideas.repec.org/a/bla/joares/v48y2010i5p1049-1102.html
+
+SOURCE 05:
+Li, Feng. 2008. "Annual Report Readability, Current Earnings, and Earnings
+Persistence." Journal of Accounting and Economics.
+https://www.sciencedirect.com/science/article/pii/S0165410108000141
+
+SOURCE 06:
+Mayew, William J., and Mohan Venkatachalam. 2012. "The Power of Voice:
+Managerial Affective States and Future Firm Performance." Journal of Finance.
+https://sites.duke.edu/mayew/publications/
+
+SOURCE 07:
+Hoberg, Gerard, and Gordon Phillips. 2016. "Text-Based Network Industries and
+Endogenous Product Differentiation." Journal of Political Economy.
+https://digitalcommons.dartmouth.edu/facoa/1766/
+
+SOURCE 08:
+Hoberg, Gerard, Gordon Phillips, and Nagpurnanand Prabhala. 2014. "Product
+Market Threats, Payouts, and Financial Flexibility." Journal of Finance.
+https://ideas.repec.org/a/bla/jfinan/v69y2014i1p293-324.html
+
+SOURCE 09:
+Cohen, Lauren, Karl B. Diether, and Christopher Malloy. 2013. "Legislating
+Stock Prices." Journal of Financial Economics.
+https://www.nber.org/papers/w18291
+
+SOURCE 10:
+Hirshleifer, David, Po-Hsuan Hsu, and Dongmei Li. 2013. "Innovative Efficiency
+and Stock Returns." Journal of Financial Economics.
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=1799675
+
+SOURCE 11:
+Kogan, Leonid, Dimitris Papanikolaou, Amit Seru, and Noah Stoffman. 2017.
+"Technological Innovation, Resource Allocation, and Growth." Quarterly Journal
+of Economics.
+https://www.gsb.stanford.edu/faculty-research/publications/technological-innovation-resource-allocation-growth
+
+SOURCE 12:
+Eberhart, Allan C., William F. Maxwell, and Akhtar R. Siddique. 2004. "An
+Examination of Long-Term Abnormal Stock Returns and Operating Performance
+Following R&D Increases." Journal of Finance.
+https://cir.nii.ac.jp/crid/1361699993740475776?lang=en
+
+SOURCE 13:
+Merton, Robert C. 1974. "On the Pricing of Corporate Debt: The Risk Structure of
+Interest Rates." Journal of Finance.
+https://www.hbs.edu/faculty/Pages/item.aspx?num=8798
+
+SOURCE 14:
+Vassalou, Maria, and Yuhang Xing. 2004. "Default Risk in Equity Returns."
+Journal of Finance.
+https://users.nber.org/~confer/2003/aps03/vassalou.pdf
+
+SOURCE 15:
+Avramov, Doron, Tarun Chordia, Gergana Jostova, and Alexander Philipov. 2007.
+"Momentum and Credit Rating." Journal of Finance.
+https://colab.ws/articles/10.1111%2Fj.1540-6261.2007.01282.x
+
+SOURCE 16:
+Kisgen, Darren J. 2006. "Credit Ratings and Capital Structure." Journal of
+Finance.
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=355680
+
+SOURCE 17:
+Ben-David, Itzhak, Francesco Franzoni, and Rabih Moussawi. 2018. "Do ETFs
+Increase Volatility?" Journal of Finance.
+https://ideas.repec.org/a/bla/jfinan/v73y2018i6p2471-2535.html
+
+SOURCE 18:
+Israeli, Doron, Charles M. C. Lee, and Suhas A. Sridharan. 2017. "Is There a
+Dark Side to Exchange Traded Funds? An Information Perspective." Review of
+Accounting Studies.
+https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2625975
+
+SOURCE 19:
+Bushee, Brian J. 1998. "The Influence of Institutional Investors on Myopic R&D
+Investment Behavior." The Accounting Review.
+https://www.econbiz.de/Record/the-influence-of-institutional-investors-on-myopic-r-d-investment-behavior-bushee-brian/10007353372
+
+SOURCE 20:
+Yan, Xuemin Sterling, and Zhe Zhang. 2009. "Institutional Investors and Equity
+Returns: Are Short-term Institutions Better Informed?" Review of Financial
+Studies.
+https://academic.oup.com/rfs/article-lookup/doi/10.1093/revfin/hhl046
+
+
+HIGHEST-ROI STRATEGY IDEAS FROM SET 6
+
+1. Earnings surprise plus analyst forecast-error prediction:
+   easiest to prototype and most naturally event-driven.
+
+2. Credit-conditioned momentum:
+   useful both as alpha and as a risk filter for other strategies.
+
+3. Innovation efficiency plus unexpected R&D increase:
+   likely better as a low-turnover sleeve than as a short-term strategy.
+
+4. ETF ownership and flow exposure:
+   start as a volatility/risk-sizing overlay, then test dislocation trades.
+
+5. Short-term institutional accumulation before earnings:
+   promising if 13F publication lags are handled honestly.
+
+6. Filing readability plus forward-looking tone:
+   useful as an earnings-quality overlay even if standalone alpha is modest.
+
+
+MINIMAL FIRST WEEK IMPLEMENTATION PLAN
+
+Day 1:
+- Create repo folders:
+  docs/research
+  docs/feature_specs
+  configs/features
+  src/features
+  src/signals
+  tests/features
+- Add this file under docs/research.
+
+Day 2:
+- Implement Batch 01 feature specs only.
+- Write tests for timestamp handling and no lookahead.
+
+Day 3:
+- Implement Batch 01 feature builder.
+- Produce a feature coverage report.
+
+Day 4:
+- Implement simple Batch 01 signal builder.
+- Run a smoke backtest with one holding period.
+
+Day 5:
+- Add Batch 07 credit feature specs.
+- Use credit features as a risk overlay for Batch 01.
+
+Weekend:
+- Write experiment log.
+- Mark failed assumptions.
+- Ask Claude Code CLI to refactor only after tests exist.
+
+
+ONE-SENTENCE INSTRUCTION FOR YOUR NEXT CHATBOT SESSION
+
+"Use Set 6 Batch 01 and Batch 07 to build a token-efficient S&P 500 earnings
+surprise plus credit-risk overlay prototype; start with feature contracts and
+tests, then implement the smallest working backtest."

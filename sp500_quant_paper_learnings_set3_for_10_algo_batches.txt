@@ -1,0 +1,1323 @@
+S&P 500 QUANT PAPER LEARNINGS - SET 3
+Third non-overlapping set of 20 papers for planning 10 additional batches of trading algorithms
+
+Purpose:
+This file is a chatbot-ready research brief. It summarizes another 20 quant trading and
+financial modeling papers that were not used as the core papers in Set 1 or Set 2, then turns
+those papers into 10 practical development batches for S&P 500 strategy research.
+
+Important:
+This is research and software-planning material, not financial advice. Every strategy must be
+tested with point-in-time data, realistic costs, realistic borrow assumptions where shorts are
+used, and out-of-sample validation.
+
+================================================================================
+HOW SET 3 IS DIFFERENT FROM SET 1 AND SET 2
+================================================================================
+
+Set 1 focused on the core engine:
+- momentum, trend, value, quality, profitability, volatility management, earnings drift,
+  liquidity-aware reversal, pairs/stat-arb, and machine-learning ranking.
+
+Set 2 focused on additional cross-sectional signals:
+- industry momentum, residual momentum, short-term reversal, seasonality, corporate issuance,
+  analyst/insider/short-seller signals, options-informed signals, attention, and sentiment.
+
+Set 3 focuses on a different layer:
+- tail-risk and lottery-stock avoidance
+- distress and bankruptcy-risk modeling
+- balance-sheet sustainability
+- capital investment discipline
+- accrual reliability
+- R&D and intangible-asset valuation
+- customer-supplier information diffusion
+- analyst-coverage-limited momentum
+- volume/visibility effects
+- Friday earnings announcement inattention
+- attention-grabbing stock pressure
+- news and 10-K text tone
+- S&P 500 index addition/deletion effects
+- mutual-fund flow pressure
+- trading-cost-aware anomaly implementation
+
+The goal of Set 3 is not just to add more signals. The goal is to make the strategy factory more
+selective, more data-aware, and more realistic about which anomalies survive execution.
+
+================================================================================
+CHATBOT PROMPT TO USE WITH THIS FILE
+================================================================================
+
+Paste this file into a chatbot with this prompt:
+
+"You are helping me build S&P 500 quant trading algorithms in Claude Code CLI. Use this research
+brief to design 10 development batches. For each batch, specify the exact features, data tables,
+backtest assumptions, validation checks, expected artifacts, and compact summary files that Claude
+Code should create. Favor token-efficient CLI workflows: cached Parquet data, small JSON summaries,
+configuration files, and reusable tests. Do not implement everything at once. Prioritize robust,
+low-leakage, low-turnover strategies first."
+
+================================================================================
+IMPLEMENTATION WARNINGS FOR THIS SET
+================================================================================
+
+1. Many Set 3 signals require harder data than prices.
+   Examples:
+   - CRSP/Compustat-style fundamentals
+   - SEC filing timestamps
+   - customer-supplier links
+   - analyst coverage
+   - daily news text
+   - mutual fund holdings and fund flows
+   - S&P index change dates
+
+2. Use point-in-time availability.
+   A financial statement dated December 31 is not available on December 31. Use filing dates,
+   announcement dates, or conservative reporting lags.
+
+3. Keep S&P 500 universe logic honest.
+   Use point-in-time constituents. Do not test today's S&P 500 list backward through history.
+
+4. Treat shorting as optional.
+   Many papers document long-short anomalies. For a practical S&P 500 system, build both:
+   - long-only ranking/avoid overlays
+   - long-short research versions with borrow/cost assumptions
+
+5. Cost control is central in Set 3.
+   Several signals are short-horizon or event-driven. Use no-trade bands, buy/hold spreads,
+   turnover caps, and impact models before trusting results.
+
+6. Do not let text/news models become a token sink.
+   Store compact precomputed text features:
+   - negative_tone
+   - uncertainty
+   - litigiousness
+   - modal_weak
+   - modal_strong
+   - article_count
+   - abnormal_news_count
+   - filing_tone_change
+
+================================================================================
+20 ADDITIONAL PAPERS AND IMPLEMENTATION LEARNINGS
+================================================================================
+
+01. Ang, Hodrick, Xing, and Zhang (2006)
+Title: The Cross-Section of Volatility and Expected Returns
+Source: https://www.nber.org/papers/w10852
+
+Core idea:
+Stocks with high idiosyncratic volatility have unusually low future average returns, and this
+cannot be explained away by standard size, value, momentum, or liquidity controls.
+
+Trading translation:
+High idiosyncratic volatility should usually be treated as a warning flag, especially when the
+stock also has weak quality, high distress, high MAX return, or poor profitability.
+
+Features to implement:
+- idio_vol_21d, idio_vol_63d, idio_vol_252d
+- residual volatility from regression on SPY plus sector ETF
+- residual volatility from regression on Fama-French-style proxies
+- idio_vol_rank_within_sector
+- idio_vol_change_1m
+
+Strategy ideas:
+- Long-only avoid overlay: remove top decile idiosyncratic volatility stocks unless quality and
+  momentum are both strong.
+- Defensive factor sleeve: rank stocks by low idio vol plus high profitability.
+- Momentum cleaner: penalize momentum signals that are mostly high-volatility lottery moves.
+
+Main caveats:
+- Idiosyncratic volatility is correlated with distress, size, price, and lottery demand.
+- S&P 500 names are large and liquid, so the effect may be weaker than in all-stock universes.
+- Avoid using contemporaneous factor residuals that would not be known at rebalance time.
+
+02. Bali, Cakici, and Whitelaw (2011)
+Title: Maxing Out: Stocks as Lotteries and the Cross-Section of Expected Returns
+Source: https://www.nber.org/papers/w14804
+
+Core idea:
+Stocks with extreme recent positive daily returns, measured by the maximum daily return over the
+past month, tend to have lower subsequent returns. The paper connects this to investor preference
+for lottery-like payoffs.
+
+Trading translation:
+A recent extreme one-day winner is often not a clean momentum stock. It may be an overbought
+lottery stock.
+
+Features to implement:
+- max_daily_return_21d
+- max_daily_return_63d
+- max_return_rank_within_sector
+- max_return_minus_realized_vol
+- max_return_interaction_with_news_attention
+
+Strategy ideas:
+- Lottery avoid list: underweight top-decile MAX stocks.
+- Momentum quality filter: only buy high-momentum stocks if MAX is not extreme.
+- Reversal candidate: fade high MAX stocks after abnormal retail attention or weak fundamentals.
+
+Main caveats:
+- Some high MAX events are real information events, such as takeover rumors or earnings surprises.
+- Avoid blindly shorting high MAX stocks around merger/news risk.
+- Use event filters before treating high MAX as pure overpricing.
+
+03. Harvey and Siddique (2000)
+Title: Conditional Skewness in Asset Pricing Tests
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2980335
+
+Core idea:
+Skewness and coskewness matter for asset pricing. Investors care not only about variance, but also
+about whether an asset worsens bad tail outcomes.
+
+Trading translation:
+Build a tail-shape overlay. Some stocks look attractive by mean/volatility but contribute badly to
+portfolio skew or crash behavior.
+
+Features to implement:
+- rolling_skew_63d, rolling_skew_252d
+- downside_beta_252d
+- coskew_with_spy_252d
+- left_tail_loss_252d
+- drawdown_sensitivity_to_spy_down_days
+
+Strategy ideas:
+- Crash-aware portfolio construction: penalize names with high downside beta and poor skew.
+- Tail-balanced long book: combine momentum/value names with skew-aware constraints.
+- Regime overlay: tighten exposure to bad-skew names when market volatility rises.
+
+Main caveats:
+- Skew estimates are noisy.
+- Daily data may not be enough for stable single-stock coskew estimates.
+- Treat this more as a risk control than a standalone alpha signal.
+
+04. Campbell, Hilscher, and Szilagyi (2008)
+Title: In Search of Distress Risk
+Source: https://dash.harvard.edu/handle/1/3199070?show=full
+
+Core idea:
+Financially distressed stocks, measured with a dynamic failure-probability model using accounting
+and market variables, have historically earned low returns despite high risk.
+
+Trading translation:
+Distress is often not compensated in equities. High failure probability is usually a reason to
+avoid a stock, not to demand a higher expected return.
+
+Features to implement:
+- chs_distress_score
+- leverage, market_equity, cash_to_assets, profitability, recent_return
+- volatility and drawdown inputs
+- distress_rank_within_sector
+- distress_change_qoq
+
+Strategy ideas:
+- Distress avoid overlay for all long-only strategies.
+- Quality-value filter: buy cheap stocks only when distress score is acceptable.
+- Short/underweight research sleeve: high distress plus negative momentum.
+
+Main caveats:
+- Bankruptcy prediction models require careful point-in-time accounting.
+- Distressed stocks can squeeze violently.
+- S&P 500 distressed names may exit the index, so constituent survivorship is a big risk.
+
+05. Ohlson (1980)
+Title: Financial Ratios and the Probabilistic Prediction of Bankruptcy
+Source: https://ideas.repec.org/a/bla/joares/v18y1980i1p109-131.html
+
+Core idea:
+Ohlson applies a conditional logit framework to predict corporate failure using financial ratios.
+The resulting O-score is a classic accounting-based distress measure.
+
+Trading translation:
+Use O-score-like variables as slow-moving balance-sheet distress inputs, then combine them with
+market-based distress from Campbell-Hilscher-Szilagyi.
+
+Features to implement:
+- o_score
+- total_liabilities_to_total_assets
+- working_capital_to_total_assets
+- current_liabilities_to_current_assets
+- net_income_to_total_assets
+- funds_from_operations_to_total_liabilities
+- size-adjusted total assets
+
+Strategy ideas:
+- Fundamental distress filter: avoid high O-score stocks.
+- Distress trend model: penalize stocks where O-score worsens across filings.
+- Value trap detector: cheap valuation plus bad O-score equals lower priority.
+
+Main caveats:
+- Accounting definitions must match the model carefully.
+- Financial firms may need separate treatment.
+- Bankruptcy models are classification models, not direct expected-return models.
+
+06. Hirshleifer, Hou, Teoh, and Zhang (2004)
+Title: Do Investors Overvalue Firms with Bloated Balance Sheets?
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=404120
+
+Core idea:
+Net operating assets, roughly cumulative operating earnings minus cumulative free cash flow,
+negatively predict future returns. High net operating assets can indicate balance-sheet bloat and
+unsustainable accounting performance.
+
+Trading translation:
+Avoid companies where accounting earnings look good but cash generation does not support them.
+
+Features to implement:
+- net_operating_assets_to_assets
+- operating_assets_minus_operating_liabilities
+- cumulative_accrual_proxy
+- NOA_rank_within_sector
+- NOA_change_yoy
+
+Strategy ideas:
+- Sustainability quality factor: long low NOA, avoid high NOA.
+- Value trap filter: cheap stocks with high NOA require extra confirmation.
+- Earnings quality overlay: penalize high accruals plus high NOA.
+
+Main caveats:
+- Accounting field construction is tedious.
+- Sector differences matter.
+- Financials and regulated utilities may need special handling.
+
+07. Titman, Wei, and Xie (2004)
+Title: Capital Investments and Stock Returns
+Source: https://www.nber.org/papers/w9951
+
+Core idea:
+Firms that substantially increase capital investment tend to have lower future abnormal returns.
+The paper argues investors may underreact to empire-building implications of aggressive investment.
+
+Trading translation:
+High investment growth is not automatically good. It can be a red flag unless supported by
+profitability, returns on capital, and strong demand.
+
+Features to implement:
+- capex_to_assets
+- capex_growth_yoy
+- investment_growth_3y
+- capex_minus_depreciation_to_assets
+- investment_rank_within_sector
+
+Strategy ideas:
+- Conservative investment factor: prefer lower, disciplined capital investment.
+- Avoid aggressive investment after strong past returns.
+- Quality-investment composite: high ROIC plus disciplined capex.
+
+Main caveats:
+- Some sectors require high capex structurally.
+- Growth firms can rationally invest heavily.
+- Use sector normalization and profitability interaction.
+
+08. Richardson, Sloan, Soliman, and Tuna (2005)
+Title: Accrual Reliability, Earnings Persistence and Stock Prices
+Source: https://www.sciencedirect.com/science/article/pii/S0165410105000406
+
+Core idea:
+Accrual components differ in reliability. Less reliable accruals are less persistent, and investors
+can misprice the persistence of earnings components.
+
+Trading translation:
+Do not treat all earnings equally. Cash earnings and reliable accruals deserve more weight than
+less reliable accruals.
+
+Features to implement:
+- working_capital_accruals
+- noncurrent_operating_accruals
+- financial_accruals
+- total_accruals_to_assets
+- cash_earnings_to_assets
+- accrual_reliability_score
+
+Strategy ideas:
+- Earnings quality rank: high cash earnings, low unreliable accruals.
+- PEAD filter: positive earnings surprise only counts strongly when accrual quality is high.
+- Value filter: cheap plus reliable earnings beats cheap plus aggressive accruals.
+
+Main caveats:
+- Requires high-quality accounting definitions.
+- Annual and quarterly versions can disagree.
+- Treat missing fields conservatively.
+
+09. Chan, Lakonishok, and Sougiannis (2001)
+Title: The Stock Market Valuation of Research and Development Expenditures
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=195488
+
+Core idea:
+The market can underappreciate R&D investment because it is expensed rather than capitalized. R&D
+intensity has predictive value, especially in certain growth or beaten-down subsets.
+
+Trading translation:
+Build intangible-aware value and quality features. Some firms that look expensive on accounting
+book value may be investing heavily in intangible assets.
+
+Features to implement:
+- rd_to_sales
+- rd_to_market_equity
+- rd_to_assets
+- rd_growth_yoy
+- intangible_adjusted_book_to_market
+- rd_intensity_rank_within_industry
+
+Strategy ideas:
+- R&D value: high R&D intensity plus reasonable valuation.
+- R&D recovery: high R&D intensity after poor past returns, if distress is low.
+- Intangible-adjusted value factor for tech, healthcare, and communications.
+
+Main caveats:
+- Missing R&D is not always zero R&D.
+- R&D has sector-specific meaning.
+- Some R&D spend is wasteful; combine with profitability and revenue growth.
+
+10. Cohen and Frazzini (2008)
+Title: Economic Links and Predictable Returns
+Source: https://www.aqr.com/Insights/Research/Journal-Article/Economic-Links-and-Predictable-Returns
+
+Core idea:
+News about customers can predict future returns of suppliers because investors underreact to
+publicly available customer-supplier links.
+
+Trading translation:
+Build customer momentum. If a major customer stock has a large positive or negative move, supplier
+stocks may drift afterward.
+
+Features to implement:
+- customer_weighted_return_1m
+- customer_weighted_return_3m
+- supplier_customer_link_strength
+- top_customer_sales_share
+- customer_news_shock
+- customer_earnings_surprise_proxy
+
+Strategy ideas:
+- Supplier momentum: buy suppliers after positive customer shocks.
+- Supplier warning: avoid suppliers after negative customer shocks.
+- Link-confirmed momentum: strengthen a supplier's own momentum when customer momentum agrees.
+
+Main caveats:
+- Customer-supplier data is difficult and may be stale.
+- Public customer lists often cover only major customers.
+- Many S&P 500 firms are both customers and suppliers in complex networks.
+
+11. Hong, Lim, and Stein (2000)
+Title: Bad News Travels Slowly: Size, Analyst Coverage, and the Profitability of Momentum Strategies
+Source: https://stein.scholars.harvard.edu/publications/bad-news-travels-slowly-size-analyst-coverage-and-profitability-momentum-strategi
+
+Core idea:
+Momentum profits are consistent with gradual information diffusion. Momentum is stronger where
+information travels more slowly, such as lower analyst coverage stocks.
+
+Trading translation:
+Momentum should be conditioned on information diffusion. For S&P 500 stocks, use relative analyst
+coverage, news density, ownership breadth, and complexity as diffusion proxies.
+
+Features to implement:
+- analyst_coverage_count
+- coverage_rank_within_sector
+- news_count_63d
+- information_diffusion_score
+- momentum_x_low_coverage
+- negative_news_momentum
+
+Strategy ideas:
+- Low-coverage momentum: overweight momentum where information diffusion is slower.
+- Bad-news drift avoid: underweight negative momentum names with sparse coverage.
+- Coverage-adjusted holding period: slower diffusion gets longer holding period.
+
+Main caveats:
+- S&P 500 names usually have more coverage than small stocks.
+- Coverage data availability may be expensive.
+- Analyst coverage can proxy for size/liquidity, so control for those.
+
+12. Lee and Swaminathan (2000)
+Title: Price Momentum and Trading Volume
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=92589
+
+Core idea:
+Trading volume helps identify where a stock sits in its momentum life cycle. Volume interacts with
+past returns and can help explain continuation versus reversal behavior.
+
+Trading translation:
+Do not use price momentum alone. Add volume state to distinguish early accumulation, crowded
+momentum, exhaustion, and reversal risk.
+
+Features to implement:
+- turnover_21d
+- turnover_252d_percentile
+- abnormal_volume_21d
+- momentum_12_1
+- momentum_x_volume_state
+- volume_trend_3m
+
+Strategy ideas:
+- Early momentum: high price momentum without extreme crowded volume.
+- Crowded momentum warning: strong momentum plus extreme turnover and high MAX gets lower weight.
+- Reversal watchlist: high past return, high volume, weakening trend.
+
+Main caveats:
+- Volume meanings change across eras due to market structure.
+- ETF/index trading can distort single-name volume.
+- Use dollar volume and turnover rather than raw shares.
+
+13. Gervais, Kaniel, and Mingelgrin (2001)
+Title: The High-Volume Return Premium
+Source: https://scholars.duke.edu/individual/pub773086
+
+Core idea:
+Stocks experiencing unusually high trading volume can earn higher subsequent returns, consistent
+with increased visibility and investor recognition.
+
+Trading translation:
+A positive volume shock can be a visibility signal, especially when not accompanied by obvious
+lottery overpricing or distressed news.
+
+Features to implement:
+- volume_shock_1d
+- volume_shock_5d
+- current_volume_percentile_vs_1y
+- high_volume_event_flag
+- high_volume_return_context
+- visibility_score
+
+Strategy ideas:
+- High-volume continuation: buy stocks with strong volume shocks and non-extreme MAX.
+- Visibility-confirmed breakout: require abnormal volume for breakout entries.
+- Event triage: separate high-volume good-news events from high-volume distress events.
+
+Main caveats:
+- High volume around bad news is not bullish.
+- Volume shocks near earnings need separate treatment.
+- Transaction costs rise when everyone notices the same event.
+
+14. DellaVigna and Pollet (2009)
+Title: Investor Inattention and Friday Earnings Announcements
+Source: https://ideas.repec.org/p/nbr/nberwo/11683.html
+
+Core idea:
+Friday earnings announcements have less immediate response and more delayed response, consistent
+with temporary investor inattention. Firms also appear more likely to release bad news on Fridays.
+
+Trading translation:
+The day of the week and attention context around earnings announcements can improve PEAD-style
+strategies.
+
+Features to implement:
+- earnings_announcement_weekday
+- friday_announcement_flag
+- earnings_surprise_proxy
+- abnormal_return_earnings_day
+- post_earnings_drift_5d_20d
+- announcement_attention_score
+
+Strategy ideas:
+- Friday PEAD: stronger continuation after positive Friday surprises.
+- Friday bad-news drift avoid: avoid or short negative Friday surprises after delayed reaction.
+- Attention-adjusted earnings model: lower immediate response means longer drift window.
+
+Main caveats:
+- Requires exact earnings announcement timestamps.
+- Friday effect may change over time.
+- Avoid lookahead from earnings databases that revise dates.
+
+15. Barber and Odean (2008)
+Title: All that Glitters: The Effect of Attention and News on the Buying Behavior of Individual and Institutional Investors
+Source: https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID956237_code12463.pdf?abstractid=460660&mirid=1
+
+Core idea:
+Individual investors are net buyers of attention-grabbing stocks, such as stocks in the news,
+stocks with abnormal volume, and stocks with extreme one-day returns.
+
+Trading translation:
+Attention can create temporary buying pressure. Combined with MAX and weak fundamentals, attention
+can mark overpricing; combined with real news and quality, it may confirm continuation.
+
+Features to implement:
+- attention_grab_flag
+- extreme_return_1d_flag
+- abnormal_volume_flag
+- news_presence_flag
+- attention_x_MAX
+- attention_x_quality
+
+Strategy ideas:
+- Attention reversal: fade attention spikes in low-quality, high-MAX names.
+- Attention confirmation: allow breakout continuation only when quality/news context supports it.
+- Retail-pressure risk overlay: avoid chasing stocks with attention but no fundamental support.
+
+Main caveats:
+- Attention is not always bearish.
+- The original setting studies investor behavior, not a guaranteed return anomaly.
+- S&P 500 stocks can attract both retail and institutional attention.
+
+16. Tetlock (2007)
+Title: Giving Content to Investor Sentiment: The Role of Media in the Stock Market
+Source: https://ideas.repec.org/a/bla/jfinan/v62y2007i3p1139-1168.html
+
+Core idea:
+Media pessimism predicts short-term downward pressure followed by reversion, and unusual pessimism
+is associated with high trading volume.
+
+Trading translation:
+Daily news tone can help separate temporary sentiment pressure from fundamental news.
+
+Features to implement:
+- news_negative_tone
+- media_pessimism_score
+- abnormal_article_count
+- tone_change_5d
+- tone_x_return
+- tone_x_volume
+
+Strategy ideas:
+- Sentiment pressure reversal: buy quality names after extreme pessimism and price pressure.
+- Negative-tone avoid: reduce exposure when bad tone aligns with weak fundamentals.
+- News-volume filter: require tone and volume context before trading sharp moves.
+
+Main caveats:
+- News text licensing can be expensive.
+- Modern media sources differ from the original newspaper-column setting.
+- Tone models need careful timestamping.
+
+17. Loughran and McDonald (2011)
+Title: When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks
+Source: https://colab.ws/articles/10.1111/j.1540-6261.2010.01625.x
+
+Core idea:
+General-purpose negative-word dictionaries misclassify many financial terms. Finance-specific
+dictionaries better measure tone in 10-K filings and relate to filing returns, volume, volatility,
+fraud, material weakness, and earnings.
+
+Trading translation:
+If using text, use finance-specific dictionaries or finance-trained models. Filing tone can be a
+slow-moving risk and quality feature.
+
+Features to implement:
+- lm_negative
+- lm_uncertainty
+- lm_litigious
+- lm_modal_weak
+- lm_modal_strong
+- filing_tone_change_yoy
+- filing_word_count_change_yoy
+
+Strategy ideas:
+- Filing tone risk overlay: underweight high uncertainty or worsening negative tone.
+- Quality confirmation: favor firms with improving filing tone and reliable accruals.
+- Event study: test returns after 10-K/10-Q filing tone shocks.
+
+Main caveats:
+- SEC filing timestamps matter.
+- Raw filings are huge; store compact feature summaries.
+- Text parsing can consume too much token/context if not cached.
+
+18. Chen, Noronha, and Singal (2004)
+Title: The Price Response to S&P 500 Index Additions and Deletions: Evidence of Asymmetry and a New Explanation
+Source: https://papers.ssrn.com/sol3/papers.cfm?abstract_id=427001
+
+Core idea:
+S&P 500 additions and deletions show asymmetric price responses. Additions can experience a more
+permanent price increase, potentially related to investor awareness, not just temporary pressure.
+
+Trading translation:
+Index membership events are not just bookkeeping. They change demand, visibility, benchmark flows,
+and sometimes comovement.
+
+Features to implement:
+- sp500_addition_event
+- sp500_deletion_event
+- days_since_index_event
+- pre_addition_runup
+- post_addition_drift
+- index_event_liquidity_change
+
+Strategy ideas:
+- Index event study engine for additions/deletions.
+- Avoid leakage in S&P universe backtests by marking membership changes.
+- Post-addition drift/reversal research sleeve with strict event-date handling.
+
+Main caveats:
+- Index addition announcement dates and effective dates differ.
+- Event alpha may be crowded.
+- If your universe is S&P 500 only, deletions disappear unless you keep a tradeable ex-index
+  tracking universe.
+
+19. Coval and Stafford (2007)
+Title: Asset Fire Sales (and Purchases) in Equity Markets
+Source: https://www.nber.org/papers/w11357
+
+Core idea:
+Mutual fund inflows and outflows force funds to buy or sell existing positions, creating price
+pressure. Liquidity providers who trade against constrained funds can earn returns.
+
+Trading translation:
+Institutional flow pressure can create temporary mispricing in otherwise liquid equities.
+
+Features to implement:
+- fund_flow_pressure_score
+- holdings_overlap_pressure
+- estimated_forced_selling
+- estimated_forced_buying
+- institutional_ownership_change
+- pressure_reversal_window
+
+Strategy ideas:
+- Fire-sale reversal: buy fundamentally sound stocks under forced selling pressure.
+- Forced-purchase fade: reduce exposure to stocks inflated by forced buying pressure.
+- Flow-pressure confirmation: combine flow pressure with abnormal volume and news tone.
+
+Main caveats:
+- Requires mutual fund holdings and flows, usually delayed.
+- S&P 500 stocks absorb flows better than small caps.
+- This is data-intensive and should not be the first batch unless data already exists.
+
+20. Novy-Marx and Velikov (2016)
+Title: A Taxonomy of Anomalies and Their Trading Costs
+Source: https://www.nber.org/papers/w20721
+
+Core idea:
+Transaction costs materially reduce anomaly profitability. Simple cost-mitigation methods, such as
+buy/hold spreads that reduce unnecessary turnover, can greatly improve implementability.
+
+Trading translation:
+Every batch should include a cost-aware version before being judged. A beautiful signal that turns
+over too much is probably not a useful strategy.
+
+Features and controls to implement:
+- estimated_spread_cost
+- estimated_market_impact
+- turnover_1way
+- rebalance_trade_size_adv
+- buy_threshold
+- sell_threshold
+- hold_band
+- cost_adjusted_alpha
+
+Strategy ideas:
+- Buy/hold spread optimizer for every ranking strategy.
+- Turnover-aware signal ensemble.
+- Capacity report by strategy sleeve.
+- Gross versus net performance dashboard.
+
+Main caveats:
+- Cost assumptions can dominate results.
+- Retail and institutional costs differ.
+- Use conservative costs first, then sensitivity tests.
+
+================================================================================
+NEW STRATEGY PRIMITIVES FROM SET 3
+================================================================================
+
+Primitive 1: Lottery-risk avoidance
+- Penalize high idiosyncratic volatility, high MAX, bad skew, and weak fundamentals.
+
+Primitive 2: Distress avoidance
+- Combine Ohlson-style accounting distress with Campbell-Hilscher-Szilagyi market distress.
+
+Primitive 3: Balance-sheet sustainability
+- Prefer low net operating assets, low unreliable accruals, and strong cash earnings.
+
+Primitive 4: Conservative investment
+- Penalize aggressive capex/investment growth unless profitability and growth quality justify it.
+
+Primitive 5: Intangible-aware value
+- Adjust value and quality for R&D intensity, especially in tech, healthcare, and communications.
+
+Primitive 6: Information diffusion
+- Momentum is more useful when information diffusion is slow or when related-firm news has not
+  been fully incorporated.
+
+Primitive 7: Volume/visibility state
+- Use abnormal volume and turnover to decide whether a move is early, crowded, or exhausted.
+
+Primitive 8: Attention pressure
+- Attention can create short-term buying pressure and later reversal in low-quality lottery names.
+
+Primitive 9: Text tone
+- Use finance-specific news and filing tone as compact features, not as raw text dumped into prompts.
+
+Primitive 10: Flow and index pressure
+- Index membership and fund flow pressure can create demand-driven moves separate from fundamentals.
+
+Primitive 11: Execution-aware anomaly survival
+- Every signal needs cost, turnover, capacity, and no-trade-band versions.
+
+================================================================================
+10 ADDITIONAL ALGORITHM DEVELOPMENT BATCHES
+================================================================================
+
+BATCH 1: Tail Risk, Lottery Risk, and Defensive Avoidance
+Source papers:
+- Ang, Hodrick, Xing, and Zhang (2006)
+- Bali, Cakici, and Whitelaw (2011)
+- Harvey and Siddique (2000)
+- Campbell, Hilscher, and Szilagyi (2008)
+
+Objective:
+Create a risk-avoidance layer that improves every long-only strategy by removing stocks with
+bad tail, lottery, and distress profiles.
+
+Algorithms:
+1. Low idiosyncratic volatility quality sleeve.
+2. High-MAX lottery avoid overlay.
+3. Downside-beta and skewness portfolio constraint.
+4. Tail-risk composite: idio vol + MAX + downside beta + distress.
+
+Required data:
+- Daily adjusted OHLCV.
+- Sector classifications.
+- SPY or market proxy.
+- Fundamental data for distress interactions.
+
+Implementation tasks for Claude Code:
+- Build `features_tail_risk.py`.
+- Add rolling idio-vol, MAX, skew, downside beta, and tail-loss calculations.
+- Create `tail_risk_score` from standardized components.
+- Backtest as both standalone ranking and overlay on Set 1 momentum/value strategies.
+- Save compact results to `results/set3_batch1_tail_risk_summary.json`.
+
+Validation:
+- Confirm all rolling features are lagged one trading day.
+- Compare results with and without sector neutralization.
+- Report turnover impact when used as an avoid overlay.
+
+BATCH 2: Fundamental Distress and Value-Trap Detection
+Source papers:
+- Campbell, Hilscher, and Szilagyi (2008)
+- Ohlson (1980)
+
+Objective:
+Build a robust distress model that prevents cheap-but-dangerous stocks from contaminating value,
+contrarian, and high-yield strategies.
+
+Algorithms:
+1. O-score accounting distress.
+2. CHS-style market-plus-accounting distress.
+3. Distress trend: worsening versus improving failure probability.
+4. Value trap filter: cheap valuation plus high distress gets downranked.
+
+Required data:
+- Quarterly fundamentals.
+- Market equity and recent returns.
+- Volatility and drawdown.
+- Filing dates or conservative lag rules.
+
+Implementation tasks for Claude Code:
+- Build `features_distress.py`.
+- Add O-score-like variables with clear field mapping.
+- Add CHS-style distress proxy with configurable coefficients.
+- Build long-only avoid overlay and long-short research sleeve.
+- Save `results/set3_batch2_distress_summary.json`.
+
+Validation:
+- Exclude or separately test financial firms.
+- Confirm point-in-time fundamental availability.
+- Track how many S&P 500 names are excluded each rebalance.
+
+BATCH 3: Accounting Sustainability and Investment Discipline
+Source papers:
+- Hirshleifer, Hou, Teoh, and Zhang (2004)
+- Titman, Wei, and Xie (2004)
+- Richardson, Sloan, Soliman, and Tuna (2005)
+
+Objective:
+Create an earnings-quality and capital-discipline feature set that improves value, quality, and
+fundamental momentum strategies.
+
+Algorithms:
+1. Low net operating assets factor.
+2. Low unreliable accruals factor.
+3. Conservative capital investment factor.
+4. Sustainable earnings composite.
+
+Required data:
+- Balance sheet, income statement, and cash flow statement items.
+- Annual and quarterly filings.
+- Sector/industry labels.
+
+Implementation tasks for Claude Code:
+- Build `features_accounting_sustainability.py`.
+- Compute NOA, accrual buckets, capex growth, and cash earnings.
+- Normalize all accounting variables within sector.
+- Backtest monthly and quarterly rebalances.
+- Save `results/set3_batch3_accounting_summary.json`.
+
+Validation:
+- Test annual-only and quarterly versions separately.
+- Use conservative filing lags.
+- Report missing-field coverage by year and sector.
+
+BATCH 4: R&D and Intangible-Aware Value
+Source papers:
+- Chan, Lakonishok, and Sougiannis (2001)
+
+Objective:
+Improve value and quality models by treating R&D as investment rather than pure expense.
+
+Algorithms:
+1. R&D intensity factor.
+2. R&D-to-market-equity value factor.
+3. Intangible-adjusted book-to-market.
+4. R&D recovery signal: high R&D plus poor past return plus low distress.
+
+Required data:
+- R&D expense.
+- Sales, assets, book equity, market equity.
+- Sector/industry labels.
+
+Implementation tasks for Claude Code:
+- Build `features_intangibles.py`.
+- Compute R&D intensity and intangible-adjusted valuation metrics.
+- Create sector-specific handling for missing R&D.
+- Backtest in full S&P 500 and sector subsets.
+- Save `results/set3_batch4_intangibles_summary.json`.
+
+Validation:
+- Compare raw value versus intangible-adjusted value.
+- Separate tech/healthcare from other sectors.
+- Check whether R&D signal is just growth/momentum in disguise.
+
+BATCH 5: Information Diffusion and Linked-Firm Momentum
+Source papers:
+- Cohen and Frazzini (2008)
+- Hong, Lim, and Stein (2000)
+
+Objective:
+Build momentum signals that account for slow information diffusion across related firms and across
+stocks with different information environments.
+
+Algorithms:
+1. Customer-supplier momentum.
+2. Supplier warning after negative customer shock.
+3. Analyst-coverage-adjusted momentum.
+4. Information diffusion score for momentum holding period.
+
+Required data:
+- Customer-supplier links from filings or vendor data.
+- Analyst coverage counts.
+- Daily returns.
+- News or earnings shock proxies.
+
+Implementation tasks for Claude Code:
+- Build `features_information_diffusion.py`.
+- Create customer-weighted return features.
+- Add coverage-adjusted momentum interaction.
+- Backtest monthly supplier-momentum and coverage-adjusted momentum.
+- Save `results/set3_batch5_info_diffusion_summary.json`.
+
+Validation:
+- Make link data point-in-time.
+- Avoid using customer relationships disclosed after the test date.
+- Compare to standard momentum and industry momentum from earlier sets.
+
+BATCH 6: Volume, Visibility, and Momentum Life Cycle
+Source papers:
+- Lee and Swaminathan (2000)
+- Gervais, Kaniel, and Mingelgrin (2001)
+- Barber and Odean (2008)
+
+Objective:
+Use volume and attention state to improve entry timing, avoid crowded momentum, and identify
+visibility-driven continuation.
+
+Algorithms:
+1. Momentum life-cycle rank: price momentum interacted with turnover state.
+2. High-volume return premium signal.
+3. Abnormal volume breakout confirmation.
+4. Attention-driven reversal in high-MAX, low-quality stocks.
+
+Required data:
+- Daily OHLCV.
+- News-count proxy if available.
+- Quality/distress/tail-risk features from earlier batches.
+
+Implementation tasks for Claude Code:
+- Build `features_volume_visibility.py`.
+- Compute turnover, abnormal volume, and volume percentiles.
+- Add attention-grab flags from extreme returns and abnormal volume.
+- Backtest continuation and reversal variants.
+- Save `results/set3_batch6_volume_visibility_summary.json`.
+
+Validation:
+- Use dollar volume and turnover, not raw shares.
+- Separate earnings-day volume from non-event volume.
+- Report net results after realistic spread assumptions.
+
+BATCH 7: Earnings Inattention and Calendar-Aware Drift
+Source papers:
+- DellaVigna and Pollet (2009)
+- Hong, Lim, and Stein (2000)
+
+Objective:
+Enhance PEAD-style strategies by accounting for attention, announcement weekday, and slower
+information diffusion.
+
+Algorithms:
+1. Friday earnings drift.
+2. Negative Friday surprise avoid/short signal.
+3. Attention-adjusted PEAD holding period.
+4. Coverage-adjusted PEAD.
+
+Required data:
+- Earnings announcement dates and preferably timestamps.
+- Earnings surprise proxy.
+- Returns around announcement.
+- Analyst coverage or news density.
+
+Implementation tasks for Claude Code:
+- Build `features_earnings_attention.py`.
+- Add weekday and attention context around earnings.
+- Backtest 1-day, 5-day, 20-day, and 60-day drift windows.
+- Save `results/set3_batch7_earnings_attention_summary.json`.
+
+Validation:
+- Use actual announcement dates, not fiscal period end dates.
+- Distinguish pre-market, during-market, and after-market announcements if possible.
+- Test by decade to see if Friday inattention persists.
+
+BATCH 8: News and Filing Text Tone
+Source papers:
+- Tetlock (2007)
+- Loughran and McDonald (2011)
+
+Objective:
+Build compact text-derived features from news and SEC filings without letting raw text overload
+Claude Code CLI context.
+
+Algorithms:
+1. Media pessimism reversal.
+2. Negative tone plus weak fundamentals avoid overlay.
+3. Filing uncertainty/litigiousness risk overlay.
+4. Filing tone improvement quality signal.
+
+Required data:
+- News articles or vendor sentiment.
+- SEC 10-K/10-Q text.
+- Filing timestamps.
+- Loughran-McDonald dictionary or finance-specific NLP model.
+
+Implementation tasks for Claude Code:
+- Build `features_text_tone.py`.
+- Parse filings offline into compact feature rows.
+- Store only ticker/date/tone metrics in Parquet.
+- Backtest filing-tone and news-tone event strategies.
+- Save `results/set3_batch8_text_tone_summary.json`.
+
+Validation:
+- Never paste raw filings into the model during normal iteration.
+- Confirm filing timestamps and publication times.
+- Compare dictionary features to vendor sentiment if available.
+
+BATCH 9: Index Events and Institutional Flow Pressure
+Source papers:
+- Chen, Noronha, and Singal (2004)
+- Coval and Stafford (2007)
+
+Objective:
+Model demand-driven price pressure from S&P 500 membership changes and institutional fund flows.
+
+Algorithms:
+1. S&P 500 addition/deletion event study.
+2. Post-addition drift/reversal research sleeve.
+3. Estimated mutual fund forced-selling pressure.
+4. Flow-pressure reversal for fundamentally healthy names.
+
+Required data:
+- S&P 500 addition/deletion announcement and effective dates.
+- Point-in-time universe membership.
+- Mutual fund holdings and flow data, if available.
+- Daily OHLCV.
+
+Implementation tasks for Claude Code:
+- Build `features_index_flow.py`.
+- Add index-event flags and event windows.
+- Add optional fund-flow pressure features behind a config flag.
+- Create event-study reports before full portfolio backtests.
+- Save `results/set3_batch9_index_flow_summary.json`.
+
+Validation:
+- Separate announcement date from effective date.
+- Avoid survivorship bias from deleted stocks.
+- Treat fund holdings as delayed unless exact publication timing is known.
+
+BATCH 10: Execution-Aware Ensemble and Anomaly Survival
+Source papers:
+- Novy-Marx and Velikov (2016)
+- All Set 3 papers as candidate signal families
+
+Objective:
+Turn Set 3 signals into an execution-aware ensemble that survives costs, turnover, and capacity
+constraints.
+
+Algorithms:
+1. Buy/hold spread for all rank-based strategies.
+2. Turnover-aware ensemble weighting.
+3. Cost-adjusted signal selection.
+4. Capacity and implementation report by signal family.
+
+Required data:
+- Signal outputs from Batches 1-9.
+- Spread/cost estimates.
+- Average daily dollar volume.
+- Portfolio holdings and trade logs.
+
+Implementation tasks for Claude Code:
+- Build `execution_cost_engine.py`.
+- Add buy threshold, sell threshold, and hold band config.
+- Produce gross/net performance for every strategy.
+- Create `set3_signal_registry.yaml` with all signals and cost assumptions.
+- Save `results/set3_batch10_execution_ensemble_summary.json`.
+
+Validation:
+- Compare gross versus net Sharpe and CAGR.
+- Report average turnover, max trade ADV, and rebalance hit rate.
+- Reject any signal that only works before costs.
+
+================================================================================
+SUGGESTED DATA TABLES TO ADD TO YOUR RESEARCH STACK
+================================================================================
+
+1. `prices_daily`
+Columns:
+- date, ticker, open, high, low, close, adj_close, volume, dollar_volume, sector, industry
+
+2. `fundamentals_quarterly`
+Columns:
+- filing_date, period_end_date, ticker, assets, liabilities, current_assets,
+  current_liabilities, working_capital, sales, net_income, operating_cash_flow,
+  capex, depreciation, rd_expense, book_equity, cash, debt
+
+3. `events_earnings`
+Columns:
+- announcement_datetime, ticker, fiscal_period, eps_actual, eps_estimate,
+  revenue_actual, revenue_estimate, surprise, announcement_weekday
+
+4. `events_index_membership`
+Columns:
+- announcement_date, effective_date, ticker, event_type, index_name
+
+5. `text_features`
+Columns:
+- date, ticker, source_type, negative, uncertainty, litigious, modal_weak,
+  modal_strong, article_count, word_count, tone_change
+
+6. `link_customer_supplier`
+Columns:
+- asof_date, supplier_ticker, customer_ticker, customer_sales_share, link_source
+
+7. `ownership_flow`
+Columns:
+- report_date, ticker, fund_id, shares_held, fund_flow, estimated_pressure
+
+8. `features_set3`
+Columns:
+- date, ticker, tail_risk_score, distress_score, noa_score, investment_score,
+  accrual_reliability_score, rd_intensity_score, info_diffusion_score,
+  volume_visibility_score, attention_pressure_score, text_tone_score,
+  index_flow_score, execution_penalty
+
+================================================================================
+RECOMMENDED IMPLEMENTATION ORDER
+================================================================================
+
+1. Batch 1: Tail risk and lottery avoidance
+Reason:
+Uses mostly price data, improves many existing strategies, and is fast to validate.
+
+2. Batch 2: Fundamental distress
+Reason:
+High practical value for avoiding value traps and blowups.
+
+3. Batch 3: Accounting sustainability
+Reason:
+Extends quality/value using fundamentals you probably already need.
+
+4. Batch 10: Execution-aware framework
+Reason:
+Do this early enough that every later signal is judged net of turnover and costs.
+
+5. Batch 6: Volume and visibility
+Reason:
+Uses daily price/volume data and helps with entries/exits.
+
+6. Batch 7: Earnings attention
+Reason:
+Useful if earnings dates are already available.
+
+7. Batch 4: R&D/intangible value
+Reason:
+Important but sector-specific.
+
+8. Batch 8: Text tone
+Reason:
+Useful but can become a tooling and data project. Cache features aggressively.
+
+9. Batch 5: Information diffusion/customer links
+Reason:
+Powerful but data-intensive.
+
+10. Batch 9: Index/flow pressure
+Reason:
+Index events are feasible; mutual fund flow pressure is valuable but harder.
+
+================================================================================
+TOKEN-EFFICIENT CLAUDE CODE CLI WORKFLOW
+================================================================================
+
+Use this pattern for each batch:
+
+1. Keep all experiment settings in a YAML config.
+   Example:
+   - `configs/set3_batch1_tail_risk.yaml`
+
+2. Cache features to Parquet.
+   Example:
+   - `data/features/set3_tail_risk.parquet`
+
+3. Save compact summaries only.
+   Example:
+   - `results/set3_batch1_tail_risk_summary.json`
+
+4. Save one small ranked CSV per rebalance only when needed.
+   Example:
+   - `debug/set3_batch1_sample_rebalance_2018-01-31.csv`
+
+5. Ask Claude Code CLI to inspect summaries, not giant logs.
+   Good prompt:
+   "Read the JSON summary and the config. Explain why the net Sharpe fell after costs. Do not read
+   the full trade log unless necessary."
+
+6. Add regression tests for feature timing.
+   Required tests:
+   - rolling features use only past data
+   - fundamentals are lagged by filing date
+   - events use announcement date, not effective hindsight
+   - universe membership is point-in-time
+   - net returns include costs
+
+================================================================================
+SOURCE LIST
+================================================================================
+
+01. Ang, Hodrick, Xing, and Zhang, The Cross-Section of Volatility and Expected Returns
+    https://www.nber.org/papers/w10852
+
+02. Bali, Cakici, and Whitelaw, Maxing Out: Stocks as Lotteries and the Cross-Section of Expected Returns
+    https://www.nber.org/papers/w14804
+
+03. Harvey and Siddique, Conditional Skewness in Asset Pricing Tests
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=2980335
+
+04. Campbell, Hilscher, and Szilagyi, In Search of Distress Risk
+    https://dash.harvard.edu/handle/1/3199070?show=full
+
+05. Ohlson, Financial Ratios and the Probabilistic Prediction of Bankruptcy
+    https://ideas.repec.org/a/bla/joares/v18y1980i1p109-131.html
+
+06. Hirshleifer, Hou, Teoh, and Zhang, Do Investors Overvalue Firms with Bloated Balance Sheets?
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=404120
+
+07. Titman, Wei, and Xie, Capital Investments and Stock Returns
+    https://www.nber.org/papers/w9951
+
+08. Richardson, Sloan, Soliman, and Tuna, Accrual Reliability, Earnings Persistence and Stock Prices
+    https://www.sciencedirect.com/science/article/pii/S0165410105000406
+
+09. Chan, Lakonishok, and Sougiannis, The Stock Market Valuation of Research and Development Expenditures
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=195488
+
+10. Cohen and Frazzini, Economic Links and Predictable Returns
+    https://www.aqr.com/Insights/Research/Journal-Article/Economic-Links-and-Predictable-Returns
+
+11. Hong, Lim, and Stein, Bad News Travels Slowly
+    https://stein.scholars.harvard.edu/publications/bad-news-travels-slowly-size-analyst-coverage-and-profitability-momentum-strategi
+
+12. Lee and Swaminathan, Price Momentum and Trading Volume
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=92589
+
+13. Gervais, Kaniel, and Mingelgrin, The High-Volume Return Premium
+    https://scholars.duke.edu/individual/pub773086
+
+14. DellaVigna and Pollet, Investor Inattention and Friday Earnings Announcements
+    https://ideas.repec.org/p/nbr/nberwo/11683.html
+
+15. Barber and Odean, All that Glitters
+    https://papers.ssrn.com/sol3/Delivery.cfm/SSRN_ID956237_code12463.pdf?abstractid=460660&mirid=1
+
+16. Tetlock, Giving Content to Investor Sentiment
+    https://ideas.repec.org/a/bla/jfinan/v62y2007i3p1139-1168.html
+
+17. Loughran and McDonald, When Is a Liability Not a Liability?
+    https://colab.ws/articles/10.1111/j.1540-6261.2010.01625.x
+
+18. Chen, Noronha, and Singal, The Price Response to S&P 500 Index Additions and Deletions
+    https://papers.ssrn.com/sol3/papers.cfm?abstract_id=427001
+
+19. Coval and Stafford, Asset Fire Sales (and Purchases) in Equity Markets
+    https://www.nber.org/papers/w11357
+
+20. Novy-Marx and Velikov, A Taxonomy of Anomalies and Their Trading Costs
+    https://www.nber.org/papers/w20721
+
+================================================================================
+FIRST TASK TO GIVE CLAUDE CODE CLI
+================================================================================
+
+Use this exact task:
+
+"Create a Set 3 strategy research scaffold for S&P 500 algorithms. Add a signal registry YAML
+covering the 20 papers in `sp500_quant_paper_learnings_set3_for_10_algo_batches.txt`. Then implement
+Batch 1 only: tail risk, lottery risk, and defensive avoidance. Use cached Parquet features, a YAML
+config, unit tests for rolling-window leakage, and a compact JSON summary. Do not implement text,
+customer-supplier, or mutual-fund-flow features yet."
+
+Expected first outputs:
+- `configs/set3_batch1_tail_risk.yaml`
+- `src/features/features_tail_risk.py`
+- `src/backtests/run_set3_batch1_tail_risk.py`
+- `tests/test_set3_tail_risk_no_leakage.py`
+- `results/set3_batch1_tail_risk_summary.json`
+
+================================================================================
+WHAT NOT TO DO FIRST
+================================================================================
+
+Do not start with:
+- raw SEC filing parsing
+- news NLP
+- customer-supplier graph modeling
+- mutual fund flow pressure
+- full 20-paper ensemble
+
+Start with:
+- price-derived tail risk
+- distress filters
+- accounting sustainability
+- execution-cost framework
+
+Those are easier to test, easier to cache, and more likely to improve your existing strategies
+without burning tokens on large raw documents or noisy data pipelines.
+
+================================================================================
+HIGHEST-ROI SET 3 IDEAS
+================================================================================
+
+1. Add high-MAX and high-idiosyncratic-volatility avoid filters to every long-only strategy.
+
+2. Add a distress score before trusting any value or reversal signal.
+
+3. Add NOA, accrual reliability, and capex discipline to your quality model.
+
+4. Use R&D intensity to improve value signals in tech, healthcare, and communications.
+
+5. Add abnormal volume and attention state to momentum entries.
+
+6. Make PEAD attention-aware by testing Friday announcements and low-coverage names.
+
+7. Use finance-specific text features only after they are cached into compact numeric tables.
+
+8. Build index-event flags so S&P 500 membership changes do not leak into backtests.
+
+9. Build buy/hold spread logic before judging any high-turnover signal.
+
+10. Force every strategy summary to report gross return, net return, turnover, average holding
+    period, worst drawdown, and max trade size as a percentage of ADV.
+

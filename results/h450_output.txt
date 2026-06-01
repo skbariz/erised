@@ -1,0 +1,110 @@
+H450: UltimateH401to450MDR (full Set 6 pool: 14 AA core + 42 CS)
+================================================================
+Loading S&P 500 stock panel...
+  Panel: 7555 days, 516 tickers
+Loading fundamentals...
+Folds (AA): 12  |  Folds (CS): 12
+
+Running 14 core ETF strategies...
+  H021: Sharpe 0.695
+  H043: Sharpe 0.340
+  H078: Sharpe 0.375
+  H046: Sharpe 0.250
+  H070: Sharpe 0.669
+  H086: Sharpe 0.662
+  H087: Sharpe 0.621
+  H097: Sharpe 0.648
+  H060: Sharpe 0.454
+  H079: Sharpe 0.689
+  H035: Sharpe 0.519
+  H301: Sharpe 0.676
+  H306: Sharpe 0.728
+  H308: Sharpe 0.684
+
+Running 42 Set 6 CS strategies...
+  H401... Sharpe 0.772
+  H402... Sharpe 0.770
+  H403... Sharpe 0.816
+  H404... Sharpe 0.705
+  H405... Sharpe 0.712
+  H406... Sharpe 0.640
+  H407... Sharpe 0.765
+  H408... Sharpe 0.784
+  H409... Sharpe 0.796
+  H410... Sharpe 0.764
+  H411... Sharpe 0.706
+  H412... Sharpe 0.961
+  H413... Sharpe 0.749
+  H414... Sharpe 0.641
+  H415... Sharpe 0.987
+  H416... Sharpe 0.767
+  H417... Sharpe 0.861
+  H418... Sharpe 0.749
+  H419... Sharpe 0.822
+  H420... Sharpe 0.861
+  H426... Sharpe 0.780
+  H427... Sharpe 0.805
+  H428... Sharpe 0.841
+  H429... Sharpe 0.984
+  H430... Sharpe 0.722
+  H431... Sharpe 0.684
+  H432... Sharpe 0.630
+  H433... Sharpe 0.818
+  H434... Sharpe 0.862
+  H435... Sharpe 0.733
+  H436... Sharpe 0.885
+  H437... Sharpe 0.716
+  H438... Sharpe 0.817
+  H439... Sharpe 0.884
+  H441... Sharpe 0.776
+  H442... Sharpe 0.850
+  H443... Sharpe 0.818
+  H444... Sharpe 0.650
+  H445... Sharpe 0.782
+  H446... Sharpe 0.792
+  H447... Sharpe 0.962
+  H448... Sharpe 0.815
+
+Equal-weight (56 strategies): Sharpe 1.004  MaxDD -28.51%
+
+Solving MDR optimisation...
+
+Optimal MDR weights (> 0.5%):
+  H043: 0.2448
+  H035: 0.1506
+  H060: 0.1080
+  H097: 0.1042
+  H046: 0.0913
+  H444: 0.0882
+  H412: 0.0657
+  H432: 0.0484
+  H078: 0.0366
+  H441: 0.0357
+  H415: 0.0137
+  H418: 0.0079
+
+Ultimate H401-H450 MDR (H450):
+  Sharpe 1.142  CI [0.741, 1.545]
+  CAGR 6.17%  MaxDD -10.33%
+
+  Compare H449 (Set6 MDR): Sharpe 1.164  MaxDD -9.53%
+  Compare H300/H350:       Sharpe 1.525  MaxDD -6.86%
+
+H001 correlation: +0.4988
+
+Per-fold Sharpe:
+  Fold  0: +1.185  (1998-01-29 -- 2000-01-29)
+  Fold  1: +1.047  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.475  (2002-01-28 -- 2004-01-28)
+  Fold  3: +1.012  (2004-01-28 -- 2006-01-27)
+  Fold  4: +1.140  (2006-01-27 -- 2008-01-27)
+  Fold  5: +1.335  (2008-01-27 -- 2010-01-26)
+  Fold  6: +0.567  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.592  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.527  (2014-01-25 -- 2016-01-25)
+  Fold  9: +1.910  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.512  (2018-01-24 -- 2020-01-24)
+  Fold 11: +1.328  (2020-01-24 -- 2022-01-23)
+
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\450-ultimate-h401to450-mdr\summary.json

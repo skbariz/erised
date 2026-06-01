@@ -1,0 +1,34 @@
+H163: ResidualMomentum (CAPM-adjusted, market-neutral momentum)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+
+H163 Canonical (long_days=252, skip_days=21, CAPM residual):
+  Sharpe 0.961  CI [0.563, 1.380]
+  CAGR 21.24%  MaxDD -60.08%
+
+H150 (raw momentum): Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- long_days:
+  long_days=126 (~6m)  Sharpe 0.980  CI [0.580, 1.390]  MaxDD -59.12%
+  long_days=252 (~12m)  Sharpe 0.961  CI [0.576, 1.371]  MaxDD -60.08%
+  long_days=378 (~18m)  Sharpe 0.916  CI [0.520, 1.330]  MaxDD -58.45%
+
+Per-fold Sharpe:
+  Fold  0: +1.847  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.981  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.151  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.716  (2004-01-03 -- 2006-01-02)
+  Fold  4: +1.003  (2006-01-02 -- 2008-01-02)
+  Fold  5: -0.057  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.846  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.437  (2012-01-01 -- 2013-12-31)
+  Fold  8: +1.037  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.389  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.041  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.022  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6486
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\163-residual-momentum\summary.json

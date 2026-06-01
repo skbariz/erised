@@ -1,0 +1,45 @@
+
+Computing Sortino for 37 H001-H100 direct strategies
+================================================================
+  H001  Sharpe 0.614  Sortino 0.492  Calmar 0.233  S/Sh 0.802
+  H007  Sharpe 0.620  Sortino 0.522  Calmar 0.251  S/Sh 0.842
+  H008  Sharpe 0.622  Sortino 0.515  Calmar 0.257  S/Sh 0.828
+  H016  Sharpe 0.555  Sortino 0.525  Calmar 0.203  S/Sh 0.946
+  H018  Sharpe 0.575  Sortino 0.468  Calmar 0.218  S/Sh 0.815
+  H019  Sharpe 0.628  Sortino 0.567  Calmar 0.287  S/Sh 0.903
+  H021  Sharpe 1.029  Sortino 0.887  Calmar 0.418  S/Sh 0.862
+  H022  Sharpe 0.678  Sortino 0.638  Calmar 0.285  S/Sh 0.941
+  H023  Sharpe 0.535  Sortino 0.356  Calmar 0.193  S/Sh 0.666
+  H025  Sharpe 0.529  Sortino 0.353  Calmar 0.185  S/Sh 0.667
+  H027  Sharpe 0.609  Sortino 0.336  Calmar 0.169  S/Sh 0.552
+  H031  Sharpe 0.578  Sortino 0.524  Calmar 0.166  S/Sh 0.906
+  H034  Sharpe 0.549  Sortino 0.430  Calmar 0.142  S/Sh 0.783
+  H035  Sharpe 0.568  Sortino 0.326  Calmar 0.133  S/Sh 0.573
+  H043  Sharpe 0.577  Sortino 0.212  Calmar 0.264  S/Sh 0.368
+  H046  Sharpe 0.707  Sortino 0.409  Calmar 0.255  S/Sh 0.578
+  H051  Sharpe 0.626  Sortino 0.607  Calmar 0.154  S/Sh 0.971
+  H060  Sharpe 0.531  Sortino 0.423  Calmar 0.223  S/Sh 0.797
+  H063  Sharpe 0.577  Sortino 0.545  Calmar 0.212  S/Sh 0.945
+  H065  Sharpe 0.554  Sortino 0.528  Calmar 0.166  S/Sh 0.954
+  H066  Sharpe 0.990  Sortino 0.869  Calmar 0.402  S/Sh 0.878
+  H068  Sharpe 0.575  Sortino 0.360  Calmar 0.224  S/Sh 0.626
+  H070  Sharpe 1.066  Sortino 0.915  Calmar 0.585  S/Sh 0.859
+  H076  Sharpe 0.666  Sortino 0.519  Calmar 0.241  S/Sh 0.779
+  H077  Sharpe 0.683  Sortino 0.623  Calmar 0.290  S/Sh 0.911
+  H078  Sharpe 0.762  Sortino 0.666  Calmar 0.365  S/Sh 0.873
+  H079  Sharpe 0.952  Sortino 0.845  Calmar 0.364  S/Sh 0.888
+  H080  Sharpe 0.891  Sortino 0.763  Calmar 0.310  S/Sh 0.857
+  H082  Sharpe 0.616  Sortino 0.559  Calmar 0.237  S/Sh 0.906
+  H084  Sharpe 0.548  Sortino 0.501  Calmar 0.209  S/Sh 0.913
+  H086  Sharpe 1.109  Sortino 0.954  Calmar 0.708  S/Sh 0.860
+  H087  Sharpe 1.010  Sortino 0.856  Calmar 0.544  S/Sh 0.848
+  H088  Sharpe 0.871  Sortino 0.779  Calmar 0.364  S/Sh 0.894
+  H089  Sharpe 1.074  Sortino 0.925  Calmar 0.544  S/Sh 0.861
+  H090  Sharpe 1.020  Sortino 0.884  Calmar 0.434  S/Sh 0.866
+  H097  Sharpe 0.992  Sortino 0.856  Calmar 0.421  S/Sh 0.863
+  H098  Sharpe 0.879  Sortino 0.757  Calmar 0.336  S/Sh 0.861
+
+Empirical Sortino/Sharpe ratios across 37 strategies:
+  Median 0.861  Mean 0.817  P25 0.797  P75 0.903
+
+Saved: results\sortino_h001_h100.json

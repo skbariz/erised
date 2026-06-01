@@ -1,0 +1,35 @@
+H161: FiveYearReversal (60-month price reversal, buy losers)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+
+H161 Canonical (long_days=1260, skip_days=21, top_quantile=20%):
+  Sharpe 0.849  CI [0.446, 1.253]
+  CAGR 18.32%  MaxDD -55.02%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+H160 (3yr reversal): Sharpe 0.876  MaxDD -58.65%
+
+Sensitivity -- long_days:
+  long_days=756 (~36m)  Sharpe 0.876  CI [0.469, 1.274]  MaxDD -58.65%
+  long_days=1008 (~48m)  Sharpe 0.877  CI [0.469, 1.287]  MaxDD -57.35%
+  long_days=1260 (~60m)  Sharpe 0.849  CI [0.441, 1.256]  MaxDD -55.02%
+
+Per-fold Sharpe:
+  Fold  0: +0.968  (1998-01-04 -- 2000-01-04)
+  Fold  1: +1.877  (2000-01-04 -- 2002-01-03)
+  Fold  2: +1.133  (2002-01-03 -- 2004-01-03)
+  Fold  3: +1.139  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.960  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.501  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.580  (2010-01-01 -- 2012-01-01)
+  Fold  7: +1.962  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.499  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.784  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.545  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.746  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5618
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\161-five-year-reversal\summary.json

@@ -1,0 +1,33 @@
+H313: EarningsYieldOverlay (SPY 1yr vs 5yr CAGR valuation signal)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (spy_cut=0.15, zscore_threshold=1.0):
+  Sharpe 0.679  CI [0.281, 1.070]
+  CAGR 5.85%  MaxDD -21.31%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- zscore_threshold:
+  zscore_threshold=0.75  Sharpe 0.679  CI [0.250, 1.052]  MaxDD -21.31%
+  zscore_threshold=1.0  Sharpe 0.679  CI [0.249, 1.044]  MaxDD -21.31%
+  zscore_threshold=1.5  Sharpe 0.696  CI [0.268, 1.068]  MaxDD -21.31%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.407  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.769  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.691  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.814  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.133  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.025  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.786  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.702  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.728  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.033  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5166
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\313-earnings-yield-overlay\summary.json

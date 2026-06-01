@@ -1,0 +1,33 @@
+H310: FundingStressVolTarget (H086 × binary funding stress)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (vol_target=8%, vix_threshold=30, stress_reduction=0.65):
+  Sharpe 0.677  CI [0.281, 1.071]
+  CAGR 4.89%  MaxDD -20.24%  N_trades 5023
+
+H086 baseline: Sharpe 0.662  MaxDD -21.17%
+
+Sensitivity -- stress_reduction:
+  stress_reduction=0.5  Sharpe 0.683  CI [0.256, 1.057]  MaxDD -19.85%
+  stress_reduction=0.65  Sharpe 0.677  CI [0.254, 1.046]  MaxDD -20.24%
+  stress_reduction=0.8  Sharpe 0.671  CI [0.250, 1.039]  MaxDD -20.64%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.437  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.665  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.802  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.762  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.373  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.083  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.894  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.741  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.756  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.076  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5343
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\310-funding-stress-vol-target\summary.json

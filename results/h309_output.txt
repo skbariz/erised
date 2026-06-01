@@ -1,0 +1,33 @@
+H309: MultiSignalStressAdjusted (5-signal tiered H021 exposure)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (vix_threshold=30, dd_threshold=5%):
+  Sharpe 0.685  CI [0.288, 1.076]
+  CAGR 5.29%  MaxDD -16.84%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- vix_threshold:
+  vix_threshold=25.0  Sharpe 0.697  CI [0.269, 1.072]  MaxDD -15.73%
+  vix_threshold=30.0  Sharpe 0.685  CI [0.266, 1.059]  MaxDD -16.84%
+  vix_threshold=35.0  Sharpe 0.684  CI [0.255, 1.061]  MaxDD -16.54%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.430  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.859  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.664  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.732  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.051  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.041  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.817  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.636  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.562  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.038  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5406
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\309-multi-signal-stress-adjusted\summary.json

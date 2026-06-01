@@ -1,0 +1,33 @@
+H305: VRPSeasonalHybrid (H078 + VRP overlay in Nov-Apr)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (unfavorable_scale=0.75):
+  Sharpe 0.333  CI [-0.068, 0.719]
+  CAGR 2.68%  MaxDD -22.17%  N_trades 2539
+
+H078 baseline: Sharpe 0.375  MaxDD -22.48%
+
+Sensitivity -- unfavorable_scale:
+  unfavorable_scale=0.6  Sharpe 0.321  CI [-0.105, 0.708]  MaxDD -22.17%
+  unfavorable_scale=0.75  Sharpe 0.333  CI [-0.092, 0.719]  MaxDD -22.17%
+  unfavorable_scale=0.9  Sharpe 0.342  CI [-0.080, 0.727]  MaxDD -22.18%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +0.809  (2002-01-28 -- 2004-01-28)
+  Fold  3: -0.198  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.014  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.744  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.484  (2010-01-26 -- 2012-01-26)
+  Fold  7: +0.901  (2012-01-26 -- 2014-01-25)
+  Fold  8: +0.857  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.407  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.502  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.367  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.2165
+Decision: kill
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\305-vrp-seasonal-hybrid\summary.json

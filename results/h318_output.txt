@@ -1,0 +1,33 @@
+H318: RegimeClassifier (4-state SPY momentum + VIX regime)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (vix_low=20, vix_high=30):
+  Sharpe 0.686  CI [0.297, 1.075]
+  CAGR 5.98%  MaxDD -17.20%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- vix_high:
+  vix_high=25  Sharpe 0.692  CI [0.289, 1.071]  MaxDD -17.10%
+  vix_high=30  Sharpe 0.686  CI [0.267, 1.069]  MaxDD -17.20%
+  vix_high=35  Sharpe 0.685  CI [0.270, 1.068]  MaxDD -17.68%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.451  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.834  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.895  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.642  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.073  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.069  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.761  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.554  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.407  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.001  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5623
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\318-regime-classifier\summary.json

@@ -1,0 +1,33 @@
+H306: FundingStressMonitor (3-signal composite stress × H021)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (stress_sensitivity=0.50, min_scale=0.40):
+  Sharpe 0.728  CI [0.332, 1.120]
+  CAGR 5.59%  MaxDD -17.58%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- stress_sensitivity:
+  stress_sensitivity=0.35  Sharpe 0.719  CI [0.293, 1.093]  MaxDD -18.71%
+  stress_sensitivity=0.5  Sharpe 0.728  CI [0.302, 1.098]  MaxDD -17.58%
+  stress_sensitivity=0.65  Sharpe 0.737  CI [0.320, 1.104]  MaxDD -16.43%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.461  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.858  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.835  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.839  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.102  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.116  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.767  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.626  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.806  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.002  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5431
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\306-funding-stress-monitor\summary.json

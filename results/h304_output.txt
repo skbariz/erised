@@ -1,0 +1,33 @@
+H304: VRPVolTarget (H086 vol-target + VRP z-score amplifier)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (vol_target=8%, vrp_amplifier=0.15, max_scale=1.25):
+  Sharpe 0.646  CI [0.253, 1.042]
+  CAGR 4.73%  MaxDD -23.35%  N_trades 5023
+
+H086 baseline: Sharpe 0.662  MaxDD -21.17%
+
+Sensitivity -- vrp_amplifier:
+  vrp_amplifier=0.1  Sharpe 0.645  CI [0.222, 1.017]  MaxDD -23.27%
+  vrp_amplifier=0.15  Sharpe 0.646  CI [0.226, 1.022]  MaxDD -23.35%
+  vrp_amplifier=0.2  Sharpe 0.646  CI [0.226, 1.021]  MaxDD -23.36%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.363  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.597  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.719  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.716  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.654  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.105  (2012-01-26 -- 2014-01-25)
+  Fold  8: +2.067  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.867  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.724  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.122  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5323
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\304-vrp-vol-target\summary.json

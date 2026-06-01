@@ -1,0 +1,33 @@
+H312: DefaultSpreadSPYTimer (HYG vs LQD 63d default spread on H021)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (credit_lookback=63, spy_scale=0.60):
+  Sharpe 0.684  CI [0.282, 1.079]
+  CAGR 5.87%  MaxDD -19.86%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- credit_lookback:
+  credit_lookback=42  Sharpe 0.641  CI [0.211, 1.020]  MaxDD -21.79%
+  credit_lookback=63  Sharpe 0.684  CI [0.262, 1.058]  MaxDD -19.86%
+  credit_lookback=126  Sharpe 0.689  CI [0.269, 1.059]  MaxDD -19.98%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.431  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.824  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.791  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.847  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.020  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.132  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.545  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.345  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.818  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.032  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.4863
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\312-default-spread-spy-timer\summary.json

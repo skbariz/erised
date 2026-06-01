@@ -1,0 +1,33 @@
+H316: QuarterlyMacroStateOverlay (quarterly composite macro signal)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (high_scale=1.20, low_scale=0.80):
+  Sharpe 0.722  CI [0.328, 1.107]
+  CAGR 6.14%  MaxDD -19.74%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- high_scale:
+  high_scale=1.1  Sharpe 0.729  CI [0.305, 1.107]  MaxDD -19.74%
+  high_scale=1.2  Sharpe 0.722  CI [0.295, 1.095]  MaxDD -19.74%
+  high_scale=1.3  Sharpe 0.715  CI [0.287, 1.083]  MaxDD -19.74%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.431  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.740  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.700  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.916  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.127  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.150  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.732  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.703  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.704  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.104  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5520
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\316-quarterly-macro-state-overlay\summary.json

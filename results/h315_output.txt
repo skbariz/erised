@@ -1,0 +1,33 @@
+H315: ConstrainedMacroOverlay (H314 + Campbell-Thompson constraints)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (spy_floor=0.50, spy_cap=1.30):
+  Sharpe 0.631  CI [0.237, 1.026]
+  CAGR 5.00%  MaxDD -22.60%  N_trades 5023
+
+H314 baseline: Sharpe 0.641  MaxDD -23.14%
+
+Sensitivity -- spy_floor:
+  spy_floor=0.4  Sharpe 0.631  CI [0.210, 1.013]  MaxDD -22.60%
+  spy_floor=0.5  Sharpe 0.631  CI [0.210, 1.013]  MaxDD -22.60%
+  spy_floor=0.6  Sharpe 0.631  CI [0.210, 1.013]  MaxDD -22.60%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.406  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.674  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.526  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.715  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.448  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.109  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.966  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.710  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.651  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.034  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5341
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\315-constrained-macro-overlay\summary.json

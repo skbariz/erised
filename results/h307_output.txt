@@ -1,0 +1,33 @@
+H307: LiquiditySpiralProtection (triple-confirm crisis -> 90% TLT)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (vix_spike=35, crisis_tlt=0.90, resume_days=10):
+  Sharpe 0.695  CI [0.298, 1.085]
+  CAGR 6.02%  MaxDD -21.31%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- resume_days:
+  resume_days=5  Sharpe 0.695  CI [0.269, 1.064]  MaxDD -21.31%
+  resume_days=10  Sharpe 0.695  CI [0.269, 1.064]  MaxDD -21.31%
+  resume_days=20  Sharpe 0.695  CI [0.269, 1.064]  MaxDD -21.31%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.431  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.824  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.687  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.825  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.133  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.072  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.814  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.656  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.732  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.008  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5409
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\307-liquidity-spiral-protection\summary.json

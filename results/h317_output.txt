@@ -1,0 +1,33 @@
+H317: ValuationSpreadMarketState (IVW vs IVE growth/value spread)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (growth_scale=1.10, value_scale=0.90, ivw_lookback=252):
+  Sharpe 0.701  CI [0.301, 1.100]
+  CAGR 6.06%  MaxDD -19.36%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- growth_scale:
+  growth_scale=1.05  Sharpe 0.700  CI [0.272, 1.076]  MaxDD -19.36%
+  growth_scale=1.1  Sharpe 0.701  CI [0.272, 1.081]  MaxDD -19.36%
+  growth_scale=1.15  Sharpe 0.702  CI [0.276, 1.084]  MaxDD -19.36%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.431  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.866  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.582  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.846  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.045  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.121  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.773  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.697  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.711  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.008  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5407
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\317-valuation-spread-market-state\summary.json

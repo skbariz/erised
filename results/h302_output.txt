@@ -1,0 +1,33 @@
+H302: VRPRiskParityScaled (3-tier VRP percentile × H021)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (high_pctile=0.70, low_pctile=0.30, scales=1.25/1.0/0.75):
+  Sharpe 0.676  CI [0.286, 1.069]
+  CAGR 5.91%  MaxDD -25.06%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- high_scale:
+  high_scale=1.15  Sharpe 0.691  CI [0.269, 1.065]  MaxDD -23.37%
+  high_scale=1.25  Sharpe 0.676  CI [0.256, 1.056]  MaxDD -25.06%
+  high_scale=1.35  Sharpe 0.662  CI [0.239, 1.047]  MaxDD -26.71%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.329  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.724  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.536  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.750  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.407  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.223  (2012-01-26 -- 2014-01-25)
+  Fold  8: +2.035  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.880  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.626  (2018-01-24 -- 2020-01-24)
+  Fold 11: +0.106  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.5397
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\302-vrp-risk-parity-scaled\summary.json

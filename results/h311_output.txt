@@ -1,0 +1,33 @@
+H311: TermSpreadSPYTimer (TLT vs SHY 252d term spread on H021)
+================================================================
+Data: 7806 rows  1993-01-29 -- 2022-12-30
+Folds: 12
+
+Canonical (spread_lookback=252, spy_scale=0.50):
+  Sharpe 0.608  CI [0.204, 0.999]
+  CAGR 5.17%  MaxDD -21.90%  N_trades 5023
+
+H021 baseline: Sharpe 0.695  MaxDD -21.31%
+
+Sensitivity -- spread_lookback:
+  spread_lookback=126  Sharpe 0.600  CI [0.163, 0.983]  MaxDD -20.38%
+  spread_lookback=252  Sharpe 0.608  CI [0.180, 0.980]  MaxDD -21.90%
+  spread_lookback=504  Sharpe 0.653  CI [0.235, 1.026]  MaxDD -20.23%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-29 -- 2000-01-29)
+  Fold  1: +0.000  (2000-01-29 -- 2002-01-28)
+  Fold  2: +1.414  (2002-01-28 -- 2004-01-28)
+  Fold  3: +0.516  (2004-01-28 -- 2006-01-27)
+  Fold  4: +0.456  (2006-01-27 -- 2008-01-27)
+  Fold  5: +0.711  (2008-01-27 -- 2010-01-26)
+  Fold  6: -0.137  (2010-01-26 -- 2012-01-26)
+  Fold  7: +1.171  (2012-01-26 -- 2014-01-25)
+  Fold  8: +1.966  (2014-01-25 -- 2016-01-25)
+  Fold  9: +0.083  (2016-01-25 -- 2018-01-24)
+  Fold 10: +0.794  (2018-01-24 -- 2020-01-24)
+  Fold 11: -0.017  (2020-01-24 -- 2022-01-23)
+
+H001 correlation: +0.4156
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\311-term-spread-spy-timer\summary.json

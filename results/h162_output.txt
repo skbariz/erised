@@ -1,0 +1,35 @@
+H162: ValueMomentumComposite (0.5*z(value) + 0.5*z(12-1m mom))
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data...
+
+H162 Canonical (50/50 value+momentum z-score):
+  Sharpe 0.716  CI [0.319, 1.130]
+  CAGR 9.27%  MaxDD -41.22%
+
+H150 (pure momentum): Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- top_quantile:
+  top_quantile=10%  Sharpe 0.747  CI [0.353, 1.123]  MaxDD -42.15%
+  top_quantile=20%  Sharpe 0.716  CI [0.328, 1.091]  MaxDD -41.22%
+  top_quantile=30%  Sharpe 0.720  CI [0.328, 1.095]  MaxDD -39.97%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.257  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.597  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.103  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.883  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.756  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.988  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.935  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6314
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\162-value-momentum-composite\summary.json

@@ -1,0 +1,77 @@
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+  sqr = _ensure_numeric((avg - values) ** 2)
+H169: QualityValueComposite (B/M + GP/A + low accruals, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (book_equity, shares_outstanding, gross_profit, total_assets, net_income, operating_cf)...
+Book equity coverage: 3386/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H169 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 0.839  CI [0.433, 1.250]
+  CAGR 10.32%  MaxDD -37.11%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 0.898  CI [0.492, 1.269]  MaxDD -38.84%
+  within_sector_quantile=20%  Sharpe 0.839  CI [0.427, 1.217]  MaxDD -37.11%
+  within_sector_quantile=30%  Sharpe 0.825  CI [0.415, 1.192]  MaxDD -37.69%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.782  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.892  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.159  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.735  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.925  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.008  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.079  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6281
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\169-quality-value-composite\summary.json

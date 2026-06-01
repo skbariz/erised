@@ -1,0 +1,37 @@
+H171: OperatingProfitabilityFF5 (GP/BE, FF2015 RMW variant, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (gross_profit, book_equity)...
+Gross profit coverage: 3379/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H171 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 0.864  CI [0.446, 1.271]
+  CAGR 10.83%  MaxDD -36.29%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 0.859  CI [0.454, 1.242]  MaxDD -36.26%
+  within_sector_quantile=20%  Sharpe 0.864  CI [0.458, 1.248]  MaxDD -36.29%
+  within_sector_quantile=30%  Sharpe 0.847  CI [0.443, 1.226]  MaxDD -36.86%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.592  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.806  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.046  (2012-01-01 -- 2013-12-31)
+  Fold  8: +1.054  (2013-12-31 -- 2015-12-31)
+  Fold  9: +2.087  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.189  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.042  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6212
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\171-operating-profitability-ff5\summary.json

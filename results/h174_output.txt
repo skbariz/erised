@@ -1,0 +1,37 @@
+H174: CashOperatingProfitability (OCF/BE, sector-neutral, Ball 2016)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (operating_cf, book_equity)...
+Operating CF coverage: 3385/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H174 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 0.766  CI [0.365, 1.176]
+  CAGR 9.32%  MaxDD -38.86%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 0.810  CI [0.403, 1.187]  MaxDD -38.95%
+  within_sector_quantile=20%  Sharpe 0.766  CI [0.380, 1.137]  MaxDD -38.86%
+  within_sector_quantile=30%  Sharpe 0.760  CI [0.365, 1.126]  MaxDD -38.57%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.450  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.745  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.103  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.701  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.867  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.884  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.035  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6259
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\174-cash-operating-profitability\summary.json

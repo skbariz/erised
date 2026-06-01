@@ -1,0 +1,37 @@
+H170: FF5InvestmentFactor (low asset growth, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (total_assets)...
+Total assets coverage: 3386/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H170 Canonical (sector-neutral, within_sector_quantile=20%, growth_window=252):
+  Sharpe 0.721  CI [0.322, 1.131]
+  CAGR 8.43%  MaxDD -38.41%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- growth_window:
+  growth_window=126d  Sharpe 0.767  CI [0.373, 1.155]  MaxDD -39.66%
+  growth_window=252d  Sharpe 0.721  CI [0.322, 1.109]  MaxDD -38.41%
+  growth_window=504d  Sharpe 0.709  CI [0.294, 1.109]  MaxDD -39.25%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.000  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.680  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.027  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.851  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.867  (2015-12-31 -- 2017-12-30)
+  Fold 10: +0.711  (2017-12-30 -- 2019-12-30)
+  Fold 11: +0.891  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.5746
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\170-ff5-investment-factor\summary.json

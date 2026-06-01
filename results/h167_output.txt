@@ -1,0 +1,38 @@
+H167: PiotroskiValueScreen (strict F-score >= 7 quality gate)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data and computing Piotroski F-score...
+F-score coverage: 2988/7555 dates with >=1 stock scored
+
+H167 Canonical (bm_quantile=20%, min_fscore=7):
+  Sharpe 0.591  CI [0.201, 0.997]
+  CAGR 9.88%  MaxDD -55.68%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+H164 (min_fscore=6): Sharpe 0.772  MaxDD -52.58%
+
+Sensitivity -- min_fscore:
+  min_fscore=6  Sharpe 0.772  CI [0.353, 1.201]  MaxDD -52.58%
+  min_fscore=7  Sharpe 0.591  CI [0.216, 0.952]  MaxDD -55.68%
+  min_fscore=8  Sharpe 0.540  CI [0.131, 0.946]  MaxDD -28.79%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.000  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.000  (2010-01-01 -- 2012-01-01)
+  Fold  7: +1.208  (2012-01-01 -- 2013-12-31)
+  Fold  8: +1.000  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.875  (2015-12-31 -- 2017-12-30)
+  Fold 10: -0.125  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.336  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.3720
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\167-piotroski-high-bar\summary.json

@@ -1,0 +1,37 @@
+H173: ReturnOnAssets (NI/TA, sector-neutral)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income, total_assets)...
+Net income coverage: 3385/7555 dates with >=1 stock
+Sector data: 503 tickers, 11 sectors
+
+H173 Canonical (sector-neutral, within_sector_quantile=20%):
+  Sharpe 0.785  CI [0.382, 1.188]
+  CAGR 9.31%  MaxDD -35.82%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- within_sector_quantile:
+  within_sector_quantile=10%  Sharpe 0.754  CI [0.346, 1.129]  MaxDD -35.01%
+  within_sector_quantile=20%  Sharpe 0.785  CI [0.391, 1.149]  MaxDD -35.82%
+  within_sector_quantile=30%  Sharpe 0.772  CI [0.383, 1.138]  MaxDD -36.43%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.522  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.769  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.007  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.882  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.710  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.046  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.033  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6341
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\173-return-on-assets\summary.json

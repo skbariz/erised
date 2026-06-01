@@ -1,0 +1,36 @@
+H166: LowAccrualsQuality (Sloan 1996 accruals anomaly)
+================================================================
+Loading prices for 1112 historical tickers...
+Data: 7555 days, 516 tickers
+Folds: 12
+Loading fundamental data (net_income, operating_cf, total_assets)...
+Net income coverage: 3385/7555 dates with >=1 stock
+
+H166 Canonical (top_quantile=20%, ascending=True):
+  Sharpe 0.824  CI [0.425, 1.238]
+  CAGR 10.54%  MaxDD -34.52%
+
+H150 baseline: Sharpe 0.981  MaxDD -52.12%
+
+Sensitivity -- top_quantile:
+  top_quantile=10%  Sharpe 0.858  CI [0.449, 1.232]  MaxDD -34.47%
+  top_quantile=20%  Sharpe 0.824  CI [0.418, 1.192]  MaxDD -34.52%
+  top_quantile=30%  Sharpe 0.788  CI [0.379, 1.156]  MaxDD -37.42%
+
+Per-fold Sharpe:
+  Fold  0: +0.000  (1998-01-04 -- 2000-01-04)
+  Fold  1: +0.000  (2000-01-04 -- 2002-01-03)
+  Fold  2: +0.000  (2002-01-03 -- 2004-01-03)
+  Fold  3: +0.000  (2004-01-03 -- 2006-01-02)
+  Fold  4: +0.000  (2006-01-02 -- 2008-01-02)
+  Fold  5: +0.128  (2008-01-02 -- 2010-01-01)
+  Fold  6: +0.755  (2010-01-01 -- 2012-01-01)
+  Fold  7: +2.095  (2012-01-01 -- 2013-12-31)
+  Fold  8: +0.918  (2013-12-31 -- 2015-12-31)
+  Fold  9: +1.837  (2015-12-31 -- 2017-12-30)
+  Fold 10: +1.087  (2017-12-30 -- 2019-12-30)
+  Fold 11: +1.211  (2019-12-30 -- 2021-12-29)
+
+H001 correlation: +0.6336
+Decision: KEEP
+Summary written: C:\Users\bariz\Downloads\quant\quant\results\166-low-accruals-quality\summary.json

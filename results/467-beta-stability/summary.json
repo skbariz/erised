@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H467",
+  "name": "beta-stability",
+  "strategy_class": "BetaStabilityPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8795,
+  "ci_low": 0.4714,
+  "ci_high": 1.2925,
+  "cagr": 0.1437,
+  "max_drawdown": -0.4692,
+  "n_trades": 1,
+  "h001_corr": -0.0031,
+  "fold_sharpes": [
+    1.178,
+    1.175,
+    0.836,
+    1.482,
+    1.282,
+    0.04,
+    0.961,
+    1.901,
+    0.907,
+    1.725,
+    0.945,
+    0.9
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Std of four 63d rolling beta estimates over 252d. Low beta instability = predictable systematic risk = lower uncertainty premium. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "beta_window": 63,
+    "n_windows": 4
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

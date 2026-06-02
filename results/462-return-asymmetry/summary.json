@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H462",
+  "name": "return-asymmetry",
+  "strategy_class": "ReturnAsymmetryPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9617,
+  "ci_low": 0.5594,
+  "ci_high": 1.3827,
+  "cagr": 0.1976,
+  "max_drawdown": -0.5122,
+  "n_trades": 1,
+  "h001_corr": -0.0017,
+  "fold_sharpes": [
+    1.354,
+    1.476,
+    0.886,
+    1.576,
+    1.143,
+    0.302,
+    0.8,
+    2.156,
+    0.61,
+    1.775,
+    1.152,
+    1.013
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "MAX1 - |MIN1| spread. Low = symmetric/safe (good). Net return asymmetry across 21d window. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "window": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

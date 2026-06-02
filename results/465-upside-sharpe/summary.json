@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H465",
+  "name": "upside-sharpe",
+  "strategy_class": "UpsideSharpePort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9504,
+  "ci_low": 0.5419,
+  "ci_high": 1.3651,
+  "cagr": 0.1823,
+  "max_drawdown": -0.4983,
+  "n_trades": 1,
+  "h001_corr": 0.0004,
+  "fold_sharpes": [
+    1.393,
+    1.406,
+    0.916,
+    1.504,
+    1.413,
+    0.138,
+    0.646,
+    2.0,
+    0.705,
+    1.765,
+    0.971,
+    1.098
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Mean(positive-day ret) / total vol over 252d. Upside efficiency vs total risk. Not equivalent to negated skewness. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

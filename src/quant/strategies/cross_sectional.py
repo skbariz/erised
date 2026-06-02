@@ -14751,3 +14751,424 @@ class ROELevelMomentumPort(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 7 — H461–H470: Return Distribution Anomalies Beyond MAX Effect
+# ===========================================================================
+
+
+class MinReturnCrashRiskPort(CrossSectionalStrategy):
+    """H461: Long stocks with smallest absolute worst-day return (low crash risk).
+
+    MIN1 = minimum 1-day return in trailing 21 days. Low |MIN1| = low crash risk.
+    H252 tested MAX1 avoidance (best day); this tests worst-day avoidance.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold (pure price).
+    """
+
+    name = "min_return_crash_risk_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        min_window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.min_window = min_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        # MIN1 is negative; higher (less negative) = safer stock
+        min1 = daily_rets.rolling(self.min_window, min_periods=self.min_window // 2).min()
+        # ascending=False: highest min1 (closest to 0) = least crash risk = long
+        daily_w = _sector_neutral_weights(
+            min1, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class ReturnAsymmetryPort(CrossSectionalStrategy):
+    """H462: Long stocks with symmetric or downside-safe return distributions.
+
+    Signal: MAX1 - |MIN1|. High positive = lottery-like upside asymmetry (bad).
+    Low/negative = symmetric or downside-safe (good). Sector-neutral, monthly.
+    Combines MAX1 and MIN1 into a net asymmetry spread — distinct from either alone.
+    """
+
+    name = "return_asymmetry_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        window: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        max1 = daily_rets.rolling(self.window, min_periods=self.window // 2).max()
+        min1 = daily_rets.rolling(self.window, min_periods=self.window // 2).min()
+        asymmetry = max1 - min1.abs()
+        # ascending=True: low asymmetry (safe/symmetric) selected
+        daily_w = _sector_neutral_weights(
+            asymmetry, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class ReturnConsistencyPort(CrossSectionalStrategy):
+    """H463: Long stocks with highest fraction of positive return days.
+
+    Fraction of positive-return days over trailing 252 days. High = consistent winner.
+    Pure price signal → full 12-fold coverage. Distinct from H155 SmoothMomentum
+    (multiplicative path modifier); this ranks independently on consistency alone.
+    Sector-neutral top 20%, monthly rebalance.
+    """
+
+    name = "return_consistency_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        pos_frac = (daily_rets > 0).rolling(self.window, min_periods=self.window // 4).mean()
+        # ascending=False: highest fraction (most consistent) selected
+        daily_w = _sector_neutral_weights(
+            pos_frac, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class DownsideCapturePort(CrossSectionalStrategy):
+    """H464: Long stocks with lowest realized downside capture vs SPY.
+
+    Average daily return on SPY-negative days normalized by own total vol.
+    Captures non-linear downside sensitivity missed by OLS beta regression.
+    H253 used regression beta on down days; this uses realized average return.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold.
+    """
+
+    name = "downside_capture_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        min_p = self.window // 4
+        down_mask = (spy < 0).astype(float)
+        # Average return on down days
+        stock_down = daily_rets.multiply(down_mask, axis=0)
+        down_count = down_mask.rolling(self.window, min_periods=min_p).sum()
+        down_sum = stock_down.rolling(self.window, min_periods=min_p).sum()
+        avg_down_ret = down_sum.div(down_count.replace(0, np.nan), axis=0)
+        # Normalize by own total vol
+        total_vol = daily_rets.rolling(self.window, min_periods=min_p).std().replace(0, np.nan)
+        downside_capture = avg_down_ret.div(total_vol, axis=1)
+        # ascending=True: lowest downside capture (safest) selected
+        daily_w = _sector_neutral_weights(
+            downside_capture, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class UpsideSharpePort(CrossSectionalStrategy):
+    """H465: Long stocks with highest upside-Sharpe ratio.
+
+    Signal: mean(positive-day returns) / total daily return std, over 252 days.
+    Rewards stocks efficient on the upside relative to total risk.
+    Not equivalent to negated skewness — combines upside magnitude and frequency.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold.
+    """
+
+    name = "upside_sharpe_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        window: int = 252,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.window = window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        min_p = self.window // 4
+        up_rets = daily_rets.where(daily_rets > 0)
+        mean_up = up_rets.rolling(self.window, min_periods=min_p).mean()
+        total_vol = daily_rets.rolling(self.window, min_periods=min_p).std().replace(0, np.nan)
+        upside_sharpe = mean_up.div(total_vol, axis=1)
+        # ascending=False: highest upside Sharpe selected
+        daily_w = _sector_neutral_weights(
+            upside_sharpe, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class VolOfVolStabilityPort(CrossSectionalStrategy):
+    """H466: Long stocks with most stable volatility process (low vol-of-vol).
+
+    Rolling std of twelve 21-day realized vol estimates over 252 days.
+    Low vol-of-vol = predictable risk profile = institutional preference.
+    H251 tested vol LEVEL; this tests vol STABILITY. Distinct signal.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold.
+    """
+
+    name = "vol_of_vol_stability_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        vol_window: int = 21,
+        n_windows: int = 12,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.vol_window = vol_window
+        self.n_windows = n_windows
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        total_window = self.vol_window * self.n_windows
+        min_p = total_window // 4
+        # Compute rolling 21-day realized vol at each point; then take std over 252d window
+        realized_vol = daily_rets.rolling(self.vol_window, min_periods=self.vol_window // 2).std()
+        vol_of_vol = realized_vol.rolling(total_window, min_periods=min_p).std()
+        # ascending=True: lowest vol-of-vol (most stable) selected
+        daily_w = _sector_neutral_weights(
+            vol_of_vol, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class BetaStabilityPort(CrossSectionalStrategy):
+    """H467: Long stocks with most stable systematic risk (low beta variance).
+
+    Std of four non-overlapping 63-day rolling beta estimates over 252 days.
+    Low variance = predictable beta = lower institutional uncertainty premium.
+    H175 tested beta LEVEL (BAB); H253 tested downside beta. This tests beta STABILITY.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold.
+    """
+
+    name = "beta_stability_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        spy_rets: pd.Series,
+        beta_window: int = 63,
+        n_windows: int = 4,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.spy_rets = spy_rets
+        self.beta_window = beta_window
+        self.n_windows = n_windows
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        spy = self.spy_rets.reindex(prices_panel.index).fillna(0.0)
+        w = self.beta_window
+        min_p = w // 2
+        total_window = w * self.n_windows
+        # Rolling beta over 63-day window
+        cov_sm = daily_rets.rolling(w, min_periods=min_p).cov(spy)
+        var_m = spy.rolling(w, min_periods=min_p).var().replace(0, np.nan)
+        beta = cov_sm.div(var_m, axis=0)
+        # Std of beta series over total window = beta instability
+        beta_instability = beta.rolling(total_window, min_periods=total_window // 4).std()
+        # ascending=True: lowest beta variance (most stable) selected
+        daily_w = _sector_neutral_weights(
+            beta_instability, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class ReturnAutocorrelationPort(CrossSectionalStrategy):
+    """H468: Long stocks with highest positive return autocorrelation (trend-continuers).
+
+    First-order serial autocorrelation of daily returns over trailing 63 days.
+    High positive AC = intrinsic momentum persistence within the return series.
+    All momentum signals use cumulative returns; this uses the autocorrelation structure.
+    Sector-neutral top 20%, monthly rebalance. Full 12-fold.
+    """
+
+    name = "return_autocorrelation_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        ac_window: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.ac_window = ac_window
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        min_p = self.ac_window // 4
+        # Lag-1 autocorrelation via rolling corr of r_t with r_{t-1}
+        lag1 = daily_rets.shift(1)
+        autocorr = daily_rets.rolling(self.ac_window, min_periods=min_p).corr(lag1)
+        # ascending=False: highest autocorr (trend-continuers) selected
+        daily_w = _sector_neutral_weights(
+            autocorr, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class MinReturnMomentumCombo(CrossSectionalStrategy):
+    """H469: z(MIN1 safety) + z(6m momentum). All-fold template.
+
+    Combines crash-risk avoidance (high MIN1 = safe) with price momentum.
+    MIN1 is negative; higher (closer to 0) = safer. Additive z-score composite.
+    H255 TailFilteredMomentum used MAX1 as a filter (exclusion); this uses MIN1
+    as an independent equal-weight z-score signal. Monthly rebalance. Full 12-fold.
+    """
+
+    name = "min_return_momentum_combo"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        min_window: int = 21,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.min_window = min_window
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        min1 = daily_rets.rolling(self.min_window, min_periods=self.min_window // 2).min()
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        # z(min1): higher min1 (safer) gets higher z; z(mom): higher mom gets higher z
+        composite = _cs_zscore(min1).fillna(0.0) + _cs_zscore(momentum).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class ReturnConsistencyMomentumCombo(CrossSectionalStrategy):
+    """H470: z(fraction positive days) + z(6m momentum). All-fold template.
+
+    Additive z-score of return consistency (252d fraction positive) + 6m momentum.
+    H155 SmoothMomentum multiplied consistency × momentum (modifier). This treats
+    consistency as an independent equal-weight signal. Monthly rebalance. Full 12-fold.
+    """
+
+    name = "return_consistency_momentum_combo"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        consistency_window: int = 252,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.consistency_window = consistency_window
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        daily_rets = prices_panel.pct_change()
+        min_p = self.consistency_window // 4
+        pos_frac = (daily_rets > 0).rolling(self.consistency_window, min_periods=min_p).mean()
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        composite = _cs_zscore(pos_frac).fillna(0.0) + _cs_zscore(momentum).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

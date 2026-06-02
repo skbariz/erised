@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H468",
+  "name": "return-autocorrelation",
+  "strategy_class": "ReturnAutocorrelationPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9184,
+  "ci_low": 0.5166,
+  "ci_high": 1.3324,
+  "cagr": 0.1841,
+  "max_drawdown": -0.5304,
+  "n_trades": 1,
+  "h001_corr": -0.0035,
+  "fold_sharpes": [
+    1.366,
+    1.126,
+    1.006,
+    1.739,
+    1.239,
+    0.371,
+    0.68,
+    1.884,
+    0.776,
+    1.522,
+    0.972,
+    0.936
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Lag-1 serial autocorrelation of daily returns over 63d. High AC = intrinsic momentum persistence. All momentum signals use cumulative returns; this uses autocorrelation structure. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "ac_window": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

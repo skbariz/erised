@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H463",
+  "name": "return-consistency",
+  "strategy_class": "ReturnConsistencyPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8813,
+  "ci_low": 0.4776,
+  "ci_high": 1.2941,
+  "cagr": 0.163,
+  "max_drawdown": -0.4803,
+  "n_trades": 1,
+  "h001_corr": -0.0039,
+  "fold_sharpes": [
+    1.436,
+    0.564,
+    0.807,
+    1.524,
+    1.09,
+    0.049,
+    0.782,
+    2.151,
+    1.088,
+    1.635,
+    1.008,
+    1.017
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Fraction positive return days over 252d. High = consistent winner. Pure price signal, full 12-fold. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

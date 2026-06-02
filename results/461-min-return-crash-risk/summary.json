@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H461",
+  "name": "min-return-crash-risk",
+  "strategy_class": "MinReturnCrashRiskPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8837,
+  "ci_low": 0.4819,
+  "ci_high": 1.2973,
+  "cagr": 0.1377,
+  "max_drawdown": -0.431,
+  "n_trades": 1,
+  "h001_corr": -0.0,
+  "fold_sharpes": [
+    0.763,
+    1.092,
+    0.78,
+    1.494,
+    1.367,
+    0.085,
+    0.98,
+    2.027,
+    1.081,
+    1.731,
+    0.922,
+    0.847
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "MIN1 = min 1-day return in 21d. Long highest MIN1 (safest). H252 used MAX1; this tests left-tail crash risk. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "min_window": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H466",
+  "name": "vol-of-vol-stability",
+  "strategy_class": "VolOfVolStabilityPort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8964,
+  "ci_low": 0.4919,
+  "ci_high": 1.3105,
+  "cagr": 0.1428,
+  "max_drawdown": -0.4143,
+  "n_trades": 1,
+  "h001_corr": -0.0016,
+  "fold_sharpes": [
+    1.108,
+    1.229,
+    0.846,
+    1.447,
+    1.206,
+    0.082,
+    0.895,
+    2.094,
+    0.888,
+    1.797,
+    1.026,
+    0.783
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Std of twelve 21d vol estimates over 252d. Low vol-of-vol = stable risk. H251 tested vol level; this tests volatility process stability. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "vol_window": 21,
+    "n_windows": 12
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

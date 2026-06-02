@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H464",
+  "name": "downside-capture",
+  "strategy_class": "DownsideCapturePort",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8697,
+  "ci_low": 0.4672,
+  "ci_high": 1.2841,
+  "cagr": 0.1786,
+  "max_drawdown": -0.5326,
+  "n_trades": 1,
+  "h001_corr": -0.003,
+  "fold_sharpes": [
+    1.313,
+    0.97,
+    0.693,
+    1.686,
+    0.954,
+    0.514,
+    0.572,
+    2.096,
+    0.539,
+    1.726,
+    0.841,
+    1.004
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Avg daily ret on SPY-down days / own total vol, 252d. Long lowest downside capture. Non-linear sensitivity H253 misses. Sector-neutral top 20%, monthly rebalance.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "window": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

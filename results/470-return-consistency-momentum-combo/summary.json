@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H470",
+  "name": "return-consistency-momentum-combo",
+  "strategy_class": "ReturnConsistencyMomentumCombo",
+  "family": "Set7 Return Distribution",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9534,
+  "ci_low": 0.5495,
+  "ci_high": 1.3616,
+  "cagr": 0.1811,
+  "max_drawdown": -0.4914,
+  "n_trades": 1,
+  "h001_corr": 0.0018,
+  "fold_sharpes": [
+    1.315,
+    0.755,
+    1.019,
+    1.855,
+    1.29,
+    -0.122,
+    0.78,
+    2.047,
+    1.002,
+    1.671,
+    1.033,
+    1.082
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "All-fold: z(fraction positive days 252d) + z(6m momentum). H155 multiplied; this adds independently. Tests whether consistency adds alpha beyond momentum alone. Monthly rebalance, 12-fold.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "consistency_window": 252,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

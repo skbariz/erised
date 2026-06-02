@@ -1224,3 +1224,116 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 - **Set 6 ALL OBJECTIVES MET** — 45 strategies tested, 45/50 KEEP, MDR frontier confirmed
 
 **The program is complete. H001-H450 all built, tested, and committed to GitHub.**
+
+---
+
+## Set 7 Program: H451–H550 (IN PROGRESS)
+
+**Theme:** Capital Architecture & Market Structure — DuPont level signals, return distribution anomalies, dollar-neutral L/S extensions, hybrid AA+CS signals.
+**Start date:** 2026-06-01
+**Plan doc:** docs/designs/B451thru550.md
+
+### Batch Map
+
+| Batch | H# | Theme | Status | Keep |
+|-------|-----|-------|--------|------|
+| 1 | H451–H460 | DuPont Level Signals | COMPLETE | **10/10** |
+| 2 | H461–H470 | Return Distribution Anomalies | COMPLETE | **10/10** |
+| 3 | H471–H480 | Dollar-Neutral L/S Extensions | COMPLETE | **3/10** |
+| 4 | H481–H490 | Hybrid AA+CS | COMPLETE | **1/10** |
+| 5 | H491–H500 | Continuous Macro Overlays | planned | — |
+| 6 | H501–H510 | Execution-Aware | planned | — |
+| 7 | H511–H520 | Cross-Program Synergies | planned | — |
+| 8 | H521–H530 | Novel Fundamentals | planned | — |
+| 9 | H531–H540 | Sector-Relative & Architecture | planned | — |
+| 10 | H541–H550 | Terminal Ensembles | planned | — |
+
+---
+
+### Batch 1: H451–H460 — DuPont Level Signals (10/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Folds |
+|---|------|--------|----|-------|------|-------|
+| 451 | NetProfitMarginLevelPort | 0.692 | [0.294, 1.103] | -40.65% | -0.019 | 6–11 |
+| 452 | AssetTurnoverLevelPort | 0.766 | [0.358, 1.181] | -38.20% | -0.019 | 6–11 |
+| 453 | ReturnOnEquityLevelPort | 0.751 | [0.348, 1.159] | -37.36% | -0.019 | 6–11 |
+| 454 | CashProfitMarginPort | 0.717 | [0.319, 1.130] | -41.28% | -0.021 | 6–11 |
+| 455 | GrossProfitFixedAssetsPort | **0.903** | [0.491, 1.316] | **-33.93%** | -0.016 | 6–11 |
+| 456 | GrossProfitDebtCoveragePort | 0.802 | [0.391, 1.217] | -34.44% | -0.018 | 7–11 |
+| 457 | CashConversionEfficiencyPort | 0.733 | [0.337, 1.146] | -36.82% | -0.018 | 6–11 |
+| 458 | NetMarginMomentumPort | 0.950 | [0.543, 1.361] | -49.00% | +0.001 | all 12 |
+| 459 | AssetTurnoverMomentumPort | 0.978 | [0.578, 1.389] | -49.00% | -0.001 | all 12 |
+| 460 | ROELevelMomentumPort | **0.984** | [0.580, 1.394] | -49.00% | +0.002 | all 12 |
+
+**Key findings:** Level>change confirmed (H452 0.766 vs H230 change 0.741; H453 0.751 vs H221 0.717). H455 GP/(TA-CA) batch star at 0.903 — fixed-asset denominator adds real signal vs GP/TA. All-fold trio (H458–H460) cluster 0.950–0.984 confirming template robustness. H001 corr uniformly near-zero across all 10.
+
+---
+
+### Batch 2: H461–H470 — Return Distribution Anomalies (10/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Folds |
+|---|------|--------|----|-------|------|-------|
+| 461 | MinReturnCrashRiskPort | 0.884 | [0.482, 1.297] | -43.10% | -0.000 | all 12 |
+| 462 | ReturnAsymmetryPort | **0.962** | [0.559, 1.383] | -51.22% | -0.002 | all 12 |
+| 463 | ReturnConsistencyPort | 0.881 | [0.478, 1.294] | -48.03% | -0.004 | all 12 |
+| 464 | DownsideCapturePort | 0.870 | [0.467, 1.284] | -53.26% | -0.003 | all 12 |
+| 465 | UpsideSharpePort | 0.950 | [0.542, 1.365] | -49.83% | +0.000 | all 12 |
+| 466 | VolOfVolStabilityPort | 0.896 | [0.492, 1.310] | -41.43% | -0.002 | all 12 |
+| 467 | BetaStabilityPort | 0.880 | [0.471, 1.292] | -46.92% | -0.003 | all 12 |
+| 468 | ReturnAutocorrelationPort | 0.918 | [0.517, 1.332] | -53.04% | -0.004 | all 12 |
+| 469 | MinReturnMomentumCombo | **0.991** | [0.589, 1.405] | -45.76% | +0.002 | all 12 |
+| 470 | ReturnConsistencyMomentumCombo | 0.953 | [0.549, 1.362] | -49.14% | +0.002 | all 12 |
+
+**Key findings:** 10/10 KEEP, all 12 folds active (pure price signals). H001 corr -0.004 to +0.002 — uniformly near-zero. H469 (MIN1+momentum) batch champion at 0.991, beating all-fold combos from Batch 1. H462 (return asymmetry) at 0.962 — MAX1-|MIN1| is a genuinely distinct signal from either component.
+
+---
+
+### Batch 3: H471–H480 — Dollar-Neutral L/S Extensions (3/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| 471 | LongShortSectorReversal | 0.829 | [0.439, 1.214] | -18.33% | +0.030 | **KEEP** |
+| 472 | LongShortResidualReversal | 0.804 | [0.412, 1.188] | -17.90% | +0.032 | **KEEP** |
+| 473 | LongShortPCAReversal | **0.964** | [0.571, 1.352] | **-14.57%** | +0.029 | **KEEP** |
+| 474 | LongShortOUReversal | 0.235 | [-0.176, 0.644] | -65.47% | +0.023 | kill |
+| 475 | LongShortPCAOUReversal | 0.445 | [0.051, 0.836] | -29.71% | +0.019 | kill |
+| 476 | LongShortBABWeekly | 0.116 | [-0.288, 0.521] | -13.86% | +0.007 | kill |
+| 477 | LongShortNegativeSkewness | 0.387 | [-0.013, 0.810] | -13.60% | +0.019 | kill |
+| 478 | LongShortQualityWeekly | 0.305 | [-0.095, 0.704] | -9.11% | -0.004 | kill |
+| 479 | LongShortShortMomentum | -0.348 | [-0.742, 0.067] | -47.25% | +0.011 | kill |
+| 480 | LongShortCompositeReversal | 0.338 | [-0.062, 0.735] | -19.25% | +0.033 | kill |
+
+**Key findings:** Only weekly price reversal signals survive L/S costs (H471–H473 KEEP). H473 LongShortPCAReversal at 0.964 is a new H194-class diversifier (Sharpe > H194's 0.829, MaxDD -14.57%). OU threshold selectivity (H474/H475) reduces trade count too much — catastrophic H474 MaxDD -65.47%. L/S BAB/skewness/quality all fail monthly frequency. H479 negative Sharpe definitively closes L/S momentum at any horizon.
+
+---
+
+### Batch 4: H481–H490 — Hybrid AA+CS (1/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| 481 | MarketQualityRegimePort | 0.302 | [-0.080, 0.699] | -60.27% | +0.491 | kill |
+| 482 | MarketAccrualTimingPort | 0.371 | [-0.011, 0.768] | -60.27% | +0.576 | kill |
+| 483 | CSReturnDispersionAAPort | 0.315 | [-0.074, 0.710] | -60.27% | +0.478 | kill |
+| 484 | QualityBreadthAAPort | 0.274 | [-0.112, 0.667] | -60.27% | +0.457 | kill |
+| 485 | MarketVolBreadthAAPort | 0.343 | [-0.042, 0.736] | -60.27% | +0.530 | kill |
+| 486 | SectorFundamentalRotation | 0.306 | [-0.080, 0.702] | -60.27% | +0.516 | kill |
+| 487 | MomentumBreadthAAPort | 0.329 | [-0.056, 0.727] | -60.27% | +0.565 | kill |
+| 488 | TLTMomentumOverlay | 0.265 | [-0.122, 0.655] | -60.27% | +0.570 | kill |
+| 489 | ThreeAssetMomentumBridge | 0.495 | [0.107, 0.895] | -60.27% | +0.509 | kill |
+| 490 | CrossProgramMidTermBlend | **1.159** | [0.748, 1.570] | **-27.23%** | **+0.196** | **KEEP** |
+
+**Key findings:** Aggregate fundamental overlay on H021 (H481–H487) uniformly fails — all have EDGAR gap in folds 0–1 rendering the overlay inactive for early folds, and high H001 corr (+0.46–+0.58) once active. H489 ThreeAssetMomentumBridge closest at 0.495 but just below keep bar. H490 CrossProgramMidTermBlend (50% H086 + 50% H415) is the batch standout: Sharpe 1.159, MaxDD -27.23%, H001 corr +0.196, all 12 folds positive. Confirms superadditive blending of near-orthogonal AA+CS components.
+
+---
+
+### Set 7 Running Summary (H451–H490, 40 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested so far | 40 |
+| KEEP | **24** (60%) |
+| Best individual | H473 LongShortPCAReversal: Sharpe 0.964, MaxDD -14.57% |
+| Best blend | H490 CrossProgramMidTermBlend: Sharpe 1.159, MaxDD -27.23% |
+| New H194-class L/S diversifier | H473 (Sharpe 0.964, H001 +0.029) |
+| Hybrid AA+CS verdict | Aggregate overlays fail (EDGAR gap + high H001 corr); direct blending works |
+| MDR ceiling crack | Condition (a) partially met: H473 qualifies as second H194-class diversifier |

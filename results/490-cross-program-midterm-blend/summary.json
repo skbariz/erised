@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H490",
+  "name": "cross-program-midterm-blend",
+  "strategy_class": "CrossProgramMidTermBlend",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 1.159,
+  "ci_low": 0.7479,
+  "ci_high": 1.5697,
+  "cagr": 0.1211,
+  "max_drawdown": -0.2723,
+  "n_trades": 5024,
+  "h001_corr": 0.1956,
+  "fold_sharpes": [
+    1.365,
+    0.668,
+    1.621,
+    1.939,
+    1.206,
+    0.221,
+    0.615,
+    2.248,
+    1.551,
+    2.387,
+    1.273,
+    0.947
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "50% H086 (LowVolTargetPortfolio, Sharpe 1.109, H001 +0.413) + 50% H415 (StableMarginMomentum, Sharpe 0.987, H001 +0.002). Near-orthogonal H001 corrs. CS lifts Sharpe; AA controls MaxDD.",
+  "canonical_params": {
+    "blend": 0.5,
+    "h086_vol_target": 0.08,
+    "h415_rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

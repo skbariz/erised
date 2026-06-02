@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H485",
+  "name": "market-vol-breadth-aa",
+  "strategy_class": "MarketVolBreadthAAPort",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3433,
+  "ci_low": -0.0424,
+  "ci_high": 0.7365,
+  "cagr": 0.0349,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5296,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.259,
+    0.793,
+    0.742,
+    0.731,
+    -0.036,
+    1.12,
+    1.795,
+    0.715,
+    0.694,
+    0.018
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + vol-decline breadth. Fraction of S&P 500 stocks with 21d vol < 63d vol. >60% \u2192 SPY \u00d7 1.15; <40% \u2192 \u00d7 0.85. Realized vol breadth vs idiosyncratic vs VIX.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "bull_thresh": 0.6,
+    "bear_thresh": 0.4,
+    "bull_scale": 1.15,
+    "bear_scale": 0.85
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

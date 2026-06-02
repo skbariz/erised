@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H488",
+  "name": "tlt-momentum-overlay",
+  "strategy_class": "TLTMomentumOverlay",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.2649,
+  "ci_low": -0.1218,
+  "ci_high": 0.6545,
+  "cagr": 0.0241,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5701,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.4,
+    0.409,
+    0.577,
+    0.663,
+    -0.079,
+    0.647,
+    1.612,
+    0.848,
+    0.651,
+    0.216
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + TLT momentum overlay. TLT 6m return > 0 \u2192 keep TLT; < 0 \u2192 replace with SHY. Preserves low-risk allocation without duration drag in rising rate environments.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "mom_window": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

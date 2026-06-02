@@ -6082,3 +6082,397 @@ class MacroRegimeSectorBlend(MultiAssetStrategy):
         w_spy = w_spy.where(tlt_avail, 1.0); w_tlt = w_tlt.where(tlt_avail, 0.0)
         w_xlp = w_xlp.where(can_sector, 0.0); w_xlu = w_xlu.where(can_sector, 0.0)
         return pd.DataFrame({"SPY": w_spy, "TLT": w_tlt, "XLP": w_xlp, "XLU": w_xlu}, index=prices.index)
+
+
+# ===========================================================================
+# SET 7 — H481–H490: Hybrid AA+CS Aggregate Fundamental Signals for ETF Timing
+# ===========================================================================
+
+
+def _h021_base_weights(prices: pd.DataFrame, vol_lookback: int = 60) -> tuple[pd.Series, pd.Series]:
+    """Compute H021 inverse-vol base weights. Returns (w_spy, w_tlt)."""
+    spy_r = prices["adj_close"].pct_change()
+    tlt_r = prices["tlt_close"].pct_change()
+    spy_vol = spy_r.rolling(vol_lookback, min_periods=vol_lookback).std().shift(1) * np.sqrt(252)
+    tlt_vol = tlt_r.rolling(vol_lookback, min_periods=vol_lookback).std().shift(1) * np.sqrt(252)
+    inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+    inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+    total = inv_spy + inv_tlt
+    w_spy = (inv_spy / total).fillna(0.0)
+    w_tlt = (inv_tlt / total).fillna(0.0)
+    return w_spy, w_tlt
+
+
+class MarketQualityRegimePort(MultiAssetStrategy):
+    """H481: H021 overlaid with market-wide GP/TA quality regime signal.
+
+    Signal: rolling 252d median GP/TA across S&P 500 universe (pre-computed).
+    Signal > its own 252d trailing mean → equity-favorable → SPY weight × 1.20.
+    Signal ≤ mean → defensive → SPY weight × 0.80.
+    Freed/added weight shifts to/from TLT. Capped at 1.0 total exposure.
+    """
+
+    name = "market_quality_regime_port"
+
+    def __init__(
+        self,
+        market_gpta: pd.Series,
+        vol_lookback: int = 60,
+        signal_window: int = 252,
+        bull_scale: float = 1.20,
+        bear_scale: float = 0.80,
+    ) -> None:
+        self.market_gpta = market_gpta
+        self.vol_lookback = vol_lookback
+        self.signal_window = signal_window
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        sig = self.market_gpta.reindex(prices.index).ffill()
+        sig_ma = sig.rolling(self.signal_window, min_periods=self.signal_window // 2).mean().shift(1)
+        bull = (sig.shift(1) > sig_ma) & tlt_avail
+        scale = pd.Series(1.0, index=prices.index)
+        scale = scale.where(~bull, self.bull_scale)
+        scale = scale.where(bull, scale).where(bull | ~tlt_avail, self.bear_scale).where(bull, self.bull_scale)
+        # Simpler: bull → scale up SPY, else scale down
+        spy_scaled = (w_spy * self.bull_scale).where(bull, w_spy * self.bear_scale)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class MarketAccrualTimingPort(MultiAssetStrategy):
+    """H482: H021 overlaid with market-wide accrual quality signal.
+
+    Signal: rolling 252d mean of (NI-OCF)/TA across universe (pre-computed).
+    High accruals (above 252d trailing mean) → earnings quality risk → SPY × 0.80.
+    Low accruals → cash-backed earnings → SPY × 1.20.
+    """
+
+    name = "market_accrual_timing_port"
+
+    def __init__(
+        self,
+        market_accruals: pd.Series,
+        vol_lookback: int = 60,
+        signal_window: int = 252,
+        bull_scale: float = 1.20,
+        bear_scale: float = 0.80,
+    ) -> None:
+        self.market_accruals = market_accruals
+        self.vol_lookback = vol_lookback
+        self.signal_window = signal_window
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        sig = self.market_accruals.reindex(prices.index).ffill()
+        sig_ma = sig.rolling(self.signal_window, min_periods=self.signal_window // 2).mean().shift(1)
+        # High accruals (sig > ma) = BAD → bear_scale; low accruals = bull_scale
+        high_accruals = (sig.shift(1) > sig_ma) & tlt_avail
+        spy_scaled = (w_spy * self.bear_scale).where(high_accruals, w_spy * self.bull_scale)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class CSReturnDispersionAAPort(MultiAssetStrategy):
+    """H483: H021 overlaid with cross-sectional return dispersion regime.
+
+    Signal: rolling 21d mean of daily CS std of 5d returns (pre-computed).
+    Low dispersion (below 252d median) → passive/ETF regime → SPY × 0.75.
+    High dispersion → active/fundamental regime → normal H021.
+    Pure price signal, full 12-fold coverage.
+    """
+
+    name = "cs_return_dispersion_aa_port"
+
+    def __init__(
+        self,
+        cs_dispersion: pd.Series,
+        vol_lookback: int = 60,
+        signal_window: int = 252,
+        low_disp_scale: float = 0.75,
+    ) -> None:
+        self.cs_dispersion = cs_dispersion
+        self.vol_lookback = vol_lookback
+        self.signal_window = signal_window
+        self.low_disp_scale = low_disp_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        sig = self.cs_dispersion.reindex(prices.index).ffill()
+        sig_median = sig.rolling(self.signal_window, min_periods=self.signal_window // 2).median().shift(1)
+        low_disp = (sig.shift(1) < sig_median) & tlt_avail
+        spy_scaled = (w_spy * self.low_disp_scale).where(low_disp, w_spy)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class QualityBreadthAAPort(MultiAssetStrategy):
+    """H484: H021 overlaid with cross-sectional quality improvement breadth.
+
+    Signal: fraction of S&P 500 stocks with GP/TA above own 252d GP/TA median (pre-computed).
+    Breadth > 0.60 → broad quality improvement → SPY × 1.20.
+    Breadth < 0.40 → quality deterioration → SPY × 0.80.
+    """
+
+    name = "quality_breadth_aa_port"
+
+    def __init__(
+        self,
+        quality_breadth: pd.Series,
+        vol_lookback: int = 60,
+        bull_thresh: float = 0.60,
+        bear_thresh: float = 0.40,
+        bull_scale: float = 1.20,
+        bear_scale: float = 0.80,
+    ) -> None:
+        self.quality_breadth = quality_breadth
+        self.vol_lookback = vol_lookback
+        self.bull_thresh = bull_thresh
+        self.bear_thresh = bear_thresh
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        breadth = self.quality_breadth.reindex(prices.index).ffill().shift(1)
+        bull = (breadth > self.bull_thresh) & tlt_avail
+        bear = (breadth < self.bear_thresh) & tlt_avail
+        spy_scaled = w_spy.copy()
+        spy_scaled = (w_spy * self.bull_scale).where(bull, spy_scaled)
+        spy_scaled = (w_spy * self.bear_scale).where(bear, spy_scaled)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class MarketVolBreadthAAPort(MultiAssetStrategy):
+    """H485: H021 overlaid with cross-sectional vol-decline breadth signal.
+
+    Signal: fraction of S&P 500 stocks where 21d realized vol < 63d realized vol (pre-computed).
+    Breadth > 0.60 → systemic vol normalization → SPY × 1.15.
+    Breadth < 0.40 → systemic vol buildup → SPY × 0.85.
+    Pure price signal, full 12-fold coverage.
+    """
+
+    name = "market_vol_breadth_aa_port"
+
+    def __init__(
+        self,
+        vol_breadth: pd.Series,
+        vol_lookback: int = 60,
+        bull_thresh: float = 0.60,
+        bear_thresh: float = 0.40,
+        bull_scale: float = 1.15,
+        bear_scale: float = 0.85,
+    ) -> None:
+        self.vol_breadth = vol_breadth
+        self.vol_lookback = vol_lookback
+        self.bull_thresh = bull_thresh
+        self.bear_thresh = bear_thresh
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        breadth = self.vol_breadth.reindex(prices.index).ffill().shift(1)
+        bull = (breadth > self.bull_thresh) & tlt_avail
+        bear = (breadth < self.bear_thresh) & tlt_avail
+        spy_scaled = w_spy.copy()
+        spy_scaled = (w_spy * self.bull_scale).where(bull, spy_scaled)
+        spy_scaled = (w_spy * self.bear_scale).where(bear, spy_scaled)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class SectorFundamentalRotation(MultiAssetStrategy):
+    """H486: H021 overlaid with cross-sector GP/TA quality dispersion signal.
+
+    Signal: rolling 63d cross-sector std of median GP/TA (pre-computed).
+    High dispersion (technology/quality sectors dominating) → SPY × 1.10.
+    Low dispersion (quality flattening across sectors) → SPY × 0.90.
+    """
+
+    name = "sector_fundamental_rotation"
+
+    def __init__(
+        self,
+        sector_quality_dispersion: pd.Series,
+        vol_lookback: int = 60,
+        signal_window: int = 252,
+        bull_scale: float = 1.10,
+        bear_scale: float = 0.90,
+    ) -> None:
+        self.sector_quality_dispersion = sector_quality_dispersion
+        self.vol_lookback = vol_lookback
+        self.signal_window = signal_window
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        sig = self.sector_quality_dispersion.reindex(prices.index).ffill()
+        sig_ma = sig.rolling(self.signal_window, min_periods=self.signal_window // 2).mean().shift(1)
+        high_disp = (sig.shift(1) > sig_ma) & tlt_avail
+        spy_scaled = (w_spy * self.bull_scale).where(high_disp, w_spy * self.bear_scale)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class MomentumBreadthAAPort(MultiAssetStrategy):
+    """H487: H021 overlaid with percentage of S&P 500 stocks above their 200d MA.
+
+    Classic market breadth indicator applied as rule-based AA overlay.
+    Breadth > 0.60 → broad market trend → SPY × 1.20.
+    Breadth < 0.40 → trend deterioration → SPY × 0.80.
+    Pure price signal, full 12-fold coverage.
+    """
+
+    name = "momentum_breadth_aa_port"
+
+    def __init__(
+        self,
+        breadth_signal: pd.Series,
+        vol_lookback: int = 60,
+        bull_thresh: float = 0.60,
+        bear_thresh: float = 0.40,
+        bull_scale: float = 1.20,
+        bear_scale: float = 0.80,
+    ) -> None:
+        self.breadth_signal = breadth_signal
+        self.vol_lookback = vol_lookback
+        self.bull_thresh = bull_thresh
+        self.bear_thresh = bear_thresh
+        self.bull_scale = bull_scale
+        self.bear_scale = bear_scale
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        breadth = self.breadth_signal.reindex(prices.index).ffill().shift(1)
+        bull = (breadth > self.bull_thresh) & tlt_avail
+        bear = (breadth < self.bear_thresh) & tlt_avail
+        spy_scaled = w_spy.copy()
+        spy_scaled = (w_spy * self.bull_scale).where(bull, spy_scaled)
+        spy_scaled = (w_spy * self.bear_scale).where(bear, spy_scaled)
+        tlt_adj = (1.0 - spy_scaled).clip(0.0, 1.0)
+        spy_final = spy_scaled.where(tlt_avail, 1.0)
+        tlt_final = tlt_adj.where(tlt_avail, 0.0)
+        return pd.DataFrame({"SPY": spy_final, "TLT": tlt_final}, index=prices.index)
+
+
+class TLTMomentumOverlay(MultiAssetStrategy):
+    """H488: H021 with TLT replaced by SHY during TLT downtrends.
+
+    TLT 6m return > 0 → maintain standard risk-parity TLT allocation.
+    TLT 6m return ≤ 0 → replace TLT with SHY (reduce duration, preserve low-risk allocation).
+    Preserves H021 diversification without bond duration drag in rising rate environments.
+    """
+
+    name = "tlt_momentum_overlay"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        mom_window: int = 126,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.mom_window = mom_window
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        w_spy, w_tlt = _h021_base_weights(prices, self.vol_lookback)
+        tlt_avail = prices["tlt_close"].notna()
+        has_shy = "shy_close" in prices.columns
+        tlt_mom = prices["tlt_close"].shift(1) / prices["tlt_close"].shift(1 + self.mom_window) - 1
+        tlt_trending = (tlt_mom >= 0) | ~tlt_avail
+        if has_shy:
+            shy_avail = prices["shy_close"].notna()
+            use_shy = ~tlt_trending & tlt_avail & shy_avail
+            w_tlt_out = w_tlt.where(~use_shy, 0.0)
+            w_shy_out = w_tlt.where(use_shy, 0.0)
+            return pd.DataFrame({"SPY": w_spy.where(tlt_avail, 1.0), "TLT": w_tlt_out, "SHY": w_shy_out}, index=prices.index)
+        return pd.DataFrame({"SPY": w_spy.where(tlt_avail, 1.0), "TLT": w_tlt.where(tlt_trending, w_tlt, 0.0)}, index=prices.index)
+
+
+class ThreeAssetMomentumBridge(MultiAssetStrategy):
+    """H489: SPY/TLT/GLD risk-parity base with 3-month momentum overlay.
+
+    Base: H021-style inverse-vol weights across 3 assets.
+    Momentum overlay: asset with highest 3m return gets weight × 1.5;
+    lowest gets × 0.5; middle unchanged. Weights renormalized to sum ≤ 1.
+    Bridges trend-following (H007) with multi-asset risk parity (H076).
+    """
+
+    name = "three_asset_momentum_bridge"
+
+    def __init__(
+        self,
+        vol_lookback: int = 60,
+        mom_window: int = 63,
+    ) -> None:
+        self.vol_lookback = vol_lookback
+        self.mom_window = mom_window
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        spy_r = prices["adj_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+        gld_r = prices["gld_close"].pct_change()
+
+        spy_vol = spy_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(1) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(1) * np.sqrt(252)
+        gld_vol = gld_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(1) * np.sqrt(252)
+
+        inv_spy = 1.0 / spy_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        inv_gld = 1.0 / gld_vol.replace(0, np.nan)
+
+        tlt_avail = prices["tlt_close"].notna()
+        gld_avail = prices["gld_close"].notna()
+        all_avail = tlt_avail & gld_avail
+
+        total = (inv_spy + inv_tlt.where(tlt_avail, 0.0) + inv_gld.where(gld_avail, 0.0)).replace(0, np.nan)
+        w_spy = (inv_spy / total).fillna(1.0)
+        w_tlt = (inv_tlt.where(tlt_avail, 0.0) / total).fillna(0.0)
+        w_gld = (inv_gld.where(gld_avail, 0.0) / total).fillna(0.0)
+
+        # 3-month momentum
+        spy_mom = prices["adj_close"].shift(1) / prices["adj_close"].shift(1 + self.mom_window) - 1
+        tlt_mom = prices["tlt_close"].shift(1) / prices["tlt_close"].shift(1 + self.mom_window) - 1
+        gld_mom = prices["gld_close"].shift(1) / prices["gld_close"].shift(1 + self.mom_window) - 1
+
+        moms = pd.DataFrame({"SPY": spy_mom, "TLT": tlt_mom, "GLD": gld_mom})
+        ranks = moms.rank(axis=1, method="first")  # 1=lowest, 3=highest
+        spy_mult = ranks["SPY"].map({1: 0.5, 2: 1.0, 3: 1.5}).fillna(1.0)
+        tlt_mult = ranks["TLT"].map({1: 0.5, 2: 1.0, 3: 1.5}).fillna(1.0)
+        gld_mult = ranks["GLD"].map({1: 0.5, 2: 1.0, 3: 1.5}).fillna(1.0)
+
+        w_spy_m = (w_spy * spy_mult).where(all_avail, w_spy)
+        w_tlt_m = (w_tlt * tlt_mult).where(all_avail, w_tlt)
+        w_gld_m = (w_gld * gld_mult).where(all_avail, w_gld)
+
+        total_m = (w_spy_m + w_tlt_m + w_gld_m).replace(0, np.nan)
+        w_spy_f = (w_spy_m / total_m).fillna(w_spy)
+        w_tlt_f = (w_tlt_m / total_m).fillna(w_tlt)
+        w_gld_f = (w_gld_m / total_m).fillna(w_gld)
+
+        return pd.DataFrame({"SPY": w_spy_f, "TLT": w_tlt_f, "GLD": w_gld_f}, index=prices.index)

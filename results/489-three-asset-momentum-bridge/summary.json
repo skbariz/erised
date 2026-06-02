@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H489",
+  "name": "three-asset-momentum-bridge",
+  "strategy_class": "ThreeAssetMomentumBridge",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.4954,
+  "ci_low": 0.1073,
+  "ci_high": 0.8946,
+  "cagr": 0.0527,
+  "max_drawdown": -0.6027,
+  "n_trades": 4964,
+  "h001_corr": 0.5086,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    1.212,
+    1.009,
+    1.104,
+    1.1,
+    -0.072,
+    0.709,
+    1.403,
+    1.801,
+    -0.142,
+    0.827
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "SPY/TLT/GLD risk-parity base \u00d7 3m momentum multiplier. Highest 3m return \u00d7 1.5; lowest \u00d7 0.5; middle \u00d7 1.0. Bridges H007 trend and H076 multi-asset parity. Novel multiplicative overlay.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "mom_window": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

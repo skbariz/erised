@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H486",
+  "name": "sector-fundamental-rotation",
+  "strategy_class": "SectorFundamentalRotation",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3055,
+  "ci_low": -0.0804,
+  "ci_high": 0.7015,
+  "cagr": 0.0301,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5156,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.151,
+    0.772,
+    0.645,
+    0.83,
+    -0.076,
+    0.994,
+    1.829,
+    0.623,
+    0.664,
+    -0.104
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + cross-sector GP/TA quality dispersion. Rolling 63d std of per-sector median GP/TA. High dispersion (tech dominating) \u2192 SPY \u00d7 1.10; low \u2192 \u00d7 0.90. Novel sector-level fundamental signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "signal_window": 252,
+    "bull_scale": 1.1,
+    "bear_scale": 0.9
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

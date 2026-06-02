@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H483",
+  "name": "cs-return-dispersion-aa",
+  "strategy_class": "CSReturnDispersionAAPort",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3152,
+  "ci_low": -0.0736,
+  "ci_high": 0.7102,
+  "cagr": 0.0312,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.4781,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.148,
+    0.701,
+    0.581,
+    0.862,
+    -0.125,
+    1.058,
+    1.785,
+    0.499,
+    0.818,
+    0.158
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + CS return dispersion regime. Rolling 21d avg of daily CS std of 5d returns. Low dispersion \u2192 passive/ETF regime \u2192 SPY \u00d7 0.75. Israeli et al. (2017) ETF synchronization signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "signal_window": 252,
+    "low_disp_scale": 0.75
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H481",
+  "name": "market-quality-regime",
+  "strategy_class": "MarketQualityRegimePort",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3018,
+  "ci_low": -0.0796,
+  "ci_high": 0.6991,
+  "cagr": 0.0296,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.491,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.117,
+    0.714,
+    0.598,
+    0.83,
+    -0.101,
+    0.907,
+    2.01,
+    0.561,
+    0.743,
+    -0.113
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + market-wide GP/TA quality regime. 252d rolling median GP/TA across S&P 500. Above mean \u2192 SPY \u00d7 1.20; below \u2192 \u00d7 0.80. Novel hybrid AA+CS signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "signal_window": 252,
+    "bull_scale": 1.2,
+    "bear_scale": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

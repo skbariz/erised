@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H484",
+  "name": "quality-breadth-aa",
+  "strategy_class": "QualityBreadthAAPort",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.2739,
+  "ci_low": -0.1124,
+  "ci_high": 0.6675,
+  "cagr": 0.026,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.4569,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.117,
+    0.714,
+    0.598,
+    0.83,
+    -0.148,
+    1.003,
+    1.712,
+    0.416,
+    0.786,
+    -0.084
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + quality breadth. Fraction of S&P 500 stocks with GP/TA above own 252d median. >60% \u2192 SPY \u00d7 1.20; <40% \u2192 \u00d7 0.80. Breadth measures whether improvement is broad-based.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "bull_thresh": 0.6,
+    "bear_thresh": 0.4,
+    "bull_scale": 1.2,
+    "bear_scale": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

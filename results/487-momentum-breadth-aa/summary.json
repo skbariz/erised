@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H487",
+  "name": "momentum-breadth-aa",
+  "strategy_class": "MomentumBreadthAAPort",
+  "family": "Set7 Hybrid AA+CS",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3287,
+  "ci_low": -0.0556,
+  "ci_high": 0.7271,
+  "cagr": 0.0335,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5646,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.118,
+    0.828,
+    0.753,
+    0.743,
+    -0.19,
+    1.073,
+    1.746,
+    0.897,
+    0.587,
+    -0.003
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + % stocks above 200d MA breadth. Classic Zweig-style market breadth as rule-based AA. >60% \u2192 SPY \u00d7 1.20; <40% \u2192 \u00d7 0.80. Pure price signal, full 12-fold coverage.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "bull_thresh": 0.6,
+    "bear_thresh": 0.4,
+    "bull_scale": 1.2,
+    "bear_scale": 0.8
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

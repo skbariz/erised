@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H451",
+  "name": "net-profit-margin-level",
+  "strategy_class": "NetProfitMarginLevelPort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.6918,
+  "ci_low": 0.2937,
+  "ci_high": 1.1033,
+  "cagr": 0.0827,
+  "max_drawdown": -0.4065,
+  "n_trades": 1,
+  "h001_corr": -0.0186,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.452,
+    0.56,
+    1.893,
+    0.884,
+    1.559,
+    1.014,
+    0.869
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NI/Revenue LEVEL (net profit margin). H238 tested YoY change. Persistent pricing power + full cost efficiency. Quarterly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

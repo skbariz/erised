@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H456",
+  "name": "gross-profit-debt-coverage",
+  "strategy_class": "GrossProfitDebtCoveragePort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.8021,
+  "ci_low": 0.3911,
+  "ci_high": 1.2173,
+  "cagr": 0.0915,
+  "max_drawdown": -0.3444,
+  "n_trades": 1,
+  "h001_corr": -0.0175,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.318,
+    2.158,
+    0.677,
+    2.244,
+    1.155,
+    1.122
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/LTD: gross profit debt coverage. H237 tested OCF/LTD; GP is more structural (pre-SGA). Firms with LTD<1% TA excluded (not rewarded). Quarterly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "min_debt_frac": 0.01
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

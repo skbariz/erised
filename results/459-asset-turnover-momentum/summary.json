@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H459",
+  "name": "asset-turnover-momentum",
+  "strategy_class": "AssetTurnoverMomentumPort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9779,
+  "ci_low": 0.5781,
+  "ci_high": 1.3893,
+  "cagr": 0.1856,
+  "max_drawdown": -0.49,
+  "n_trades": 1,
+  "h001_corr": -0.0006,
+  "fold_sharpes": [
+    1.4,
+    0.648,
+    1.177,
+    1.847,
+    1.409,
+    -0.106,
+    0.749,
+    2.163,
+    0.864,
+    1.77,
+    1.075,
+    1.125
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "All-fold template: z(Revenue/TA level) + z(6m price momentum). Asset turnover (operational quality) + momentum. Distinct from margin-based templates H415/H429. Monthly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "mom_lookback": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

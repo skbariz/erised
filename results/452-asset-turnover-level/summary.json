@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H452",
+  "name": "asset-turnover-level",
+  "strategy_class": "AssetTurnoverLevelPort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.7661,
+  "ci_low": 0.3579,
+  "ci_high": 1.1811,
+  "cagr": 0.0935,
+  "max_drawdown": -0.382,
+  "n_trades": 1,
+  "h001_corr": -0.0187,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.59,
+    0.706,
+    2.267,
+    0.757,
+    1.761,
+    0.98,
+    0.947
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Revenue/TA LEVEL (asset turnover). H230 tested YoY change. Asset-light high-turnover firms outperform capital-heavy industries. Quarterly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

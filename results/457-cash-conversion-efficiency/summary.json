@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H457",
+  "name": "cash-conversion-efficiency",
+  "strategy_class": "CashConversionEfficiencyPort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.7332,
+  "ci_low": 0.3366,
+  "ci_high": 1.1464,
+  "cagr": 0.0874,
+  "max_drawdown": -0.3682,
+  "n_trades": 1,
+  "h001_corr": -0.0177,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.066,
+    0.744,
+    1.956,
+    0.617,
+    1.91,
+    0.868,
+    1.084
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "OCF/(CA-CL): operating cash flow per net working capital. Firms with negative WC excluded. Novel ratio \u2014 working capital efficiency. Quarterly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

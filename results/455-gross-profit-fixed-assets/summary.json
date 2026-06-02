@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H455",
+  "name": "gross-profit-fixed-assets",
+  "strategy_class": "GrossProfitFixedAssetsPort",
+  "family": "Set7 DuPont Level",
+  "run_date": "2026-06-01",
+  "oos_sharpe": 0.9034,
+  "ci_low": 0.4913,
+  "ci_high": 1.3158,
+  "cagr": 0.1141,
+  "max_drawdown": -0.3393,
+  "n_trades": 1,
+  "h001_corr": -0.0161,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.727,
+    2.141,
+    0.975,
+    2.068,
+    1.28,
+    1.214
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/(TA-CA): gross profit per unit of structural/fixed assets. Capital-light economic moat proxy. Novel ratio not in any prior hypothesis. Quarterly rebalance sector-neutral top 20%.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

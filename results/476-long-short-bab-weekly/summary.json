@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H476",
+  "name": "long-short-bab-weekly",
+  "strategy_class": "LongShortBABWeekly",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.1164,
+  "ci_low": -0.2876,
+  "ci_high": 0.5211,
+  "cagr": 0.0037,
+  "max_drawdown": -0.1386,
+  "n_trades": 1,
+  "h001_corr": 0.0072,
+  "fold_sharpes": [
+    -0.444,
+    0.469,
+    0.22,
+    -0.075,
+    0.334,
+    -0.005,
+    -0.138,
+    0.038,
+    0.134,
+    -0.754,
+    0.286,
+    0.566
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S BAB: long low-beta / short high-beta, weekly rebalance. H175 long-only = 1.088. Frazzini-Pedersen pure beta-arbitrage alpha. Weekly beta refresh.",
+  "canonical_params": {
+    "beta_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

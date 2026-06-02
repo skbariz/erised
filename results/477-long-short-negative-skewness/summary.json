@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H477",
+  "name": "long-short-negative-skewness",
+  "strategy_class": "LongShortNegativeSkewness",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3874,
+  "ci_low": -0.0127,
+  "ci_high": 0.8102,
+  "cagr": 0.013,
+  "max_drawdown": -0.136,
+  "n_trades": 1,
+  "h001_corr": 0.0185,
+  "fold_sharpes": [
+    1.612,
+    -0.356,
+    0.534,
+    1.66,
+    0.82,
+    -0.174,
+    0.848,
+    1.477,
+    0.904,
+    -1.002,
+    0.823,
+    -0.32
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S skewness: long positive-skew / short negative-skew (lottery) stocks. H276 long-only = 1.062. Monthly rebalance (12 turns x 3bps manageable). 252d skew window.",
+  "canonical_params": {
+    "skew_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

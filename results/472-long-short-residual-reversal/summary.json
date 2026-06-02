@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H472",
+  "name": "long-short-residual-reversal",
+  "strategy_class": "LongShortResidualReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.8039,
+  "ci_low": 0.412,
+  "ci_high": 1.188,
+  "cagr": 0.042,
+  "max_drawdown": -0.179,
+  "n_trades": 1,
+  "h001_corr": 0.0321,
+  "fold_sharpes": [
+    4.047,
+    1.512,
+    -0.425,
+    0.952,
+    0.795,
+    0.602,
+    1.363,
+    0.892,
+    -0.482,
+    0.422,
+    0.188,
+    0.681
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Dollar-neutral L/S: long lowest / short highest 5d idiosyncratic return (SPY-beta stripped). H186 long-only = 1.095. Higher signal purity via beta stripping. Weekly rebalance.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "beta_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H479",
+  "name": "long-short-short-momentum",
+  "strategy_class": "LongShortShortMomentum",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": -0.3484,
+  "ci_low": -0.7419,
+  "ci_high": 0.067,
+  "cagr": -0.0223,
+  "max_drawdown": -0.4725,
+  "n_trades": 1,
+  "h001_corr": 0.0105,
+  "fold_sharpes": [
+    -0.387,
+    -1.502,
+    -0.415,
+    0.495,
+    1.4,
+    -1.323,
+    0.022,
+    0.525,
+    0.303,
+    -0.589,
+    -0.26,
+    -0.254
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S 3m (63d) momentum. Monthly rebalance. H193 (12-1m) was killed. Falsification test: if 3m L/S also fails, L/S momentum space is closed at this cost structure.",
+  "canonical_params": {
+    "mom_window": 63,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

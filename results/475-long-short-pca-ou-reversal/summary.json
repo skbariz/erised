@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H475",
+  "name": "long-short-pca-ou-reversal",
+  "strategy_class": "LongShortPCAOUReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.4452,
+  "ci_low": 0.0509,
+  "ci_high": 0.8361,
+  "cagr": 0.0329,
+  "max_drawdown": -0.2971,
+  "n_trades": 1,
+  "h001_corr": 0.0192,
+  "fold_sharpes": [
+    2.822,
+    0.976,
+    0.567,
+    0.485,
+    -0.345,
+    0.263,
+    0.418,
+    0.075,
+    -0.758,
+    0.007,
+    -0.803,
+    0.078
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S PCA OU: K=10 PCA + OU z-score |z|>1.5. H192 long-only = 1.175 (program best short-term). L/S amplifies purest signal. Primary MDR ceiling crack attempt. Weekly rebalance.",
+  "canonical_params": {
+    "n_components": 10,
+    "ou_window": 252,
+    "entry_z": 1.5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H474",
+  "name": "long-short-ou-reversal",
+  "strategy_class": "LongShortOUReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.2353,
+  "ci_low": -0.1762,
+  "ci_high": 0.6438,
+  "cagr": 0.0237,
+  "max_drawdown": -0.6547,
+  "n_trades": 107,
+  "h001_corr": 0.0233,
+  "fold_sharpes": [
+    2.566,
+    0.736,
+    0.39,
+    -0.626,
+    -1.212,
+    0.088,
+    0.3,
+    0.029,
+    -0.153,
+    -0.441,
+    -0.836,
+    0.69
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S OU: long z<-1.5 (oversold) / short z>+1.5 (overbought) idiosyncratic residuals. H189 long-only = 1.025. OU threshold improves cost efficiency. Weekly rebalance.",
+  "canonical_params": {
+    "beta_window": 252,
+    "ou_window": 252,
+    "entry_z": 1.5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

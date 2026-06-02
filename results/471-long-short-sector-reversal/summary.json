@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H471",
+  "name": "long-short-sector-reversal",
+  "strategy_class": "LongShortSectorReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.8293,
+  "ci_low": 0.4393,
+  "ci_high": 1.2145,
+  "cagr": 0.0439,
+  "max_drawdown": -0.1833,
+  "n_trades": 1,
+  "h001_corr": 0.0301,
+  "fold_sharpes": [
+    3.681,
+    1.615,
+    -0.144,
+    0.899,
+    1.07,
+    0.617,
+    1.365,
+    0.892,
+    -0.482,
+    0.549,
+    0.158,
+    0.621
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Dollar-neutral L/S: long prior-5d losers / short prior-5d winners, sector-neutral both legs. H185 long-only = 1.103. H194 baseline = 0.829. Weekly rebalance.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H473",
+  "name": "long-short-pca-reversal",
+  "strategy_class": "LongShortPCAReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.9642,
+  "ci_low": 0.5707,
+  "ci_high": 1.3523,
+  "cagr": 0.041,
+  "max_drawdown": -0.1457,
+  "n_trades": 1,
+  "h001_corr": 0.0294,
+  "fold_sharpes": [
+    3.908,
+    2.203,
+    -0.169,
+    0.979,
+    0.647,
+    0.568,
+    1.134,
+    0.78,
+    -0.309,
+    0.427,
+    0.459,
+    0.973
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Dollar-neutral L/S: long/short K=10 PCA residual 5d reversal. H191 long-only = 1.135 (best long-only reversal). L/S of purest idiosyncratic signal. Weekly rebalance.",
+  "canonical_params": {
+    "n_components": 10,
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

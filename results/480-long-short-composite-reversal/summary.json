@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H480",
+  "name": "long-short-composite-reversal",
+  "strategy_class": "LongShortCompositeReversal",
+  "family": "Set7 L/S Market-Neutral",
+  "run_date": "2026-06-02",
+  "oos_sharpe": 0.3381,
+  "ci_low": -0.0617,
+  "ci_high": 0.7348,
+  "cagr": 0.0158,
+  "max_drawdown": -0.1925,
+  "n_trades": 1,
+  "h001_corr": 0.0333,
+  "fold_sharpes": [
+    2.79,
+    1.241,
+    -0.725,
+    0.274,
+    0.588,
+    -0.442,
+    1.264,
+    0.688,
+    -0.272,
+    -0.101,
+    -0.316,
+    0.107
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Dollar-neutral L/S composite: z(5d reversal) + z(-MAX1_5d). Short 5d-winners with extreme day (lottery overshoot); long 5d-losers with no extreme day (clean mean-revert). Weekly rebalance.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

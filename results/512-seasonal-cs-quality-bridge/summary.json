@@ -1,0 +1,48 @@
+{
+  "hypothesis": "H512",
+  "name": "seasonal-cs-quality-bridge",
+  "strategy_class": "SeasonalCSQualityBridge",
+  "family": "Set7 Cross-Program Synergy",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.8377,
+  "ci_low": 0.4293,
+  "ci_high": 1.2566,
+  "cagr": 0.1266,
+  "max_drawdown": -0.365,
+  "n_trades": 1,
+  "h001_corr": -0.009,
+  "fold_sharpes": [
+    2.285,
+    0.721,
+    1.037,
+    0.707,
+    1.311,
+    0.126,
+    0.374,
+    2.075,
+    0.913,
+    1.098,
+    0.732,
+    0.658
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H078's seasonal structure with H021 replaced by H415 (StableMarginMomentum CS) in Nov-Apr. May-Oct stays 100% TLT (H078's defensive leg). Tests if H415 CS is more powerful than H021 AA in the favorable equity season.",
+  "canonical_params": {
+    "cs_strategy": "H415_StableMarginMomentum",
+    "favorable_months": [
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ]
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

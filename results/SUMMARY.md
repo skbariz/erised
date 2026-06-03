@@ -1337,3 +1337,36 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | New H194-class L/S diversifier | H473 (Sharpe 0.964, H001 +0.029) |
 | Hybrid AA+CS verdict | Aggregate overlays fail (EDGAR gap + high H001 corr); direct blending works |
 | MDR ceiling crack | Condition (a) partially met: H473 qualifies as second H194-class diversifier |
+
+---
+
+### Batch 5: H491–H500 — Continuous Macro Overlays & Regime CS Selectors (5/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| 491 | ContinuousYieldCurveScaler | 0.302 | [-0.076, 0.693] | -60.27% | +0.514 | kill |
+| 492 | VIXPercentileScalerPort | 0.337 | [-0.046, 0.734] | -60.27% | +0.547 | kill |
+| 493 | CreditSpreadContinuousPort | 0.346 | [-0.037, 0.738] | -60.27% | +0.546 | kill |
+| 494 | MultiplexMacroComposite | 0.332 | [-0.047, 0.725] | -60.27% | +0.539 | kill |
+| 495 | GLDMomentumOverlay | **0.530** | [0.148, 0.926] | **-60.27%** | **+0.480** | **KEEP** |
+| 496 | VIXMeanReversionPort | 0.350 | [-0.039, 0.744] | -60.27% | +0.559 | kill |
+| 497 | RegimeAdaptiveCSSignal | **0.981** | [0.572, 1.392] | **-38.44%** | **-0.009** | **KEEP** |
+| 498 | CoreDiversifierSleeve | **0.704** | [0.315, 1.101] | **-14.14%** | **+0.378** | **KEEP** |
+| 499 | VolAccelerationCSSwitch | **1.015** | [0.616, 1.430] | **-47.19%** | **+0.004** | **KEEP** |
+| 500 | AdaptiveFrequencyQualityPort | **0.870** | [0.460, 1.281] | **-34.35%** | **-0.018** | **KEEP** |
+
+**Key findings:** Continuous AA macro scalers (H491-H494, H496) all fail — SPY overlay strategies inherit the early-period dot-com crash losses (folds 0-1 negative) and scale too mildly to improve on H021. H495 GLDMomentumOverlay is the exception: GLD trend signal improves 3-asset parity (Sharpe 0.530 CI[0.148, 0.926]). Regime-conditional CS signal selectors (H497, H499, H500) are the batch standouts: H497 VIX-gated (momentum/quality) at Sharpe 0.981 H001 corr -0.009; H499 vol-acceleration CS switch at Sharpe 1.015 H001 corr +0.004 — both near-zero H001 correlation. H498 CoreDiversifierSleeve (H078+H086+H473 blend) achieves MaxDD -14.14% (below all 3 components). **Confirmed: regime-adaptive CS signal selection is highly effective and near-orthogonal to H001.**
+
+---
+
+### Set 7 Running Summary (H451–H500, 50 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested so far | 50 |
+| KEEP | **29** (58%) |
+| Best individual | H499 VolAccelerationCSSwitch: Sharpe 1.015, MaxDD -47.19%, H001 +0.004 |
+| Best blend | H490 CrossProgramMidTermBlend: Sharpe 1.159, MaxDD -27.23% |
+| Batch 5 standouts | H497 (H001 -0.009), H499 (H001 +0.004), H500 (H001 -0.018) — near-zero corr |
+| Regime CS verdict | VIX-gated and vol-acceleration CS signal selectors work; near-zero H001 corr |
+| AA continuous scalers | All fail (H491-H494, H496) except H495 GLD momentum overlay (0.530) |

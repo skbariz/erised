@@ -1,0 +1,49 @@
+{
+  "hypothesis": "H513",
+  "name": "quality-seasonal-market-neutral",
+  "strategy_class": "QualitySeasonalMarketNeutral",
+  "family": "Set7 Cross-Program Synergy",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.4371,
+  "ci_low": 0.0478,
+  "ci_high": 0.8435,
+  "cagr": 0.03,
+  "max_drawdown": -0.1547,
+  "n_trades": 5024,
+  "h001_corr": 0.3099,
+  "fold_sharpes": [
+    2.738,
+    0.768,
+    0.905,
+    -0.14,
+    0.134,
+    1.222,
+    -0.14,
+    0.511,
+    0.682,
+    0.22,
+    0.614,
+    0.24
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H078's seasonal structure: Nov-Apr = H021 (risk parity); May-Oct = 50% TLT + 50% H473 (LongShortPCAReversal, dollar-neutral). Adds market-neutral L/S alpha to H078's defensive season without adding equity beta.",
+  "canonical_params": {
+    "favorable_months": [
+      11,
+      12,
+      1,
+      2,
+      3,
+      4
+    ],
+    "may_oct_tlt": 0.5,
+    "may_oct_ls": 0.5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

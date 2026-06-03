@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H503",
+  "name": "semi-annual-asset-turnover",
+  "strategy_class": "SemiAnnualAssetTurnoverPort",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7409,
+  "ci_low": 0.3347,
+  "ci_high": 1.1515,
+  "cagr": 0.0889,
+  "max_drawdown": -0.382,
+  "n_trades": 1,
+  "h001_corr": -0.0201,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.753,
+    2.16,
+    0.8,
+    1.58,
+    0.997,
+    0.951
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Revenue/TA (asset turnover) LEVEL, sector-neutral top 20%, semi-annual rebalance (126d). Tests optimal frequency for mid-speed DuPont signal. H452 monthly expected ~0.80.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

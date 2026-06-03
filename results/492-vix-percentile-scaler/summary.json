@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H492",
+  "name": "vix-percentile-scaler",
+  "strategy_class": "VIXPercentileScalerPort",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.3368,
+  "ci_low": -0.0458,
+  "ci_high": 0.7338,
+  "cagr": 0.0345,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5467,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.163,
+    0.914,
+    0.831,
+    0.748,
+    -0.077,
+    1.108,
+    1.648,
+    0.992,
+    0.699,
+    -0.325
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + VIX percentile scaler. VIX 252d trailing percentile rank -> linear SPY weight in [0.6, 1.4]. Low VIX pct -> equity boost; high pct -> defensive. Continuous analog of H066 binary VIX>35 spike override.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "pct_window": 252,
+    "scale_lo": 0.6,
+    "scale_hi": 1.4
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

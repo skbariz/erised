@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H491",
+  "name": "continuous-yield-curve-scaler",
+  "strategy_class": "ContinuousYieldCurveScaler",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.3019,
+  "ci_low": -0.0757,
+  "ci_high": 0.693,
+  "cagr": 0.0299,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5137,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.191,
+    0.539,
+    0.553,
+    0.794,
+    -0.167,
+    1.137,
+    2.005,
+    0.465,
+    0.709,
+    -0.066
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + continuous yield curve scaler. 252d TLT-SHY return spread z-scored over rolling 252d window -> linear SPY weight scale in [0.6, 1.4]. Steep curve -> equity tilt; flat/inverted -> defensive. Continuous analog of H311 binary signal.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "spread_window": 252,
+    "scale_lo": 0.6,
+    "scale_hi": 1.4
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

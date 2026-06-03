@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H508",
+  "name": "semi-annual-momentum-quality",
+  "strategy_class": "SemiAnnualMomentumQualityCombo",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.9892,
+  "ci_low": 0.5803,
+  "ci_high": 1.3995,
+  "cagr": 0.1981,
+  "max_drawdown": -0.4989,
+  "n_trades": 1,
+  "h001_corr": -0.0004,
+  "fold_sharpes": [
+    1.564,
+    0.981,
+    1.103,
+    1.669,
+    1.341,
+    0.033,
+    0.64,
+    2.353,
+    0.847,
+    1.695,
+    1.213,
+    1.084
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(GP/TA) + z(6m momentum), sector-neutral top 20%, semi-annual rebalance (126d). Same signal as H231 QualityMomentum (monthly: 0.870). Tests whether composite signal IC is stable enough at semi-annual cadence to beat monthly.",
+  "canonical_params": {
+    "mom_lookback": 126,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 126
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

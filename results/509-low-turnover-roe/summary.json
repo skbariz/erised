@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H509",
+  "name": "low-turnover-roe",
+  "strategy_class": "LowTurnoverROEPort",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7534,
+  "ci_low": 0.3502,
+  "ci_high": 1.1631,
+  "cagr": 0.0919,
+  "max_drawdown": -0.3606,
+  "n_trades": 1,
+  "h001_corr": -0.0206,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.247,
+    0.588,
+    1.998,
+    0.882,
+    1.913,
+    1.055,
+    0.99
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NI/BE (ROE) LEVEL with buy-hold band: enter top 20%, exit only below 25th percentile. Quarterly rebalance. Negative book equity excluded (NaN). Asymmetric exit reduces churn for structural ROE signal.",
+  "canonical_params": {
+    "buy_quantile": 0.2,
+    "hold_quantile": 0.75,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

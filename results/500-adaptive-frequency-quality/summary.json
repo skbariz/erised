@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H500",
+  "name": "adaptive-frequency-quality",
+  "strategy_class": "AdaptiveFrequencyQualityPort",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.8704,
+  "ci_low": 0.4596,
+  "ci_high": 1.2815,
+  "cagr": 0.11,
+  "max_drawdown": -0.3435,
+  "n_trades": 1,
+  "h001_corr": -0.0184,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.372,
+    0.699,
+    2.108,
+    1.107,
+    2.042,
+    1.248,
+    1.18
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA quality, sector-neutral top 20%, with VIX-adaptive rebalance: monthly (21d) when VIX >= 25, quarterly (63d) when VIX < 25. H292 established quarterly > monthly for GP/TA (0.884 vs 0.852). Tests whether high-vol regime requires faster refresh.",
+  "canonical_params": {
+    "vix_threshold": 25.0,
+    "period_high_vix": 21,
+    "period_low_vix": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

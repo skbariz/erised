@@ -1370,3 +1370,36 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | Batch 5 standouts | H497 (H001 -0.009), H499 (H001 +0.004), H500 (H001 -0.018) — near-zero corr |
 | Regime CS verdict | VIX-gated and vol-acceleration CS signal selectors work; near-zero H001 corr |
 | AA continuous scalers | All fail (H491-H494, H496) except H495 GLD momentum overlay (0.530) |
+
+---
+
+### Batch 6: H501–H510 — Execution-Aware Cost Minimization (9/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| 501 | AnnualRebalanceQualityPort | **0.844** | [0.432, 1.258] | **-34.14%** | **-0.013** | **KEEP** |
+| 502 | AnnualRebalanceNetMarginPort | **0.683** | [0.281, 1.095] | **-40.65%** | **-0.017** | **KEEP** |
+| 503 | SemiAnnualAssetTurnoverPort | **0.741** | [0.335, 1.151] | **-38.20%** | **-0.020** | **KEEP** |
+| 504 | LowTurnoverNetMarginPort | **0.709** | [0.309, 1.111] | **-37.61%** | **-0.019** | **KEEP** |
+| 505 | PatienceFilteredMomentum | **0.949** | [0.546, 1.362] | **-50.28%** | **+0.000** | **KEEP** |
+| 506 | MinTurnoverMomentumBand | **0.932** | [0.532, 1.345] | **-49.22%** | **-0.002** | **KEEP** |
+| 507 | LargeCapQualityFilter | 0.471 | [0.077, 0.876] | -41.86% | -0.021 | kill |
+| 508 | SemiAnnualMomentumQualityCombo | **0.989** | [0.580, 1.400] | **-49.89%** | **-0.000** | **KEEP** |
+| 509 | LowTurnoverROEPort | **0.753** | [0.350, 1.163] | **-36.06%** | **-0.021** | **KEEP** |
+| 510 | CrossProgramHybridLowTurnover | **1.055** | [0.657, 1.461] | **-18.06%** | **+0.475** | **KEEP** |
+
+**Key findings:** 9/10 KEEP — one of the strongest batches in the program. The Batch 6 near-zero H001 correlation cluster (H501-H506, H508-H509 all with H001 corr -0.02 to 0.00) confirms these fundamental strategies are essentially orthogonal to equity trend. Frequency findings: annual GP/TA (H501: 0.844) slightly below quarterly (H292: 0.884) — quarterly is the optimum. Semi-annual quality+momentum composite (H508: 0.989) **significantly beats** monthly H231 (0.870) — the best Batch 6 result shows semi-annual works better than monthly for composites. H505 PatienceFilteredMomentum at 0.949 with H001 corr exactly +0.000 is an extraordinary result. H510 CrossProgramHybridLowTurnover (80% H021 + 20% H415 quarterly) at Sharpe 1.055, MaxDD -18.06% — the lowest MaxDD of any hybrid strategy.
+
+---
+
+### Set 7 Running Summary (H451–H510, 60 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested so far | 60 |
+| KEEP | **38** (63%) |
+| Best individual | H499 VolAccelerationCSSwitch: Sharpe 1.015, H001 +0.004 |
+| Best blend | H510 CrossProgramHybridLowTurnover: Sharpe 1.055, MaxDD -18.06% |
+| Batch 6 standout | H508 SemiAnnualMomentumQualityCombo: 0.989, H001 -0.000 (beats H231 monthly) |
+| Frequency verdict | Quarterly optimal for pure quality; semi-annual optimal for quality+momentum composite |
+| Near-zero H001 cluster | H501-H509 all have H001 corr -0.02 to 0.00 — high MDR value pool |

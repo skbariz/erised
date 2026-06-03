@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H530",
+  "name": "multi-period-momentum-blend",
+  "strategy_class": "MultiPeriodMomentumBlend",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.045,
+  "ci_low": 0.6488,
+  "ci_high": 1.4572,
+  "cagr": 0.202,
+  "max_drawdown": -0.4838,
+  "n_trades": 1,
+  "h001_corr": 0.0047,
+  "fold_sharpes": [
+    1.726,
+    0.605,
+    1.314,
+    1.836,
+    1.453,
+    -0.125,
+    0.832,
+    2.363,
+    1.117,
+    1.595,
+    1.15,
+    1.09
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(z(3m return) + z(6m return) + z(12-1m momentum)) / 3. Multi-horizon consensus filter selects stocks with strong momentum across all time horizons. Reduces crash risk from any single formation period. Pure price signal, all 12 folds active, monthly rebalance.",
+  "canonical_params": {
+    "mom_3m": 63,
+    "mom_6m": 126,
+    "mom_12m": 252,
+    "skip_1m": 21,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

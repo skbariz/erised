@@ -16321,3 +16321,468 @@ class LowTurnoverROEPort(CrossSectionalStrategy):
             roe, membership, self.sectors, self.hold_quantile, ascending=False
         )
         return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 7 — BATCH 8 (H521–H530): Novel Fundamental Combinations
+# ===========================================================================
+
+
+class NetDebtQualityPort(CrossSectionalStrategy):
+    """H521: Net leverage = (LTD - CA) / TA. Long lowest (most net cash). Sector-neutral, quarterly.
+
+    Net debt is the TRUE economic leverage after offsetting liquid assets.
+    Negative values = net cash position (CA > LTD) → top ranked.
+    H246 tested gross leverage (TA/BE); H237 tested cash coverage (OCF/LTD).
+    Net debt ratio not previously tested.
+    """
+
+    name = "net_debt_quality_port"
+
+    def __init__(
+        self,
+        long_term_debt: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.long_term_debt = long_term_debt
+        self.current_assets = current_assets
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ltd = _align_fund(self.long_term_debt, prices_panel).clip(lower=0.0)
+        ca = _align_fund(self.current_assets, prices_panel).clip(lower=0.0)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        # Net leverage: negative = net cash (good). Clip at [-2, 2] to limit outlier influence.
+        net_leverage = ((ltd - ca) / ta_safe).clip(-2.0, 2.0)
+        # ascending=True: lower (more negative = more net cash) is better
+        daily_w = _sector_neutral_weights(
+            net_leverage, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CapitalIntensityAvoidPort(CrossSectionalStrategy):
+    """H522: (TA - CA) / Revenue = fixed asset intensity. Long lowest (asset-light). Quarterly.
+
+    Long firms with lowest fixed-capital input per revenue dollar.
+    Asset-light firms (software, services) generate more revenue per unit of structural capacity.
+    Input-side complement to H452 (GP/(TA-CA) = output efficiency per fixed asset).
+    """
+
+    name = "capital_intensity_avoid_port"
+
+    def __init__(
+        self,
+        total_assets: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.total_assets = total_assets
+        self.current_assets = current_assets
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ta = _align_fund(self.total_assets, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel).clip(lower=0.0)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        fixed_assets = (ta - ca).clip(lower=0.0)
+        intensity = (fixed_assets / rev_safe).clip(0.0, 20.0)
+        # ascending=True: lower intensity (asset-light) is better
+        daily_w = _sector_neutral_weights(
+            intensity, membership, self.sectors, self.within_sector_quantile, ascending=True
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class GrossCrossEfficiencyPort(CrossSectionalStrategy):
+    """H523: (GP/TA) x (Revenue/TA) = GP*Revenue/TA^2. Long top 20%. Quarterly.
+
+    Rewards firms excelling on BOTH gross profitability AND asset efficiency simultaneously.
+    GP/TA (H227: 0.879) and Revenue/TA are both independently alpha-generating.
+    Their product selects firms that are strong on both dimensions, not just one.
+    """
+
+    name = "gross_cross_efficiency_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        rev_ta = (rev / ta_safe).clip(0.0, 10.0)
+        cross_eff = (gp_ta * rev_ta).clip(0.0, 50.0)
+        daily_w = _sector_neutral_weights(
+            cross_eff, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class CashCycleEfficiencyPort(CrossSectionalStrategy):
+    """H524: OCF / (CA - CL) = cash flow per unit net working capital. Long top 20%. Quarterly.
+
+    Measures how efficiently the operating cycle converts working capital to cash.
+    Firms with CA < CL (negative NWC) are excluded (assigned NaN signal).
+    High ratio = lean operations; low ratio = capital trapped in operating cycle.
+    """
+
+    name = "cash_cycle_efficiency_port"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        current_assets: pd.DataFrame,
+        current_liabilities: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.operating_cf = operating_cf
+        self.current_assets = current_assets
+        self.current_liabilities = current_liabilities
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        ca = _align_fund(self.current_assets, prices_panel).clip(lower=0.0)
+        cl = _align_fund(self.current_liabilities, prices_panel).clip(lower=0.0)
+        nwc = ca - cl
+        # Only include firms with positive NWC (ca > cl)
+        nwc_positive = nwc.where(nwc > 0)
+        cash_cycle = (ocf / nwc_positive).clip(-5.0, 20.0)
+        daily_w = _sector_neutral_weights(
+            cash_cycle, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SectorNeutralizedROEPort(CrossSectionalStrategy):
+    """H525: NI/BE demeaned by sector median NI/BE. Long highest sector-adjusted ROE. Quarterly.
+
+    Removes structural ROE level differences across sectors (financials naturally have high
+    ROE from leverage; sector demeaning removes this bias). Distinct from H453 which ranks
+    ROE within sector: H525 uses the explicit demeaned value, allowing cross-sector comparison.
+    """
+
+    name = "sector_neutralized_roe_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        be_positive = be.where(be > 0)
+        roe = (ni / be_positive).clip(-1.0, 5.0)
+        # Sector-demean: subtract sector median per date
+        roe_demeaned = roe.copy()
+        for sector in self.sectors.dropna().unique():
+            cols = [t for t in self.sectors[self.sectors == sector].index if t in roe.columns]
+            if not cols:
+                continue
+            sector_med = roe[cols].median(axis=1)
+            roe_demeaned[cols] = roe[cols].values - sector_med.values[:, None]
+        daily_w = _sector_neutral_weights(
+            roe_demeaned, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class ProfitabilityConsistencyPort(CrossSectionalStrategy):
+    """H526: Fraction of trailing 8 quarters where NI/BE > sector median NI/BE. Quarterly.
+
+    Persistent above-sector ROE = structural competitive advantage (durable moat).
+    H225 tested earnings growth persistence; H526 tests ROE LEVEL persistence above benchmark.
+    Rolling 504-day window approximates 8 quarterly periods.
+    """
+
+    name = "profitability_consistency_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 504,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.lookback = lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        be_positive = be.where(be > 0)
+        roe = (ni / be_positive).clip(-1.0, 5.0)
+        # Compute sector median ROE per date
+        sector_med_roe = pd.DataFrame(0.0, index=roe.index, columns=roe.columns)
+        for sector in self.sectors.dropna().unique():
+            cols = [t for t in self.sectors[self.sectors == sector].index if t in roe.columns]
+            if not cols:
+                continue
+            med = roe[cols].median(axis=1)
+            sector_med_roe[cols] = med.values[:, None]
+        # Fraction of days in lookback where ROE > sector median
+        above_med = (roe > sector_med_roe).astype(float)
+        consistency = above_med.rolling(self.lookback, min_periods=self.lookback // 2).mean()
+        daily_w = _sector_neutral_weights(
+            consistency, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class RevenueMarginConsistencyPort(CrossSectionalStrategy):
+    """H527: Fraction of 8 quarters where rev_growth>0 AND GP/Revenue change > -1%. Quarterly.
+
+    Joint persistence condition: sustained revenue growth AND margin stability simultaneously.
+    H411-H415 tested these signals separately. H527 requires BOTH conditions for 8 consecutive
+    quarters -- a joint quality-growth persistence signal.
+    """
+
+    name = "revenue_margin_consistency_port"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        gross_profit: pd.DataFrame,
+        sectors: pd.Series,
+        lookback: int = 504,
+        quarterly_step: int = 63,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.revenue = revenue
+        self.gross_profit = gross_profit
+        self.sectors = sectors
+        self.lookback = lookback
+        self.quarterly_step = quarterly_step
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        gp = _align_fund(self.gross_profit, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        # Quarterly revenue growth > 0
+        rev_growth = rev.pct_change(self.quarterly_step)
+        rev_growth_pos = (rev_growth > 0).astype(float)
+        # Quarterly GP margin change > -1%
+        gp_margin = (gp / rev_safe).clip(0.0, 2.0)
+        margin_change = gp_margin.pct_change(self.quarterly_step)
+        margin_stable = (margin_change > -0.01).astype(float)
+        # Both conditions simultaneously
+        both = rev_growth_pos * margin_stable
+        consistency = both.rolling(self.lookback, min_periods=self.lookback // 2).mean()
+        daily_w = _sector_neutral_weights(
+            consistency, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class OCFRevenueGrowthCombo(CrossSectionalStrategy):
+    """H528: z(OCF/Revenue level) + z(Revenue YoY growth). 2-factor z-score. Quarterly.
+
+    Cash margin (OCF/Revenue captures full cash conversion stack) + revenue growth.
+    Extends H233 (z(rev_growth)+z(GP/TA): 0.803) by replacing quality with OCF margin.
+    OCF/Revenue is post-working-capital unlike GP/Revenue -- more conservative cash view.
+    """
+
+    name = "ocf_revenue_growth_combo"
+
+    def __init__(
+        self,
+        operating_cf: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.operating_cf = operating_cf
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ocf = _align_fund(self.operating_cf, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        ocf_margin = (ocf / rev_safe).clip(-2.0, 5.0)
+        rev_growth = (rev / rev.shift(252) - 1).clip(-1.0, 5.0)
+        composite = _cs_zscore(ocf_margin).fillna(0.0) + _cs_zscore(rev_growth).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class NetMarginAssetTurnoverCombo(CrossSectionalStrategy):
+    """H529: z(NI/Revenue level) + z(Revenue/TA level). 2-factor DuPont z-score. Quarterly.
+
+    DuPont decomposition: NI/TA = NI/Revenue x Revenue/TA (ROA = margin x turnover).
+    Ranking on BOTH z-scores separately rewards firms strong on both margins AND efficiency.
+    Different from H173 (ROA = product): z-score sum selects firms excelling on each dimension.
+    """
+
+    name = "net_margin_asset_turnover_combo"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        ta_safe = ta.where(ta > 0)
+        ni_margin = (ni / rev_safe).clip(-2.0, 5.0)
+        asset_turn = (rev / ta_safe).clip(0.0, 10.0)
+        composite = _cs_zscore(ni_margin).fillna(0.0) + _cs_zscore(asset_turn).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class MultiPeriodMomentumBlend(CrossSectionalStrategy):
+    """H530: Equal-weight of z(3m), z(6m), z(12-1m) momentum. Sector-neutral, monthly.
+
+    Multi-horizon consensus filter: selects stocks with strong momentum across ALL horizons.
+    All prior momentum strategies use a single formation period. H530 tests whether requiring
+    confirmation at 3m, 6m, AND 12-1m reduces momentum crash risk via diversification.
+    Pure price signal -- full 12-fold coverage.
+    """
+
+    name = "multi_period_momentum_blend"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_3m: int = 63,
+        mom_6m: int = 126,
+        mom_12m: int = 252,
+        skip_1m: int = 21,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.mom_3m = mom_3m
+        self.mom_6m = mom_6m
+        self.mom_12m = mom_12m
+        self.skip_1m = skip_1m
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        m3 = prices_panel / prices_panel.shift(self.mom_3m) - 1
+        m6 = prices_panel / prices_panel.shift(self.mom_6m) - 1
+        m12 = prices_panel.shift(self.skip_1m) / prices_panel.shift(self.mom_12m) - 1
+        composite = (
+            _cs_zscore(m3).fillna(0.0) + _cs_zscore(m6).fillna(0.0) + _cs_zscore(m12).fillna(0.0)
+        ) / 3.0
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)

@@ -12203,13 +12203,17 @@ class RevenueEarningsAcceleration(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         rev_safe = rev.where(rev.shift(self.annual_lag) > 0)
         # YoY growth rates
-        rev_growth = (rev - rev.shift(self.annual_lag)) / rev.shift(self.annual_lag).abs().clip(lower=1.0)
+        rev_growth = (rev - rev.shift(self.annual_lag)) / rev.shift(self.annual_lag).abs().clip(
+            lower=1.0
+        )
         ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
         ni_growth = ni_ta - ni_ta.shift(self.annual_lag)
         # 2nd derivative: acceleration vs one quarter ago
         rev_accel = rev_growth - rev_growth.shift(self.accel_lag)
         ni_accel = ni_growth - ni_growth.shift(self.accel_lag)
-        composite = _cs_zscore(rev_accel.clip(-2.0, 2.0)).fillna(0.0) + _cs_zscore(ni_accel.clip(-2.0, 2.0)).fillna(0.0)
+        composite = _cs_zscore(rev_accel.clip(-2.0, 2.0)).fillna(0.0) + _cs_zscore(
+            ni_accel.clip(-2.0, 2.0)
+        ).fillna(0.0)
         daily_w = _sector_neutral_weights(
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
@@ -12462,7 +12466,7 @@ class BalanceSheetStrengthPort(CrossSectionalStrategy):
         ocf_ratio = (ocf / ta_safe).clip(-2.0, 5.0)
         be_ratio = (be / ta_safe).clip(-1.0, 5.0)
         # YoY improvements
-        debt_improve = -(debt_ratio - debt_ratio.shift(self.lookback))   # negative = improving
+        debt_improve = -(debt_ratio - debt_ratio.shift(self.lookback))  # negative = improving
         ocf_improve = ocf_ratio - ocf_ratio.shift(self.lookback)
         be_improve = be_ratio - be_ratio.shift(self.lookback)
         composite = (
@@ -12577,7 +12581,9 @@ class ConsistentGrowthStreak(CrossSectionalStrategy):
         ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
         ni_growth_pos = (ni_ta > ni_ta.shift(self.growth_lookback)).astype(float)
         both_growing = rev_growth_pos * ni_growth_pos
-        streak = both_growing.rolling(self.streak_window, min_periods=self.streak_window // 4).mean()
+        streak = both_growing.rolling(
+            self.streak_window, min_periods=self.streak_window // 4
+        ).mean()
         daily_w = _sector_neutral_weights(
             streak, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
@@ -12779,7 +12785,9 @@ class StableMarginMomentum(CrossSectionalStrategy):
         rev = _align_fund(self.revenue, prices_panel)
         rev_safe = rev.where(rev > 0)
         gp_margin = (gp / rev_safe).clip(0.0, 2.0)
-        margin_std = gp_margin.rolling(self.margin_window, min_periods=self.margin_window // 4).std()
+        margin_std = gp_margin.rolling(
+            self.margin_window, min_periods=self.margin_window // 4
+        ).std()
         # Low margin std = stable; negate so high stability = high score
         margin_stability = -margin_std
         # 6m momentum
@@ -12831,7 +12839,9 @@ class DifferentiatedMarginPort(CrossSectionalStrategy):
         rev = _align_fund(self.revenue, prices_panel)
         rev_safe = rev.where(rev > 0)
         gp_margin = (gp / rev_safe).clip(0.0, 2.0)
-        margin_std = gp_margin.rolling(self.stability_window, min_periods=self.stability_window // 4).std()
+        margin_std = gp_margin.rolling(
+            self.stability_window, min_periods=self.stability_window // 4
+        ).std()
         composite = _cs_zscore(gp_margin).fillna(0.0) + _cs_zscore(-margin_std).fillna(0.0)
         daily_w = _sector_neutral_weights(
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
@@ -12882,7 +12892,9 @@ class CompetitivePressureAvoid(CrossSectionalStrategy):
         gp_margin = (gp / rev_safe).clip(0.0, 2.0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
         margin_declining = gp_margin < gp_margin.shift(self.lookback)
-        rev_growth = (rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)
+        rev_growth = (rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(
+            lower=1.0
+        )
         rev_decelerating = rev_growth < rev_growth.shift(self.accel_lag)
         under_threat = (margin_declining & rev_decelerating).fillna(False)
         safe_mem = membership & ~under_threat
@@ -13035,7 +13047,9 @@ class MarketShareProxy(CrossSectionalStrategy):
         mem_f = membership.reindex_like(rev_growth).fillna(False)
         sec_rel_rev = pd.DataFrame(0.0, index=rev_growth.index, columns=rev_growth.columns)
         for sector in self.sectors.dropna().unique():
-            tickers = [t for t in self.sectors[self.sectors == sector].index if t in rev_growth.columns]
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in rev_growth.columns
+            ]
             if not tickers:
                 continue
             sec_g = rev_growth[tickers].where(mem_f[tickers])
@@ -13177,8 +13191,12 @@ class GrowthReinvestmentQuality(CrossSectionalStrategy):
         be = _align_fund(self.book_equity, prices_panel)
         ta_safe = ta.where(ta > 0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
-        rev_growth = ((rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
-        be_growth = ((be - be.shift(self.lookback)) / be.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        rev_growth = (
+            (rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)
+        ).clip(-1.0, 5.0)
+        be_growth = (
+            (be - be.shift(self.lookback)) / be.shift(self.lookback).abs().clip(lower=1.0)
+        ).clip(-1.0, 5.0)
         composite = (
             _cs_zscore(gp_ta).fillna(0.0)
             + _cs_zscore(rev_growth).fillna(0.0)
@@ -13228,7 +13246,9 @@ class SectorRelativeMarginProxy(CrossSectionalStrategy):
         mem_f = membership.reindex_like(gp_margin).fillna(False)
         sec_rel = pd.DataFrame(0.0, index=gp_margin.index, columns=gp_margin.columns)
         for sector in self.sectors.dropna().unique():
-            tickers = [t for t in self.sectors[self.sectors == sector].index if t in gp_margin.columns]
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in gp_margin.columns
+            ]
             if not tickers:
                 continue
             sec_m = gp_margin[tickers].where(mem_f[tickers])
@@ -13615,7 +13635,11 @@ class SectorEWDivergence(CrossSectionalStrategy):
         # Reverse: long most negative sector-relative return (biggest laggards)
         score = (-sector_rel).where(ni_growing, other=np.nan)
         daily_w = _sector_neutral_weights(
-            score, membership & ni_growing, self.sectors, self.within_sector_quantile, ascending=False
+            score,
+            membership & ni_growing,
+            self.sectors,
+            self.within_sector_quantile,
+            ascending=False,
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
 
@@ -13664,7 +13688,9 @@ class MarketCapConcentrationAvoid(CrossSectionalStrategy):
         # Exclude top cap_exclude_pct within each sector (mega-caps)
         mega_cap = pd.DataFrame(False, index=prices_panel.index, columns=prices_panel.columns)
         for sector in self.sectors.dropna().unique():
-            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns
+            ]
             if not tickers:
                 continue
             sec_cap = mktcap[tickers].where(mem_f[tickers])
@@ -13715,7 +13741,9 @@ class InverseIndexWeightMomentum(CrossSectionalStrategy):
         # Inverse cap rank score within sector
         inv_cap = pd.DataFrame(0.0, index=prices_panel.index, columns=prices_panel.columns)
         for sector in self.sectors.dropna().unique():
-            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns
+            ]
             if not tickers:
                 continue
             sec_cap = mktcap[tickers].where(mem_f[tickers])
@@ -13776,19 +13804,31 @@ class SectorCorrelationBreak(CrossSectionalStrategy):
         mem_f = membership.reindex_like(prices_panel).fillna(False)
         sector_corr = pd.Series(0.0, index=prices_panel.index)
         for sector in self.sectors.dropna().unique():
-            tickers = [t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns]
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns
+            ]
             if len(tickers) < 2:
                 continue
             sec_ret = daily_rets[tickers].where(mem_f[tickers])
-            roll_corr = sec_ret.rolling(self.corr_window, min_periods=20).corr().groupby(level=0).mean().mean(axis=1)
-            sector_corr = sector_corr.add(roll_corr.reindex(prices_panel.index).fillna(0.0), fill_value=0.0)
+            roll_corr = (
+                sec_ret.rolling(self.corr_window, min_periods=20)
+                .corr()
+                .groupby(level=0)
+                .mean()
+                .mean(axis=1)
+            )
+            sector_corr = sector_corr.add(
+                roll_corr.reindex(prices_panel.index).fillna(0.0), fill_value=0.0
+            )
         # Normalize by n_sectors
         n_sectors = len(self.sectors.dropna().unique())
         mean_corr = (sector_corr / max(n_sectors, 1)).clip(0.0, 1.0)
         # Scale factor: reduce to high_corr_scale when corr > 75th pctile
         corr_thresh = mean_corr.rolling(252, min_periods=63).quantile(0.75)
         high_corr_regime = mean_corr.gt(corr_thresh.fillna(1.0))
-        scale = pd.Series(1.0, index=prices_panel.index).where(~high_corr_regime, self.high_corr_scale)
+        scale = pd.Series(1.0, index=prices_panel.index).where(
+            ~high_corr_regime, self.high_corr_scale
+        )
         scaled = base_w.mul(scale, axis=0)
         row_sum = scaled.sum(axis=1).replace(0, np.nan)
         rescaled = scaled.div(row_sum, axis=0).fillna(0.0)
@@ -13951,7 +13991,9 @@ class TransientOwnershipAvoid(CrossSectionalStrategy):
         ta_safe = ta.where(ta > 0)
         gp_ta = (gp / ta_safe).clip(0.0, 5.0)
         rev_safe = rev.where(rev.shift(self.lookback) > 0)
-        rev_growth = ((rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)).clip(-1.0, 5.0)
+        rev_growth = (
+            (rev - rev.shift(self.lookback)) / rev.shift(self.lookback).abs().clip(lower=1.0)
+        ).clip(-1.0, 5.0)
         rev_vol = rev_growth.rolling(self.vol_window, min_periods=self.vol_window // 4).std()
         # High revenue volatility: above cross-sectional median
         mem_f = membership.reindex_like(rev_vol).fillna(False)
@@ -14069,10 +14111,9 @@ class SmartAccumulationProxy(CrossSectionalStrategy):
         ni_improving = (ni_ta > ni_ta.shift(self.lookback)).fillna(False)
         gp_ta_improving = (gp_ta > gp_ta.shift(self.lookback)).fillna(False)
         accumulation_mem = membership & price_above_ma & ni_improving & gp_ta_improving
-        score = (
-            _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0)
-            + _cs_zscore(gp_ta - gp_ta.shift(self.lookback)).fillna(0.0)
-        )
+        score = _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0) + _cs_zscore(
+            gp_ta - gp_ta.shift(self.lookback)
+        ).fillna(0.0)
         daily_w = _sector_neutral_weights(
             score, accumulation_mem, self.sectors, self.within_sector_quantile, ascending=False
         )
@@ -14123,7 +14164,9 @@ class OwnerMixQualityPort(CrossSectionalStrategy):
         shares_lag = shares.shift(self.lookback)
         shares_growth = ((shares - shares_lag) / shares_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
         ocf_exceeds_ni = (ocf > ni).astype(float)
-        ocf_reliability = ocf_exceeds_ni.rolling(self.reliability_window, min_periods=self.reliability_window // 4).mean()
+        ocf_reliability = ocf_exceeds_ni.rolling(
+            self.reliability_window, min_periods=self.reliability_window // 4
+        ).mean()
         be_lag = be.shift(self.lookback)
         be_growth = ((be - be_lag) / be_lag.abs().clip(lower=1.0)).clip(-1.0, 5.0)
         composite = (
@@ -14187,10 +14230,16 @@ class EarningsQualityComposite(CrossSectionalStrategy):
         # Earnings + OCF momentum
         ni_ta = (ni / ta_safe).clip(-2.0, 5.0)
         ocf_ta = (ocf / ta_safe).clip(-2.0, 5.0)
-        earn_mom = _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0) + \
-                   _cs_zscore(ocf_ta - ocf_ta.shift(self.lookback)).fillna(0.0)
+        earn_mom = _cs_zscore(ni_ta - ni_ta.shift(self.lookback)).fillna(0.0) + _cs_zscore(
+            ocf_ta - ocf_ta.shift(self.lookback)
+        ).fillna(0.0)
         # OCF dominance fraction
-        ocf_dom = (ocf > ni).astype(float).rolling(self.persistence_window, min_periods=self.persistence_window // 4).mean()
+        ocf_dom = (
+            (ocf > ni)
+            .astype(float)
+            .rolling(self.persistence_window, min_periods=self.persistence_window // 4)
+            .mean()
+        )
         composite = _cs_zscore(-accruals).fillna(0.0) + earn_mom + _cs_zscore(ocf_dom).fillna(0.0)
         daily_w = _sector_neutral_weights(
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
@@ -14317,15 +14366,27 @@ class Set6FundamentalQualityBlend(CrossSectionalStrategy):
         debt_improve = -(ltd / ta_safe - (ltd / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
         ocf_improve = (ocf / ta_safe - (ocf / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
         be_improve = (be / ta_safe - (be / ta_safe).shift(self.lookback)).clip(-2.0, 2.0)
-        bs_score = _cs_zscore(debt_improve).fillna(0.0) + _cs_zscore(ocf_improve).fillna(0.0) + _cs_zscore(be_improve).fillna(0.0)
+        bs_score = (
+            _cs_zscore(debt_improve).fillna(0.0)
+            + _cs_zscore(ocf_improve).fillna(0.0)
+            + _cs_zscore(be_improve).fillna(0.0)
+        )
         # Altman Z proxy (like H434)
         ni_mean = (ni / ta_safe).rolling(self.lookback, min_periods=63).mean().clip(-2.0, 2.0)
-        z_proxy = 1.2 * ((ca - cl) / ta_safe).clip(-2.0, 2.0) + 1.4 * ni_mean + 3.3 * (gp / ta_safe).clip(0.0, 5.0) + 0.6 * (be / ltd_safe).clip(0.0, 20.0) + 1.0 * (rev / ta_safe).clip(0.0, 10.0)
+        z_proxy = (
+            1.2 * ((ca - cl) / ta_safe).clip(-2.0, 2.0)
+            + 1.4 * ni_mean
+            + 3.3 * (gp / ta_safe).clip(0.0, 5.0)
+            + 0.6 * (be / ltd_safe).clip(0.0, 20.0)
+            + 1.0 * (rev / ta_safe).clip(0.0, 10.0)
+        )
         # Shareholder alignment (like H441 simplified)
         no_dilution = (shares <= shares.shift(self.lookback)).fillna(False).astype(float)
         ocf_pos = (ocf > 0).fillna(False).astype(float)
         alignment_score = _cs_zscore(no_dilution + ocf_pos).fillna(0.0)
-        composite = _cs_zscore(bs_score).fillna(0.0) + _cs_zscore(z_proxy).fillna(0.0) + alignment_score
+        composite = (
+            _cs_zscore(bs_score).fillna(0.0) + _cs_zscore(z_proxy).fillna(0.0) + alignment_score
+        )
         daily_w = _sector_neutral_weights(
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
@@ -14940,7 +15001,11 @@ class LongShortOUReversal(CrossSectionalStrategy):
         residual = daily_rets.sub(beta.mul(spy, axis=0))
         resid_5d = residual.rolling(5, min_periods=3).sum()
         mu = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).mean()
-        sd = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).std().replace(0, np.nan)
+        sd = (
+            resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2)
+            .std()
+            .replace(0, np.nan)
+        )
         z_score = (resid_5d - mu) / sd
         # Long: z < -entry_z (oversold); short: z > +entry_z (overbought)
         long_signal = (-z_score).where(z_score < -self.entry_z)
@@ -14998,7 +15063,11 @@ class LongShortPCAOUReversal(CrossSectionalStrategy):
         residuals = pd.DataFrame(mat - reconstruction, index=daily_rets.index, columns=common)
         resid_5d = residuals.rolling(5, min_periods=3).sum()
         mu = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).mean()
-        sd = resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2).std().replace(0, np.nan)
+        sd = (
+            resid_5d.rolling(self.ou_window, min_periods=self.ou_window // 2)
+            .std()
+            .replace(0, np.nan)
+        )
         z_score = (resid_5d - mu) / sd
         mem_cs = membership.reindex(columns=prices_panel.columns)
         long_signal = (-z_score).where(z_score < -self.entry_z)
@@ -15211,7 +15280,9 @@ class LongShortCompositeReversal(CrossSectionalStrategy):
     ) -> pd.DataFrame:
         daily_rets = prices_panel.pct_change()
         ret_5d = prices_panel.pct_change(self.reversal_window)
-        max1_5d = daily_rets.rolling(self.reversal_window, min_periods=self.reversal_window // 2).max()
+        max1_5d = daily_rets.rolling(
+            self.reversal_window, min_periods=self.reversal_window // 2
+        ).max()
         # Long signal: prior losers + no extreme day (safe reversal)
         long_score = _cs_zscore(-ret_5d).fillna(0.0) + _cs_zscore(-max1_5d).fillna(0.0)
         # Short signal: prior winners + had extreme positive day (lottery overshoot)
@@ -15645,3 +15716,199 @@ class ReturnConsistencyMomentumCombo(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ===========================================================================
+# SET 7 — BATCH 5 (H497, H499, H500): VIX/Vol-Regime CS Signal Selectors
+# ===========================================================================
+
+
+class RegimeAdaptiveCSSignal(CrossSectionalStrategy):
+    """H497: VIX-regime-conditional CS signal selection.
+
+    VIX < vix_threshold (default 20): use 6m price momentum (top 20%).
+    VIX ≥ vix_threshold: use GP/TA quality (top 20%).
+    Sector-neutral, monthly rebalance. Tests momentum-calm / quality-stress hypothesis.
+    """
+
+    name = "regime_adaptive_cs_signal"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        vix_series: pd.Series,
+        vix_threshold: float = 20.0,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.vix_series = vix_series
+        self.vix_threshold = vix_threshold
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        tickers = prices_panel.columns.tolist()
+        idx = prices_panel.index
+
+        gp = self.gross_profit.reindex(columns=tickers, index=idx)
+        ta = self.total_assets.reindex(columns=tickers, index=idx)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+
+        vix = self.vix_series.reindex(idx).ffill().shift(1)
+        stressed = vix >= self.vix_threshold
+
+        selected = pd.DataFrame(
+            np.where(stressed.values[:, None], gp_ta.values, momentum.values),
+            index=idx,
+            columns=tickers,
+        )
+        daily_w = _sector_neutral_weights(
+            selected, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class VolAccelerationCSSwitch(CrossSectionalStrategy):
+    """H499: SPY vol acceleration-conditional CS signal selection.
+
+    SPY 21d realized vol > 63d realized vol × 1.2 (vol accelerating):
+        use GP/TA quality signal (top 20%, sector-neutral).
+    Otherwise (vol normal or decelerating):
+        use 6m price momentum (top 20%, sector-neutral).
+    Monthly rebalance. Applies H327's vol-acceleration concept to CS signal selection.
+    """
+
+    name = "vol_acceleration_cs_switch"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        spy_returns: pd.Series,
+        accel_ratio: float = 1.20,
+        vol_short: int = 21,
+        vol_long: int = 63,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.spy_returns = spy_returns
+        self.accel_ratio = accel_ratio
+        self.vol_short = vol_short
+        self.vol_long = vol_long
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        tickers = prices_panel.columns.tolist()
+        idx = prices_panel.index
+
+        gp = self.gross_profit.reindex(columns=tickers, index=idx)
+        ta = self.total_assets.reindex(columns=tickers, index=idx)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+
+        spy_r = self.spy_returns.reindex(idx).fillna(0.0)
+        vol_21 = spy_r.rolling(self.vol_short, min_periods=self.vol_short // 2).std()
+        vol_63 = spy_r.rolling(self.vol_long, min_periods=self.vol_long // 2).std()
+        accel = (vol_21 > vol_63 * self.accel_ratio).shift(1)
+
+        selected = pd.DataFrame(
+            np.where(accel.values[:, None], gp_ta.values, momentum.values),
+            index=idx,
+            columns=tickers,
+        )
+        daily_w = _sector_neutral_weights(
+            selected, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class AdaptiveFrequencyQualityPort(CrossSectionalStrategy):
+    """H500: GP/TA quality with VIX-adaptive rebalance frequency.
+
+    High VIX (≥ vix_threshold, default 25): rebalance monthly (21 days).
+    Low VIX (< vix_threshold): rebalance quarterly (63 days).
+    H292 established quarterly beats monthly for GP/TA (0.884 vs 0.852).
+    H500 tests whether high-vol regimes require faster signal refresh.
+    """
+
+    name = "adaptive_frequency_quality_port"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        vix_series: pd.Series,
+        vix_threshold: float = 25.0,
+        period_high_vix: int = 21,
+        period_low_vix: int = 63,
+        within_sector_quantile: float = 0.20,
+    ) -> None:
+        self.sectors = sectors
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.vix_series = vix_series
+        self.vix_threshold = vix_threshold
+        self.period_high_vix = period_high_vix
+        self.period_low_vix = period_low_vix
+        self.within_sector_quantile = within_sector_quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        tickers = prices_panel.columns.tolist()
+        idx = prices_panel.index
+
+        gp = self.gross_profit.reindex(columns=tickers, index=idx)
+        ta = self.total_assets.reindex(columns=tickers, index=idx)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+
+        daily_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+
+        vix = self.vix_series.reindex(idx).ffill().shift(1)
+        high_vix = vix >= self.vix_threshold
+
+        result = daily_w.copy()
+        last_w = None
+        days_since = 0
+        for i in range(len(idx)):
+            period = self.period_high_vix if bool(high_vix.iloc[i]) else self.period_low_vix
+            if last_w is None or days_since >= period:
+                last_w = daily_w.iloc[i].copy()
+                days_since = 0
+            result.iloc[i] = last_w
+            days_since += 1
+
+        return result

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H498",
+  "name": "core-diversifier-sleeve",
+  "strategy_class": "CoreDiversifierSleeve",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7038,
+  "ci_low": 0.3154,
+  "ci_high": 1.1007,
+  "cagr": 0.0392,
+  "max_drawdown": -0.1414,
+  "n_trades": 7563,
+  "h001_corr": 0.378,
+  "fold_sharpes": [
+    3.628,
+    2.241,
+    1.233,
+    0.237,
+    0.712,
+    0.967,
+    -0.384,
+    1.071,
+    1.275,
+    0.582,
+    0.599,
+    0.327
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal blend of program's 3 lowest H001-corr actively-traded strategies: H078 SeasonalRiskParity (corr +0.008), H086 LowVolTargetPortfolio (corr +0.413), H473 LongShortPCAReversal (corr +0.029). Seasonal + vol-control + market-neutral alpha.",
+  "canonical_params": {
+    "blend": 0.333,
+    "h078_vol_lookback": 60,
+    "h086_vol_target": 0.08,
+    "h473_n_components": 10
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

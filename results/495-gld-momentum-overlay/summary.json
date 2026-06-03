@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H495",
+  "name": "gld-momentum-overlay",
+  "strategy_class": "GLDMomentumOverlay",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.5301,
+  "ci_low": 0.1484,
+  "ci_high": 0.9256,
+  "cagr": 0.0554,
+  "max_drawdown": -0.6027,
+  "n_trades": 4964,
+  "h001_corr": 0.4803,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    1.212,
+    1.427,
+    1.233,
+    0.876,
+    -0.031,
+    1.121,
+    1.315,
+    1.762,
+    0.252,
+    0.644
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SPY/TLT/GLD inverse-vol parity base + GLD 6m momentum tilt. GLD trending up -> GLD weight \u00d7 1.2; down -> \u00d7 0.5, floor at 10% of portfolio. Renormalize. Tests whether GLD trend improves H076 3-asset parity.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "mom_window": 126,
+    "mom_up_mult": 1.2,
+    "mom_dn_mult": 0.5,
+    "gld_floor": 0.1
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

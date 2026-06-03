@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H517",
+  "name": "vol-tuned-h300",
+  "strategy_class": "VolTunedH300Port",
+  "family": "Set7 Cross-Program Synergy",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.5149,
+  "ci_low": 1.123,
+  "ci_high": 1.9169,
+  "cagr": 0.0569,
+  "max_drawdown": -0.0651,
+  "n_trades": 0,
+  "h001_corr": 0.6591,
+  "fold_sharpes": [
+    2.053,
+    1.744,
+    1.242,
+    1.426,
+    1.376,
+    1.413,
+    1.204,
+    2.072,
+    1.571,
+    2.479,
+    0.792,
+    1.418
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H300 MDR portfolio (17 non-zero-weight components) with H086-style 8% vol-scaling applied at portfolio level. Reconstructs H300 return stream from its stored MDR weights, then scales daily by min(1, 8%/realized_vol).",
+  "canonical_params": {
+    "vol_target": 0.08,
+    "vol_lookback": 21,
+    "h300_weights": {
+      "H016": 0.1099,
+      "H035": 0.0623,
+      "H043": 0.1007,
+      "H060": 0.0283,
+      "H065": 0.0701,
+      "H068": 0.0949,
+      "H076": 0.0804,
+      "H078": 0.0305,
+      "H082": 0.0084,
+      "H097": 0.0262,
+      "H157": 0.0526,
+      "H175": 0.0075,
+      "H189": 0.0086,
+      "H194": 0.2279,
+      "H268": 0.0097,
+      "H265": 0.0727,
+      "H287": 0.0088
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

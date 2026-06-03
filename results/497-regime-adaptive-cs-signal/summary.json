@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H497",
+  "name": "regime-adaptive-cs-signal",
+  "strategy_class": "RegimeAdaptiveCSSignal",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.9808,
+  "ci_low": 0.5722,
+  "ci_high": 1.3915,
+  "cagr": 0.1438,
+  "max_drawdown": -0.3844,
+  "n_trades": 19,
+  "h001_corr": -0.0087,
+  "fold_sharpes": [
+    0.442,
+    -0.317,
+    0.609,
+    1.927,
+    1.233,
+    0.219,
+    0.609,
+    2.118,
+    0.943,
+    1.844,
+    1.346,
+    0.919
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-conditional CS signal selection. VIX < 20 -> 6m price momentum (top 20%); VIX >= 20 -> GP/TA quality (top 20%). Sector-neutral, monthly. Quality mode uses fundamentals (EDGAR gap in folds 0-5). Tests momentum-in-calm / quality-in-stress hypothesis.",
+  "canonical_params": {
+    "vix_threshold": 20.0,
+    "mom_lookback": 126,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

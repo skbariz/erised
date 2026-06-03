@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H511",
+  "name": "vol-scaled-cs-star-combo",
+  "strategy_class": "VolScaledCSStarCombo",
+  "family": "Set7 Cross-Program Synergy",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.1367,
+  "ci_low": 0.7359,
+  "ci_high": 1.5566,
+  "cagr": 0.0992,
+  "max_drawdown": -0.1485,
+  "n_trades": 4,
+  "h001_corr": 0.0104,
+  "fold_sharpes": [
+    1.356,
+    0.684,
+    1.059,
+    1.69,
+    1.511,
+    0.117,
+    0.885,
+    1.885,
+    0.434,
+    1.857,
+    0.984,
+    1.232
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight H412+H415+H429+H447 CS star blend with portfolio-level vol-scaling (8% target). H086's vol-scaling applied to CS ensemble. Tests if vol-scaling mechanism is universal across AA and CS portfolios.",
+  "canonical_params": {
+    "blend": "equal_weight",
+    "vol_target": 0.08,
+    "vol_lookback": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

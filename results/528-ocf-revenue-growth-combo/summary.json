@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H528",
+  "name": "ocf-revenue-growth-combo",
+  "strategy_class": "OCFRevenueGrowthCombo",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7144,
+  "ci_low": 0.3231,
+  "ci_high": 1.1185,
+  "cagr": 0.0895,
+  "max_drawdown": -0.3703,
+  "n_trades": 1,
+  "h001_corr": -0.0218,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.09,
+    0.746,
+    1.876,
+    0.814,
+    1.363,
+    0.996,
+    1.151
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(OCF/Revenue level) + z(Revenue YoY growth). Cash margin + growth combo. H233 tested z(rev_growth)+z(GP/TA): 0.803. H528 replaces GP/TA with OCF/Revenue (post-working-capital cash margin). Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

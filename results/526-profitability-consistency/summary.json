@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H526",
+  "name": "profitability-consistency",
+  "strategy_class": "ProfitabilityConsistencyPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7576,
+  "ci_low": 0.3585,
+  "ci_high": 1.1653,
+  "cagr": 0.0887,
+  "max_drawdown": -0.3574,
+  "n_trades": 1,
+  "h001_corr": -0.0207,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.093,
+    0.669,
+    2.035,
+    0.78,
+    1.847,
+    1.164,
+    1.016
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Fraction of trailing 8 quarters (504d) where NI/BE > sector median NI/BE. ROE level persistence above sector benchmark = durable moat. Distinct from H225 earnings growth persistence. Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "lookback": 504,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

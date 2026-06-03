@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H529",
+  "name": "net-margin-asset-turnover-combo",
+  "strategy_class": "NetMarginAssetTurnoverCombo",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7145,
+  "ci_low": 0.3204,
+  "ci_high": 1.128,
+  "cagr": 0.0858,
+  "max_drawdown": -0.3831,
+  "n_trades": 1,
+  "h001_corr": -0.0197,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.337,
+    0.615,
+    2.131,
+    1.074,
+    1.546,
+    1.011,
+    0.995
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(NI/Revenue) + z(Revenue/TA). DuPont combo: NI/TA = margin x turnover. Ranking on BOTH z-scores rewards firms excelling on BOTH dimensions vs H173 ROA (the product). Success criteria: beats H173 (0.785). Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

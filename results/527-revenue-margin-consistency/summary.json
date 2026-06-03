@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H527",
+  "name": "revenue-margin-consistency",
+  "strategy_class": "RevenueMarginConsistencyPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.8254,
+  "ci_low": 0.4092,
+  "ci_high": 1.2419,
+  "cagr": 0.1001,
+  "max_drawdown": -0.3258,
+  "n_trades": 1,
+  "h001_corr": -0.0169,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.147,
+    2.435,
+    0.874,
+    1.826,
+    1.248,
+    1.194
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Fraction of trailing 8 quarters where: (1) quarterly revenue growth > 0 AND (2) GP/Revenue quarterly change > -1%. Joint persistence of growth AND margin stability. Novel joint condition not tested in H411-H415. Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "lookback": 504,
+    "quarterly_step": 63,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

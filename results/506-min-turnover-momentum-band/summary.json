@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H506",
+  "name": "min-turnover-momentum-band",
+  "strategy_class": "MinTurnoverMomentumBand",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.9321,
+  "ci_low": 0.5324,
+  "ci_high": 1.345,
+  "cagr": 0.1776,
+  "max_drawdown": -0.4922,
+  "n_trades": 1,
+  "h001_corr": -0.0017,
+  "fold_sharpes": [
+    1.306,
+    1.199,
+    0.915,
+    1.517,
+    1.186,
+    0.045,
+    0.709,
+    2.055,
+    0.941,
+    1.779,
+    1.026,
+    0.992
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "6m momentum with asymmetric buy-hold band. Buy only if above 60th pct (top 40%); sell only if below 35th pct (bottom 35%). Large 35-60 hysteresis zone prevents churning. Monthly rebalance.",
+  "canonical_params": {
+    "mom_lookback": 126,
+    "buy_quantile": 0.4,
+    "hold_quantile": 0.65,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

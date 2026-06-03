@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H504",
+  "name": "low-turnover-net-margin",
+  "strategy_class": "LowTurnoverNetMarginPort",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7088,
+  "ci_low": 0.3088,
+  "ci_high": 1.1112,
+  "cagr": 0.0861,
+  "max_drawdown": -0.3761,
+  "n_trades": 1,
+  "h001_corr": -0.0192,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.239,
+    0.497,
+    1.962,
+    0.876,
+    1.853,
+    0.987,
+    0.926
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NI/Revenue LEVEL with buy-hold band: enter top 20%, exit only below 25th percentile. Quarterly rebalance. Reduces churn for stable fundamental signal. Asymmetric exit (75th percentile hold zone).",
+  "canonical_params": {
+    "buy_quantile": 0.2,
+    "hold_quantile": 0.75,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

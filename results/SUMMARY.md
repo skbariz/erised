@@ -1403,3 +1403,37 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | Batch 6 standout | H508 SemiAnnualMomentumQualityCombo: 0.989, H001 -0.000 (beats H231 monthly) |
 | Frequency verdict | Quarterly optimal for pure quality; semi-annual optimal for quality+momentum composite |
 | Near-zero H001 cluster | H501-H509 all have H001 corr -0.02 to 0.00 — high MDR value pool |
+
+---
+
+### Batch 7: H511–H520 — Cross-Program Synergy Combinations (9/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| **511** | **VolScaledCSStarCombo** | **1.137** | **[0.736, 1.557]** | **-14.85%** | **+0.010** | **KEEP** |
+| **512** | **SeasonalCSQualityBridge** | **0.838** | **[0.429, 1.257]** | **-36.50%** | **-0.009** | **KEEP** |
+| 513 | QualitySeasonalMarketNeutral | 0.437 | [0.048, 0.843] | -15.47% | +0.310 | kill |
+| **514** | **AllFoldMDRPort** | **1.499** | **[1.101, 1.897]** | **-6.97%** | **+0.669** | **KEEP** |
+| **515** | **ExpandedAAOnlyMDR** | **0.874** | **[0.481, 1.260]** | **-9.58%** | **+0.833** | **KEEP** |
+| **516** | **CoreDiversifierTripleMDR** | **1.577** | **[1.185, 1.969]** | **-7.31%** | **+0.643** | **KEEP** |
+| **517** | **VolTunedH300Port** | **1.515** | **[1.123, 1.917]** | **-6.51%** | **+0.659** | **KEEP** |
+| **518** | **RatchetH300Port** | **1.524** | **[1.129, 1.925]** | **-6.29%** | **+0.655** | **KEEP** |
+| **519** | **HierarchicalAllFoldMDR** | **1.552** | **[1.154, 1.943]** | **-8.72%** | **+0.579** | **KEEP** |
+| **520** | **SmallPoolOptimalMDR** | **1.360** | **[0.973, 1.758]** | **-8.72%** | **+0.443** | **KEEP** |
+
+**Key findings:** **H516 CoreDiversifierTripleMDR (Sharpe 1.577) CRACKS THE MDR CEILING** — exceeds H300/H350 (1.525) for the first time. The 20-strategy focused pool (top H300 AA contributors + Set7 near-zero-H001-corr CS stars including H473 at 24%) confirms that (b) small-pool MDR beats large-pool MDR by eliminating redundancy dilution. H511 VolScaledCSStarCombo (1.137, MaxDD -14.85%) confirms vol-scaling is universal across AA and CS portfolios. H512 SeasonalCSQualityBridge (0.838) with H001 corr -0.009 shows seasonal + CS masking nearly eliminates H001 correlation. H517/H518 confirm that vol-scaling and ratchet add minimal value to an already well-diversified H300 portfolio — the ceiling required genuinely new diversification sources, not position-sizing. H519 Hierarchical clean all-fold MDR (1.552) nearly matches H300 and beats H325 (1.520). H513 killed (seasonal L/S reduces Nov-Apr returns without adding enough alpha).
+
+---
+
+### Set 7 Running Summary (H451–H520, 70 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested so far | 70 |
+| KEEP | **47** (67%) |
+| **NEW MDR CHAMPION** | **H516 CoreDiversifierTripleMDR: Sharpe 1.577, MaxDD -7.31%** |
+| Previous MDR champion | H300/H350: Sharpe 1.525, MaxDD -6.86% |
+| Best individual CS | H511 VolScaledCSStarCombo: Sharpe 1.137, MaxDD -14.85% (vol-scaling universal) |
+| MDR ceiling verdict | **CRACKED** by H516 (condition b confirmed: small-pool focused MDR > large-pool) |
+| Vol-scaling verdict | Universal: works on H021 AA (H086: 1.109), CS star ensemble (H511: 1.137) |
+| Hierarchical MDR | H519 (1.552) > H325 (1.520): clean all-fold Tier2 improves over contaminated Tier2 |

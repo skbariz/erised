@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H502",
+  "name": "annual-rebalance-net-margin",
+  "strategy_class": "AnnualRebalanceNetMarginPort",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.6828,
+  "ci_low": 0.2805,
+  "ci_high": 1.0953,
+  "cagr": 0.0817,
+  "max_drawdown": -0.4065,
+  "n_trades": 1,
+  "h001_corr": -0.0174,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.538,
+    1.978,
+    0.764,
+    1.665,
+    0.833,
+    0.974
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "NI/Revenue (net profit margin) LEVEL, sector-neutral top 20%, annual rebalance (252d). Tests annual cadence for new DuPont net margin signal. H451 monthly ~0.692; annual aligns with filing frequency.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 252
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

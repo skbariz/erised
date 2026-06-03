@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H524",
+  "name": "cash-cycle-efficiency",
+  "strategy_class": "CashCycleEfficiencyPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7332,
+  "ci_low": 0.3366,
+  "ci_high": 1.1464,
+  "cagr": 0.0874,
+  "max_drawdown": -0.3682,
+  "n_trades": 1,
+  "h001_corr": -0.0177,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.066,
+    0.744,
+    1.956,
+    0.617,
+    1.91,
+    0.868,
+    1.084
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "OCF/(CA-CL) = cash flow per unit of net working capital. Firms with CA<CL (negative NWC) excluded. Measures operating cycle cash conversion efficiency. Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

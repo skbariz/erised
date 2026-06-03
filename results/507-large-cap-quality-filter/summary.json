@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H507",
+  "name": "large-cap-quality-filter",
+  "strategy_class": "LargeCapQualityFilter",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.4707,
+  "ci_low": 0.0772,
+  "ci_high": 0.8761,
+  "cagr": 0.0555,
+  "max_drawdown": -0.4186,
+  "n_trades": 1,
+  "h001_corr": -0.0207,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.086,
+    1.262,
+    0.733,
+    1.152,
+    0.991,
+    0.594
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "GP/TA quality restricted to stocks above sector-median market cap (top 50% by market cap within sector). Large-cap stocks have better liquidity -> lower realized slippage than 1.5 bps assumed. Sector-neutral top 20%, quarterly rebalance.",
+  "canonical_params": {
+    "cap_include_pct": 0.5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

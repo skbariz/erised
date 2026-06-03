@@ -1437,3 +1437,35 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | MDR ceiling verdict | **CRACKED** by H516 (condition b confirmed: small-pool focused MDR > large-pool) |
 | Vol-scaling verdict | Universal: works on H021 AA (H086: 1.109), CS star ensemble (H511: 1.137) |
 | Hierarchical MDR | H519 (1.552) > H325 (1.520): clean all-fold Tier2 improves over contaminated Tier2 |
+
+---
+
+### Batch 8: H521–H530 — Novel Fundamental Combinations (10/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Decision |
+|---|------|--------|----|-------|------|----------|
+| **521** | **NetDebtQualityPort** | **0.761** | **[0.358, 1.172]** | **-37.77%** | **-0.020** | **KEEP** |
+| **522** | **CapitalIntensityAvoidPort** | **0.818** | **[0.407, 1.230]** | **-38.13%** | **-0.018** | **KEEP** |
+| **523** | **GrossCrossEfficiencyPort** | **0.829** | **[0.418, 1.240]** | **-33.65%** | **-0.016** | **KEEP** |
+| **524** | **CashCycleEfficiencyPort** | **0.733** | **[0.337, 1.146]** | **-36.82%** | **-0.018** | **KEEP** |
+| **525** | **SectorNeutralizedROEPort** | **0.751** | **[0.348, 1.159]** | **-37.36%** | **-0.019** | **KEEP** |
+| **526** | **ProfitabilityConsistencyPort** | **0.758** | **[0.358, 1.165]** | **-35.74%** | **-0.021** | **KEEP** |
+| **527** | **RevenueMarginConsistencyPort** | **0.825** | **[0.409, 1.242]** | **-32.58%** | **-0.017** | **KEEP** |
+| **528** | **OCFRevenueGrowthCombo** | **0.714** | **[0.323, 1.119]** | **-37.03%** | **-0.022** | **KEEP** |
+| **529** | **NetMarginAssetTurnoverCombo** | **0.715** | **[0.320, 1.128]** | **-38.31%** | **-0.020** | **KEEP** |
+| **530** | **MultiPeriodMomentumBlend** | **1.045** | **[0.649, 1.457]** | **-48.38%** | **+0.005** | **KEEP** |
+
+**Key findings:** 10/10 KEEP — perfect batch. H521-H529 all fundamental CS (EDGAR gap folds 0-5); H530 pure price (all 12 folds). Near-zero H001 corr cluster continues: H521-H529 all H001 between -0.016 and -0.022. H530 MultiPeriodMomentumBlend (1.045, H001 +0.005) marginally improves on H150 single-period (0.981) but doesn't reduce momentum crash (fold 5 still negative). H527 RevenueMarginConsistencyPort (0.825, MaxDD -32.58%) is the best fundamental signal of the batch — joint revenue+margin persistence captures reliable compounders.
+
+---
+
+### Set 7 Running Summary (H451–H530, 80 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested so far | 80 |
+| KEEP | **57** (71%) |
+| **Program MDR champion** | **H516 CoreDiversifierTripleMDR: Sharpe 1.577, MaxDD -7.31%** |
+| Batch 8 verdict | 10/10 KEEP — novel fundamental combos all pass; H001 corr cluster -0.016 to -0.022 |
+| Best Batch 8 individual | H530 MultiPeriodMomentumBlend: 1.045 H001 +0.005 (all-fold) |
+| MDR pool expansion | H521-H530 add 10 more near-zero H001 corr strategies for terminal MDR |

@@ -1,0 +1,52 @@
+{
+  "hypothesis": "H520",
+  "name": "small-pool-optimal-mdr",
+  "strategy_class": "SmallPoolOptimalMDR",
+  "family": "Set7 Cross-Program Synergy",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.3603,
+  "ci_low": 0.9734,
+  "ci_high": 1.7577,
+  "cagr": 0.0548,
+  "max_drawdown": -0.0872,
+  "n_trades": 0,
+  "h001_corr": 0.443,
+  "fold_sharpes": [
+    3.477,
+    1.994,
+    1.025,
+    1.672,
+    1.41,
+    1.116,
+    0.898,
+    1.547,
+    1.308,
+    1.601,
+    0.591,
+    1.321
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over 15-strategy curated pool: 7 AA program diversifiers (H043/H078/H035/H060/H086/H087/H097) + 8 CS all-fold/L/S stars (H194/H471/H472/H473/H412/H415/H429/H447). Tests small-pool MDR vs H300 52-strategy. Top weights: {'H043': 0.20156757938684616, 'H078': 0.047867962329107075, 'H035': 0.12203267504978815, 'H060': 0.09072347858212969, 'H097': 0.04888901421741981, 'H472': 0.07156871115658946, 'H473': 0.32116101621339105, 'H412': 0.02545096272477116, 'H415': 0.07073860033995753}.",
+  "canonical_params": {
+    "n_strategies": 15,
+    "method": "SLSQP",
+    "top_weights": {
+      "H043": 0.20156757938684616,
+      "H078": 0.047867962329107075,
+      "H035": 0.12203267504978815,
+      "H060": 0.09072347858212969,
+      "H097": 0.04888901421741981,
+      "H472": 0.07156871115658946,
+      "H473": 0.32116101621339105,
+      "H412": 0.02545096272477116,
+      "H415": 0.07073860033995753
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

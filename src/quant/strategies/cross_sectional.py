@@ -15912,3 +15912,412 @@ class AdaptiveFrequencyQualityPort(CrossSectionalStrategy):
             days_since += 1
 
         return result
+
+
+# ===========================================================================
+# SET 7 — BATCH 6 (H501–H510): Execution-Aware Cost Minimization
+# ===========================================================================
+
+
+class AnnualRebalanceQualityPort(CrossSectionalStrategy):
+    """H501: GP/TA quality, sector-neutral top 20%, annual rebalance (252 days).
+
+    Identical signal to H227 (monthly) and H292 (quarterly). Tests whether
+    annual rebalance further improves Sharpe by eliminating residual turnover costs.
+    GP/TA is an annual filing signal — annual rebalance aligns cadence with information.
+    """
+
+    name = "annual_rebalance_quality_port"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 252,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        daily_w = _sector_neutral_weights(
+            gp_ta, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class AnnualRebalanceNetMarginPort(CrossSectionalStrategy):
+    """H502: NI/Revenue (net profit margin) LEVEL, sector-neutral top 20%, annual rebalance.
+
+    NI/Revenue level captures persistent full-cost-stack efficiency (including SGA,
+    interest, taxes). Annual rebalance tests whether annual filing cadence optimal.
+    Companion to H451 (monthly) to test frequency effect on net margin signal.
+    """
+
+    name = "annual_rebalance_net_margin_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 252,
+    ) -> None:
+        self.net_income = net_income
+        self.revenue = revenue
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        ni_margin = (ni / rev_safe).clip(-2.0, 5.0)
+        daily_w = _sector_neutral_weights(
+            ni_margin, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SemiAnnualAssetTurnoverPort(CrossSectionalStrategy):
+    """H503: Revenue/TA (asset turnover) LEVEL, sector-neutral top 20%, semi-annual rebalance (126 days).
+
+    Revenue/TA captures structural business model efficiency. Semi-annual cadence
+    sits between quarterly (H452) and annual — tests optimal frequency for this signal.
+    """
+
+    name = "semi_annual_asset_turnover_port"
+
+    def __init__(
+        self,
+        revenue: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 126,
+    ) -> None:
+        self.revenue = revenue
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        rev = _align_fund(self.revenue, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        asset_turn = (rev / ta_safe).clip(0.0, 10.0)
+        daily_w = _sector_neutral_weights(
+            asset_turn, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class LowTurnoverNetMarginPort(CrossSectionalStrategy):
+    """H504: NI/Revenue LEVEL with buy-hold band (enter top 20%, exit below 25th percentile).
+
+    Quarterly rebalance with asymmetric entry/exit thresholds to reduce turnover.
+    Buy: top 20% NI/Revenue (sector-neutral). Hold: until ranked below 25th percentile.
+    Tests whether reducing exit sensitivity improves net margin signal net performance.
+    """
+
+    name = "low_turnover_net_margin_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        revenue: pd.DataFrame,
+        sectors: pd.Series,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.75,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.revenue = revenue
+        self.sectors = sectors
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        rev = _align_fund(self.revenue, prices_panel)
+        rev_safe = rev.where(rev > 0)
+        ni_margin = (ni / rev_safe).clip(-2.0, 5.0)
+        strict_w = _sector_neutral_weights(
+            ni_margin, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            ni_margin, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+class PatienceFilteredMomentum(CrossSectionalStrategy):
+    """H505: 6m momentum with patience entry filter (3+ consecutive positive weekly returns).
+
+    Entry: stock must be in top 20% by 6m momentum AND have 3+ consecutive positive
+    weekly (5-day) returns before a position is initiated. Reduces whipsaw by
+    requiring confirmation before entry. Exit when momentum rank falls below 30th pct.
+    Monthly rebalance.
+    """
+
+    name = "patience_filtered_momentum"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        patience_weeks: int = 3,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.70,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.patience_weeks = patience_weeks
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        # Patience filter: patience_weeks consecutive positive weekly returns
+        weekly_ret = prices_panel.pct_change(5)
+        patience = weekly_ret > 0
+        for lag in range(1, self.patience_weeks):
+            patience = patience & (weekly_ret.shift(5 * lag) > 0)
+
+        # Entry: top 20% by momentum AND patience met
+        strict_raw = _sector_neutral_weights(
+            momentum, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        strict_w = strict_raw * patience.reindex_like(strict_raw).fillna(False).astype(float)
+        # Re-normalize strict_w: equal-weight among qualifying stocks per rebalance
+        # (keep the weight values from strict_raw for qualifying stocks, zero out others)
+        extended_w = _sector_neutral_weights(
+            momentum, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+class MinTurnoverMomentumBand(CrossSectionalStrategy):
+    """H506: 6m momentum with asymmetric buy-hold band to minimize turnover.
+
+    Buy only if ranked above 60th percentile (top 40% by momentum).
+    Sell only if ranked below 35th percentile (bottom 35%).
+    Large hysteresis band (35th to 60th) prevents churning on small rank fluctuations.
+    Monthly rebalance. Tests H293's finding that holding momentum longer preserves alpha.
+    """
+
+    name = "min_turnover_momentum_band"
+
+    def __init__(
+        self,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        buy_quantile: float = 0.40,
+        hold_quantile: float = 0.65,
+        rebalance_period: int = 21,
+    ) -> None:
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        strict_w = _sector_neutral_weights(
+            momentum, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            momentum, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)
+
+
+class LargeCapQualityFilter(CrossSectionalStrategy):
+    """H507: GP/TA quality restricted to stocks above sector-median market cap.
+
+    Market cap = price × shares_outstanding (point-in-time, 63d lag).
+    Filter to top 50% by market cap within each sector before applying quality ranking.
+    Large-cap stocks have better liquidity → lower realized slippage than 1.5 bps assumed.
+    Sector-neutral top 20% within large-cap filtered universe. Quarterly rebalance.
+    """
+
+    name = "large_cap_quality_filter"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        shares_outstanding: pd.DataFrame,
+        sectors: pd.Series,
+        cap_include_pct: float = 0.50,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.shares_outstanding = shares_outstanding
+        self.sectors = sectors
+        self.cap_include_pct = cap_include_pct
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        shares = _align_fund(self.shares_outstanding, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        mktcap = (prices_panel * shares.clip(lower=0.0)).replace(0, np.nan)
+        mem_f = membership.reindex_like(mktcap).fillna(False)
+
+        # Identify large-cap stocks (top cap_include_pct by market cap within sector)
+        large_cap = pd.DataFrame(False, index=prices_panel.index, columns=prices_panel.columns)
+        for sector in self.sectors.dropna().unique():
+            tickers = [
+                t for t in self.sectors[self.sectors == sector].index if t in prices_panel.columns
+            ]
+            if not tickers:
+                continue
+            sec_cap = mktcap[tickers].where(mem_f[tickers])
+            n_mem = mem_f[tickers].sum(axis=1)
+            # Threshold: rank > (1 - cap_include_pct) × n_members
+            thresh = (n_mem * (1.0 - self.cap_include_pct)).clip(lower=0)
+            rank = sec_cap.rank(axis=1, ascending=True, na_option="keep")
+            large_cap[tickers] = rank.gt(thresh, axis=0)
+
+        large_cap_mem = membership & large_cap
+        daily_w = _sector_neutral_weights(
+            gp_ta, large_cap_mem, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class SemiAnnualMomentumQualityCombo(CrossSectionalStrategy):
+    """H508: z(GP/TA) + z(6m momentum), sector-neutral top 20%, semi-annual rebalance (126 days).
+
+    Same composite signal as H231 QualityMomentum (monthly: 0.870) at semi-annual cadence.
+    H292 showed quarterly beats monthly for GP/TA alone. H508 tests whether the quality-momentum
+    composite (with faster-decaying momentum component) also benefits from lower turnover.
+    """
+
+    name = "semi_annual_momentum_quality_combo"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        mom_lookback: int = 126,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 126,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.mom_lookback = mom_lookback
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gp_ta = (gp / ta_safe).clip(0.0, 5.0)
+        momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
+        composite = _cs_zscore(gp_ta).fillna(0.0) + _cs_zscore(momentum).fillna(0.0)
+        daily_w = _sector_neutral_weights(
+            composite, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+class LowTurnoverROEPort(CrossSectionalStrategy):
+    """H509: NI/BE (ROE) LEVEL with buy-hold band (enter top 20%, exit below 25th percentile).
+
+    Quarterly rebalance. ROE level captures sustained equity capital efficiency.
+    Asymmetric entry/exit: buy top 20%, hold until below 25th percentile.
+    Negative book equity stocks excluded (assigned NaN signal → bottom rank).
+    """
+
+    name = "low_turnover_roe_port"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        book_equity: pd.DataFrame,
+        sectors: pd.Series,
+        buy_quantile: float = 0.20,
+        hold_quantile: float = 0.75,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.book_equity = book_equity
+        self.sectors = sectors
+        self.buy_quantile = buy_quantile
+        self.hold_quantile = hold_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        ni = _align_fund(self.net_income, prices_panel)
+        be = _align_fund(self.book_equity, prices_panel)
+        # Exclude negative book equity (leveraged distress)
+        be_positive = be.where(be > 0)
+        roe = (ni / be_positive).clip(-1.0, 5.0)
+        strict_w = _sector_neutral_weights(
+            roe, membership, self.sectors, self.buy_quantile, ascending=False
+        )
+        extended_w = _sector_neutral_weights(
+            roe, membership, self.sectors, self.hold_quantile, ascending=False
+        )
+        return _buy_hold_band(strict_w, extended_w, membership, self.rebalance_period)

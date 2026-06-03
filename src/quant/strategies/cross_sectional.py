@@ -16594,7 +16594,7 @@ class ProfitabilityConsistencyPort(CrossSectionalStrategy):
             if not cols:
                 continue
             med = roe[cols].median(axis=1)
-            sector_med_roe[cols] = med.values[:, None]
+            sector_med_roe[cols] = np.tile(med.values[:, None], (1, len(cols)))
         # Fraction of days in lookback where ROE > sector median
         above_med = (roe > sector_med_roe).astype(float)
         consistency = above_med.rolling(self.lookback, min_periods=self.lookback // 2).mean()

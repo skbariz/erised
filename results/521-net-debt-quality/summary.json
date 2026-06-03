@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H521",
+  "name": "net-debt-quality",
+  "strategy_class": "NetDebtQualityPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.7614,
+  "ci_low": 0.3583,
+  "ci_high": 1.1723,
+  "cagr": 0.0944,
+  "max_drawdown": -0.3777,
+  "n_trades": 1,
+  "h001_corr": -0.0203,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    -0.387,
+    0.906,
+    2.182,
+    0.827,
+    1.813,
+    0.979,
+    1.052
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Net leverage = (LTD-CA)/TA. Long lowest (most net cash, most negative). Net debt is the true economic leverage after offsetting liquid assets. Sector-neutral top 20%, ascending, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63,
+    "ascending": true
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

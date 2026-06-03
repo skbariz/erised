@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H522",
+  "name": "capital-intensity-avoid",
+  "strategy_class": "CapitalIntensityAvoidPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.8182,
+  "ci_low": 0.4069,
+  "ci_high": 1.2297,
+  "cagr": 0.1017,
+  "max_drawdown": -0.3813,
+  "n_trades": 1,
+  "h001_corr": -0.0176,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.565,
+    0.729,
+    2.366,
+    0.796,
+    1.702,
+    1.097,
+    1.092
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(TA-CA)/Revenue = fixed asset intensity. Long lowest (asset-light). Input-side complement to H452 GP/(TA-CA). Sector-neutral top 20%, ascending, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H523",
+  "name": "gross-cross-efficiency",
+  "strategy_class": "GrossCrossEfficiencyPort",
+  "family": "Set7 Novel Fundamentals",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.8289,
+  "ci_low": 0.4179,
+  "ci_high": 1.2395,
+  "cagr": 0.1025,
+  "max_drawdown": -0.3365,
+  "n_trades": 1,
+  "h001_corr": -0.0158,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.349,
+    0.541,
+    2.198,
+    1.045,
+    1.895,
+    1.218,
+    1.16
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "(GP/TA) x (Revenue/TA) = GP*Revenue/TA^2. Rewards simultaneous gross profitability AND asset efficiency. GP/TA (0.879) and Revenue/TA tested separately; product selects double-quality firms. Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

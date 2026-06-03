@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H510",
+  "name": "cross-program-hybrid-low-turnover",
+  "strategy_class": "CrossProgramHybridLowTurnover",
+  "family": "Set7 Execution-Aware",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.0549,
+  "ci_low": 0.6572,
+  "ci_high": 1.4613,
+  "cagr": 0.0865,
+  "max_drawdown": -0.1806,
+  "n_trades": 5024,
+  "h001_corr": 0.4746,
+  "fold_sharpes": [
+    1.32,
+    0.614,
+    1.747,
+    1.334,
+    1.123,
+    0.723,
+    0.178,
+    1.66,
+    1.861,
+    1.328,
+    0.999,
+    0.443
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "80% H021 (RiskParity, daily rebalance) + 20% H415 (StableMarginMomentum, quarterly 63d rebalance). Explicit frequency-by-asset-class split: ETFs daily, stocks quarterly. H490 tested 50/50 daily; H510 tests 80/20 with quarterly CS.",
+  "canonical_params": {
+    "blend_aa": 0.8,
+    "blend_cs": 0.2,
+    "h021_vol_lookback": 60,
+    "h415_rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

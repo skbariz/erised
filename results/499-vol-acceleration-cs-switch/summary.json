@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H499",
+  "name": "vol-acceleration-cs-switch",
+  "strategy_class": "VolAccelerationCSSwitch",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 1.0154,
+  "ci_low": 0.6157,
+  "ci_high": 1.4303,
+  "cagr": 0.1883,
+  "max_drawdown": -0.4719,
+  "n_trades": 23,
+  "h001_corr": 0.0036,
+  "fold_sharpes": [
+    1.426,
+    1.011,
+    1.148,
+    1.832,
+    1.331,
+    -0.077,
+    0.718,
+    2.177,
+    0.899,
+    1.696,
+    1.069,
+    1.038
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Vol-acceleration CS signal switch. SPY 21d realized vol > 63d vol \u00d7 1.2 -> GP/TA quality (defensive); otherwise -> 6m price momentum. Sector-neutral, monthly. H327 applied vol-acceleration to AA exposure; H499 applies it to CS signal selection.",
+  "canonical_params": {
+    "accel_ratio": 1.2,
+    "vol_short": 21,
+    "vol_long": 63,
+    "mom_lookback": 126,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

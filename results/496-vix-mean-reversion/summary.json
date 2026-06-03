@@ -1,0 +1,45 @@
+{
+  "hypothesis": "H496",
+  "name": "vix-mean-reversion",
+  "strategy_class": "VIXMeanReversionPort",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.3502,
+  "ci_low": -0.0394,
+  "ci_high": 0.7441,
+  "cagr": 0.036,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5585,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.207,
+    0.844,
+    0.666,
+    0.845,
+    -0.138,
+    1.084,
+    1.875,
+    0.674,
+    0.71,
+    0.089
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "Contrarian VIX overlay on H021. VIX/252d_MA ratio \u2265 1.5 -> SPY \u00d7 1.2 (mean reversion buy); < 0.7 -> SPY \u00d7 1.0; interpolated between. Opposite of H066/H492 which penalize high VIX. Tests if VIX spike = buying opportunity.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "vix_ma_window": 252,
+    "low_thresh": 0.7,
+    "high_thresh": 1.5,
+    "scale_lo": 1.0,
+    "scale_hi": 1.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

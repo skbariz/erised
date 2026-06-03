@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H494",
+  "name": "multiplex-macro-composite",
+  "strategy_class": "MultiplexMacroComposite",
+  "family": "Set7 Continuous Macro AA",
+  "run_date": "2026-06-03",
+  "oos_sharpe": 0.3323,
+  "ci_low": -0.0473,
+  "ci_high": 0.7254,
+  "cagr": 0.0336,
+  "max_drawdown": -0.6027,
+  "n_trades": 5025,
+  "h001_corr": 0.5393,
+  "fold_sharpes": [
+    -0.551,
+    -0.443,
+    0.18,
+    0.77,
+    0.7,
+    0.803,
+    -0.175,
+    1.182,
+    1.813,
+    0.693,
+    0.702,
+    -0.01
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "H021 + 3-signal continuous macro composite. Average of VIX pct scaler + yield curve z-score scaler + credit spread z-score scaler -> SPY weight in [0.6, 1.4]. All signals continuous; credit falls back to 1.0 before HYG/LQD inception.",
+  "canonical_params": {
+    "vol_lookback": 60,
+    "signal_window": 252,
+    "scale_lo": 0.6,
+    "scale_hi": 1.4
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

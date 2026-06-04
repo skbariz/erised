@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H531",
+  "name": "sector-delta-quality",
+  "strategy_class": "SectorDeltaQualityPort",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-04",
+  "oos_sharpe": 0.8838,
+  "ci_low": 0.4717,
+  "ci_high": 1.2957,
+  "cagr": 0.1099,
+  "max_drawdown": -0.3414,
+  "n_trades": 1,
+  "h001_corr": -0.0169,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.658,
+    0.751,
+    2.06,
+    1.024,
+    2.041,
+    1.218,
+    1.18
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "GP/TA - sector_median(GP/TA). Long stocks with largest positive deviation from sector median quality. H227 (0.879) ranks within sector; H531 uses absolute distance. Sector-neutral top 20%, quarterly.",
+  "canonical_params": {
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

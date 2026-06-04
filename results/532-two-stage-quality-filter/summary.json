@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H532",
+  "name": "two-stage-quality-filter",
+  "strategy_class": "TwoStageQualityFilter",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-04",
+  "oos_sharpe": 0.7076,
+  "ci_low": 0.3128,
+  "ci_high": 1.125,
+  "cagr": 0.0895,
+  "max_drawdown": -0.391,
+  "n_trades": 1,
+  "h001_corr": -0.0057,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.278,
+    0.254,
+    2.043,
+    1.47,
+    1.584,
+    1.198,
+    0.815
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Two-stage: filter top 40% GP/TA (sector-neutral), then rank top 20% NI/Revenue within filtered set. Sequential double-quality filter. H265 used accruals gate; H532 uses NI/Revenue as second dimension. Quarterly.",
+  "canonical_params": {
+    "stage1_quantile": 0.4,
+    "stage2_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

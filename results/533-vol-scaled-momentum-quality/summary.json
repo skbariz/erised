@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H533",
+  "name": "vol-scaled-momentum-quality",
+  "strategy_class": "VolScaledMomentumQuality",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-04",
+  "oos_sharpe": 0.9421,
+  "ci_low": 0.5427,
+  "ci_high": 1.3495,
+  "cagr": 0.1591,
+  "max_drawdown": -0.4639,
+  "n_trades": 1,
+  "h001_corr": 0.0021,
+  "fold_sharpes": [
+    0.936,
+    0.772,
+    0.941,
+    1.729,
+    1.381,
+    -0.128,
+    0.79,
+    2.126,
+    1.149,
+    1.685,
+    1.141,
+    1.111
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(GP/TA)+z(6m momentum) composite with per-stock vol-targeting: weight*min(1,15%/stock_252d_vol), renormalized. H157 applied portfolio-level vol; H533 applies stock-level. Overweights low-vol quality names. Monthly.",
+  "canonical_params": {
+    "vol_target": 0.15,
+    "vol_window": 252,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

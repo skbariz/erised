@@ -1,5 +1,5 @@
 """H492: VIXPercentileScalerPort -- H021 with linear SPY scaling from VIX 252d percentile rank.
-VIX at min pct → SPY × 1.4 (equity tilt); VIX at max pct → SPY × 0.6 (defensive). Continuous.
+VIX at min pct -> SPY × 1.4 (equity tilt); VIX at max pct -> SPY × 0.6 (defensive). Continuous.
 Run: uv run python scripts/run_h492.py
 """
 from __future__ import annotations
@@ -16,7 +16,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SEP = "=" * 64
 
 def main():
-    print(f"H492: VIXPercentileScalerPort (VIX 252d pct rank → SPY scale [0.6, 1.4])\n{SEP}")
+    print(f"H492: VIXPercentileScalerPort (VIX 252d pct rank -> SPY scale [0.6, 1.4])\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     import pandas as pd
@@ -41,7 +41,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="H021 + VIX percentile scaler. VIX 252d trailing percentile rank → linear SPY weight in [0.6, 1.4]. Low VIX pct → equity boost; high pct → defensive. Continuous analog of H066 binary VIX>35 spike override.",
+        notes="H021 + VIX percentile scaler. VIX 252d trailing percentile rank -> linear SPY weight in [0.6, 1.4]. Low VIX pct -> equity boost; high pct -> defensive. Continuous analog of H066 binary VIX>35 spike override.",
         canonical_params={"vol_lookback": 60, "pct_window": 252, "scale_lo": 0.60, "scale_hi": 1.40},
     )
 

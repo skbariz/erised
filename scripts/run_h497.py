@@ -20,7 +20,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SEP = "=" * 64
 
 def main():
-    print(f"H497: RegimeAdaptiveCSSignal (VIX<20→momentum; VIX>=20→quality, monthly)\n{SEP}")
+    print(f"H497: RegimeAdaptiveCSSignal (VIX<20->momentum; VIX>=20->quality, monthly)\n{SEP}")
     tickers = get_all_historical_tickers()
     panel = load_stocks_panel(tickers)
     membership = load_sp500_members(); common = panel.index.intersection(membership.index)
@@ -52,7 +52,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="VIX-conditional CS signal selection. VIX < 20 → 6m price momentum (top 20%); VIX >= 20 → GP/TA quality (top 20%). Sector-neutral, monthly. Quality mode uses fundamentals (EDGAR gap in folds 0-5). Tests momentum-in-calm / quality-in-stress hypothesis.",
+        notes="VIX-conditional CS signal selection. VIX < 20 -> 6m price momentum (top 20%); VIX >= 20 -> GP/TA quality (top 20%). Sector-neutral, monthly. Quality mode uses fundamentals (EDGAR gap in folds 0-5). Tests momentum-in-calm / quality-in-stress hypothesis.",
         canonical_params={"vix_threshold": 20.0, "mom_lookback": 126, "within_sector_quantile": 0.20, "rebalance_period": 21},
     )
 

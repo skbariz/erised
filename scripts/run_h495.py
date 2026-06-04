@@ -1,5 +1,5 @@
 """H495: GLDMomentumOverlay -- SPY/TLT/GLD 3-asset parity with GLD 6m momentum tilt.
-GLD up → GLD weight × 1.2; GLD down → GLD weight × 0.5, floor at 10%. Renormalize.
+GLD up -> GLD weight × 1.2; GLD down -> GLD weight × 0.5, floor at 10%. Renormalize.
 Run: uv run python scripts/run_h495.py
 """
 from __future__ import annotations
@@ -39,7 +39,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="SPY/TLT/GLD inverse-vol parity base + GLD 6m momentum tilt. GLD trending up → GLD weight × 1.2; down → × 0.5, floor at 10% of portfolio. Renormalize. Tests whether GLD trend improves H076 3-asset parity.",
+        notes="SPY/TLT/GLD inverse-vol parity base + GLD 6m momentum tilt. GLD trending up -> GLD weight × 1.2; down -> × 0.5, floor at 10% of portfolio. Renormalize. Tests whether GLD trend improves H076 3-asset parity.",
         canonical_params={"vol_lookback": 60, "mom_window": 126, "mom_up_mult": 1.2, "mom_dn_mult": 0.5, "gld_floor": 0.10},
     )
 

@@ -1,5 +1,5 @@
 """H496: VIXMeanReversionPort -- contrarian H021 overlay, buy when VIX > 1.5× 252d average.
-VIX/VIX_252d_MA ratio ≥ 1.5 → SPY × 1.2 (buy the fear); ratio < 0.7 → SPY × 1.0 (normal).
+VIX/VIX_252d_MA ratio ≥ 1.5 -> SPY × 1.2 (buy the fear); ratio < 0.7 -> SPY × 1.0 (normal).
 Run: uv run python scripts/run_h496.py
 """
 from __future__ import annotations
@@ -41,7 +41,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="Contrarian VIX overlay on H021. VIX/252d_MA ratio ≥ 1.5 → SPY × 1.2 (mean reversion buy); < 0.7 → SPY × 1.0; interpolated between. Opposite of H066/H492 which penalize high VIX. Tests if VIX spike = buying opportunity.",
+        notes="Contrarian VIX overlay on H021. VIX/252d_MA ratio ≥ 1.5 -> SPY × 1.2 (mean reversion buy); < 0.7 -> SPY × 1.0; interpolated between. Opposite of H066/H492 which penalize high VIX. Tests if VIX spike = buying opportunity.",
         canonical_params={"vol_lookback": 60, "vix_ma_window": 252, "low_thresh": 0.70, "high_thresh": 1.50, "scale_lo": 1.00, "scale_hi": 1.20},
     )
 

@@ -1,5 +1,5 @@
 """H491: ContinuousYieldCurveScaler -- H021 with linear SPY scaling from TLT-SHY spread z-score.
-252d TLT-SHY return spread z-scored → SPY scale in [0.6, 1.4]. Continuous vs H311's binary.
+252d TLT-SHY return spread z-scored -> SPY scale in [0.6, 1.4]. Continuous vs H311's binary.
 Run: uv run python scripts/run_h491.py
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H491: ContinuousYieldCurveScaler (TLT-SHY 252d spread z-score → SPY scale [0.6, 1.4])\n{SEP}")
+    print(f"H491: ContinuousYieldCurveScaler (TLT-SHY 252d spread z-score -> SPY scale [0.6, 1.4])\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     shy = load_research("SHY")[["adj_close"]].rename(columns={"adj_close": "shy_close"})
@@ -39,7 +39,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="H021 + continuous yield curve scaler. 252d TLT-SHY return spread z-scored over rolling 252d window → linear SPY weight scale in [0.6, 1.4]. Steep curve → equity tilt; flat/inverted → defensive. Continuous analog of H311 binary signal.",
+        notes="H021 + continuous yield curve scaler. 252d TLT-SHY return spread z-scored over rolling 252d window -> linear SPY weight scale in [0.6, 1.4]. Steep curve -> equity tilt; flat/inverted -> defensive. Continuous analog of H311 binary signal.",
         canonical_params={"vol_lookback": 60, "spread_window": 252, "scale_lo": 0.60, "scale_hi": 1.40},
     )
 

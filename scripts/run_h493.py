@@ -1,5 +1,5 @@
 """H493: CreditSpreadContinuousPort -- H021 with linear SPY scaling from HYG-LQD spread z-score.
-252d HYG-LQD return spread z-scored → SPY scale in [0.6, 1.4]. Wide spreads → defensive.
+252d HYG-LQD return spread z-scored -> SPY scale in [0.6, 1.4]. Wide spreads -> defensive.
 Run: uv run python scripts/run_h493.py
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ from quant.validation.walk_forward import make_folds, walk_forward, walk_forward
 SEP = "=" * 64
 
 def main():
-    print(f"H493: CreditSpreadContinuousPort (HYG-LQD 252d spread z-score → SPY scale [0.6, 1.4])\n{SEP}")
+    print(f"H493: CreditSpreadContinuousPort (HYG-LQD 252d spread z-score -> SPY scale [0.6, 1.4])\n{SEP}")
     spy = load_research("SPY")
     tlt = load_research("TLT")[["adj_close"]].rename(columns={"adj_close": "tlt_close"})
     hyg = load_research("HYG")[["adj_close"]].rename(columns={"adj_close": "hyg_close"})
@@ -41,7 +41,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="H021 + continuous credit spread scaler. 252d HYG-LQD return spread z-scored → linear SPY weight in [0.6, 1.4]. HYG outperforms (tight spreads) → equity tilt; underperforms → defensive. HYG from 2007; early folds fall back to H021 weights.",
+        notes="H021 + continuous credit spread scaler. 252d HYG-LQD return spread z-scored -> linear SPY weight in [0.6, 1.4]. HYG outperforms (tight spreads) -> equity tilt; underperforms -> defensive. HYG from 2007; early folds fall back to H021 weights.",
         canonical_params={"vol_lookback": 60, "spread_window": 252, "scale_lo": 0.60, "scale_hi": 1.40},
     )
 

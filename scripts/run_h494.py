@@ -1,5 +1,5 @@
 """H494: MultiplexMacroComposite -- H021 with average of 3 continuous macro scalers.
-(VIX pct + yield curve z-score + credit spread z-score) / 3 → SPY scale [0.6, 1.4].
+(VIX pct + yield curve z-score + credit spread z-score) / 3 -> SPY scale [0.6, 1.4].
 Run: uv run python scripts/run_h494.py
 """
 from __future__ import annotations
@@ -44,7 +44,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="H021 + 3-signal continuous macro composite. Average of VIX pct scaler + yield curve z-score scaler + credit spread z-score scaler → SPY weight in [0.6, 1.4]. All signals continuous; credit falls back to 1.0 before HYG/LQD inception.",
+        notes="H021 + 3-signal continuous macro composite. Average of VIX pct scaler + yield curve z-score scaler + credit spread z-score scaler -> SPY weight in [0.6, 1.4]. All signals continuous; credit falls back to 1.0 before HYG/LQD inception.",
         canonical_params={"vol_lookback": 60, "signal_window": 252, "scale_lo": 0.60, "scale_hi": 1.40},
     )
 

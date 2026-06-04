@@ -1,4 +1,4 @@
-"""H499: VolAccelerationCSSwitch -- SPY 21d vol > 63d vol × 1.2 → quality; else → momentum.
+"""H499: VolAccelerationCSSwitch -- SPY 21d vol > 63d vol × 1.2 -> quality; else -> momentum.
 Applies H327 vol-acceleration concept to CS signal selection. Sector-neutral, monthly.
 Run: uv run python scripts/run_h499.py
 """
@@ -20,7 +20,7 @@ DATA_DIR = Path(__file__).resolve().parents[1] / "data"
 SEP = "=" * 64
 
 def main():
-    print(f"H499: VolAccelerationCSSwitch (21d vol > 63d vol × 1.2 → quality; else → momentum)\n{SEP}")
+    print(f"H499: VolAccelerationCSSwitch (21d vol > 63d vol × 1.2 -> quality; else -> momentum)\n{SEP}")
     tickers = get_all_historical_tickers()
     panel = load_stocks_panel(tickers)
     membership = load_sp500_members(); common = panel.index.intersection(membership.index)
@@ -51,7 +51,7 @@ def main():
         family="Set7 Continuous Macro AA", sharpe=rep.sharpe, ci_low=lo, ci_high=hi, cagr=rep.cagr,
         max_drawdown=rep.max_drawdown, n_trades=rep.n_trades, h001_corr=float(corr),
         fold_sharpes=[float(sharpe(f.net_returns)) for f in wf.fold_results], decision=decision,
-        notes="Vol-acceleration CS signal switch. SPY 21d realized vol > 63d vol × 1.2 → GP/TA quality (defensive); otherwise → 6m price momentum. Sector-neutral, monthly. H327 applied vol-acceleration to AA exposure; H499 applies it to CS signal selection.",
+        notes="Vol-acceleration CS signal switch. SPY 21d realized vol > 63d vol × 1.2 -> GP/TA quality (defensive); otherwise -> 6m price momentum. Sector-neutral, monthly. H327 applied vol-acceleration to AA exposure; H499 applies it to CS signal selection.",
         canonical_params={"accel_ratio": 1.20, "vol_short": 21, "vol_long": 63, "mom_lookback": 126, "within_sector_quantile": 0.20, "rebalance_period": 21},
     )
 

@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **557** (H001–H557) | **ONGOING** — Set8 Batch2 in progress |
-| Strategies kept | **367+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557 from Set8 | Set8: 5/7 keep (H554 cancelled, H555 analytic) |
+| Strategies tested | **558** (H001–H558) | **ONGOING** — Set8 Batch2 in progress |
+| Strategies kept | **368+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558 from Set8 | Set8: 6/8 keep (H554 cancelled, H555 analytic) |
 
 ---
 
@@ -1580,6 +1580,11 @@ Max-cap 2.0× with target_vol 6.5% is optimal: avg realized leverage 1.23× (vol
 
 **H557 discovery — ratchet vs vol-target leverage:**
 Vol-targeting (H556) improves Sharpe +0.048 over base. Ratchet (H557) degrades Sharpe −0.041. Root cause: H551's base MaxDD is only −4.40%; any ratchet dd_limit ≥ 3% almost never fires — strategy runs near max leverage continuously, gaining CAGR (+3.36pp) at the cost of Sharpe. Vol-targeting fires daily via realized vol, de-levering proactively → Sharpe-preserving. **Verdict: use vol-targeting for Sharpe-optimized leverage; ratchet for CAGR-maximizing leverage.**
+
+| **558** | **CalmarOptimizedMDR** | **1.697** | **[1.309, 2.090]** | **−6.60%** | **1.802** | +0.519 | **KEEP. Leveraged-Calmar objective on full 55-strategy pool. H065 30%/H473 28.6%/H157 16.6%/H076 15.6%. CAGR 11.89% best in Set8. Calmar_lev 1.802 best in Set8. H001 corr +0.519 (lowest Set8 ensemble).** |
+
+**H558 discovery — optimize the deployed metric, not the base metric:**
+Pure Calmar on base: Cal_base 1.863 (best unleveraged) → Cal_lev 1.429 under leverage. Leveraged-Calmar: Cal_base 1.280 (lowest) → Cal_lev 1.802 (best). The optimizer co-adapts portfolio to the vol-targeting mechanism. H473 (L/S PCA reversal) grows to 28.6% weight — its market-neutral vol profile pairs well with vol-targeting, lowering H001 corr to +0.519. **H558 is CAGR/Calmar champion (11.89%/1.802); H556 remains Sharpe champion (1.790).** When deploying with leverage, always optimize for the leveraged objective directly.
 
 ---
 

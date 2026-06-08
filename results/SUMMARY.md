@@ -119,13 +119,13 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.741 (H551)** / 1.600 (H544) / 1.525 (H300) / 1.133 (H095) | **MET ★★** — H551 multi-objective champion far exceeds target |
-| Max DD < SPY (−55.92%) | **−4.41% (H551)** / −6.20% (H547) / −6.86% (H300) / −7.16% (H095) | **MET ★★** — H551 achieves program-best MaxDD −4.41% |
-| Calmar ratio (institutional) | **1.707 (H551)** / 0.917 (H518) / 0.908 (H547) | **NEW GATE MET ★★** — first time Calmar > 1.0 achieved |
-| Institutional bars at 1.5× | All 12 Target-bar survivors: CAGR 8–9%, MaxDD −9 to −11%, Sharpe 1.47–1.56 | **MET ★★** — H555 confirmed all pass at 1.5× leverage |
+| OOS Sharpe ≥ 1.0 | **1.790 (H556)** / 1.741 (H551) / 1.600 (H544) / 1.525 (H300) | **MET ★★** — H556 dynamic leverage beats H551 champion |
+| Max DD < SPY (−55.92%) | **−4.41% (H551)** / −5.79% (H556) / −6.20% (H547) / −7.16% (H095) | **MET ★★** — H551 program-best; H556 slightly wider but still excellent |
+| Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
+| Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **555** (H001–H555) | **ONGOING** — Set8 Batch1 complete (H551–H555) |
-| Strategies kept | **365+ total** — 360 from H001-H550 + H551/H552/H553 kept from Set8 | Set8: 3/5 keep (H554 cancelled, H555 analytic) |
+| Strategies tested | **556** (H001–H556) | **ONGOING** — Set8 Batch2 started (H556) |
+| Strategies kept | **366+ total** — 360 from H001-H550 + H551/H552/H553/H556 from Set8 | Set8: 4/6 keep (H554 cancelled, H555 analytic) |
 
 ---
 
@@ -1566,3 +1566,12 @@ H065 (26.9%), H076 (25.8%), H473 (16.5%), H157 (15.0%), H016 (7.4%) — complete
 Key: the composite optimizer (Sharpe+Calmar+Sortino) found a portfolio with dramatically better Calmar by prioritizing defensive factor + 4-asset parity + L/S reversal + vol-scaled momentum.
 
 **H555 leverage finding:** Every Target-bar survivor meets all institutional bars (CAGR ≥ 8%, MaxDD ≤ −15%, Sharpe ≥ 1.4) at exactly **1.5× leverage**. H547 is the best choice at 1.5× (MaxDD −9.30%, CAGR 8.20%, Sharpe 1.536).
+
+### Batch 2: Dynamic Leverage (H556–H560)
+
+| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|-------|--------|-----------|-------|
+| **556** | **DynamicLeverageVolTarget** | **1.790** | **[1.393, 2.189]** | **−5.79%** | **1.658** | +0.612 | **KEEP. leverage_t = min(2.0, 6.5%/realized_vol). Avg realized lev 1.23x. +0.048 Sharpe, +2.07pp CAGR vs H551 base. MaxDD worsens only 1.39pp. All 12 folds positive [1.22, 2.45].** |
+
+**H556 discovery — dynamic leverage sensitivity:**
+Max-cap 2.0× with target_vol 6.5% is optimal: avg realized leverage 1.23× (vol-targeting de-levers frequently; the 2.0× cap is rarely hit). All 15 grid configs improve CAGR over base. Sharpe improvement is modest (+0.048) but CAGR crosses the 8% institutional bar (+2.07pp). MaxDD worsens gracefully with leverage — the vol-targeting mechanism prevents drawdown amplification.

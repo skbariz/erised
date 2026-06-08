@@ -29,4 +29,27 @@ the vol-targeting scale factors and each component's tail behavior.
 
 ## Results
 
-*(To be filled after run)*
+**Decision: KEEP**
+
+| Objective | Sh_base | Cal_base | Sh_lev | Cal_lev | CAGR_lev | DD_lev |
+|---|---|---|---|---|---|---|
+| H551 ref | 1.721 | 1.782 | 1.683 | 1.520 | 11.70% | −7.70% |
+| Pure Calmar | 1.654 | **1.863** | 1.640 | 1.429 | 11.77% | −8.24% |
+| Calmar-dominant (0.1/0.8/0.1) | 1.651 | 1.848 | 1.628 | 1.422 | 11.68% | −8.22% |
+| **Leveraged Calmar** | 1.750 | 1.280 | **1.697** | **1.802** | **11.89%** | **−6.60%** |
+
+**Final (canonical):** Leveraged Calmar objective, vol-target 6.5%/2.0x
+- OOS Sharpe: **1.697**  CI [1.309, 2.090]
+- CAGR: **11.89%**  MaxDD: **−6.60%**  Calmar: **1.802**
+- H001 corr: +0.519 (lower than H551's +0.641 — H473's market-neutral character)
+- All 12 folds positive [+1.071, +2.328]
+
+**Top weights:** H065 (30.0%), H473 (28.6%), H157 (16.6%), H076 (15.6%), H016 (3.3%), H063 (3.9%)
+
+**Critical finding — optimize the deployed metric, not the base metric:**
+Pure Calmar on base achieves Cal_base 1.863 (best unleveraged) but collapses to Cal_lev 1.429 when leveraged.
+Leveraged-Calmar objective achieves Cal_base 1.280 (lowest) but Cal_lev 1.802 (best). The optimizer co-adapts
+portfolio composition to the vol-targeting mechanism — finding a portfolio whose vol profile pairs with the
+leverage overlay rather than maximizing Calmar in isolation. **Lesson: always optimize for the deployed metric.**
+
+**vs H556:** H558 has better CAGR (11.89% vs 9.61%) and Calmar_lev (1.802 vs 1.660) but lower Sharpe (1.697 vs 1.790) and wider MaxDD (−6.60% vs −5.79%). H556 remains Sharpe champion; H558 is the Calmar/CAGR champion under leverage.

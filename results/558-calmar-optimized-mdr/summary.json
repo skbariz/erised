@@ -1,0 +1,54 @@
+{
+  "hypothesis": "H558",
+  "name": "calmar-optimized-mdr",
+  "strategy_class": "CalmarOptimizedMDR",
+  "family": "Set8 Batch2 Ensemble",
+  "run_date": "2026-06-08",
+  "oos_sharpe": 1.6972,
+  "ci_low": 1.3087,
+  "ci_high": 2.0896,
+  "cagr": 0.1189,
+  "max_drawdown": -0.066,
+  "n_trades": 0,
+  "h001_corr": 0.519,
+  "fold_sharpes": [
+    2.328,
+    1.241,
+    2.145,
+    1.59,
+    1.913,
+    1.085,
+    1.532,
+    1.801,
+    2.099,
+    2.177,
+    1.389,
+    1.071
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Best objective: leveraged-calmar. Leveraged at 6.5%/2.0x (H556 params). All objectives: H551-ref: Sh=1.721/Cal=1.782 (lev: Sh=1.683/Cal=1.520/CAGR=11.70%/DD=-7.70%); pure-calmar: Sh=1.654/Cal=1.863 (lev: Sh=1.640/Cal=1.429/CAGR=11.77%/DD=-8.24%); calmar-dominant: Sh=1.651/Cal=1.848 (lev: Sh=1.628/Cal=1.422/CAGR=11.68%/DD=-8.22%); leveraged-calmar: Sh=1.750/Cal=1.280 (lev: Sh=1.697/Cal=1.802/CAGR=11.89%/DD=-6.60%). Base metrics: Sh=1.750 Cal=1.280 CAGR=7.81% DD=-6.10%.",
+  "canonical_params": {
+    "objective": "leveraged-calmar",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 20,
+    "top_weights": {
+      "H016": 0.03271425988216459,
+      "H063": 0.03914589132751756,
+      "H065": 0.29985941607279204,
+      "H076": 0.1563674179000187,
+      "H157": 0.166020238991215,
+      "H189": 0.008930770466380158,
+      "H268": 0.008674643814259381,
+      "H473": 0.2856800301547338
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

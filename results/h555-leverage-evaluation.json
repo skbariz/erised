@@ -1,0 +1,614 @@
+{
+  "H544": {
+    "name": "hierarchical-all-fold-mdr-v2",
+    "base": {
+      "sharpe": 1.6004,
+      "cagr_pct": 5.96,
+      "maxdd_pct": -7.4,
+      "calmar": 0.805
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.96,
+        "maxdd_pct": -7.4,
+        "sharpe": 1.6,
+        "calmar": 0.805,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 7.32,
+        "maxdd_pct": -9.25,
+        "sharpe": 1.574,
+        "calmar": 0.792,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.69,
+        "maxdd_pct": -11.1,
+        "sharpe": 1.556,
+        "calmar": 0.783,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 11.42,
+        "maxdd_pct": -14.8,
+        "sharpe": 1.533,
+        "calmar": 0.772,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H550": {
+    "name": "ultimate-terminal-mdr-550",
+    "base": {
+      "sharpe": 1.5925,
+      "cagr_pct": 5.73,
+      "maxdd_pct": -6.97,
+      "calmar": 0.822
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.73,
+        "maxdd_pct": -6.97,
+        "sharpe": 1.593,
+        "calmar": 0.822,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 7.04,
+        "maxdd_pct": -8.71,
+        "sharpe": 1.565,
+        "calmar": 0.808,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.34,
+        "maxdd_pct": -10.46,
+        "sharpe": 1.546,
+        "calmar": 0.798,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.96,
+        "maxdd_pct": -13.94,
+        "sharpe": 1.523,
+        "calmar": 0.786,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H547": {
+    "name": "ratchet-expanded-h300",
+    "base": {
+      "sharpe": 1.583,
+      "cagr_pct": 5.63,
+      "maxdd_pct": -6.2,
+      "calmar": 0.908
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.63,
+        "maxdd_pct": -6.2,
+        "sharpe": 1.583,
+        "calmar": 0.908,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.91,
+        "maxdd_pct": -7.75,
+        "sharpe": 1.555,
+        "calmar": 0.892,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.2,
+        "maxdd_pct": -9.3,
+        "sharpe": 1.536,
+        "calmar": 0.881,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.76,
+        "maxdd_pct": -12.4,
+        "sharpe": 1.513,
+        "calmar": 0.868,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H543": {
+    "name": "expanded-h300-mdr",
+    "base": {
+      "sharpe": 1.5785,
+      "cagr_pct": 5.65,
+      "maxdd_pct": -6.73,
+      "calmar": 0.84
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.65,
+        "maxdd_pct": -6.73,
+        "sharpe": 1.579,
+        "calmar": 0.84,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.94,
+        "maxdd_pct": -8.41,
+        "sharpe": 1.551,
+        "calmar": 0.825,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.22,
+        "maxdd_pct": -10.1,
+        "sharpe": 1.532,
+        "calmar": 0.815,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.8,
+        "maxdd_pct": -13.46,
+        "sharpe": 1.509,
+        "calmar": 0.802,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H545": {
+    "name": "small-pool-focused-mdr",
+    "base": {
+      "sharpe": 1.5768,
+      "cagr_pct": 5.65,
+      "maxdd_pct": -6.32,
+      "calmar": 0.894
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.65,
+        "maxdd_pct": -6.32,
+        "sharpe": 1.577,
+        "calmar": 0.894,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.94,
+        "maxdd_pct": -7.9,
+        "sharpe": 1.549,
+        "calmar": 0.878,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.22,
+        "maxdd_pct": -9.48,
+        "sharpe": 1.53,
+        "calmar": 0.868,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.8,
+        "maxdd_pct": -12.64,
+        "sharpe": 1.507,
+        "calmar": 0.854,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H546": {
+    "name": "vol-scaled-expanded-h300",
+    "base": {
+      "sharpe": 1.5703,
+      "cagr_pct": 5.58,
+      "maxdd_pct": -6.73,
+      "calmar": 0.829
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.58,
+        "maxdd_pct": -6.73,
+        "sharpe": 1.57,
+        "calmar": 0.829,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.85,
+        "maxdd_pct": -8.41,
+        "sharpe": 1.542,
+        "calmar": 0.814,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.12,
+        "maxdd_pct": -10.1,
+        "sharpe": 1.523,
+        "calmar": 0.804,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.66,
+        "maxdd_pct": -13.46,
+        "sharpe": 1.5,
+        "calmar": 0.792,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H549": {
+    "name": "set7-grand-cross-mdr",
+    "base": {
+      "sharpe": 1.5457,
+      "cagr_pct": 5.65,
+      "maxdd_pct": -6.47,
+      "calmar": 0.873
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.65,
+        "maxdd_pct": -6.47,
+        "sharpe": 1.546,
+        "calmar": 0.873,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.94,
+        "maxdd_pct": -8.09,
+        "sharpe": 1.518,
+        "calmar": 0.858,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.22,
+        "maxdd_pct": -9.71,
+        "sharpe": 1.5,
+        "calmar": 0.848,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.8,
+        "maxdd_pct": -12.94,
+        "sharpe": 1.477,
+        "calmar": 0.835,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H518": {
+    "name": "ratchet-h300",
+    "base": {
+      "sharpe": 1.5236,
+      "cagr_pct": 5.77,
+      "maxdd_pct": -6.29,
+      "calmar": 0.917
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.77,
+        "maxdd_pct": -6.29,
+        "sharpe": 1.524,
+        "calmar": 0.917,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 7.09,
+        "maxdd_pct": -7.86,
+        "sharpe": 1.497,
+        "calmar": 0.901,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.4,
+        "maxdd_pct": -9.43,
+        "sharpe": 1.48,
+        "calmar": 0.891,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 11.04,
+        "maxdd_pct": -12.58,
+        "sharpe": 1.458,
+        "calmar": 0.878,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H300": {
+    "name": "grand-cross-program-mdr",
+    "base": {
+      "sharpe": 1.5248,
+      "cagr_pct": 5.82,
+      "maxdd_pct": -6.86,
+      "calmar": 0.848
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.82,
+        "maxdd_pct": -6.86,
+        "sharpe": 1.525,
+        "calmar": 0.848,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 7.15,
+        "maxdd_pct": -8.57,
+        "sharpe": 1.499,
+        "calmar": 0.834,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.48,
+        "maxdd_pct": -10.29,
+        "sharpe": 1.481,
+        "calmar": 0.824,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 11.14,
+        "maxdd_pct": -13.72,
+        "sharpe": 1.459,
+        "calmar": 0.812,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H350": {
+    "name": "ultimate-grand-mdr",
+    "base": {
+      "sharpe": 1.5248,
+      "cagr_pct": 5.82,
+      "maxdd_pct": -6.86,
+      "calmar": 0.848
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.82,
+        "maxdd_pct": -6.86,
+        "sharpe": 1.525,
+        "calmar": 0.848,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 7.15,
+        "maxdd_pct": -8.57,
+        "sharpe": 1.499,
+        "calmar": 0.834,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.48,
+        "maxdd_pct": -10.29,
+        "sharpe": 1.481,
+        "calmar": 0.824,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 11.14,
+        "maxdd_pct": -13.72,
+        "sharpe": 1.459,
+        "calmar": 0.812,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H517": {
+    "name": "vol-tuned-h300",
+    "base": {
+      "sharpe": 1.5149,
+      "cagr_pct": 5.69,
+      "maxdd_pct": -6.51,
+      "calmar": 0.874
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.69,
+        "maxdd_pct": -6.51,
+        "sharpe": 1.515,
+        "calmar": 0.874,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.99,
+        "maxdd_pct": -8.14,
+        "sharpe": 1.488,
+        "calmar": 0.859,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.29,
+        "maxdd_pct": -9.77,
+        "sharpe": 1.471,
+        "calmar": 0.848,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.88,
+        "maxdd_pct": -13.02,
+        "sharpe": 1.448,
+        "calmar": 0.836,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  },
+  "H552": {
+    "name": "maxdd-constrained-mdr",
+    "base": {
+      "sharpe": 1.5839,
+      "cagr_pct": 5.67,
+      "maxdd_pct": -6.77,
+      "calmar": 0.838
+    },
+    "leveraged": {
+      "1.0": {
+        "leverage": 1.0,
+        "cagr_pct": 5.67,
+        "maxdd_pct": -6.77,
+        "sharpe": 1.584,
+        "calmar": 0.838,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.25": {
+        "leverage": 1.25,
+        "cagr_pct": 6.96,
+        "maxdd_pct": -8.46,
+        "sharpe": 1.556,
+        "calmar": 0.823,
+        "meets_cagr_bar": false,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": false
+      },
+      "1.5": {
+        "leverage": 1.5,
+        "cagr_pct": 8.25,
+        "maxdd_pct": -10.15,
+        "sharpe": 1.537,
+        "calmar": 0.813,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      },
+      "2.0": {
+        "leverage": 2.0,
+        "cagr_pct": 10.84,
+        "maxdd_pct": -13.54,
+        "sharpe": 1.514,
+        "calmar": 0.801,
+        "meets_cagr_bar": true,
+        "meets_maxdd_bar": true,
+        "meets_all_bars": true
+      }
+    }
+  }
+}

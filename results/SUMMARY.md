@@ -1469,3 +1469,75 @@ H388 GreenProxyQuality (3.0%) is the only Set5 strategy with meaningful MDR weig
 | Batch 8 verdict | 10/10 KEEP — novel fundamental combos all pass; H001 corr cluster -0.016 to -0.022 |
 | Best Batch 8 individual | H530 MultiPeriodMomentumBlend: 1.045 H001 +0.005 (all-fold) |
 | MDR pool expansion | H521-H530 add 10 more near-zero H001 corr strategies for terminal MDR |
+
+---
+
+### Batch 9: H531–H540 — Sector-Relative Signals & Novel Portfolio Architecture (10/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Folds |
+|---|------|--------|----|-------|------|-------|
+| **531** | **SectorDeltaQualityPort** | **0.884** | [0.472, 1.296] | -34.14% | -0.017 | 5–11 |
+| **532** | **TwoStageQualityFilter** | **0.708** | [0.313, 1.125] | -39.10% | -0.006 | 5–11 |
+| **533** | **VolScaledMomentumQuality** | **0.942** | [0.543, 1.349] | -46.39% | +0.002 | all 12 |
+| **534** | **GPTAAccelerationPort** | **0.735** | [0.319, 1.142] | -34.72% | -0.013 | 6–11 |
+| **535** | **LowBetaQualityMomentum** | **0.998** | [0.596, 1.408] | -44.57% | +0.000 | all 12 |
+| **536** | **EarningsQualityGatedMomentum** | **0.774** | [0.365, 1.181] | -39.96% | -0.020 | 5–11 |
+| **537** | **MomentumWithPortfolioRatchet** | **1.015** | [0.612, 1.432] | -31.07% | +0.018 | all 12 |
+| **538** | **ReversionQualityCombo** | **1.140** | [0.741, 1.554] | -50.70% | +0.007 | all 12 |
+| **539** | **SectorLeaderMomentumFilter** | **0.789** | [0.400, 1.200] | -39.45% | -0.006 | 5–11 |
+| **540** | **FundamentalReversalWeekly** | **1.134** | [0.736, 1.552] | -50.76% | +0.007 | all 12 |
+
+**Key findings:** 10/10 KEEP — perfect batch. All-fold strategies (H533/H535/H537/H538/H540) are the standouts. H538 ReversionQualityCombo (1.140) and H540 FundamentalReversalWeekly (1.134) lead — weekly reversal family produces consistently high Sharpe with near-zero H001 corr. H537 MomentumWithPortfolioRatchet (1.015) confirms ratchet mechanism works on CS portfolios (H087 worked on AA). H535 LowBetaQualityMomentum (0.998) is the best 3-factor composite. H531/H534 sector-relative GP/TA signals pass but underperform absolute GP/TA rankings. H532 TwoStageQualityFilter (0.708) is the weakest — sequential filtering concentrates the universe without meaningful gain.
+
+---
+
+### Batch 10: H541–H550 — Terminal Ensembles & MDR Ceiling Tests (10/10 KEEP)
+
+| # | Name | Sharpe | CI | MaxDD | H001 | Note |
+|---|------|--------|----|-------|------|------|
+| **541** | **Set7EqualWeightCSEnsemble** | **1.126** | [0.728, 1.546] | -41.08% | +0.007 | EW baseline |
+| **542** | **Set7AllFoldMDR** | **1.335** | [0.939, 1.749] | -15.55% | +0.028 | H473(54%)+H537(17%) |
+| **543** | **ExpandedH300MDR** | **1.578** | [1.187, 1.971] | -6.73% | +0.647 | **Cracks 1.525 ceiling** |
+| **544** | **HierarchicalAllFoldMDRv2** | **1.600** | [1.205, 1.985] | -7.40% | +0.596 | **NEW PROGRAM CHAMPION** |
+| **545** | **SmallPoolFocusedMDR** | **1.577** | [1.187, 1.967] | -6.32% | +0.650 | Ties H516 |
+| **546** | **VolScaledExpandedH300** | **1.570** | [1.178, 1.963] | -6.73% | +0.649 | Overlay marginal (-0.008) |
+| **547** | **RatchetExpandedH300** | **1.583** | [1.192, 1.978] | -6.20% | +0.651 | Ratchet +0.005 |
+| **548** | **RegimeAdaptiveH300** | **1.452** | [1.059, 1.849] | -6.33% | +0.658 | VIX regime destroys -0.073 |
+| **549** | **Set7GrandCrossMDR** | **1.546** | [1.154, 1.933] | -6.47% | +0.656 | More CS dilutes |
+| **550** | **UltimateTerminalMDR550** | **1.593** | [1.198, 1.984] | -6.97% | +0.643 | Grand finale |
+
+**Key findings:** 10/10 KEEP. **H544 HierarchicalAllFoldMDRv2 (Sharpe 1.600, MaxDD -7.40%) is the new program champion**, exceeding H300/H350 (1.525) and all prior ensembles. The MDR ceiling crack hypotheses: (a) CONFIRMED — L/S strategies (H471/H472/H473) crack the ceiling in H543/H544; (c) CONFIRMED — small-pool focused MDR (H545: 1.577) ties H516; (d) NOT CONFIRMED — vol-scaling (H546: 1.570) and ratchet (H547: 1.583) add minimal value over the already well-diversified H543 base. H548 VIX regime switching destroys value (-0.073), consistent with H092 finding. H473 (L/S PCA reversal) is the program's single most valuable new diversifier — takes 23–75% weight in every MDR that includes it. H542 (pure CS all-fold MDR at 1.335, H001 +0.028) is the best low-H001-corr ensemble in the program.
+
+---
+
+### Set 7 Complete Summary (H451–H550, 100 strategies)
+
+| Metric | Value |
+|--------|-------|
+| Total tested | 100 |
+| KEEP | **77** (77%) |
+| **Program champion** | **H544 HierarchicalAllFoldMDRv2: Sharpe 1.600, MaxDD -7.40%** |
+| Previous champion | H300/H350: Sharpe 1.525, MaxDD -6.86% |
+| MDR ceiling cracked | **YES** — H543 (1.578), H544 (1.600), H547 (1.583), H550 (1.593) all exceed 1.525 |
+| Key new ingredient | **H473 LongShortPCAReversal** — 23–75% MDR weight; L/S structure provides true diversification |
+| Best individual CS | H538 ReversionQualityCombo: 1.140, H001 +0.007 (weekly reversal + quality) |
+| Best pure CS MDR | H542 Set7AllFoldMDR: 1.335, H001 +0.028, MaxDD -15.55% |
+| Vol-scaling verdict | Marginal on H543 base (-0.008): well-diversified MDR doesn't need it |
+| Regime-switching verdict | Destroys value (-0.073): consistent with H092; don't use VIX gating on mature MDR |
+| Hierarchical vs monolithic | Hierarchical 2-tier (H544: 1.600) > monolithic grand pool (H550: 1.593) |
+| Batch status | Batches 1–10 COMPLETE |
+
+### Set 7 Batch Status (updated)
+
+| Batch | Range | Theme | Status | Keep |
+|-------|-------|-------|--------|------|
+| 1 | H451–H460 | DuPont Level Signals | COMPLETE | **10/10** |
+| 2 | H461–H470 | Return Distribution Anomalies | COMPLETE | **10/10** |
+| 3 | H471–H480 | Dollar-Neutral L/S Extensions | COMPLETE | **3/10** |
+| 4 | H481–H490 | Hybrid AA+CS | COMPLETE | **1/10** |
+| 5 | H491–H500 | Continuous Macro Overlays | COMPLETE | **5/10** |
+| 6 | H501–H510 | Execution-Aware | COMPLETE | **9/10** |
+| 7 | H511–H520 | Cross-Program Synergies | COMPLETE | **9/10** |
+| 8 | H521–H530 | Novel Fundamentals | COMPLETE | **10/10** |
+| 9 | H531–H540 | Sector-Relative & Architecture | COMPLETE | **10/10** |
+| 10 | H541–H550 | Terminal Ensembles | COMPLETE | **10/10** |

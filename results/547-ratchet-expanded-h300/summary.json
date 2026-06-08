@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H547",
+  "name": "ratchet-expanded-h300",
+  "strategy_class": "RatchetExpandedH300",
+  "family": "Set7 Batch10 Terminal Ensemble",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.583,
+  "ci_low": 1.1919,
+  "ci_high": 1.9782,
+  "cagr": 0.0563,
+  "max_drawdown": -0.062,
+  "n_trades": 0,
+  "h001_corr": 0.6506,
+  "fold_sharpes": [
+    2.37,
+    2.167,
+    1.181,
+    1.462,
+    1.361,
+    1.408,
+    1.19,
+    2.04,
+    1.642,
+    2.357,
+    0.87,
+    1.71
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H543 expanded MDR (55 strategies) with H087-style ratchet: when portfolio dd from peak > 5%, scale by (1-dd/0.15). H300 MaxDD is -6.86% so ratchet triggers rarely. H087 showed ratchet works on H021. MDR base weights: {'H016': 0.10233856650014632, 'H035': 0.05726290419131986, 'H043': 0.09480182410374909, 'H060': 0.026866110138909317, 'H065': 0.06476994499846192, 'H068': 0.08756043828421696, 'H076': 0.07545561447180966, 'H078': 0.028037988875773526, 'H082': 0.00765592368292389, 'H097': 0.02417928908524994, 'H157': 0.04872538210842385, 'H189': 0.008478431553442193, 'H254': 0.007824839864868477, 'H265': 0.06867325329491844, 'H268': 0.009169279711324689, 'H287': 0.005341396164072462, 'H472': 0.044983263068250894, 'H473': 0.23300781252832362}.",
+  "canonical_params": {
+    "dd_trigger": 0.05,
+    "dd_limit": 0.15,
+    "method": "SLSQP",
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

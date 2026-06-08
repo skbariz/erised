@@ -52,4 +52,29 @@ Borrow cost: 50 bps/yr on leveraged fraction (same as H556).
 
 ## Results
 
-*(To be filled after run)*
+**Decision: KEEP**
+
+| Config | Sharpe | CAGR | MaxDD | Calmar | Avg Lev |
+|---|---|---|---|---|---|
+| H551 base (1.0x) | 1.742 | 7.54% | −4.40% | — | 1.00x |
+| H556 vol-target (ref) | 1.790 | 9.61% | −5.79% | 1.660 | 1.23x |
+| ratchet 1.5x, dd=3% | 1.684 | 9.89% | −5.73% | 1.726 | 1.35x |
+| ratchet 1.5x, dd=15% | 1.701 | 10.90% | −6.48% | 1.683 | 1.47x |
+| **ratchet 2.0x, dd=3%** | 1.640 | 12.26% | −7.05% | **1.741** | 1.70x |
+
+**Final (canonical):** max_lev=1.5x, dd_limit=15% (best Sharpe among CAGR≥8% configs)
+- OOS Sharpe: **1.701**  CI [1.300, 2.103]
+- CAGR: **10.90%**  MaxDD: **−6.48%**  Calmar: **1.683**
+- H001 corr: +0.641. All 12 folds positive [+1.203, +2.260].
+
+**Key insight — ratchet is inferior to vol-targeting for Sharpe:**
+No ratchet configuration beats H551's base Sharpe of 1.742. Vol-targeting (H556) improves
+Sharpe to 1.790; ratchet degrades it. Root cause: H551's base MaxDD is only −4.40%, so any
+ratchet with dd_limit ≥ 3% almost never fires — it runs near max leverage continuously,
+adding CAGR but also adding noise. Vol-targeting fires daily via realized vol → de-levers
+proactively before losses accumulate → Sharpe-preserving. Ratchet fires after losses →
+reactive, Sharpe-degrading.
+
+**When ratchet wins:** CAGR (10.90% vs 9.61%) and Calmar at 2.0x (1.741 vs 1.660).
+If the goal is raw CAGR with Calmar as secondary, ratchet at 2.0x/3% is competitive.
+For risk-adjusted return (Sharpe), vol-targeting dominates.

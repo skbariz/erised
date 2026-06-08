@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H539",
+  "name": "sector-leader-momentum-filter",
+  "strategy_class": "SectorLeaderMomentumFilter",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 0.7891,
+  "ci_low": 0.4004,
+  "ci_high": 1.1999,
+  "cagr": 0.1172,
+  "max_drawdown": -0.3945,
+  "n_trades": 1,
+  "h001_corr": -0.0064,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    1.055,
+    0.71,
+    1.912,
+    0.902,
+    2.071,
+    0.783,
+    0.746
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sector selection by quality-adjusted momentum: mean(6m_return*GP/TA_zscore) per sector, top 2 sectors. Stock selection: 6m momentum top 20% within those sectors. Quality-filtered sector rotation vs H203 (price-only, 0.915). Monthly.",
+  "canonical_params": {
+    "mom_lookback": 126,
+    "n_top_sectors": 2,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

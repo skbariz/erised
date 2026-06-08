@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H534",
+  "name": "gpta-acceleration-port",
+  "strategy_class": "GPTAAccelerationPort",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 0.7355,
+  "ci_low": 0.3187,
+  "ci_high": 1.1423,
+  "cagr": 0.0883,
+  "max_drawdown": -0.3472,
+  "n_trades": 1,
+  "h001_corr": -0.013,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.166,
+    1.981,
+    0.927,
+    2.005,
+    1.232,
+    1.029
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Second derivative of GP/TA: d1=GP/TA(t)-GP/TA(t-1Q), d2=d1(t)-d1(t-1Q). Long top 20% with fastest-accelerating quality improvement. Inflection-point signal. Quarterly rebalance. Sector-neutral.",
+  "canonical_params": {
+    "quarterly_step": 63,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 63
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H535",
+  "name": "low-beta-quality-momentum",
+  "strategy_class": "LowBetaQualityMomentum",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 0.9976,
+  "ci_low": 0.5964,
+  "ci_high": 1.4075,
+  "cagr": 0.1934,
+  "max_drawdown": -0.4457,
+  "n_trades": 1,
+  "h001_corr": 0.0004,
+  "fold_sharpes": [
+    1.31,
+    1.009,
+    1.009,
+    1.717,
+    1.401,
+    0.039,
+    0.689,
+    1.957,
+    1.192,
+    1.694,
+    1.149,
+    1.156
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-factor composite: z(-252d beta)+z(GP/TA)+z(6m momentum). Extends H178 (BAB+mom 1.125) with quality as third leg. Beta=rolling cov(stock,SPY)/var(SPY). Sector-neutral top 20%. Monthly.",
+  "canonical_params": {
+    "beta_window": 252,
+    "mom_lookback": 126,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

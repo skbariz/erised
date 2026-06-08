@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H537",
+  "name": "momentum-portfolio-ratchet",
+  "strategy_class": "MomentumWithPortfolioRatchet",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.0152,
+  "ci_low": 0.6123,
+  "ci_high": 1.4315,
+  "cagr": 0.1443,
+  "max_drawdown": -0.3107,
+  "n_trades": 733,
+  "h001_corr": 0.0183,
+  "fold_sharpes": [
+    1.374,
+    0.596,
+    1.223,
+    1.927,
+    1.171,
+    -1.226,
+    -0.051,
+    2.043,
+    0.762,
+    1.712,
+    0.956,
+    1.316
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H150 (6m momentum, sector-neutral, top 20%, monthly) with H087-style ratchet: when CS portfolio drawdown from peak > 10%, scale by (1-dd/0.20). Resets at new high-water mark. Pure price signal, all 12 folds.",
+  "canonical_params": {
+    "mom_lookback": 126,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 21,
+    "dd_trigger": 0.1,
+    "dd_limit": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

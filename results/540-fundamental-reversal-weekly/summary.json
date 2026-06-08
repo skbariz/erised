@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H540",
+  "name": "fundamental-reversal-weekly",
+  "strategy_class": "FundamentalReversalWeekly",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.1341,
+  "ci_low": 0.7355,
+  "ci_high": 1.552,
+  "cagr": 0.2552,
+  "max_drawdown": -0.5076,
+  "n_trades": 1,
+  "h001_corr": 0.0068,
+  "fold_sharpes": [
+    2.475,
+    1.443,
+    1.137,
+    1.956,
+    1.485,
+    0.445,
+    0.852,
+    2.308,
+    0.628,
+    1.996,
+    1.018,
+    1.053
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(5d idiosyncratic reversal)+z(-accruals). Idio=within-sector residual 5d return. Accruals=(NI-OCF)/TA; low accruals=cash-backed earnings. Selects quality names temporarily dislocated. Weekly (5d) rebalance. Distinct from H538 (GP/TA vs accruals).",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

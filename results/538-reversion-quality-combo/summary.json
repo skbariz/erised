@@ -1,0 +1,42 @@
+{
+  "hypothesis": "H538",
+  "name": "reversion-quality-combo",
+  "strategy_class": "ReversionQualityCombo",
+  "family": "Set7 Sector-Relative",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.1397,
+  "ci_low": 0.7408,
+  "ci_high": 1.5536,
+  "cagr": 0.2524,
+  "max_drawdown": -0.507,
+  "n_trades": 1,
+  "h001_corr": 0.0067,
+  "fold_sharpes": [
+    2.478,
+    1.534,
+    0.968,
+    1.983,
+    1.547,
+    0.446,
+    0.925,
+    2.103,
+    0.6,
+    1.782,
+    1.086,
+    1.16
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "z(5-day sector reversal)+z(GP/TA). Long quality stocks dislocated by short-term price moves. 5d reversal=-5d return (contrarian). GP/TA acts as persistent quality filter. Sector-neutral top 20%. Weekly (5d) rebalance.",
+  "canonical_params": {
+    "reversal_window": 5,
+    "within_sector_quantile": 0.2,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

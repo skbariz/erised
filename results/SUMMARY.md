@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **556** (H001–H556) | **ONGOING** — Set8 Batch2 started (H556) |
-| Strategies kept | **366+ total** — 360 from H001-H550 + H551/H552/H553/H556 from Set8 | Set8: 4/6 keep (H554 cancelled, H555 analytic) |
+| Strategies tested | **557** (H001–H557) | **ONGOING** — Set8 Batch2 in progress |
+| Strategies kept | **367+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557 from Set8 | Set8: 5/7 keep (H554 cancelled, H555 analytic) |
 
 ---
 
@@ -1575,6 +1575,11 @@ Key: the composite optimizer (Sharpe+Calmar+Sortino) found a portfolio with dram
 
 **H556 discovery — dynamic leverage sensitivity:**
 Max-cap 2.0× with target_vol 6.5% is optimal: avg realized leverage 1.23× (vol-targeting de-levers frequently; the 2.0× cap is rarely hit). All 15 grid configs improve CAGR over base. Sharpe improvement is modest (+0.048) but CAGR crosses the 8% institutional bar (+2.07pp). MaxDD worsens gracefully with leverage — the vol-targeting mechanism prevents drawdown amplification.
+
+| **557** | **RatchetLeverage** | **1.701** | **[1.300, 2.103]** | **−6.48%** | **1.683** | +0.641 | **KEEP. leverage_t = 1 + 0.5×max(0,1-dd/15%). Avg lev 1.47x. CAGR 10.90% (+3.36pp vs base). All 12 folds positive. Ratchet inferior to vol-target (H556) on Sharpe — ratchet rarely fires on H551's low-DD base.** |
+
+**H557 discovery — ratchet vs vol-target leverage:**
+Vol-targeting (H556) improves Sharpe +0.048 over base. Ratchet (H557) degrades Sharpe −0.041. Root cause: H551's base MaxDD is only −4.40%; any ratchet dd_limit ≥ 3% almost never fires — strategy runs near max leverage continuously, gaining CAGR (+3.36pp) at the cost of Sharpe. Vol-targeting fires daily via realized vol, de-levering proactively → Sharpe-preserving. **Verdict: use vol-targeting for Sharpe-optimized leverage; ratchet for CAGR-maximizing leverage.**
 
 ---
 

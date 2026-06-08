@@ -1,0 +1,48 @@
+{
+  "hypothesis": "H542",
+  "name": "set7-all-fold-mdr",
+  "strategy_class": "Set7AllFoldMDR",
+  "family": "Set7 Batch10 Terminal Ensemble",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.3346,
+  "ci_low": 0.9392,
+  "ci_high": 1.7493,
+  "cagr": 0.0706,
+  "max_drawdown": -0.1555,
+  "n_trades": 0,
+  "h001_corr": 0.0276,
+  "fold_sharpes": [
+    3.341,
+    1.801,
+    0.62,
+    2.12,
+    0.919,
+    0.475,
+    0.807,
+    2.041,
+    0.325,
+    2.093,
+    0.86,
+    1.44
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over 25 Set7 all-fold CS strategies (H458-H473 + H505/H506/H508/H530/H533/H535/H537/H538/H540). All 12 folds active. MDR ceiling test with clean no-EDGAR-gap pool. Top weights: {'H461': 0.04154296003802902, 'H464': 0.04391274891524485, 'H472': 0.20365956335651, 'H473': 0.5421226871456296, 'H537': 0.16876204054458643}.",
+  "canonical_params": {
+    "n_strategies": 25,
+    "method": "SLSQP",
+    "top_weights": {
+      "H461": 0.04154296003802902,
+      "H464": 0.04391274891524485,
+      "H472": 0.20365956335651,
+      "H473": 0.5421226871456296,
+      "H537": 0.16876204054458643
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

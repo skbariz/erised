@@ -1,0 +1,54 @@
+{
+  "hypothesis": "H545",
+  "name": "small-pool-focused-mdr",
+  "strategy_class": "SmallPoolFocusedMDR",
+  "family": "Set7 Batch10 Terminal Ensemble",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.5768,
+  "ci_low": 1.1872,
+  "ci_high": 1.9674,
+  "cagr": 0.0565,
+  "max_drawdown": -0.0632,
+  "n_trades": 0,
+  "h001_corr": 0.6497,
+  "fold_sharpes": [
+    2.38,
+    2.007,
+    1.309,
+    1.825,
+    1.416,
+    1.51,
+    0.828,
+    1.829,
+    1.605,
+    2.103,
+    0.803,
+    1.688
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SLSQP MDR over focused 20-strategy pool: top 10 H300 AA contributors + top 10 all-fold CS stars (H516 pool updated with H535/H537/H538/H540). Tests if concentrated pool beats redundancy-diluted larger pool. Top weights: {'H043': 0.09363952715423807, 'H016': 0.11394360725622504, 'H068': 0.0913794996875297, 'H076': 0.08097376486335131, 'H065': 0.06800095439950779, 'H078': 0.029655529520227042, 'H035': 0.06138374308654051, 'H097': 0.04190792652439279, 'H412': 0.03467307402222277, 'H473': 0.3075355316851106, 'H537': 0.076906841800655}.",
+  "canonical_params": {
+    "n_strategies": 20,
+    "method": "SLSQP",
+    "top_weights": {
+      "H043": 0.09363952715423807,
+      "H016": 0.11394360725622504,
+      "H068": 0.0913794996875297,
+      "H076": 0.08097376486335131,
+      "H065": 0.06800095439950779,
+      "H078": 0.029655529520227042,
+      "H035": 0.06138374308654051,
+      "H097": 0.04190792652439279,
+      "H412": 0.03467307402222277,
+      "H473": 0.3075355316851106,
+      "H537": 0.076906841800655
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

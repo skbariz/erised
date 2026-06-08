@@ -1,0 +1,47 @@
+{
+  "hypothesis": "H541",
+  "name": "set7-equal-weight-cs-ensemble",
+  "strategy_class": "Set7EqualWeightCSEnsemble",
+  "family": "Set7 Batch10 Terminal Ensemble",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.1259,
+  "ci_low": 0.7278,
+  "ci_high": 1.5464,
+  "cagr": 0.2057,
+  "max_drawdown": -0.4108,
+  "n_trades": 0,
+  "h001_corr": 0.0067,
+  "fold_sharpes": [
+    1.878,
+    1.177,
+    1.133,
+    1.917,
+    1.443,
+    0.169,
+    0.736,
+    2.126,
+    0.865,
+    1.873,
+    1.108,
+    1.209
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight of top 5 Set7 individual CS all-fold strategies by OOS Sharpe: H538 ReversionQualityCombo, H540 FundamentalReversalWeekly, H537 MomentumWithPortfolioRatchet, H535 LowBetaQualityMomentum, H469 MinReturnMomentumCombo. Baseline before MDR.",
+  "canonical_params": {
+    "components": [
+      "H538",
+      "H540",
+      "H537",
+      "H535",
+      "H469"
+    ],
+    "method": "equal_weight"
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

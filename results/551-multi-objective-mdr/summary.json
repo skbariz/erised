@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H551",
+  "name": "multi-objective-mdr",
+  "strategy_class": "MultiObjectiveMDR",
+  "family": "Set8 Batch1 Ensemble",
+  "run_date": "2026-06-07",
+  "oos_sharpe": 1.741,
+  "ci_low": 1.3408,
+  "ci_high": 2.1438,
+  "cagr": 0.0753,
+  "max_drawdown": -0.0441,
+  "n_trades": 0,
+  "h001_corr": 0.6408,
+  "fold_sharpes": [
+    1.841,
+    1.332,
+    2.262,
+    1.806,
+    2.092,
+    1.566,
+    1.415,
+    1.671,
+    2.286,
+    2.146,
+    1.266,
+    1.245
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Multi-objective MDR (w1=0.33, w2=0.33, w3=0.33): composite = w1*Sharpe + w2*Calmar + w3*Sortino. Pool: 55 strategies (same as H543). Grid results: Pure Sharpe(w1=1.0,w2=0.0,w3=0.0): Sh=1.895 Cal=0.850 So=nan DD=-8.37%; Sharpe-Calmar(w1=0.5,w2=0.5,w3=0.0): Sh=1.704 Cal=1.689 So=nan DD=-5.02%; Primary target(w1=0.4,w2=0.4,w3=0.2): Sh=1.697 Cal=1.677 So=nan DD=-5.27%; Equal weights(w1=0.33,w2=0.33,w3=0.33): Sh=1.741 Cal=1.708 So=nan DD=-4.41%. Top weights: {'H016': 0.07436035285017911, 'H034': 0.012161120419418543, 'H043': 0.01883922786069784, 'H063': 0.03368849414251108, 'H065': 0.2686091859650303, 'H076': 0.25803764646043975, 'H157': 0.14964917593478216, 'H192': 0.012775061656185983, 'H265': 0.005419830382246415, 'H473': 0.16520527793594433}.",
+  "canonical_params": {
+    "w1": 0.33,
+    "w2": 0.33,
+    "w3": 0.33,
+    "n_strategies": 55,
+    "method": "SLSQP_multi_objective",
+    "top_weights": {
+      "H016": 0.07436035285017911,
+      "H034": 0.012161120419418543,
+      "H043": 0.01883922786069784,
+      "H063": 0.03368849414251108,
+      "H065": 0.2686091859650303,
+      "H076": 0.25803764646043975,
+      "H157": 0.14964917593478216,
+      "H192": 0.012775061656185983,
+      "H265": 0.005419830382246415,
+      "H473": 0.16520527793594433
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

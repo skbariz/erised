@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H556",
+  "name": "dynamic-leverage-vol-target",
+  "strategy_class": "DynamicLeverageVolTarget",
+  "family": "Set8 Batch2 Leverage",
+  "run_date": "2026-06-08",
+  "oos_sharpe": 1.7898,
+  "ci_low": 1.393,
+  "ci_high": 2.1886,
+  "cagr": 0.0961,
+  "max_drawdown": -0.0579,
+  "n_trades": 0,
+  "h001_corr": 0.6121,
+  "fold_sharpes": [
+    1.931,
+    1.564,
+    2.129,
+    1.984,
+    2.45,
+    1.414,
+    1.389,
+    1.602,
+    2.361,
+    2.147,
+    1.253,
+    1.222
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Dynamic leverage on H551 portfolio (fixed weights). leverage_t = min(2.00, 6.5% / realized_vol). Lookback: 20d. Borrow cost: 0bps/yr. Avg realized leverage: 1.23x. Base (H551 1x): Sharpe 1.742 CAGR 7.54% MaxDD -4.40%.",
+  "canonical_params": {
+    "target_vol": 0.065,
+    "max_lev": 2.0,
+    "vol_lookback": 20,
+    "borrow_cost_annual": 0.005,
+    "avg_realized_lev": 1.227,
+    "base_weights": {
+      "H016": 0.07436,
+      "H034": 0.01216,
+      "H043": 0.01884,
+      "H063": 0.03369,
+      "H065": 0.26861,
+      "H076": 0.25804,
+      "H157": 0.14965,
+      "H192": 0.01278,
+      "H265": 0.00542,
+      "H473": 0.16521
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

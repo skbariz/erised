@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **558** (H001–H558) | **ONGOING** — Set8 Batch2 in progress |
-| Strategies kept | **368+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558 from Set8 | Set8: 6/8 keep (H554 cancelled, H555 analytic) |
+| Strategies tested | **566** (H001–H566) | **ONGOING** — Set8 Batch4 partially complete |
+| Strategies kept | **369+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565 from Set8 | Set8: 7/9 keep (H554 cancelled, H555 analytic, H566 kill-strict-bar) |
 
 ---
 
@@ -1618,8 +1618,8 @@ H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensem
 | **564** | **MaxDDConstrainedLevSharpe** | **1.876** | **[1.481, 2.265]** | **−9.43%** | **1.413** | +0.425 | **KEEP. dd_penalty sweep [1,5,10,20]. penalty=1: Sh=1.876/DD=−9.43%; penalty=10: Sh=1.757/DD=−7.00%. Pareto frontier: −0.119 Sharpe buys +2.43pp MaxDD improvement.** |
 | **567** | **LevSortinoDownsideVol** | **1.889** | **[1.496, 2.283]** | **−9.66%** | **1.467** | +0.457 | **KEEP. Downside vol targeting (semi-deviation). Avg lev=1.631× vs H559's 1.23× — downside vol < total vol in bull periods. CAGR 14.17% NEW PROGRAM RECORD. Sh 1.889 > H559 (1.879).** |
 | **563** | **FastVolLookbackSharpe** | **1.857** | **[1.457, 2.245]** | **−10.13%** | **1.248** | +0.437 | **KEEP. lb=5d (fast). Worse than H559's 20d (1.879). Fast lookback hurts: whipsaws reduce Sharpe by 0.022. Confirms 20d optimal.** |
-| 565 | AsymmetricVolTarget | — | — | — | — | — | running |
-| 566 | LevCAGRObjective | — | — | — | — | — | running |
+| **565** | **AsymmetricVolTarget** | **1.874** | **[1.479, 2.270]** | **−9.95%** | **1.171** | +0.443 | **KEEP. Asymmetric vol target: fast=5d/slow=20d. Marginal over H559 (1.879→1.874). avg_lev=1.505×. H473 takes 19.2%, H076 22.6%.** |
+| 566 | LevCAGRObjective | 1.859 | [1.459, 2.249] | −9.25% | 1.458 | +0.392 | kill-strict-bar. CAGR 13.48% fails >16% strict bar. Sh 1.859, Cal 1.458 vs H561 (1.921/1.406). CAGR objective doesn't dominate Sharpe objective. |
 | 568 | WalkForwardLeverageParams | — | — | — | — | — | running |
 | 569 | CostAwareLevSharpe | — | — | — | — | — | running |
 | 570 | LeverageRegimeConditional | — | — | — | — | — | running |

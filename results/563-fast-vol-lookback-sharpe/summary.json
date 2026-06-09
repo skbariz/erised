@@ -1,0 +1,57 @@
+{
+  "hypothesis": "H563",
+  "name": "fast-vol-lookback-sharpe",
+  "strategy_class": "FastVolLookbackSharpe",
+  "family": "Set8 Batch3 Ensemble",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.8573,
+  "ci_low": 1.4575,
+  "ci_high": 2.2453,
+  "cagr": 0.1264,
+  "max_drawdown": -0.1013,
+  "n_trades": 0,
+  "h001_corr": 0.4375,
+  "fold_sharpes": [
+    3.046,
+    1.861,
+    1.654,
+    1.728,
+    2.033,
+    1.513,
+    1.454,
+    1.801,
+    1.385,
+    2.798,
+    1.271,
+    1.874
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Lev-Sharpe objective with fast vol lookback: 6.5%/2.0x/5d. Base metrics: Sh=1.828 Cal=0.733 CAGR=8.05% DD=-10.98%. H559 reference Sh_lev=1.879 at 6.5%/2.0x/20d. Hypothesis: 5d lookback reacts faster to vol spikes, reducing caught-with-high-leverage events.",
+  "canonical_params": {
+    "objective": "lev-sharpe",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 5,
+    "top_weights": {
+      "H016": 0.05178226807238669,
+      "H065": 0.17756787800363,
+      "H076": 0.21599141959152554,
+      "H097": 0.02372606684397219,
+      "H157": 0.02514744360650748,
+      "H191": 0.047475949617937,
+      "H192": 0.04026991655445946,
+      "H265": 0.07152254109629212,
+      "H268": 0.02114944753617619,
+      "H472": 0.013089249008611865,
+      "H473": 0.3043356420355411
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

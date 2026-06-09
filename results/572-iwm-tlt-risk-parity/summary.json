@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H572",
+  "name": "iwm-tlt-risk-parity",
+  "strategy_class": "IWMTLTRiskParity",
+  "family": "Set8 Batch2 AA",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.4256,
+  "ci_low": 0.0327,
+  "ci_high": 0.8163,
+  "cagr": 0.0369,
+  "max_drawdown": -0.2746,
+  "n_trades": 1,
+  "h001_corr": -0.0358,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    -0.074,
+    1.064,
+    1.062,
+    0.094,
+    -0.012,
+    0.023,
+    1.545,
+    -0.665,
+    1.447,
+    -0.017
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "IWM/TLT risk parity. IWM starts 2000-05; folds 0-1 mostly cash. Folds 2-11 active.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

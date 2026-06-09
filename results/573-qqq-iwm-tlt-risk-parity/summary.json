@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H573",
+  "name": "qqq-iwm-tlt-risk-parity",
+  "strategy_class": "QQQIWMTLTRiskParity",
+  "family": "Set8 Batch2 AA",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.4722,
+  "ci_low": 0.0814,
+  "ci_high": 0.8649,
+  "cagr": 0.039,
+  "max_drawdown": -0.2936,
+  "n_trades": 1,
+  "h001_corr": -0.0435,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    -0.355,
+    0.492,
+    0.968,
+    0.132,
+    -0.286,
+    1.024,
+    1.729,
+    -0.62,
+    1.329,
+    0.624
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "QQQ/IWM/TLT 3-asset risk parity. Both equity ETFs start after 2000; folds 0-2 mostly cash.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

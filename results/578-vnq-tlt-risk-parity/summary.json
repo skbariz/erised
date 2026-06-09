@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H578",
+  "name": "vnq-tlt-risk-parity",
+  "strategy_class": "VNQTLTRiskParity",
+  "family": "Set8 Batch2 AA",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.373,
+  "ci_low": -0.0169,
+  "ci_high": 0.7657,
+  "cagr": 0.0293,
+  "max_drawdown": -0.2871,
+  "n_trades": 1,
+  "h001_corr": -0.0065,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    1.241,
+    0.777,
+    0.882,
+    -0.167,
+    -0.274,
+    0.256,
+    0.116,
+    0.533,
+    0.676
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "VNQ/TLT risk parity. VNQ starts 2004-09; folds 0-3 mostly cash. Folds 4-11 active.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

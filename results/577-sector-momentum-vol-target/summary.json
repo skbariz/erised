@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H577",
+  "name": "sector-momentum-vol-target",
+  "strategy_class": "SectorMomentumVolTarget",
+  "family": "Set8 Batch2 AA",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.6552,
+  "ci_low": 0.2739,
+  "ci_high": 1.0578,
+  "cagr": 0.0651,
+  "max_drawdown": -0.3899,
+  "n_trades": 2,
+  "h001_corr": 0.0681,
+  "fold_sharpes": [
+    0.06,
+    -0.503,
+    -0.105,
+    0.852,
+    0.933,
+    0.756,
+    0.897,
+    1.121,
+    1.534,
+    -0.186,
+    1.544,
+    1.237
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "7-ETF sector momentum top-3, vol-targeted at 12%. Pure momentum, no regime gate.",
+  "canonical_params": {
+    "mom_window": 126,
+    "vol_lookback": 60,
+    "top_n": 3,
+    "target_vol": 0.12
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

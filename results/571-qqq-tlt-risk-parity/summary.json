@@ -1,0 +1,40 @@
+{
+  "hypothesis": "H571",
+  "name": "qqq-tlt-risk-parity",
+  "strategy_class": "QQQTLTRiskParity",
+  "family": "Set8 Batch2 AA",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.3255,
+  "ci_low": -0.0788,
+  "ci_high": 0.7189,
+  "cagr": 0.0278,
+  "max_drawdown": -0.2606,
+  "n_trades": 1,
+  "h001_corr": -0.0313,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.152,
+    -0.366,
+    0.14,
+    0.573,
+    -0.472,
+    1.627,
+    1.221,
+    -0.479,
+    0.673,
+    0.543
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "QQQ/TLT risk parity. QQQ starts 1999-03; folds 0-1 mostly cash. Folds 2-11 active.",
+  "canonical_params": {
+    "vol_lookback": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

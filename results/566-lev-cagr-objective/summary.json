@@ -1,0 +1,57 @@
+{
+  "hypothesis": "H566",
+  "name": "lev-cagr-objective",
+  "strategy_class": "LevCAGRObjective",
+  "family": "Set8 Batch4 Ensemble",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.859,
+  "ci_low": 1.459,
+  "ci_high": 2.249,
+  "cagr": 0.1348,
+  "max_drawdown": -0.0925,
+  "n_trades": 0,
+  "h001_corr": 0.3917,
+  "fold_sharpes": [
+    2.459,
+    1.32,
+    2.496,
+    1.627,
+    2.204,
+    1.029,
+    1.499,
+    1.923,
+    1.904,
+    3.003,
+    1.396,
+    1.526
+  ],
+  "decision": "kill-strict-bar",
+  "kept": false,
+  "notes": "CAGR-first mandate: CAGR_lev=13.48%, Sh_lev=1.859, Cal_lev=1.458. Strict keep bar (Sh>1.5, CI_lo>1.3, CAGR>16%): NOT MET. Leveraged at 6.5%/2.0x (H559 params). Base metrics: Sh=1.711 Cal=0.790 CAGR=11.24% DD=-14.22%. H559 reference Sh_lev=1.879/CAGR_lev=13.08%. H558 reference CAGR_lev=11.89%.",
+  "canonical_params": {
+    "objective": "lev_cagr",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 20,
+    "strict_keep_bar_met": false,
+    "top_weights": {
+      "H016": 0.0148,
+      "H019": 0.0201,
+      "H065": 0.2845,
+      "H076": 0.2832,
+      "H097": 0.009,
+      "H191": 0.0947,
+      "H192": 0.1093,
+      "H194": 0.0339,
+      "H265": 0.1165,
+      "H471": 0.0339
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -402,7 +402,7 @@ def main():
             "leverage_target_vol": LEV_TARGET_VOL,
             "leverage_max": LEV_MAX,
             "leverage_lookback": LEV_LOOKBACK,
-            "strict_keep_bar_met": keep_strict,
+            "strict_keep_bar_met": bool(keep_strict),
             "top_weights": top_w,
             "n_strategies": n,
         },

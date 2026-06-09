@@ -200,9 +200,10 @@ def run_pool(mat_sub, names_sub, label):
     print(SEP)
     print(f"  Strategies: {names_sub}")
 
+    # MDR warm-start for this pool
     w0 = mdr_warm_start(mat_sub, n)
 
-    # MDR solution (reference)
+    # MDR solution (for reference)
     cov = np.cov(mat_sub.T) * TRADING_DAYS
     vols = np.sqrt(np.diag(cov))
 
@@ -377,6 +378,7 @@ def main():
     top20_names = ranked[:20]
     top30_names = ranked[:30]
 
+    # Build subpool matrices
     mat_top30 = clean[top30_names].fillna(0.0).values
     mat_top20 = clean[top20_names].fillna(0.0).values
 
@@ -390,7 +392,7 @@ def main():
     print("CROSS-POOL COMPARISON (leveraged-Calmar objective)")
     print(SEP)
     print(
-        f"{'Pool':<25} {'Sh_base':>8} {'Cal_base':>9} {'Sh_lev':>8} {'Cal_lev':>9} {'CAGR_lev':>10} {'DD_lev':>8}"
+        f"  {'Pool':<23} {'Sh_base':>8} {'Cal_base':>9} {'Sh_lev':>8} {'Cal_lev':>9} {'CAGR_lev':>10} {'DD_lev':>8}"
     )
     print("-" * 80)
     for pool_label, res in [
@@ -454,6 +456,7 @@ def main():
     decision = "KEEP" if best_shl > 0.51 and lo > 0 else "kill"
     print(f"Decision: {decision}")
 
+    # Comparison string
     comp_str = " | ".join(
         f"{pl}: Sh_lev={res[6]:.3f}/Cal_lev={res[7]:.3f}/CAGR={res[8]:.2%}/DD={res[9]:.2%}"
         for pl, res, _, _ in pool_results

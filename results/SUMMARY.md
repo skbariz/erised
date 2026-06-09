@@ -1567,7 +1567,7 @@ Key: the composite optimizer (Sharpe+Calmar+Sortino) found a portfolio with dram
 
 **H555 leverage finding:** Every Target-bar survivor meets all institutional bars (CAGR ≥ 8%, MaxDD ≤ −15%, Sharpe ≥ 1.4) at exactly **1.5× leverage**. H547 is the best choice at 1.5× (MaxDD −9.30%, CAGR 8.20%, Sharpe 1.536).
 
-### Batch 2: Dynamic Leverage (H556–H560)
+### Batch 2: Dynamic Leverage (H556–H558)
 
 | # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
 |---|------|--------|--------|-------|--------|-----------|-------|
@@ -1584,17 +1584,42 @@ Vol-targeting (H556) improves Sharpe +0.048 over base. Ratchet (H557) degrades S
 | **558** | **CalmarOptimizedMDR** | **1.697** | **[1.309, 2.090]** | **−6.60%** | **1.802** | +0.519 | **KEEP. Leveraged-Calmar objective on full 55-strategy pool. H065 30%/H473 28.6%/H157 16.6%/H076 15.6%. CAGR 11.89% best in Set8. Calmar_lev 1.802 best in Set8. H001 corr +0.519 (lowest Set8 ensemble).** |
 
 **H558 discovery — optimize the deployed metric, not the base metric:**
-Pure Calmar on base: Cal_base 1.863 (best unleveraged) → Cal_lev 1.429 under leverage. Leveraged-Calmar: Cal_base 1.280 (lowest) → Cal_lev 1.802 (best). The optimizer co-adapts portfolio to the vol-targeting mechanism. H473 (L/S PCA reversal) grows to 28.6% weight — its market-neutral vol profile pairs well with vol-targeting, lowering H001 corr to +0.519. **H558 is CAGR/Calmar champion (11.89%/1.802); H556 remains Sharpe champion (1.790).** When deploying with leverage, always optimize for the leveraged objective directly.
+Pure Calmar on base: Cal_base 1.863 (best unleveraged) → Cal_lev 1.429 under leverage. Leveraged-Calmar: Cal_base 1.280 (lowest) → Cal_lev 1.802 (best). The optimizer co-adapts portfolio to the vol-targeting mechanism. H473 (L/S PCA reversal) grows to 28.6% weight — its market-neutral vol profile pairs well with vol-targeting, lowering H001 corr to +0.519. **H558 is CAGR/Calmar champion (11.89%/1.802); H556 was Sharpe champion (1.790) until H559.** When deploying with leverage, always optimize for the leveraged objective directly.
+
+### Batch 3: Leveraged Objective Optimization (H559–H560)
+
+| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|-------|--------|-----------|-------|
+| **559** | **LeveragedSharpeMDR** | **1.879** | **[1.483, 2.268]** | **−9.73%** | **1.344** | +0.451 | **NEW CHAMPION. Lev-Sharpe objective beats H556 post-hoc approach (+0.089 Sharpe). 12/12 folds positive [1.157, 3.077]. Top: H076 25.4%, H065 21.1%, H473 15.0%, H265 14.7%. CAGR 13.08%.** |
+| **560** | **ConcentratedPoolMDR** | **1.697** | **[1.309, 2.090]** | **−6.60%** | **1.802** | +0.519 | **KEEP. Lev-Calmar on top-20/30/full pools. Full-55 wins on Cal_lev (1.802 vs 1.764 top-20). H516 "concentrated pool" finding does NOT generalize — full pool is optimal for leveraged SLSQP.** |
+
+**H559 discovery — leveraged-Sharpe objective is the new program champion:**
+Directly optimizing Sh_lev beats applying leverage post-hoc to a Sharpe-optimized base (H556's approach): 1.879 vs 1.790 (+0.089). Confirms H558's principle — "optimize the deployed metric" — generalizes from Calmar to Sharpe. Weight shift vs H556: H076 25.4% (stable), H065 21.1% (down), H473 15.0% (down from H558's 28.6%), H265 14.7% (new), H191/H192 PCA factors enter (12.9% combined). CAGR 13.08% is new program record. H001 corr drops to +0.451 (lowest non-L/S ensemble).
+
+**H559 objective comparison (all on leveraged returns):**
+| Objective | Sh_lev | Cal_lev | So_lev | CAGR_lev | DD_lev |
+|---|---|---|---|---|---|
+| H556 ref (post-hoc) | 1.683 | 1.520 | 1.732 | 11.70% | −7.70% |
+| **Lev-Sharpe** | **1.879** | 1.344 | **1.904** | **13.08%** | −9.73% |
+| Lev-Sortino | 1.874 | 1.397 | 1.922 | 13.20% | −9.45% |
+| Lev-Composite (Sh+Cal+So) | 1.762 | **1.735** | 1.828 | 12.58% | **−7.25%** |
+
+Tradeoff: Lev-Sharpe/Sortino maximize return efficiency (Sharpe ~1.88) at cost of higher DD (−9.7%). Lev-Composite is the Pareto frontier if MaxDD control matters (1.762 Sharpe, 1.735 Calmar, −7.25% DD).
+
+**H560 discovery — concentrated pools don't generalize:**
+H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensembles) does NOT hold for leveraged SLSQP. Pool comparison: Full-55 Cal_lev=1.802 > Top-20 1.764 > Top-30 1.727. The full pool's diversity of low-corr strategies (especially L/S reversal signals) provides coverage that concentrated high-Sharpe pools miss. H560 confirms H558's result as stable.
 
 ---
 
-## Institutional Baseline Qualifiers (as of H556)
+## Institutional Baseline Qualifiers (as of H559)
 
 Set 8 target bar: **Sharpe ≥ 1.5, MaxDD ≤ −10%, Calmar ≥ 0.8** (Sortino ≥ 1.3 not stored in JSON).
-Pre-Set8 count: 11. Current count: **15 strategies**.
+Pre-Set8 count: 11. Current count: **17 strategies**.
 
 | ID | Sharpe | MaxDD | CAGR | Calmar | Set |
 |---|---|---|---|---|---|
+| **H559** | **1.879** | **−9.73%** | **13.08%** | **1.344** | Set8 ← NEW CHAMPION; highest Sharpe and CAGR in program history |
+| **H560** | **1.697** | **−6.60%** | **11.89%** | **1.802** | Set8 |
 | **H556** | **1.790** | **−5.79%** | **9.61%** | **1.660** | Set8 ← only strategy meeting all bars at baseline (no leverage needed) |
 | **H551** | **1.741** | **−4.41%** | **7.53%** | **1.707** | Set8 |
 | **H553** | **1.692** | **−4.22%** | **7.18%** | **1.701** | Set8 |
@@ -1611,4 +1636,4 @@ Pre-Set8 count: 11. Current count: **15 strategies**.
 | H518 | 1.524 | −6.29% | 5.77% | 0.917 | Set7 |
 | H517 | 1.515 | −6.51% | 5.69% | 0.874 | Set7 |
 
-**Key pattern:** Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8% — they clear the bar but just barely. Set 8 additions (H551/H553/H556) are in a different class: Calmar 1.66–1.71, driven by the multi-objective optimizer directly targeting Calmar. H556 is the **only strategy of 404 kept that meets all institutional bars without leverage** — the others need 1.5× to cross the 8% CAGR bar.
+**Key pattern:** H559 is a class apart — Sharpe 1.879 and CAGR 13.08% are both program records, achieved by co-adapting portfolio weights to vol-targeting leverage (lev-Sharpe objective). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%. H556 is the only strategy meeting all institutional bars at baseline (no leverage needed); H559/H560 need leverage for CAGR but clear all other bars comfortably.

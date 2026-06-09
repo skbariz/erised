@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **578** (H001–H578) | **ONGOING** — Set8 Batch2 AA strategies complete; CS H574-H576 running |
-| Strategies kept | **370+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H577 from Set8 | Set8: 8/17 keep (H571-H573/H578 killed; H574-H576/H579-H580 pending) |
+| Strategies tested | **580** (H001–H580) | **ONGOING** — Set8 Batch2 individual strategies complete; H579/H580 ensemble running |
+| Strategies kept | **372+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H576/H577 from Set8 | Set8: 10/20 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H580 pending) |
 
 ---
 
@@ -1648,12 +1648,18 @@ Downside vol is lower than total vol in bull market periods (rising prices have 
 | **577** | **SectorMomentumVolTarget** | **0.655** | **[0.274, 1.058]** | **−38.99%** | **0.167** | **+0.068** | **KEEP. 7-ETF sector momentum top-3 + 12% vol-target. Low H001 corr (+0.068). MaxDD poor standalone but correlation structure may add ensemble value.** |
 | 578 | VNQTLTRiskParity | 0.373 | [−0.017, 0.766] | −28.71% | 0.130 | −0.007 | kill. CI clips negative. VNQ/TLT parity fails — folds 0-3 zero (data gap), inconsistent. |
 | 574 | QuarterlyNIMomentum | 0.495 | [0.128, 0.835] | −22.55% | 0.220 | −0.031 | kill. Sh < 0.51 bar. Folds 0-6 zero (EDGAR gap). Folds 7-11 real signal (0.86-1.30). H001 corr −0.031 (near-zero!). Signal exists but EDGAR gap kills 12-fold OOS. |
-| 575 | ThreeFactorDailyReversal | — | — | — | — | — | running |
-| 576 | QualityMomentumWeeklyRotation | — | — | — | — | — | running |
+| 575 | ThreeFactorDailyReversal | 0.008 | [−0.393, 0.410] | −96.61% | — | −0.010 | kill. MaxDD -97%! Folds 0-1 positive (2.0/3.2) then collapses folds 2-11 (all negative). Classic arbitrage decay. |
+| **576** | **QualityMomentumWeeklyRotation** | **0.732** | **[0.332, 1.143]** | **−36.55%** | **0.255** | **−0.019** | **KEEP. Quality gate (GP/A 40%) + weekly momentum (21d top-20). H001 corr −0.019. EDGAR folds 0-4 zero; folds 5-11 consistently positive (0.21-1.81).** |
 | 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | pending |
 | 580 | QQQIWMAugmentedPool (58) | — | — | — | — | — | pending |
 
-**Batch 2 early finding:** QQQ/IWM/VNQ parity strategies all fail standalone (H571-H573, H578). The new asset classes don't provide enough return vs SPY/TLT H021 baseline to overcome the data gap penalty (folds 0-3 zero). H577 (sector momentum vol-target) is the sole AA keeper with near-zero H001 corr (+0.068). CS strategies H574-H576 running.
+**Batch 2 individual strategy findings:**
+- QQQ/IWM/VNQ parity (H571-H573/H578): all killed. Data gaps + below SPY bar.
+- H574 QuarterlyNIMomentum: killed by EDGAR gap; real signal in folds 7-11 (H001 corr −0.031).
+- H575 ThreeFactorDailyReversal: killed, MaxDD −97%. 3-factor reversal arbitraged away post-2002.
+- H576 QualityMomentumWeeklyRotation: **KEEP**. Sharpe 0.732, H001 corr −0.019. EDGAR folds 0-4 zero but folds 5-11 strong.
+- H577 SectorMomentumVolTarget: **KEEP**. Sharpe 0.655, H001 corr +0.068.
+- **2/8 individual strategies kept.** H579/H580 ensemble expansions running.
 
 ---
 

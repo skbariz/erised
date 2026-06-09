@@ -1,0 +1,43 @@
+{
+  "hypothesis": "H576",
+  "name": "quality-momentum-weekly-rotation",
+  "strategy_class": "QualityMomentumWeeklyRotation",
+  "family": "Set8 Batch2 CS",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.7324,
+  "ci_low": 0.3324,
+  "ci_high": 1.1428,
+  "cagr": 0.093,
+  "max_drawdown": -0.3655,
+  "n_trades": 1,
+  "h001_corr": -0.0185,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.206,
+    1.112,
+    1.81,
+    1.058,
+    1.312,
+    0.735,
+    0.737
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Quality gate (top 40% GP/A) + weekly momentum (21d, top-20). 5-day rebalance. Long-only.",
+  "canonical_params": {
+    "quality_quantile": 0.4,
+    "top_n": 20,
+    "mom_window": 21,
+    "rebalance_period": 5
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

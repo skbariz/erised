@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H575",
+  "name": "three-factor-daily-reversal",
+  "strategy_class": "ThreeFactorDailyReversal",
+  "family": "Set8 Batch2 CS",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.0076,
+  "ci_low": -0.3934,
+  "ci_high": 0.4102,
+  "cagr": -0.0188,
+  "max_drawdown": -0.9661,
+  "n_trades": 7,
+  "h001_corr": -0.0103,
+  "fold_sharpes": [
+    2.011,
+    3.168,
+    -0.957,
+    -0.813,
+    -0.53,
+    0.227,
+    -1.459,
+    -0.759,
+    -2.017,
+    -2.024,
+    -1.116,
+    -1.0
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "3-factor (mkt+size+val) daily residual reversal. L/S top/bottom 10%. Dollar-neutral. Economic grounding vs PCA-based H191/H192.",
+  "canonical_params": {
+    "quantile": 0.1,
+    "beta_window": 60
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

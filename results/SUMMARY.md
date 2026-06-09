@@ -1620,7 +1620,7 @@ H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensem
 | **563** | **FastVolLookbackSharpe** | **1.857** | **[1.457, 2.245]** | **−10.13%** | **1.248** | +0.437 | **KEEP. lb=5d (fast). Worse than H559's 20d (1.879). Fast lookback hurts: whipsaws reduce Sharpe by 0.022. Confirms 20d optimal.** |
 | **565** | **AsymmetricVolTarget** | **1.874** | **[1.479, 2.270]** | **−9.95%** | **1.171** | +0.443 | **KEEP. Asymmetric vol target: fast=5d/slow=20d. Marginal over H559 (1.879→1.874). avg_lev=1.505×. H473 takes 19.2%, H076 22.6%.** |
 | 566 | LevCAGRObjective | 1.859 | [1.459, 2.249] | −9.25% | 1.458 | +0.392 | kill-strict-bar. CAGR 13.48% fails >16% strict bar. Sh 1.859, Cal 1.458 vs H561 (1.921/1.406). CAGR objective doesn't dominate Sharpe objective. |
-| 568 | WalkForwardLeverageParams | — | — | — | — | — | running |
+| **568** | **WalkForwardLeverageParams** | **1.460** | **[1.058, 1.844]** | **−9.93%** | **0.902** | +0.455 | **KEEP standard bar. WF fold-specific param selection: −0.419 Sharpe vs fixed H559 (1.879). Confirms fixed H561 params optimal — fold-specific tuning is overfit.** |
 | 569 | CostAwareLevSharpe | — | — | — | — | — | running |
 | 570 | LeverageRegimeConditional | — | — | — | — | — | running |
 
@@ -1647,7 +1647,7 @@ Downside vol is lower than total vol in bull market periods (rising prices have 
 | 573 | QQQIWMTLTRiskParity | 0.472 | [0.081, 0.865] | −29.36% | 0.133 | −0.044 | kill. Sharpe < SPY 0.51 bar. 3-asset parity doesn't overcome data gap penalty. |
 | **577** | **SectorMomentumVolTarget** | **0.655** | **[0.274, 1.058]** | **−38.99%** | **0.167** | **+0.068** | **KEEP. 7-ETF sector momentum top-3 + 12% vol-target. Low H001 corr (+0.068). MaxDD poor standalone but correlation structure may add ensemble value.** |
 | 578 | VNQTLTRiskParity | 0.373 | [−0.017, 0.766] | −28.71% | 0.130 | −0.007 | kill. CI clips negative. VNQ/TLT parity fails — folds 0-3 zero (data gap), inconsistent. |
-| 574 | QuarterlyNIMomentum | — | — | — | — | — | running |
+| 574 | QuarterlyNIMomentum | 0.495 | [0.128, 0.835] | −22.55% | 0.220 | −0.031 | kill. Sh < 0.51 bar. Folds 0-6 zero (EDGAR gap). Folds 7-11 real signal (0.86-1.30). H001 corr −0.031 (near-zero!). Signal exists but EDGAR gap kills 12-fold OOS. |
 | 575 | ThreeFactorDailyReversal | — | — | — | — | — | running |
 | 576 | QualityMomentumWeeklyRotation | — | — | — | — | — | running |
 | 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | pending |

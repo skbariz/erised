@@ -17228,7 +17228,7 @@ class SectorLeaderMomentumFilter(CrossSectionalStrategy):
         momentum = prices_panel / prices_panel.shift(self.mom_lookback) - 1
         gp_ta_z = _cs_zscore(gp_ta).fillna(0.0)
         qa_mom = momentum * gp_ta_z
-        sector_list = [s for s in self.sectors.dropna().unique()]
+        sector_list = list(self.sectors.dropna().unique())
         sector_tickers = {
             s: [t for t in self.sectors[self.sectors == s].index if t in prices_panel.columns]
             for s in sector_list

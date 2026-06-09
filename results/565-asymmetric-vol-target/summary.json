@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H565",
+  "name": "asymmetric-vol-target",
+  "strategy_class": "AsymmetricVolTarget",
+  "family": "Set8 Batch4 Ensemble",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.874,
+  "ci_low": 1.479,
+  "ci_high": 2.2695,
+  "cagr": 0.1165,
+  "max_drawdown": -0.0995,
+  "n_trades": 0,
+  "h001_corr": 0.4429,
+  "fold_sharpes": [
+    2.833,
+    1.658,
+    1.986,
+    1.612,
+    2.056,
+    1.255,
+    1.524,
+    1.888,
+    1.611,
+    3.036,
+    1.279,
+    1.871
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Asymmetric vol target: fast=5d / slow=20d. avg_lev_asym=1.505x vs avg_lev_sym=1.514x. Symmetric baseline: Sh_lev=1.879/DD_lev=-9.73%. H559 reference Sh_lev=1.879/DD_lev=-9.73%.",
+  "canonical_params": {
+    "objective": "lev_sharpe_asymmetric",
+    "vol_lookback_fast": 5,
+    "vol_lookback_slow": 20,
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "avg_lev": 1.505426495884286,
+    "top_weights": {
+      "H016": 0.059523356323783076,
+      "H065": 0.18254280354585675,
+      "H076": 0.2264712751081758,
+      "H097": 0.05204805073299295,
+      "H157": 0.016941440051051068,
+      "H191": 0.03590217495992632,
+      "H192": 0.053470462056118176,
+      "H265": 0.13088227941302877,
+      "H268": 0.0501760204072811,
+      "H473": 0.19204213740177478
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

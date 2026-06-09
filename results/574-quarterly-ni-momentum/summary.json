@@ -1,0 +1,41 @@
+{
+  "hypothesis": "H574",
+  "name": "quarterly-ni-momentum",
+  "strategy_class": "QuarterlyNIMomentum",
+  "family": "Set8 Batch2 CS",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 0.4945,
+  "ci_low": 0.1275,
+  "ci_high": 0.8351,
+  "cagr": 0.0624,
+  "max_drawdown": -0.2255,
+  "n_trades": 17,
+  "h001_corr": -0.031,
+  "fold_sharpes": [
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.0,
+    0.89,
+    0.304,
+    1.304,
+    0.986,
+    0.866
+  ],
+  "decision": "kill",
+  "kept": false,
+  "notes": "PEAD proxy: top quintile by delta(NI)/TA (positive NI surprises). Quarterly rebalance. EDGAR ~2009; folds 0-5 zero.",
+  "canonical_params": {
+    "rebalance_period": 63,
+    "within_sector_quantile": 0.2
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": false
+}

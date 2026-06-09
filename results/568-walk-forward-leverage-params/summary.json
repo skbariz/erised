@@ -1,0 +1,131 @@
+{
+  "hypothesis": "H568",
+  "name": "walk-forward-leverage-params",
+  "strategy_class": "WalkForwardLeverageParams",
+  "family": "Set8 Batch4 Leverage",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.4595,
+  "ci_low": 1.0583,
+  "ci_high": 1.8443,
+  "cagr": 0.0896,
+  "max_drawdown": -0.0993,
+  "n_trades": 0,
+  "h001_corr": 0.4554,
+  "fold_sharpes": [
+    2.617,
+    1.703,
+    1.191,
+    1.432,
+    1.285,
+    1.111,
+    0.929,
+    1.962,
+    1.382,
+    2.576,
+    0.44,
+    1.633
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Walk-forward leverage param selection: 9 combos of tv x cap per fold. Fixed-params reference (H559 style): Sh_lev=1.879 Cal=1.344 CAGR=13.08% DD=-9.73%. WF delta vs fixed: -0.419 Sharpe. Lookback fixed at 20d. Params per fold: fold0: tv=0.065 cap=2.0x; fold1: tv=0.080 cap=1.5x; fold2: tv=0.080 cap=1.5x; fold3: tv=0.080 cap=1.5x; fold4: tv=0.080 cap=1.5x; fold5: tv=0.080 cap=2.0x; fold6: tv=0.050 cap=2.0x; fold7: tv=0.050 cap=3.0x; fold8: tv=0.050 cap=3.0x; fold9: tv=0.050 cap=3.0x; fold10: tv=0.050 cap=3.0x; fold11: tv=0.050 cap=1.5x.",
+  "canonical_params": {
+    "param_grid": [
+      [
+        0.05,
+        1.5
+      ],
+      [
+        0.05,
+        2.0
+      ],
+      [
+        0.05,
+        3.0
+      ],
+      [
+        0.065,
+        1.5
+      ],
+      [
+        0.065,
+        2.0
+      ],
+      [
+        0.065,
+        3.0
+      ],
+      [
+        0.08,
+        1.5
+      ],
+      [
+        0.08,
+        2.0
+      ],
+      [
+        0.08,
+        3.0
+      ]
+    ],
+    "lookback": 20,
+    "fold_params": [
+      [
+        0.065,
+        2.0
+      ],
+      [
+        0.08,
+        1.5
+      ],
+      [
+        0.08,
+        1.5
+      ],
+      [
+        0.08,
+        1.5
+      ],
+      [
+        0.08,
+        1.5
+      ],
+      [
+        0.08,
+        2.0
+      ],
+      [
+        0.05,
+        2.0
+      ],
+      [
+        0.05,
+        3.0
+      ],
+      [
+        0.05,
+        3.0
+      ],
+      [
+        0.05,
+        3.0
+      ],
+      [
+        0.05,
+        3.0
+      ],
+      [
+        0.05,
+        1.5
+      ]
+    ],
+    "fixed_ref_sh_lev": 1.8789,
+    "delta_sh_lev": -0.4194,
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

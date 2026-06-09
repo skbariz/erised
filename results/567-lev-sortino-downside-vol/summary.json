@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H567",
+  "name": "lev-sortino-downside-vol",
+  "strategy_class": "LevSortinoDownsideVol",
+  "family": "Set8 Batch4 Leverage",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.8887,
+  "ci_low": 1.4955,
+  "ci_high": 2.2832,
+  "cagr": 0.1417,
+  "max_drawdown": -0.0966,
+  "n_trades": 0,
+  "h001_corr": 0.4566,
+  "fold_sharpes": [
+    2.633,
+    1.75,
+    2.233,
+    1.643,
+    2.062,
+    1.226,
+    1.488,
+    1.831,
+    1.865,
+    2.929,
+    1.438,
+    1.67
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Best objective: lev-sharpe-std (selected by max Sh downside-lev). Downside vol targeting with lev-Sortino SLSQP. Leverage params: 6.5%/2.0x/20d. Avg downside-vol leverage: 1.631x. All objectives: lev-sharpe-std: Sh_std=1.879/Sh_ds=1.889/Cal_ds=1.466/CAGR_ds=14.17%/DD_ds=-9.66%; lev-sortino-ds: Sh_std=1.832/Sh_ds=1.889/Cal_ds=1.465/CAGR_ds=13.89%/DD_ds=-9.48%; lev-sharpe-ds: Sh_std=1.865/Sh_ds=1.904/Cal_ds=1.483/CAGR_ds=14.14%/DD_ds=-9.54%. H559 reference: Sh_lev=1.879 (standard vol-targeting).",
+  "canonical_params": {
+    "objective": "lev-sharpe-std",
+    "leverage_type": "downside_vol",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 20,
+    "avg_leverage": 1.6311883799548286,
+    "top_weights": {
+      "H016": 0.05636489203231235,
+      "H019": 0.011805585370421572,
+      "H065": 0.21124693945633555,
+      "H076": 0.25427754259454904,
+      "H097": 0.028843915250994556,
+      "H191": 0.05641674704993755,
+      "H192": 0.07307386148879261,
+      "H265": 0.14660138394614902,
+      "H268": 0.011844092520517076,
+      "H473": 0.14952504028999458
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

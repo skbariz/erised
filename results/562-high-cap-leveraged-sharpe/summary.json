@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H562",
+  "name": "high-cap-leveraged-sharpe",
+  "strategy_class": "HighCapLeveragedSharpe",
+  "family": "Set8 Batch3 Ensemble",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.9209,
+  "ci_low": 1.5226,
+  "ci_high": 2.3168,
+  "cagr": 0.107,
+  "max_drawdown": -0.0761,
+  "n_trades": 0,
+  "h001_corr": 0.3952,
+  "fold_sharpes": [
+    2.932,
+    1.541,
+    2.111,
+    1.476,
+    2.456,
+    1.195,
+    1.491,
+    2.0,
+    1.773,
+    3.104,
+    1.357,
+    1.652
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Lev-Sharpe objective with aggressive params: 5.0%/3.0x/20d. Base metrics: Sh=1.771 Cal=0.758 CAGR=8.58% DD=-11.32%. H559 reference Sh_lev=1.879 at 6.5%/2.0x/20d. Hypothesis: lower target vol + higher cap pushes avg leverage to ~1.6-1.8x.",
+  "canonical_params": {
+    "objective": "lev-sharpe",
+    "leverage_target_vol": 0.05,
+    "leverage_max": 3.0,
+    "leverage_lookback": 20,
+    "top_weights": {
+      "H016": 0.029042847441556583,
+      "H065": 0.176453176224113,
+      "H076": 0.29639819987958294,
+      "H097": 0.01492574310856644,
+      "H157": 0.013054140191640747,
+      "H191": 0.034942384627922755,
+      "H192": 0.045476500787557224,
+      "H265": 0.12789833458225228,
+      "H268": 0.06049883188453129,
+      "H473": 0.2013098412722819
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,44 @@
+{
+  "hypothesis": "H561",
+  "name": "leverage-param-grid-search",
+  "strategy_class": "LeverageParamGridSearch",
+  "family": "Set8 Batch4 Leverage",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.9209,
+  "ci_low": 1.5226,
+  "ci_high": 2.3168,
+  "cagr": 0.107,
+  "max_drawdown": -0.0761,
+  "n_trades": 0,
+  "h001_corr": 0.3952,
+  "fold_sharpes": [
+    2.932,
+    1.541,
+    2.111,
+    1.476,
+    2.456,
+    1.195,
+    1.491,
+    2.0,
+    1.773,
+    3.104,
+    1.357,
+    1.652
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Best params: target_vol=0.050, cap=3.0x, lookback=20d. H559 baseline (0.065/2.0x/20d) Sh_lev=1.879. Improvement over H559: +0.042. Top-5 by Sh_lev: tv=0.050/cap=3.0x/lb=20d:Sh=1.921; tv=0.050/cap=2.0x/lb=20d:Sh=1.919; tv=0.050/cap=2.0x/lb=40d:Sh=1.912; tv=0.050/cap=1.5x/lb=40d:Sh=1.907; tv=0.065/cap=3.0x/lb=20d:Sh=1.906. 27 combinations tested.",
+  "canonical_params": {
+    "best_target_vol": 0.05,
+    "best_cap": 3.0,
+    "best_lookback": 20,
+    "h559_baseline_sh_lev": 1.879,
+    "n_combinations": 27
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

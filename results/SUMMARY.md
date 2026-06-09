@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **566** (H001–H566) | **ONGOING** — Set8 Batch4 partially complete |
-| Strategies kept | **369+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565 from Set8 | Set8: 7/9 keep (H554 cancelled, H555 analytic, H566 kill-strict-bar) |
+| Strategies tested | **578** (H001–H578) | **ONGOING** — Set8 Batch2 AA strategies complete; CS H574-H576 running |
+| Strategies kept | **370+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H577 from Set8 | Set8: 8/17 keep (H571-H573/H578 killed; H574-H576/H579-H580 pending) |
 
 ---
 
@@ -1635,6 +1635,25 @@ penalty=20.0: Sh=1.757 / DD=−7.00% (saturated — penalty=10 and 20 identical)
 
 **H567 discovery — downside vol leverage has higher avg leverage and CAGR:**
 Downside vol is lower than total vol in bull market periods (rising prices have positive returns excluded). This means leverage stays at or near cap more often → avg_lev=1.631× vs H559's 1.23×. Result: CAGR 14.17% (new program record), Sharpe 1.889. The Sortino-targeted objective is dominated by the standard lev-Sharpe objective even with downside vol targeting.
+
+---
+
+### Batch 2: Pool Expansion — New Asset Classes + CS Signals (H571–H580)
+
+| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|-------|--------|-----------|-------|
+| 571 | QQQTLTRiskParity | 0.326 | [−0.079, 0.719] | −26.06% | 0.125 | −0.031 | kill. CI clips negative. QQQ/TLT parity fails standalone — folds 0-1 zero, extreme variance. |
+| 572 | IWMTLTRiskParity | 0.426 | [0.033, 0.816] | −27.46% | 0.134 | −0.036 | kill. Sharpe < SPY 0.51 bar. IWM/TLT parity marginally viable but below bar. |
+| 573 | QQQIWMTLTRiskParity | 0.472 | [0.081, 0.865] | −29.36% | 0.133 | −0.044 | kill. Sharpe < SPY 0.51 bar. 3-asset parity doesn't overcome data gap penalty. |
+| **577** | **SectorMomentumVolTarget** | **0.655** | **[0.274, 1.058]** | **−38.99%** | **0.167** | **+0.068** | **KEEP. 7-ETF sector momentum top-3 + 12% vol-target. Low H001 corr (+0.068). MaxDD poor standalone but correlation structure may add ensemble value.** |
+| 578 | VNQTLTRiskParity | 0.373 | [−0.017, 0.766] | −28.71% | 0.130 | −0.007 | kill. CI clips negative. VNQ/TLT parity fails — folds 0-3 zero (data gap), inconsistent. |
+| 574 | QuarterlyNIMomentum | — | — | — | — | — | running |
+| 575 | ThreeFactorDailyReversal | — | — | — | — | — | running |
+| 576 | QualityMomentumWeeklyRotation | — | — | — | — | — | running |
+| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | pending |
+| 580 | QQQIWMAugmentedPool (58) | — | — | — | — | — | pending |
+
+**Batch 2 early finding:** QQQ/IWM/VNQ parity strategies all fail standalone (H571-H573, H578). The new asset classes don't provide enough return vs SPY/TLT H021 baseline to overcome the data gap penalty (folds 0-3 zero). H577 (sector momentum vol-target) is the sole AA keeper with near-zero H001 corr (+0.068). CS strategies H574-H576 running.
 
 ---
 

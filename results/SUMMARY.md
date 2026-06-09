@@ -1617,7 +1617,7 @@ H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensem
 | **562** | **HighCapLeveragedSharpe** | **1.921** | **[1.523, 2.317]** | **−7.61%** | **1.406** | **+0.395** | **KEEP. 5%/3.0×/20d lev-Sharpe. Identical result to H561 best combo — confirms H561 finding. Weight shift vs H559: H076 29.6% (up), H265 12.8% (stable), H473 20.1% (up).** |
 | **564** | **MaxDDConstrainedLevSharpe** | **1.876** | **[1.481, 2.265]** | **−9.43%** | **1.413** | +0.425 | **KEEP. dd_penalty sweep [1,5,10,20]. penalty=1: Sh=1.876/DD=−9.43%; penalty=10: Sh=1.757/DD=−7.00%. Pareto frontier: −0.119 Sharpe buys +2.43pp MaxDD improvement.** |
 | **567** | **LevSortinoDownsideVol** | **1.889** | **[1.496, 2.283]** | **−9.66%** | **1.467** | +0.457 | **KEEP. Downside vol targeting (semi-deviation). Avg lev=1.631× vs H559's 1.23× — downside vol < total vol in bull periods. CAGR 14.17% NEW PROGRAM RECORD. Sh 1.889 > H559 (1.879).** |
-| 563 | FastVolLookbackSharpe | — | — | — | — | — | running |
+| **563** | **FastVolLookbackSharpe** | **1.857** | **[1.457, 2.245]** | **−10.13%** | **1.248** | +0.437 | **KEEP. lb=5d (fast). Worse than H559's 20d (1.879). Fast lookback hurts: whipsaws reduce Sharpe by 0.022. Confirms 20d optimal.** |
 | 565 | AsymmetricVolTarget | — | — | — | — | — | running |
 | 566 | LevCAGRObjective | — | — | — | — | — | running |
 | 568 | WalkForwardLeverageParams | — | — | — | — | — | running |

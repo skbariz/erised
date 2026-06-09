@@ -17309,3 +17309,196 @@ class FundamentalReversalWeekly(CrossSectionalStrategy):
             composite, membership, self.sectors, self.within_sector_quantile, ascending=False
         )
         return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H574: QuarterlyNIMomentum (PEAD proxy)
+# ---------------------------------------------------------------------------
+
+
+class QuarterlyNIMomentum(CrossSectionalStrategy):
+    """H574: Quarterly net-income growth momentum (PEAD proxy).
+
+    Signal: most-recent quarterly NI change scaled by total assets (NI/TA
+    delta). Proxies for post-earnings announcement drift (PEAD) using EDGAR
+    filing data. Long-only top quintile, sector-neutral, quarterly rebalance.
+    EDGAR available from ~2009; folds 0-5 zero returns.
+    """
+
+    name = "quarterly_ni_momentum"
+
+    def __init__(
+        self,
+        net_income: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        within_sector_quantile: float = 0.20,
+        rebalance_period: int = 63,
+    ) -> None:
+        self.net_income = net_income
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.within_sector_quantile = within_sector_quantile
+        self.rebalance_period = rebalance_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+
+        ni = _align_fund(self.net_income, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        # Scaled NI change: delta(NI) / TA — measures surprise magnitude
+        delta_ni = ni.diff()
+        signal = (delta_ni / ta_safe).clip(-0.5, 0.5)
+        # Long-only: only positive NI improvements
+        signal = signal.where(signal > 0, 0.0)
+        daily_w = _sector_neutral_weights(
+            signal, membership, self.sectors, self.within_sector_quantile, ascending=False
+        )
+        return _periodic_rebalance(daily_w, self.rebalance_period)
+
+
+# ---------------------------------------------------------------------------
+# H575: ThreeFactorDailyReversal
+# ---------------------------------------------------------------------------
+
+
+class ThreeFactorDailyReversal(CrossSectionalStrategy):
+    """H575: Daily reversal using 3-factor (market, size, value) residuals.
+
+    Computes each stock's residual daily return after removing exposure to
+    market (SPY), size (IWM-SPY), and value (IVE-IVW) factors via OLS.
+    Long bottom decile (most negative residual, oversold), short top decile
+    (most positive residual, overbought). Dollar-neutral, daily rebalance.
+    More economically grounded than PCA-based H191/H192.
+    """
+
+    name = "three_factor_daily_reversal"
+
+    def __init__(
+        self,
+        spy_rets: pd.Series,
+        size_rets: pd.Series,
+        value_rets: pd.Series,
+        sectors: pd.Series,
+        quantile: float = 0.10,
+    ) -> None:
+        self.spy_rets = spy_rets
+        self.size_rets = size_rets
+        self.value_rets = value_rets
+        self.sectors = sectors
+        self.quantile = quantile
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        stock_rets = prices_panel.pct_change()
+        mkt = self.spy_rets.reindex(stock_rets.index).fillna(0.0)
+        size = self.size_rets.reindex(stock_rets.index).fillna(0.0)
+        val = self.value_rets.reindex(stock_rets.index).fillna(0.0)
+
+        # 3-factor betas via 60d rolling covariance
+        window = 60
+        cov_mf = stock_rets.rolling(window, min_periods=window // 2).cov(mkt)
+        cov_sf = stock_rets.rolling(window, min_periods=window // 2).cov(size)
+        cov_vf = stock_rets.rolling(window, min_periods=window // 2).cov(val)
+        var_mkt = mkt.rolling(window, min_periods=window // 2).var()
+        var_size = size.rolling(window, min_periods=window // 2).var()
+        var_val = val.rolling(window, min_periods=window // 2).var()
+
+        beta_m = cov_mf.div(var_mkt.replace(0, np.nan), axis=0).fillna(1.0)
+        beta_s = cov_sf.div(var_size.replace(0, np.nan), axis=0).fillna(0.0)
+        beta_v = cov_vf.div(var_val.replace(0, np.nan), axis=0).fillna(0.0)
+
+        predicted = (
+            beta_m.multiply(mkt, axis=0)
+            + beta_s.multiply(size, axis=0)
+            + beta_v.multiply(val, axis=0)
+        )
+        residual = stock_rets - predicted
+
+        # Negate residual: most negative residual (oversold) gets highest score
+        signal = -residual
+
+        # Vectorized long/short selection via percentile rank
+        active = membership.reindex(prices_panel.index, method="ffill").fillna(False)
+        sig_active = signal.where(active, np.nan)
+
+        rank_pct = sig_active.rank(axis=1, pct=True, na_option="keep", ascending=False)
+        long_mask = rank_pct <= self.quantile
+        short_mask = rank_pct >= (1.0 - self.quantile)
+
+        long_n = long_mask.sum(axis=1).replace(0, np.nan)
+        short_n = short_mask.sum(axis=1).replace(0, np.nan)
+        long_w = long_mask.div(long_n, axis=0).fillna(0.0)
+        short_w = -short_mask.div(short_n, axis=0).fillna(0.0)
+
+        return (long_w + short_w).shift(1).fillna(0.0)
+
+
+# ---------------------------------------------------------------------------
+# H576: QualityMomentumWeeklyRotation
+# ---------------------------------------------------------------------------
+
+
+class QualityMomentumWeeklyRotation(CrossSectionalStrategy):
+    """H576: Quality gate + weekly momentum rotation.
+
+    Monthly: filter to top-40% of S&P 500 by GP/A (quality universe).
+    Weekly: within quality universe, select top-20 by 21-day return.
+    Rebalance weekly (every 5 trading days). Equal-weight, long-only.
+    Hypothesis: quality gate + weekly momentum captures momentum alpha
+    with lower drawdown than pure weekly momentum.
+    """
+
+    name = "quality_momentum_weekly_rotation"
+
+    def __init__(
+        self,
+        gross_profit: pd.DataFrame,
+        total_assets: pd.DataFrame,
+        sectors: pd.Series,
+        quality_quantile: float = 0.40,
+        top_n: int = 20,
+        mom_window: int = 21,
+        rebalance_period: int = 5,
+        quality_update_period: int = 21,
+    ) -> None:
+        self.gross_profit = gross_profit
+        self.total_assets = total_assets
+        self.sectors = sectors
+        self.quality_quantile = quality_quantile
+        self.top_n = top_n
+        self.mom_window = mom_window
+        self.rebalance_period = rebalance_period
+        self.quality_update_period = quality_update_period
+
+    def generate_weights(
+        self,
+        prices_panel: pd.DataFrame,
+        membership: pd.DataFrame,
+    ) -> pd.DataFrame:
+        gp = _align_fund(self.gross_profit, prices_panel)
+        ta = _align_fund(self.total_assets, prices_panel)
+        ta_safe = ta.where(ta > 0)
+        gpa = (gp / ta_safe).clip(0.0, 5.0)
+
+        active = membership.reindex(prices_panel.index, method="ffill").fillna(False)
+        quality_mask = gpa.where(active, pd.NA)
+        quality_rank = quality_mask.rank(axis=1, ascending=False, pct=True, na_option="keep")
+        in_quality = quality_rank <= self.quality_quantile
+
+        mom = prices_panel.pct_change(self.mom_window)
+        mom_in_quality = mom.where(in_quality & active, pd.NA)
+
+        mom_rank = mom_in_quality.rank(axis=1, ascending=False, na_option="keep")
+        top_n_mask = (mom_rank <= self.top_n) & mom_in_quality.notna()
+        top_count = top_n_mask.sum(axis=1).replace(0, pd.NA)
+        daily_w = top_n_mask.div(top_count, axis=0).fillna(0.0)
+
+        return _periodic_rebalance(daily_w, self.rebalance_period)

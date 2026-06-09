@@ -6899,3 +6899,227 @@ class VIXMeanReversionPort(MultiAssetStrategy):
             {"SPY": spy_scaled.where(tlt_avail, 1.0), "TLT": tlt_adj.where(tlt_avail, 0.0)},
             index=prices.index,
         )
+
+
+# ---------------------------------------------------------------------------
+# H571: QQQTLTRiskParity
+# ---------------------------------------------------------------------------
+
+
+class QQQTLTRiskParity(MultiAssetStrategy):
+    """H571: QQQ/TLT inverse-vol risk parity.
+
+    Identical mechanism to H021 (RiskParity) but uses QQQ (Nasdaq-100) instead
+    of SPY for the equity leg. QQQ has higher historical CAGR and deeper crashes
+    than SPY, giving TLT a more valuable hedge role. QQQ available from 1999-03;
+    folds 0-1 mostly cash (no QQQ+TLT overlap until fold 2).
+    """
+
+    name = "qqq_tlt_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        qqq_r = prices["qqq_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        qqq_vol = qqq_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        inv_qqq = 1.0 / qqq_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_qqq + inv_tlt
+
+        w_qqq = (inv_qqq / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        return pd.DataFrame({"QQQ": w_qqq, "TLT": w_tlt}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# H572: IWMTLTRiskParity
+# ---------------------------------------------------------------------------
+
+
+class IWMTLTRiskParity(MultiAssetStrategy):
+    """H572: IWM/TLT inverse-vol risk parity.
+
+    H021-style risk parity but using IWM (Russell 2000 small-cap) instead of
+    SPY. Small-cap has lower correlation with TLT than large-cap in normal
+    regimes; deeper crashes in recessions. IWM available from 2000-05;
+    folds 0-1 mostly cash.
+    """
+
+    name = "iwm_tlt_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        iwm_r = prices["iwm_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        iwm_vol = iwm_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        inv_iwm = 1.0 / iwm_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_iwm + inv_tlt
+
+        w_iwm = (inv_iwm / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        return pd.DataFrame({"IWM": w_iwm, "TLT": w_tlt}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# H573: QQQIWMTLTRiskParity
+# ---------------------------------------------------------------------------
+
+
+class QQQIWMTLTRiskParity(MultiAssetStrategy):
+    """H573: QQQ/IWM/TLT three-asset inverse-vol risk parity.
+
+    Growth (QQQ) + value/small-cap (IWM) + bonds (TLT). Gracefully degrades
+    to fewer assets when data is unavailable. Both QQQ (1999-03) and IWM
+    (2000-05) start after TLT (2002-07); folds 0-2 mostly cash.
+    """
+
+    name = "qqq_iwm_tlt_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        asset_cols = {"QQQ": "qqq_close", "IWM": "iwm_close", "TLT": "tlt_close"}
+        available = {k: v for k, v in asset_cols.items() if v in prices.columns}
+
+        vols: dict[str, pd.Series] = {}
+        for asset, col in available.items():
+            r = prices[col].pct_change()
+            vols[asset] = r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+                1
+            ) * np.sqrt(252)
+
+        inv_vols = {a: 1.0 / v.replace(0, np.nan) for a, v in vols.items()}
+        total = sum(inv_vols.values())
+        weights = pd.DataFrame(index=prices.index, columns=list(available.keys()), dtype=float)
+        for asset in available:
+            weights[asset] = (inv_vols[asset] / total).fillna(0.0)
+
+        return weights
+
+
+# ---------------------------------------------------------------------------
+# H578: VNQTLTRiskParity
+# ---------------------------------------------------------------------------
+
+
+class VNQTLTRiskParity(MultiAssetStrategy):
+    """H578: VNQ/TLT inverse-vol risk parity.
+
+    REITs (VNQ) paired with long-duration Treasuries (TLT). REITs benefit from
+    falling rates like TLT but also from rising real estate values (anti-TLT).
+    The ambiguous VNQ-TLT correlation may produce a distinctive risk profile.
+    VNQ available from 2004-09; folds 0-3 mostly cash.
+    """
+
+    name = "vnq_tlt_risk_parity"
+
+    def __init__(self, vol_lookback: int = 60) -> None:
+        self.vol_lookback = vol_lookback
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        vnq_r = prices["vnq_close"].pct_change()
+        tlt_r = prices["tlt_close"].pct_change()
+
+        vnq_vol = vnq_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        tlt_vol = tlt_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+
+        inv_vnq = 1.0 / vnq_vol.replace(0, np.nan)
+        inv_tlt = 1.0 / tlt_vol.replace(0, np.nan)
+        total = inv_vnq + inv_tlt
+
+        w_vnq = (inv_vnq / total).fillna(0.0)
+        w_tlt = (inv_tlt / total).fillna(0.0)
+
+        return pd.DataFrame({"VNQ": w_vnq, "TLT": w_tlt}, index=prices.index)
+
+
+# ---------------------------------------------------------------------------
+# H577: SectorMomentumVolTarget
+# ---------------------------------------------------------------------------
+
+
+class SectorMomentumVolTarget(MultiAssetStrategy):
+    """H577: Sector momentum with vol-targeting overlay.
+
+    Ranks equity ETFs (XLP, XLU, IVE, IVW, QQQ, IWM, VNQ) by 6-month
+    momentum; holds top-N risk-parity weighted. Applies vol-targeting:
+    scales total exposure by min(1, target_vol/realized_vol). Pure momentum
+    signal without regime conditioning (contrast with H063/H065).
+    """
+
+    name = "sector_momentum_vol_target"
+
+    _ETFS = ["XLP", "XLU", "IVE", "IVW", "QQQ", "IWM", "VNQ"]
+
+    def __init__(
+        self,
+        mom_window: int = 126,
+        vol_lookback: int = 60,
+        top_n: int = 3,
+        target_vol: float = 0.12,
+    ) -> None:
+        self.mom_window = mom_window
+        self.vol_lookback = vol_lookback
+        self.top_n = top_n
+        self.target_vol = target_vol
+
+    def generate_weights(self, prices: pd.DataFrame) -> pd.DataFrame:
+        col_map = {a: f"{a.lower()}_close" for a in self._ETFS}
+        available = {a: col for a, col in col_map.items() if col in prices.columns}
+
+        if not available:
+            return pd.DataFrame({"SPY": pd.Series(1.0, index=prices.index)})
+
+        mom_df = pd.DataFrame(
+            {a: prices[col].pct_change(self.mom_window) for a, col in available.items()}
+        )
+        ret_df = pd.DataFrame({a: prices[col].pct_change() for a, col in available.items()})
+        vol_df = ret_df.rolling(self.vol_lookback, min_periods=self.vol_lookback // 2).std()
+        inv_vol_df = vol_df.replace(0, np.nan).rdiv(1).fillna(1.0)
+
+        mom_rank = mom_df.rank(axis=1, ascending=False, na_option="keep")
+        top_mask = (mom_rank <= self.top_n) & mom_rank.notna()
+
+        raw = inv_vol_df.where(top_mask, 0.0)
+        total = raw.sum(axis=1).replace(0, np.nan)
+        etf_w = raw.div(total, axis=0).fillna(0.0)
+
+        # Vol-targeting: scale total ETF exposure
+        port_r = (etf_w.shift(1) * ret_df).sum(axis=1)
+        port_vol = port_r.rolling(self.vol_lookback, min_periods=self.vol_lookback).std().shift(
+            1
+        ) * np.sqrt(252)
+        scale = (self.target_vol / port_vol.replace(0, np.nan)).clip(upper=1.0).fillna(1.0)
+
+        etf_w_scaled = etf_w.multiply(scale, axis=0)
+
+        no_etf = top_mask.sum(axis=1) == 0
+        etf_w_scaled["SPY"] = no_etf.astype(float)
+
+        return etf_w_scaled.shift(1).fillna(0.0)

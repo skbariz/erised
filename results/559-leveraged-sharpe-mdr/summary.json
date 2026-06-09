@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H559",
+  "name": "leveraged-sharpe-mdr",
+  "strategy_class": "LeveragedSharpeMDR",
+  "family": "Set8 Batch3 Ensemble",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.8789,
+  "ci_low": 1.4828,
+  "ci_high": 2.2681,
+  "cagr": 0.1308,
+  "max_drawdown": -0.0973,
+  "n_trades": 0,
+  "h001_corr": 0.4513,
+  "fold_sharpes": [
+    2.656,
+    1.558,
+    2.132,
+    1.65,
+    2.156,
+    1.157,
+    1.433,
+    2.013,
+    1.891,
+    3.077,
+    1.277,
+    1.651
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Best objective: lev-sharpe (selected by max Sh_lev). Leveraged at 6.5%/2.0x (H556 params). All objectives: H556-ref: Sh_base=1.721/Sh_lev=1.683/Cal_lev=1.520/So_lev=1.732/CAGR=11.70%/DD=-7.70%; lev-sharpe: Sh_base=1.775/Sh_lev=1.879/Cal_lev=1.344/So_lev=1.904/CAGR=13.08%/DD=-9.73%; lev-sortino: Sh_base=1.792/Sh_lev=1.874/Cal_lev=1.397/So_lev=1.922/CAGR=13.20%/DD=-9.45%; lev-composite: Sh_base=1.775/Sh_lev=1.762/Cal_lev=1.735/So_lev=1.828/CAGR=12.58%/DD=-7.25%. Base metrics: Sh=1.775 Cal=0.778 CAGR=9.59% DD=-12.32%. H556 reference Sh_lev=1.790 (H551 weights + post-hoc leverage).",
+  "canonical_params": {
+    "objective": "lev-sharpe",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 20,
+    "top_weights": {
+      "H016": 0.05636489203231235,
+      "H019": 0.011805585370421572,
+      "H065": 0.21124693945633555,
+      "H076": 0.25427754259454904,
+      "H097": 0.028843915250994556,
+      "H191": 0.05641674704993755,
+      "H192": 0.07307386148879261,
+      "H265": 0.14660138394614902,
+      "H268": 0.011844092520517076,
+      "H473": 0.14952504028999458
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

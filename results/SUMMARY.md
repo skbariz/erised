@@ -1609,16 +1609,46 @@ Tradeoff: Lev-Sharpe/Sortino maximize return efficiency (Sharpe ~1.88) at cost o
 **H560 discovery — concentrated pools don't generalize:**
 H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensembles) does NOT hold for leveraged SLSQP. Pool comparison: Full-55 Cal_lev=1.802 > Top-20 1.764 > Top-30 1.727. The full pool's diversity of low-corr strategies (especially L/S reversal signals) provides coverage that concentrated high-Sharpe pools miss. H560 confirms H558's result as stable.
 
+### Batch 4: Leverage Parameter Optimization (H561–H570)
+
+| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|-------|--------|-----------|-------|
+| **561** | **LeverageParamGridSearch** | **1.921** | **[1.523, 2.317]** | **−7.61%** | **1.406** | **+0.395** | **NEW CHAMPION. 27-combo grid (tv×cap×lb). Best: tv=0.050/cap=3.0×/lb=20d. +0.042 over H559. Top-5 all use tv=0.05 — lower target vol = strictly better Sharpe AND MaxDD.** |
+| **562** | **HighCapLeveragedSharpe** | **1.921** | **[1.523, 2.317]** | **−7.61%** | **1.406** | **+0.395** | **KEEP. 5%/3.0×/20d lev-Sharpe. Identical result to H561 best combo — confirms H561 finding. Weight shift vs H559: H076 29.6% (up), H265 12.8% (stable), H473 20.1% (up).** |
+| **564** | **MaxDDConstrainedLevSharpe** | **1.876** | **[1.481, 2.265]** | **−9.43%** | **1.413** | +0.425 | **KEEP. dd_penalty sweep [1,5,10,20]. penalty=1: Sh=1.876/DD=−9.43%; penalty=10: Sh=1.757/DD=−7.00%. Pareto frontier: −0.119 Sharpe buys +2.43pp MaxDD improvement.** |
+| **567** | **LevSortinoDownsideVol** | **1.889** | **[1.496, 2.283]** | **−9.66%** | **1.467** | +0.457 | **KEEP. Downside vol targeting (semi-deviation). Avg lev=1.631× vs H559's 1.23× — downside vol < total vol in bull periods. CAGR 14.17% NEW PROGRAM RECORD. Sh 1.889 > H559 (1.879).** |
+| 563 | FastVolLookbackSharpe | — | — | — | — | — | running |
+| 565 | AsymmetricVolTarget | — | — | — | — | — | running |
+| 566 | LevCAGRObjective | — | — | — | — | — | running |
+| 568 | WalkForwardLeverageParams | — | — | — | — | — | running |
+| 569 | CostAwareLevSharpe | — | — | — | — | — | running |
+| 570 | LeverageRegimeConditional | — | — | — | — | — | running |
+
+**H561/H562 discovery — target_vol=0.05 strictly dominates 0.065:**
+All top-5 grid results use target_vol=0.05. Lower target vol de-risks more aggressively (avg leverage lower) but the SLSQP re-optimizes weights to compensate, finding a better risk-adjusted portfolio. Result: 1.921 Sharpe (+0.042 over H559) AND −7.61% MaxDD (+2.12pp better). H559 strictly dominated by H561/H562 on both Sharpe and MaxDD — only CAGR is lower (10.7% vs 13.08%) because lower leverage means less CAGR scaling.
+
+**H564 Pareto frontier mapping:**
+penalty=1.0: Sh=1.876 / DD=−9.43% (near H559)
+penalty=5.0: Sh=1.861 / DD=−8.98%
+penalty=10.0: Sh=1.757 / DD=−7.00% ← crossing the 7% threshold costs 0.119 Sharpe
+penalty=20.0: Sh=1.757 / DD=−7.00% (saturated — penalty=10 and 20 identical)
+
+**H567 discovery — downside vol leverage has higher avg leverage and CAGR:**
+Downside vol is lower than total vol in bull market periods (rising prices have positive returns excluded). This means leverage stays at or near cap more often → avg_lev=1.631× vs H559's 1.23×. Result: CAGR 14.17% (new program record), Sharpe 1.889. The Sortino-targeted objective is dominated by the standard lev-Sharpe objective even with downside vol targeting.
+
 ---
 
-## Institutional Baseline Qualifiers (as of H559)
+## Institutional Baseline Qualifiers (as of H562)
 
 Set 8 target bar: **Sharpe ≥ 1.5, MaxDD ≤ −10%, Calmar ≥ 0.8** (Sortino ≥ 1.3 not stored in JSON).
 Pre-Set8 count: 11. Current count: **17 strategies**.
 
 | ID | Sharpe | MaxDD | CAGR | Calmar | Set |
 |---|---|---|---|---|---|
-| **H559** | **1.879** | **−9.73%** | **13.08%** | **1.344** | Set8 ← NEW CHAMPION; highest Sharpe and CAGR in program history |
+| **H561** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← **NEW CHAMPION**; tv=0.05/cap=3.0× strictly dominates H559 on Sharpe AND MaxDD |
+| **H562** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← tied H561 (same params); confirms H561 |
+| **H567** | **1.889** | **−9.66%** | **14.17%** | **1.467** | Set8 Batch4 ← **CAGR record**; downside vol targeting avg_lev=1.631× |
+| **H559** | **1.879** | **−9.73%** | **13.08%** | **1.344** | Set8 (prior champion) |
 | **H560** | **1.697** | **−6.60%** | **11.89%** | **1.802** | Set8 |
 | **H556** | **1.790** | **−5.79%** | **9.61%** | **1.660** | Set8 ← only strategy meeting all bars at baseline (no leverage needed) |
 | **H551** | **1.741** | **−4.41%** | **7.53%** | **1.707** | Set8 |
@@ -1636,4 +1666,4 @@ Pre-Set8 count: 11. Current count: **17 strategies**.
 | H518 | 1.524 | −6.29% | 5.77% | 0.917 | Set7 |
 | H517 | 1.515 | −6.51% | 5.69% | 0.874 | Set7 |
 
-**Key pattern:** H559 is a class apart — Sharpe 1.879 and CAGR 13.08% are both program records, achieved by co-adapting portfolio weights to vol-targeting leverage (lev-Sharpe objective). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%. H556 is the only strategy meeting all institutional bars at baseline (no leverage needed); H559/H560 need leverage for CAGR but clear all other bars comfortably.
+**Key pattern:** H561/H562 are new champions at Sharpe 1.921 — target_vol=0.05/cap=3.0× strictly dominates H559 on both Sharpe and MaxDD. H567's downside vol targeting pushes CAGR to 14.17% (new program record). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%. H556 is the only strategy meeting all institutional bars at baseline (no leverage needed).

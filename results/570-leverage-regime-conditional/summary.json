@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H570",
+  "name": "leverage-regime-conditional",
+  "strategy_class": "LeverageRegimeConditional",
+  "family": "Set8 Batch4 Leverage",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 2.0214,
+  "ci_low": 1.6247,
+  "ci_high": 2.42,
+  "cagr": 0.1279,
+  "max_drawdown": -0.075,
+  "n_trades": 0,
+  "h001_corr": 0.4791,
+  "fold_sharpes": [
+    2.246,
+    1.927,
+    2.426,
+    1.707,
+    2.458,
+    1.29,
+    1.632,
+    1.918,
+    2.053,
+    3.158,
+    1.657,
+    1.834
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Regime-conditional leverage: bull (SPY>200d MA) cap=2.5x, bear cap=1.0x. Vol-target=6.5%/lookback=20d. Bull regime fraction: 61.7%. Flat-cap reference (H559 style): Sh_lev=1.879 Cal=1.344 CAGR=13.08% DD=-9.73%. Regime conditional: Sh_lev=2.021 Cal=1.706 CAGR=12.79% DD=-7.50%. Delta Sh_lev: +0.143. H559 reference: Sh_lev=1.879. H556 kill bar: Sh_lev=1.790.",
+  "canonical_params": {
+    "objective": "lev-sharpe-regime-conditional",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "bull_regime_fraction": 0.6173,
+    "flat_ref_sh_lev": 1.8789,
+    "delta_sh_lev_vs_flat": 0.1426,
+    "top_weights": {
+      "H016": 0.019353495624938755,
+      "H019": 0.01711625848456035,
+      "H065": 0.23542881375010213,
+      "H076": 0.24070994332983633,
+      "H191": 0.020862699037652428,
+      "H192": 0.06518656981760905,
+      "H194": 0.015256452188289376,
+      "H199": 0.021070600925269963,
+      "H265": 0.14131547291861993,
+      "H471": 0.015256263184026871,
+      "H473": 0.20232748591232977
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

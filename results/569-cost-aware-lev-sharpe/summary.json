@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H569",
+  "name": "cost-aware-lev-sharpe",
+  "strategy_class": "CostAwareLevSharpe",
+  "family": "Set8 Batch4 Leverage",
+  "run_date": "2026-06-09",
+  "oos_sharpe": 1.7312,
+  "ci_low": 1.3281,
+  "ci_high": 2.1189,
+  "cagr": 0.126,
+  "max_drawdown": -0.0953,
+  "n_trades": 0,
+  "h001_corr": 0.4044,
+  "fold_sharpes": [
+    2.108,
+    1.176,
+    2.405,
+    1.357,
+    1.937,
+    0.85,
+    1.501,
+    1.87,
+    1.972,
+    2.932,
+    1.285,
+    1.433
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Realistic borrow cost (Fed Funds step-function + 50bps spread). Mean borrow rate: 2.877%/yr vs H559 flat 0.500%/yr. Flat-cost reference: Sh_lev=1.879 Cal=1.344 CAGR=13.08% DD=-9.73%. Realistic-cost: Sh_lev=1.731 Cal=1.322 CAGR=12.60% DD=-9.53%. Delta Sh_lev: -0.148. H559 reference Sh_lev=1.879 (flat cost).",
+  "canonical_params": {
+    "objective": "lev-sharpe-realistic-cost",
+    "leverage_target_vol": 0.065,
+    "leverage_max": 2.0,
+    "leverage_lookback": 20,
+    "borrow_mean_annual": 0.0288,
+    "flat_cost_ref_sh_lev": 1.8789,
+    "delta_sh_lev_vs_flat": -0.1477,
+    "top_weights": {
+      "H019": 0.03309666437392293,
+      "H065": 0.3387905558030817,
+      "H076": 0.2503299650384004,
+      "H082": 0.032380981352264956,
+      "H191": 0.15484809354517087,
+      "H192": 0.1219378633441605,
+      "H265": 0.06861587654299817
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

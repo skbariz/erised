@@ -124,7 +124,7 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **590** (H001–H590) | **ONGOING** — Batch3 H581-H590 running; H579 pending; Batch3 complete when runners finish |
+| Strategies tested | **590** (H001–H590) | **PAUSED** — H579/H581-H590 stopped; runners+designs committed; relaunch when ready |
 | Strategies kept | **375+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577/H580 from Set8 | Set8: 13/23 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H581-H590 pending) |
 
 ---
@@ -1653,7 +1653,7 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 | 574 | QuarterlyNIMomentum | 0.495 | [0.128, 0.835] | −22.55% | 0.220 | −0.031 | kill. Sh < 0.51 bar. Folds 0-6 zero (EDGAR gap). Folds 7-11 real signal (0.86-1.30). H001 corr −0.031 (near-zero!). Signal exists but EDGAR gap kills 12-fold OOS. |
 | 575 | ThreeFactorDailyReversal | 0.008 | [−0.393, 0.410] | −96.61% | — | −0.010 | kill. MaxDD -97%! Folds 0-1 positive (2.0/3.2) then collapses folds 2-11 (all negative). Classic arbitrage decay. |
 | **576** | **QualityMomentumWeeklyRotation** | **0.732** | **[0.332, 1.143]** | **−36.55%** | **0.255** | **−0.019** | **KEEP. Quality gate (GP/A 40%) + weekly momentum (21d top-20). H001 corr −0.019. EDGAR folds 0-4 zero; folds 5-11 consistently positive (0.21-1.81).** |
-| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | running |
+| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | stopped — killed before completion; rerun when ready |
 | **580** | **QQQIWMAugmentedPool (58)** | **1.947** | **[1.546, 2.347]** | **−7.69%** | **0.771** | **+0.378** | **KEEP. 58-strat pool (55+H571/H572/H573). IWM (H572) gets 5.7% weight; QQQ gets 0. +0.026 Sharpe over H561. IWM's correlation structure adds marginal diversification.** |
 
 **Batch 2 individual strategy findings:**
@@ -1671,18 +1671,19 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 
 | # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
 |---|------|--------|--------|-------|--------|-----------|-------|
-| 581 | VIXRegimeConditional | — | — | — | — | — | running — VIX<20 = bull vs SPY MA |
-| 582 | ThreeStateRegimeLeverage | — | — | — | — | — | running — strong/neutral/bear |
-| 583 | RegimeSortinoLeverage | — | — | — | — | — | running — downside vol targeting |
-| 584 | ExpandedPoolRegimeConditional | — | — | — | — | — | running — +H576/H577 (57 strats) |
-| 585 | SPYTLTCorrRegimeConditional | — | — | — | — | — | running — correlation as regime |
-| 586 | AsymmetricVolTargetRegime | — | — | — | — | — | running — tv+cap both vary |
-| 587 | RegimeConditionalCalmar | — | — | — | — | — | running — Calmar obj + regime |
-| 588 | RealBorrowRegimeConditional | — | — | — | — | — | running — H570 + Fed Funds cost |
-| 589 | DurationFilteredRegime | — | — | — | — | — | running — 10d persistence filter |
-| 590 | RegimeConditionalMaxDDPenalty | — | — | — | — | — | running — MaxDD penalty in bear |
+| 581 | VIXRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in (data-load phase); rerun when ready |
+| 582 | ThreeStateRegimeLeverage | — | — | — | — | — | stopped — killed ~34 min in |
+| 583 | RegimeSortinoLeverage | — | — | — | — | — | stopped — killed ~34 min in |
+| 584 | ExpandedPoolRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
+| 585 | SPYTLTCorrRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
+| 586 | AsymmetricVolTargetRegime | — | — | — | — | — | stopped — killed ~34 min in |
+| 587 | RegimeConditionalCalmar | — | — | — | — | — | stopped — killed ~34 min in |
+| 588 | RealBorrowRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
+| 589 | DurationFilteredRegime | — | — | — | — | — | stopped — killed ~34 min in |
+| 590 | RegimeConditionalMaxDDPenalty | — | — | — | — | — | stopped — killed ~34 min in |
 
-**Key question:** Does any regime signal beat H570's 200d MA (Sharpe 2.021)? Does H570 survive realistic borrow cost (H588)?
+**Status:** All H581-H590 stopped before producing results (34 min into ~5-7 hour runs). Runners and design docs committed. Relaunch with `uv run python scripts/run_h58X.py` when ready.
+**Key question (pending):** Does any regime signal beat H570's 200d MA (Sharpe 2.021)? Does H570 survive realistic borrow cost (H588)?
 
 ---
 

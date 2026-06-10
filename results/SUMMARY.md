@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **580** (H001–H580) | **ONGOING** — Set8 Batch2/4 complete; H579/H580 ensemble pending; Batch3 (H581-H590) in design |
-| Strategies kept | **374+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577 from Set8 | Set8: 12/22 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H580 pending) |
+| Strategies tested | **590** (H001–H590) | **ONGOING** — Batch3 H581-H590 running; H579 pending; Batch3 complete when runners finish |
+| Strategies kept | **375+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577/H580 from Set8 | Set8: 13/23 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H581-H590 pending) |
 
 ---
 
@@ -1653,16 +1653,17 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 | 574 | QuarterlyNIMomentum | 0.495 | [0.128, 0.835] | −22.55% | 0.220 | −0.031 | kill. Sh < 0.51 bar. Folds 0-6 zero (EDGAR gap). Folds 7-11 real signal (0.86-1.30). H001 corr −0.031 (near-zero!). Signal exists but EDGAR gap kills 12-fold OOS. |
 | 575 | ThreeFactorDailyReversal | 0.008 | [−0.393, 0.410] | −96.61% | — | −0.010 | kill. MaxDD -97%! Folds 0-1 positive (2.0/3.2) then collapses folds 2-11 (all negative). Classic arbitrage decay. |
 | **576** | **QualityMomentumWeeklyRotation** | **0.732** | **[0.332, 1.143]** | **−36.55%** | **0.255** | **−0.019** | **KEEP. Quality gate (GP/A 40%) + weekly momentum (21d top-20). H001 corr −0.019. EDGAR folds 0-4 zero; folds 5-11 consistently positive (0.21-1.81).** |
-| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | pending |
-| 580 | QQQIWMAugmentedPool (58) | — | — | — | — | — | pending |
+| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | running |
+| **580** | **QQQIWMAugmentedPool (58)** | **1.947** | **[1.546, 2.347]** | **−7.69%** | **0.771** | **+0.378** | **KEEP. 58-strat pool (55+H571/H572/H573). IWM (H572) gets 5.7% weight; QQQ gets 0. +0.026 Sharpe over H561. IWM's correlation structure adds marginal diversification.** |
 
 **Batch 2 individual strategy findings:**
-- QQQ/IWM/VNQ parity (H571-H573/H578): all killed. Data gaps + below SPY bar.
+- QQQ/IWM/VNQ parity (H571-H573/H578): all killed standalone. Data gaps + below SPY bar.
 - H574 QuarterlyNIMomentum: killed by EDGAR gap; real signal in folds 7-11 (H001 corr −0.031).
 - H575 ThreeFactorDailyReversal: killed, MaxDD −97%. 3-factor reversal arbitraged away post-2002.
 - H576 QualityMomentumWeeklyRotation: **KEEP**. Sharpe 0.732, H001 corr −0.019. EDGAR folds 0-4 zero but folds 5-11 strong.
 - H577 SectorMomentumVolTarget: **KEEP**. Sharpe 0.655, H001 corr +0.068.
-- **2/8 individual strategies kept.** H579/H580 ensemble expansions pending.
+- H580 QQQIWMAugmentedPool: **KEEP**. Sharpe 1.947 (+0.026 over H561). IWM (H572) gets 5.7% weight — killed standalone but adds correlation-structure value in ensemble context.
+- **3/9 individual strategies kept (H576/H577/H580).** H579 still running.
 
 ---
 

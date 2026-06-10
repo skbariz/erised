@@ -1662,7 +1662,26 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 - H575 ThreeFactorDailyReversal: killed, MaxDD −97%. 3-factor reversal arbitraged away post-2002.
 - H576 QualityMomentumWeeklyRotation: **KEEP**. Sharpe 0.732, H001 corr −0.019. EDGAR folds 0-4 zero but folds 5-11 strong.
 - H577 SectorMomentumVolTarget: **KEEP**. Sharpe 0.655, H001 corr +0.068.
-- **2/8 individual strategies kept.** H579/H580 ensemble expansions running.
+- **2/8 individual strategies kept.** H579/H580 ensemble expansions pending.
+
+---
+
+### Batch 3: Regime Signal Variants (H581–H590)
+
+| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|-------|--------|-----------|-------|
+| 581 | VIXRegimeConditional | — | — | — | — | — | running — VIX<20 = bull vs SPY MA |
+| 582 | ThreeStateRegimeLeverage | — | — | — | — | — | running — strong/neutral/bear |
+| 583 | RegimeSortinoLeverage | — | — | — | — | — | running — downside vol targeting |
+| 584 | ExpandedPoolRegimeConditional | — | — | — | — | — | running — +H576/H577 (57 strats) |
+| 585 | SPYTLTCorrRegimeConditional | — | — | — | — | — | running — correlation as regime |
+| 586 | AsymmetricVolTargetRegime | — | — | — | — | — | running — tv+cap both vary |
+| 587 | RegimeConditionalCalmar | — | — | — | — | — | running — Calmar obj + regime |
+| 588 | RealBorrowRegimeConditional | — | — | — | — | — | running — H570 + Fed Funds cost |
+| 589 | DurationFilteredRegime | — | — | — | — | — | running — 10d persistence filter |
+| 590 | RegimeConditionalMaxDDPenalty | — | — | — | — | — | running — MaxDD penalty in bear |
+
+**Key question:** Does any regime signal beat H570's 200d MA (Sharpe 2.021)? Does H570 survive realistic borrow cost (H588)?
 
 ---
 

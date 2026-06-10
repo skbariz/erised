@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **580** (H001–H580) | **ONGOING** — Set8 Batch2 individual strategies complete; H579/H580 ensemble running |
-| Strategies kept | **372+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H576/H577 from Set8 | Set8: 10/20 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H580 pending) |
+| Strategies tested | **580** (H001–H580) | **ONGOING** — Set8 Batch2/4 complete; H579/H580 ensemble pending; Batch3 (H581-H590) in design |
+| Strategies kept | **374+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577 from Set8 | Set8: 12/22 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H580 pending) |
 
 ---
 
@@ -1621,8 +1621,8 @@ H516 finding (20-strategy focused pool cracked MDR ceiling for unleveraged ensem
 | **565** | **AsymmetricVolTarget** | **1.874** | **[1.479, 2.270]** | **−9.95%** | **1.171** | +0.443 | **KEEP. Asymmetric vol target: fast=5d/slow=20d. Marginal over H559 (1.879→1.874). avg_lev=1.505×. H473 takes 19.2%, H076 22.6%.** |
 | 566 | LevCAGRObjective | 1.859 | [1.459, 2.249] | −9.25% | 1.458 | +0.392 | kill-strict-bar. CAGR 13.48% fails >16% strict bar. Sh 1.859, Cal 1.458 vs H561 (1.921/1.406). CAGR objective doesn't dominate Sharpe objective. |
 | **568** | **WalkForwardLeverageParams** | **1.460** | **[1.058, 1.844]** | **−9.93%** | **0.902** | +0.455 | **KEEP standard bar. WF fold-specific param selection: −0.419 Sharpe vs fixed H559 (1.879). Confirms fixed H561 params optimal — fold-specific tuning is overfit.** |
-| 569 | CostAwareLevSharpe | — | — | — | — | — | running |
-| 570 | LeverageRegimeConditional | — | — | — | — | — | running |
+| **569** | **CostAwareLevSharpe** | **1.731** | **[1.328, 2.119]** | **−9.53%** | **1.322** | +0.404 | **KEEP. Realistic Fed Funds borrow cost (step-func + 50bps spread). Mean borrow 2.877%/yr. Delta: −0.148 Sharpe vs flat 0.5%/yr (H559). Confirms leverage drag is real but manageable.** |
+| **570** | **LeverageRegimeConditional** | **2.021** | **[1.625, 2.420]** | **−7.50%** | **1.706** | +0.479 | **NEW CHAMPION (+0.100 over H561). Bull (SPY>200d MA): cap=2.5×; Bear: cap=1.0×. Vol-target 6.5%/lb=20d. Bull fraction: 61.7%. Delta: +0.143 vs H559. MaxDD −7.50% (2nd best leveraged). Regime protection works.** |
 
 **H561/H562 discovery — target_vol=0.05 strictly dominates 0.065:**
 All top-5 grid results use target_vol=0.05. Lower target vol de-risks more aggressively (avg leverage lower) but the SLSQP re-optimizes weights to compensate, finding a better risk-adjusted portfolio. Result: 1.921 Sharpe (+0.042 over H559) AND −7.61% MaxDD (+2.12pp better). H559 strictly dominated by H561/H562 on both Sharpe and MaxDD — only CAGR is lower (10.7% vs 13.08%) because lower leverage means less CAGR scaling.
@@ -1635,6 +1635,9 @@ penalty=20.0: Sh=1.757 / DD=−7.00% (saturated — penalty=10 and 20 identical)
 
 **H567 discovery — downside vol leverage has higher avg leverage and CAGR:**
 Downside vol is lower than total vol in bull market periods (rising prices have positive returns excluded). This means leverage stays at or near cap more often → avg_lev=1.631× vs H559's 1.23×. Result: CAGR 14.17% (new program record), Sharpe 1.889. The Sortino-targeted objective is dominated by the standard lev-Sharpe objective even with downside vol targeting.
+
+**H570 — NEW PROGRAM CHAMPION (Sharpe 2.021):**
+Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SPY<200d MA (bear) → cap=1.0×. Vol-target=6.5%/lb=20d fixed. The key insight is asymmetric risk-taking: go aggressive when price momentum confirms safety, de-leverage in drawdown regimes. MaxDD −7.50% (2nd best across all leveraged strategies after H561/H562 at −7.61%). +0.143 Sharpe delta vs H559, +0.100 over H561. Top weights: H076 24.1%, H065 23.5%, H473 20.2%, H265 14.1%.
 
 ---
 

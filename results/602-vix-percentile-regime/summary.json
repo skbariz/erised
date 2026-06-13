@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H602",
+  "name": "vix-percentile-regime",
+  "strategy_class": "VIXPercentileRegime",
+  "family": "Set9 Regime Forms",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1808,
+  "ci_low": 1.7823,
+  "ci_high": 2.5752,
+  "cagr": 0.1329,
+  "max_drawdown": -0.0792,
+  "n_trades": 0,
+  "h001_corr": 0.3969,
+  "fold_sharpes": [
+    3.309,
+    2.019,
+    1.993,
+    1.851,
+    2.753,
+    1.052,
+    1.916,
+    2.275,
+    1.962,
+    3.196,
+    2.126,
+    1.776
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Bull = VIX < expanding 40%-pctile (adaptive, no fixed level). Bull cap=2.5x/bear 1.0x, tv=6.5%. Bull frac 56.0%. H600/H591 (fixed VIX<15) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.6778,
+    "sortino": 2.3049,
+    "top_weights": {
+      "H016": 0.046026426524112436,
+      "H043": 0.011734267596729183,
+      "H065": 0.15744341623459615,
+      "H076": 0.20244961647287518,
+      "H192": 0.03594147441806946,
+      "H194": 0.011522202585087734,
+      "H199": 0.07006712864909713,
+      "H265": 0.12080041241262089,
+      "H268": 0.013726124419486703,
+      "H284": 0.01924124994254555,
+      "H471": 0.011522112650451836,
+      "H473": 0.2948832751047828
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-expanding-pctile",
+    "quantile": 0.4,
+    "bull_fraction": 0.5604,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

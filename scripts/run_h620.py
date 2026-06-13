@@ -63,6 +63,16 @@ def main():
         sh = portfolio_metrics(apply_leverage(mat @ w, idx, tv_a, cap_a, LOOKBACK))[0]
         cands[f"vix<{thr}-asym"] = (sh, w, tv_a, cap_a, thr)
         print(f"  vix<{thr}-asym: Sh={sh:.3f}")
+    # VIX-momentum: bull = VIX<thr AND VIX not rising (H604 mechanism, the Batch-A champion)
+    for thr in [14.0, 15.0, 16.0]:
+        vixr = vix.reindex(idx).ffill().bfill()
+        not_rising = vixr <= vixr.rolling(20, min_periods=10).mean()
+        bull = ((vixr < thr) & not_rising).fillna(True)
+        cap_m = two_state_cap(bull, 2.5, 1.0, idx)
+        w = slsqp(lev_sharpe_neg(mat, idx, 0.065, cap_m), w0, n)
+        sh = portfolio_metrics(apply_leverage(mat @ w, idx, 0.065, cap_m, LOOKBACK))[0]
+        cands[f"vix<{thr}-mom"] = (sh, w, 0.065, cap_m, thr)
+        print(f"  vix<{thr}-mom: Sh={sh:.3f}")
 
     best_key = max(cands, key=lambda k: cands[k][0])
     _, w, tv, cap, thr = cands[best_key]
@@ -93,7 +103,7 @@ def main():
             float(portfolio_metrics(apply_leverage(mat @ w, idx, 0.065 + d, cap, LOOKBACK))[0]), 3
         )
     print(f"Sensitivity: {sens}")
-    print(f"vs H600 (2.237): {sh - 2.237:+.3f}")
+    print(f"vs H604 (2.422): {sh - 2.422:+.3f}")
 
     finalize_run(
         "620",
@@ -108,7 +118,7 @@ def main():
         spy,
         notes=(
             f"TERMINAL Set9 strategy. Champion config: {best_key}. 5-start Sharpes {shs} "
-            f"(range {max(shs) - min(shs):.4f}). Sensitivity {sens}. vs H600 (2.237): {sh - 2.237:+.3f}. "
+            f"(range {max(shs) - min(shs):.4f}). Sensitivity {sens}. vs H604 (2.422): {sh - 2.422:+.3f}. "
             f"Sortino {so:.3f}, Calmar {cal:.3f}."
         ),
         extra={

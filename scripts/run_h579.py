@@ -304,7 +304,7 @@ def main():
     strategy_names = list(all_rets.keys())
     ret_df = pd.DataFrame(all_rets)
     clean = ret_df.dropna(how="all")
-    mat = clean.fillna(0.0).values
+    mat = clean.fillna(0.0).to_numpy(dtype="float64")
     n = mat.shape[1]
     print(f"\nPool: {n} strategies")
 

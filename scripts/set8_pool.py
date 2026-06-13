@@ -87,6 +87,7 @@ from quant.validation.walk_forward import (
 )
 
 DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+CACHE_DIR = DATA_DIR / "cache"
 
 AA_POOL_BASE = {
     "H001": MovingAverageCrossover(50, 200),
@@ -164,6 +165,34 @@ def build_pool(include_h576: bool = False, include_h577: bool = False) -> dict:
 
     spy_close = spy["adj_close"]
     vix_series = load_research("VIX")["adj_close"]
+    spy_rets = spy["adj_close"].pct_change().fillna(0.0)
+
+    # Disk cache of the (expensive) walk-forward return matrix. Pure memoization:
+    # the pool is fully determined by the strategy set + fixed OOS folds, so the
+    # cached `clean` matrix is byte-identical to a fresh build. Keyed by include flags.
+    cache_key = f"{int(include_h576)}{int(include_h577)}"
+    cache_path = CACHE_DIR / f"set8_pool_clean_{cache_key}.parquet"
+    if cache_path.exists():
+        clean = pd.read_parquet(cache_path)
+        mat = clean.fillna(0.0).to_numpy(dtype="float64")
+        strategy_names = list(clean.columns)
+        print(
+            f"[cache] loaded return matrix from {cache_path.name}: "
+            f"{mat.shape[1]} strategies, {mat.shape[0]} days"
+        )
+        return {
+            "mat": mat,
+            "strategy_names": strategy_names,
+            "clean": clean,
+            "folds_aa": folds_aa,
+            "spy_close": spy_close,
+            "vix_series": vix_series,
+            "prices_aa": prices_aa,
+            "spy_rets": spy_rets,
+            "sectors": None,
+            "spy": spy,
+            "fundamentals": None,
+        }
 
     tickers = get_all_historical_tickers()
     panel = load_stocks_panel(tickers)
@@ -171,7 +200,6 @@ def build_pool(include_h576: bool = False, include_h577: bool = False) -> dict:
     common = panel.index.intersection(membership.index)
     panel = panel.loc[common]
     membership = membership.loc[common]
-    spy_rets = spy["adj_close"].pct_change().fillna(0.0)
     sectors = pd.read_parquet(DATA_DIR / "sp500_sectors.parquet")["sector"]
     pt = panel.columns.tolist()
     gp = load_fundamentals_panel(pt, "gross_profit", panel.index)
@@ -245,8 +273,12 @@ def build_pool(include_h576: bool = False, include_h577: bool = False) -> dict:
     strategy_names = list(all_rets.keys())
     ret_df = pd.DataFrame(all_rets)
     clean = ret_df.dropna(how="all")
-    mat = clean.fillna(0.0).values
+    mat = clean.fillna(0.0).to_numpy(dtype="float64")
     print(f"\nPool: {mat.shape[1]} strategies, {mat.shape[0]} days")
+
+    CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    clean.to_parquet(cache_path)
+    print(f"[cache] saved return matrix to {cache_path.name}")
 
     return {
         "mat": mat,

@@ -1,5 +1,6 @@
 # Data
 data/*.parquet
+data/cache/
 data/raw/
 data/fundamentals/
 data/stocks/

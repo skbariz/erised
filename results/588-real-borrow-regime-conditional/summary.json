@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H588",
+  "name": "real-borrow-regime-conditional",
+  "strategy_class": "RealBorrowRegimeConditional",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.8787,
+  "ci_low": 1.4809,
+  "ci_high": 2.2751,
+  "cagr": 0.1224,
+  "max_drawdown": -0.0785,
+  "n_trades": 0,
+  "h001_corr": 0.4945,
+  "fold_sharpes": [
+    2.079,
+    1.818,
+    2.387,
+    1.075,
+    2.075,
+    1.294,
+    1.57,
+    1.899,
+    2.097,
+    2.986,
+    1.469,
+    1.808
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime caps (bull=2.5x/bear=1.0x, 200d MA) + realistic Fed Funds borrow cost (+50bps spread). Mean borrow: 2.622%/yr. Bull fraction: 62.5%. H570 ref (flat cost): Sh=2.021. H569 ref (flat regime): Sh=1.731. Delta vs H570: -0.142. Delta vs H569: +0.148.",
+  "canonical_params": {
+    "objective": "lev-sharpe-regime-real-cost",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "borrow_spread_bps": 50,
+    "mean_borrow_annual": 0.0262,
+    "bull_regime_fraction": 0.6253,
+    "top_weights": {
+      "H016": 0.03362715838189312,
+      "H019": 0.025541619302607878,
+      "H065": 0.27488760757873404,
+      "H076": 0.23714309624694802,
+      "H191": 0.0627631811186283,
+      "H192": 0.07834167671209256,
+      "H194": 0.012438430015904922,
+      "H265": 0.1323989937389564,
+      "H471": 0.012438260405735865,
+      "H473": 0.12578990972949897
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

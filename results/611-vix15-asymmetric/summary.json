@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H611",
+  "name": "vix15-asymmetric",
+  "strategy_class": "VIX15Asymmetric",
+  "family": "Set9 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3481,
+  "ci_low": 1.9514,
+  "ci_high": 2.7368,
+  "cagr": 0.1252,
+  "max_drawdown": -0.0742,
+  "n_trades": 0,
+  "h001_corr": 0.3598,
+  "fold_sharpes": [
+    2.888,
+    1.955,
+    1.765,
+    2.489,
+    2.951,
+    1.088,
+    1.52,
+    2.932,
+    2.273,
+    3.656,
+    2.529,
+    1.731
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX<15 bull: tv=8%/cap=2.5x; bear: tv=4%/cap=1.0x. Combines H591 (VIX<15, 2.237) + H592 (asymmetric, Calmar 2.264). Tests the two Batch4 champions at their joint best params.",
+  "canonical_params": {
+    "calmar": 1.6864,
+    "sortino": 2.5553,
+    "top_weights": {
+      "H016": 0.03189895092329987,
+      "H065": 0.1620884188311835,
+      "H076": 0.2061575908669827,
+      "H097": 0.009695844252563434,
+      "H191": 0.032737752034081684,
+      "H192": 0.04075332166506488,
+      "H199": 0.01791644145784471,
+      "H265": 0.1325590780264232,
+      "H268": 0.07596151817903868,
+      "H284": 0.03359137794697471,
+      "H473": 0.2541178622514583
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix15-asymmetric",
+    "vix_threshold": 15.0,
+    "bull_tv": 0.08,
+    "bull_cap": 2.5,
+    "bear_tv": 0.04,
+    "bear_cap": 1.0,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

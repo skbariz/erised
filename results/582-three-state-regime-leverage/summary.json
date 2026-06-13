@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H582",
+  "name": "three-state-regime-leverage",
+  "strategy_class": "ThreeStateRegimeLeverage",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1005,
+  "ci_low": 1.7045,
+  "ci_high": 2.4965,
+  "cagr": 0.1306,
+  "max_drawdown": -0.0802,
+  "n_trades": 0,
+  "h001_corr": 0.4399,
+  "fold_sharpes": [
+    3.152,
+    2.15,
+    2.048,
+    1.883,
+    2.486,
+    1.395,
+    2.051,
+    1.976,
+    1.834,
+    3.018,
+    1.711,
+    1.853
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Strong bull (MA AND VIX<20.0): cap=3.0x. Bear (no-MA AND VIX>=25.0): cap=0.75x. Neutral: cap=1.5x. State fractions: strong_bull=41.3%, neutral=49.3%, bear=9.3%. H570 reference (binary MA): Sh=2.021 DD=-7.50%. Delta vs H570: +0.079 Sh, -0.52pp MaxDD.",
+  "canonical_params": {
+    "objective": "lev-sharpe-three-state",
+    "leverage_target_vol": 0.065,
+    "leverage_max_strong_bull": 3.0,
+    "leverage_max_neutral": 1.5,
+    "leverage_max_bear": 0.75,
+    "leverage_lookback": 20,
+    "vix_bull_threshold": 20.0,
+    "vix_bear_threshold": 25.0,
+    "strong_bull_fraction": 0.4135,
+    "bear_fraction": 0.0932,
+    "top_weights": {
+      "H016": 0.03564768642968891,
+      "H043": 0.011112740230906533,
+      "H065": 0.17487499166904488,
+      "H076": 0.22182734515296698,
+      "H097": 0.009057313078996126,
+      "H157": 0.009727500228071442,
+      "H192": 0.02731775195526502,
+      "H199": 0.06760098927813783,
+      "H265": 0.12030930817182672,
+      "H473": 0.31801353653257547
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H617",
+  "name": "turnover-cost-vix15",
+  "strategy_class": "TurnoverCostVIX15",
+  "family": "Set9 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1983,
+  "ci_low": 1.7978,
+  "ci_high": 2.585,
+  "cagr": 0.1138,
+  "max_drawdown": -0.0782,
+  "n_trades": 0,
+  "h001_corr": 0.3815,
+  "fold_sharpes": [
+    3.168,
+    2.124,
+    1.687,
+    2.368,
+    2.779,
+    1.06,
+    1.346,
+    2.645,
+    2.081,
+    3.281,
+    2.29,
+    1.666
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX<15 champion + leverage-rebalance turnover cost (|d_lev|*1.5bps) on top of borrow. Capacity/cost realism for the daily vol-target overlay. H600/H591 (no turnover cost) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.4541,
+    "sortino": 2.3464,
+    "top_weights": {
+      "H016": 0.03475216654804324,
+      "H043": 0.013372665198757398,
+      "H065": 0.1554304289882676,
+      "H076": 0.18497385885798148,
+      "H097": 0.005172399024347194,
+      "H157": 0.009179463844371433,
+      "H192": 0.0343858133004312,
+      "H199": 0.0665761654591191,
+      "H265": 0.13186441315847522,
+      "H473": 0.35838703806696626
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix15-turnover-cost",
+    "vix_threshold": 15.0,
+    "turnover_bps": 1.4999999999999998,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

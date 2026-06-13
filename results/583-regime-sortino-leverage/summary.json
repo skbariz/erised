@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H583",
+  "name": "regime-sortino-leverage",
+  "strategy_class": "RegimeSortinoLeverage",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0073,
+  "ci_low": 1.6086,
+  "ci_high": 2.4057,
+  "cagr": 0.176,
+  "max_drawdown": -0.1081,
+  "n_trades": 0,
+  "h001_corr": 0.4954,
+  "fold_sharpes": [
+    2.147,
+    2.038,
+    2.237,
+    1.808,
+    2.301,
+    1.357,
+    1.748,
+    1.968,
+    1.909,
+    3.2,
+    1.702,
+    1.903
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime caps (bull=2.5x/bear=1.0x, 200d MA) + downside semi-deviation vol targeting (tv=6.5%/lb=20d). Bull fraction: 62.5%. H570 reference (total vol): Sh=2.021 DD=-7.50%. H567 reference (Sortino, flat cap): Sh=1.889 CAGR=14.17%. Delta vs H570: -0.014 Sh.",
+  "canonical_params": {
+    "objective": "lev-sharpe-regime-sortino",
+    "leverage_target_vol": 0.065,
+    "vol_estimate": "semi-deviation",
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "bull_regime_fraction": 0.6253,
+    "top_weights": {
+      "H019": 0.03673109419080195,
+      "H034": 0.00977031726776858,
+      "H035": 0.01994621373267963,
+      "H065": 0.2156893753898661,
+      "H076": 0.21543655198724235,
+      "H097": 0.020124132125331127,
+      "H191": 0.07286868302662876,
+      "H192": 0.055436230190001094,
+      "H194": 0.036613186616385886,
+      "H265": 0.1398852201523359,
+      "H471": 0.036612814843689064,
+      "H473": 0.1408861804772662
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

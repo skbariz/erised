@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H586",
+  "name": "asymmetric-vol-target-regime",
+  "strategy_class": "AsymmetricVolTargetRegime",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0536,
+  "ci_low": 1.6575,
+  "ci_high": 2.452,
+  "cagr": 0.1528,
+  "max_drawdown": -0.0838,
+  "n_trades": 0,
+  "h001_corr": 0.4985,
+  "fold_sharpes": [
+    1.89,
+    1.674,
+    2.564,
+    1.749,
+    2.581,
+    1.431,
+    1.799,
+    2.007,
+    2.089,
+    3.299,
+    1.717,
+    1.679
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Both tv AND cap vary with regime. Bull (MA): tv=8%/cap=2.5x. Bear: tv=4%/cap=1.0x. lb=20d. Bull fraction: 62.5%. H570 reference (cap-only asym, tv=6.5%): Sh=2.021 DD=-7.50%. Delta vs H570: +0.033 Sh, -0.88pp MaxDD.",
+  "canonical_params": {
+    "objective": "lev-sharpe-asym-vol-regime",
+    "leverage_tv_bull": 0.08,
+    "leverage_tv_bear": 0.04,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "bull_regime_fraction": 0.6253,
+    "top_weights": {
+      "H019": 0.03826323744220058,
+      "H065": 0.25833054238291275,
+      "H076": 0.30188358248487185,
+      "H191": 0.07115111136979689,
+      "H192": 0.0663629903969128,
+      "H194": 0.038529642925652106,
+      "H265": 0.16471699033550943,
+      "H471": 0.03853079883683453,
+      "H473": 0.013889997028758254
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H603",
+  "name": "composite-regime-score",
+  "strategy_class": "CompositeRegimeScore",
+  "family": "Set9 Regime Forms",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0319,
+  "ci_low": 1.6333,
+  "ci_high": 2.4347,
+  "cagr": 0.1207,
+  "max_drawdown": -0.0804,
+  "n_trades": 0,
+  "h001_corr": 0.4295,
+  "fold_sharpes": [
+    2.672,
+    2.101,
+    2.009,
+    2.007,
+    2.544,
+    1.072,
+    1.624,
+    2.099,
+    1.861,
+    3.141,
+    1.826,
+    1.836
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Composite regime score = mean{VIX<15, SPY>200dMA, SPY-TLT 60d corr<0}; cap=clip(1+1.5*score,1,2.5), tv=6.5%. Mean cap 1.67. H600/H591 (VIX<15 only) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.5004,
+    "sortino": 2.1057,
+    "top_weights": {
+      "H016": 0.026665597130677673,
+      "H043": 0.010145515481849773,
+      "H065": 0.19110705117211357,
+      "H076": 0.21709898381053636,
+      "H097": 0.005938758875094962,
+      "H191": 0.013399069612237918,
+      "H192": 0.04205475225401722,
+      "H199": 0.04829339983347539,
+      "H265": 0.13281945723890737,
+      "H473": 0.30698021715175594
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-composite-regime",
+    "components": "vix15+spy200ma+spytlt_corr",
+    "mean_cap": 1.673,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

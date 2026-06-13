@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H590",
+  "name": "regime-conditional-maxdd-penalty",
+  "strategy_class": "RegimeConditionalMaxDDPenalty",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 0.6456,
+  "ci_low": 0.254,
+  "ci_high": 1.0217,
+  "cagr": 0.049,
+  "max_drawdown": -0.2987,
+  "n_trades": 0,
+  "h001_corr": 0.646,
+  "fold_sharpes": [
+    -1.006,
+    -0.241,
+    1.38,
+    0.87,
+    0.645,
+    0.069,
+    -0.05,
+    0.89,
+    2.142,
+    2.598,
+    -0.149,
+    0.339
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime caps (bull=2.5x/bear=1.0x, 200d MA) + MaxDD penalty=2.0 (objective: Sh - penalty*(DD/10%)^2). tv=6.5%/lb=20d. Bull fraction: 62.5%. H570-style ref: Sh=2.023 DD=-7.53%. H570 published: Sh=2.021 DD=-7.50%. Delta vs H570: Sh -1.375, DD -22.37pp.",
+  "canonical_params": {
+    "objective": "lev-sharpe-regime-maxdd-penalty",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "dd_penalty_weight": 2.0,
+    "bull_regime_fraction": 0.6253,
+    "ref_sh": 2.0234,
+    "ref_dd": -0.0753,
+    "top_weights": {
+      "H019": 0.15563361224880973,
+      "H031": 0.649651002129537,
+      "H051": 0.018828114323812893,
+      "H082": 0.1758872713165346
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

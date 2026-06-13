@@ -1,0 +1,51 @@
+{
+  "hypothesis": "H610",
+  "name": "ensemble-of-champions",
+  "strategy_class": "EnsembleOfChampions",
+  "family": "Set9 Pool Robustness",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.2385,
+  "ci_low": 1.8369,
+  "ci_high": 2.6344,
+  "cagr": 0.1394,
+  "max_drawdown": -0.0742,
+  "n_trades": 0,
+  "h001_corr": 0.4009,
+  "fold_sharpes": [
+    3.105,
+    2.014,
+    2.249,
+    2.056,
+    2.756,
+    1.049,
+    2.061,
+    2.459,
+    2.043,
+    3.273,
+    2.169,
+    1.872
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight blend of 4 leveraged champion streams ['vix15', 'vix20', 'asym', 'sortino'] (H591 VIX<15, H581 VIX<20, H592 asym, H595 Sortino). Diversifies across regime configs. H600/H591 best single ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.879,
+    "sortino": 2.3687,
+    "top_weights": {},
+    "n_strategies": 55,
+    "objective": "equal-blend-leveraged-champion-streams",
+    "components": [
+      "vix15",
+      "vix20",
+      "asym",
+      "sortino"
+    ],
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

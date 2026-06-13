@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H598",
+  "name": "vix-regime-dd-floor",
+  "strategy_class": "VIXRegimeDDFloor",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0365,
+  "ci_low": 1.6361,
+  "ci_high": 2.4304,
+  "cagr": 0.1025,
+  "max_drawdown": -0.0687,
+  "n_trades": 0,
+  "h001_corr": 0.4072,
+  "fold_sharpes": [
+    3.078,
+    2.086,
+    2.029,
+    1.799,
+    2.568,
+    1.084,
+    1.783,
+    2.183,
+    1.792,
+    3.074,
+    1.554,
+    1.63
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "DD-floor via post-hoc tv reduction (NO in-objective penalty -- H590 showed penalty fails). Weights optimized at tv=6.5%, then tv lowered to 0.0500 for MaxDD<=7%. VIX<20.0 regime (bull 2.5x/bear 1.0x). Target Sh>1.90 at DD<=-7%. Achieved Sh=2.036, DD=-6.87%, Calmar=1.493.",
+  "canonical_params": {
+    "objective": "lev-sharpe-then-dd-floor-tv",
+    "vix_threshold": 20.0,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "base_target_vol": 0.065,
+    "floored_target_vol": 0.05,
+    "dd_floor": 0.07,
+    "leverage_lookback": 20,
+    "calmar": 1.4925,
+    "top_weights": {
+      "H016": 0.048850281287479376,
+      "H043": 0.009206096105924171,
+      "H065": 0.16407045833753,
+      "H076": 0.2045820125880191,
+      "H191": 0.00849688410148619,
+      "H192": 0.03344878689311429,
+      "H199": 0.05198387742918842,
+      "H265": 0.1211396260348023,
+      "H284": 0.03294550768298717,
+      "H473": 0.3220797016511936
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

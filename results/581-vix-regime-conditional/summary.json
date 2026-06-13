@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H581",
+  "name": "vix-regime-conditional",
+  "strategy_class": "VIXRegimeConditional",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1187,
+  "ci_low": 1.7157,
+  "ci_high": 2.5134,
+  "cagr": 0.1288,
+  "max_drawdown": -0.0781,
+  "n_trades": 0,
+  "h001_corr": 0.411,
+  "fold_sharpes": [
+    3.103,
+    2.11,
+    2.206,
+    1.865,
+    2.649,
+    1.095,
+    1.917,
+    2.252,
+    1.948,
+    3.118,
+    1.835,
+    1.687
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX < 20.0 = bull cap=2.5x, VIX >= 20.0 = bear cap=1.0x. tv=6.5%/lb=20d. Bull fraction: 57.1%. H570 reference (MA regime): Sh=2.021 DD=-7.50%. Delta vs H570: +0.098 Sh, -0.31pp MaxDD.",
+  "canonical_params": {
+    "objective": "lev-sharpe-vix-regime",
+    "vix_threshold": 20.0,
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "bull_regime_fraction": 0.5711,
+    "top_weights": {
+      "H016": 0.048850281287479376,
+      "H043": 0.009206096105924171,
+      "H065": 0.16407045833753,
+      "H076": 0.2045820125880191,
+      "H191": 0.00849688410148619,
+      "H192": 0.03344878689311429,
+      "H199": 0.05198387742918842,
+      "H265": 0.1211396260348023,
+      "H284": 0.03294550768298717,
+      "H473": 0.3220797016511936
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

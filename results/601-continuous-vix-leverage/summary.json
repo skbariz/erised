@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H601",
+  "name": "continuous-vix-leverage",
+  "strategy_class": "ContinuousVIXLeverage",
+  "family": "Set9 Regime Forms",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1661,
+  "ci_low": 1.7679,
+  "ci_high": 2.5663,
+  "cagr": 0.1236,
+  "max_drawdown": -0.0803,
+  "n_trades": 0,
+  "h001_corr": 0.4057,
+  "fold_sharpes": [
+    3.439,
+    2.115,
+    1.874,
+    2.18,
+    2.628,
+    1.192,
+    1.937,
+    2.19,
+    1.821,
+    2.992,
+    2.084,
+    1.868
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "cap=clip(3.5-VIX/10,1.0,3.0), tv=6.5%/lb=20d. Continuous VIX response. Mean cap 1.63. H600/H591 (VIX<15 step) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.5402,
+    "sortino": 2.2971,
+    "top_weights": {
+      "H016": 0.03761972057788384,
+      "H043": 0.029984577403384005,
+      "H065": 0.15106571853319045,
+      "H076": 0.17812126858138116,
+      "H097": 0.008212570330054014,
+      "H157": 0.01856932553054403,
+      "H175": 0.012184423126003367,
+      "H192": 0.022166028854697917,
+      "H199": 0.06594537822077391,
+      "H265": 0.09363584729128825,
+      "H284": 0.005794984471191739,
+      "H473": 0.37670015707969756
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-continuous-vix-cap",
+    "cap_formula": "clip(3.5-VIX/10,1,3)",
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "mean_cap": 1.635
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

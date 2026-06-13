@@ -1,0 +1,75 @@
+{
+  "hypothesis": "H596",
+  "name": "vix-regime-low-corr",
+  "strategy_class": "VIXRegimeLowCorr",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0874,
+  "ci_low": 1.6823,
+  "ci_high": 2.4879,
+  "cagr": 0.1276,
+  "max_drawdown": -0.0819,
+  "n_trades": 0,
+  "h001_corr": 0.2988,
+  "fold_sharpes": [
+    3.28,
+    2.128,
+    2.18,
+    1.811,
+    2.621,
+    0.981,
+    1.966,
+    2.206,
+    1.758,
+    3.066,
+    1.905,
+    1.589
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H001-corr-penalized lev-Sharpe (obj=Sh-lambda*corr) + VIX<20.0 regime. Lambda sweep [0.5, 1.0, 2.0, 3.0]: {0.5: {'sharpe': 2.087, 'corr': 0.299}, 1.0: {'sharpe': 2.038, 'corr': 0.227}, 2.0: {'sharpe': 1.858, 'corr': 0.111}, 3.0: {'sharpe': 1.648, 'corr': 0.026}}. Chosen lambda=0.5 -> corr +0.299 at Sh 2.087. Target: corr<0.3 at Sh>1.80. H581 ref: corr +0.411 / Sh 2.119.",
+  "canonical_params": {
+    "objective": "lev-sharpe-minus-lambda-h001corr-vix-regime",
+    "vix_threshold": 20.0,
+    "lambda_chosen": 0.5,
+    "lambda_sweep": {
+      "0.5": {
+        "sharpe": 2.087,
+        "corr": 0.299
+      },
+      "1.0": {
+        "sharpe": 2.038,
+        "corr": 0.227
+      },
+      "2.0": {
+        "sharpe": 1.858,
+        "corr": 0.111
+      },
+      "3.0": {
+        "sharpe": 1.648,
+        "corr": 0.026
+      }
+    },
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "top_weights": {
+      "H016": 0.006910647737129738,
+      "H065": 0.15297972637154927,
+      "H076": 0.20998060877268623,
+      "H192": 0.036173048581149635,
+      "H199": 0.06116116107880593,
+      "H265": 0.12143797397628628,
+      "H284": 0.040097705946855175,
+      "H473": 0.3660158996417118
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

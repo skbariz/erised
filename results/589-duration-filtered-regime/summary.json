@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H589",
+  "name": "duration-filtered-regime",
+  "strategy_class": "DurationFilteredRegime",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.921,
+  "ci_low": 1.518,
+  "ci_high": 2.3236,
+  "cagr": 0.124,
+  "max_drawdown": -0.0796,
+  "n_trades": 0,
+  "h001_corr": 0.4458,
+  "fold_sharpes": [
+    2.257,
+    1.75,
+    2.531,
+    1.558,
+    2.311,
+    1.351,
+    1.483,
+    1.766,
+    1.815,
+    3.072,
+    1.596,
+    1.6
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime + 10d persistence filter before switching. Raw switches: 221 \u2192 filtered: 39. tv=6.5%/lb=20d. Bull fraction: 63.5%. H570 reference (no filter): Sh=2.021 DD=-7.50%. Delta vs H570: -0.100 Sh.",
+  "canonical_params": {
+    "objective": "lev-sharpe-filtered-regime",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "regime_filter_days": 10,
+    "regime_switches_raw": 221,
+    "regime_switches_filtered": 39,
+    "bull_regime_fraction": 0.6352,
+    "top_weights": {
+      "H016": 0.03146782429440898,
+      "H065": 0.2582823497352792,
+      "H076": 0.2804582640963276,
+      "H097": 0.005072976260075444,
+      "H191": 0.03493379280878417,
+      "H192": 0.10257436925383662,
+      "H194": 0.028192636328985422,
+      "H265": 0.13764472897994684,
+      "H268": 0.01300867659609267,
+      "H471": 0.028192968831673226,
+      "H473": 0.07780459594184493
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

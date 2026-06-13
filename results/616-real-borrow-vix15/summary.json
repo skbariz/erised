@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H616",
+  "name": "real-borrow-vix15",
+  "strategy_class": "RealBorrowVIX15",
+  "family": "Set9 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0627,
+  "ci_low": 1.6594,
+  "ci_high": 2.4491,
+  "cagr": 0.1101,
+  "max_drawdown": -0.0784,
+  "n_trades": 0,
+  "h001_corr": 0.3931,
+  "fold_sharpes": [
+    3.023,
+    2.063,
+    1.756,
+    1.594,
+    2.227,
+    1.104,
+    1.372,
+    2.664,
+    2.157,
+    3.109,
+    2.094,
+    1.665
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX<15 champion + Fed Funds step borrow (+50bps spread). Mean borrow 2.622%/yr. Net-of-financing Sharpe. H600/H591 (flat 50bps) ref 2.237. H588 (VIX<20 real borrow) showed ~-0.14 drag.",
+  "canonical_params": {
+    "calmar": 1.4044,
+    "sortino": 2.1794,
+    "top_weights": {
+      "H016": 0.039446996609213865,
+      "H043": 0.007527431984758604,
+      "H065": 0.17503938959542267,
+      "H076": 0.18875967620755896,
+      "H097": 0.006388542879194803,
+      "H157": 0.01133718537035807,
+      "H191": 0.028821017632577956,
+      "H192": 0.03406793546917328,
+      "H199": 0.05877021215254796,
+      "H265": 0.12330534373947519,
+      "H473": 0.3265362683597746
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix15-real-borrow",
+    "vix_threshold": 15.0,
+    "mean_borrow_annual": 0.0262,
+    "spread_bps": 50,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

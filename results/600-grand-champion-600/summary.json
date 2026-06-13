@@ -1,0 +1,75 @@
+{
+  "hypothesis": "H600",
+  "name": "grand-champion-600",
+  "strategy_class": "GrandChampion600",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.237,
+  "ci_low": 1.8342,
+  "ci_high": 2.6217,
+  "cagr": 0.1148,
+  "max_drawdown": -0.0776,
+  "n_trades": 0,
+  "h001_corr": 0.385,
+  "fold_sharpes": [
+    3.177,
+    2.125,
+    1.695,
+    2.458,
+    2.832,
+    1.074,
+    1.357,
+    2.708,
+    2.156,
+    3.325,
+    2.355,
+    1.667
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "TERMINAL STRATEGY of the 600-hypothesis Erised program. Champion config: vix<15.0. 5-start restart Sharpes [2.237, 2.237, 2.237, 2.237, 2.237] (range 0.0000). Sensitivity {'thr12.5': 2.157, 'thr15.0': 2.237, 'thr17.5': 2.182, 'tv0.055': 2.174, 'tv0.065': 2.237, 'tv0.075': 2.265, 'bullcap2.0': 2.196, 'bullcap2.5': 2.237, 'bullcap3.0': 2.238}. Calmar=1.479 Sortino=2.395. vs H581 (2.119): +0.118. Best regime signal (VIX) + lev-Sharpe objective + MDR-warm-started SLSQP weights.",
+  "canonical_params": {
+    "objective": "grand-champion-vix-regime-lev-sharpe",
+    "champion_config": "vix<15.0",
+    "vix_threshold": 15.0,
+    "leverage_lookback": 20,
+    "calmar": 1.4793,
+    "sortino": 2.395,
+    "restart_sharpes": [
+      2.237,
+      2.237,
+      2.237,
+      2.237,
+      2.237
+    ],
+    "sensitivity": {
+      "thr12.5": 2.157,
+      "thr15.0": 2.237,
+      "thr17.5": 2.182,
+      "tv0.055": 2.174,
+      "tv0.065": 2.237,
+      "tv0.075": 2.265,
+      "bullcap2.0": 2.196,
+      "bullcap2.5": 2.237,
+      "bullcap3.0": 2.238
+    },
+    "top_weights": {
+      "H016": 0.03428421854913107,
+      "H043": 0.01417004015631984,
+      "H065": 0.15386100540035633,
+      "H076": 0.18580669716298706,
+      "H157": 0.015645229411237124,
+      "H192": 0.03260490926029069,
+      "H199": 0.06061055912180933,
+      "H265": 0.1296286957420889,
+      "H473": 0.3637123778938552
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

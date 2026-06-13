@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H612",
+  "name": "vix15-calmar",
+  "strategy_class": "VIX15Calmar",
+  "family": "Set9 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.8853,
+  "ci_low": 1.4927,
+  "ci_high": 2.2791,
+  "cagr": 0.1087,
+  "max_drawdown": -0.0533,
+  "n_trades": 0,
+  "h001_corr": 0.426,
+  "fold_sharpes": [
+    1.924,
+    0.999,
+    2.265,
+    1.986,
+    2.184,
+    1.182,
+    1.548,
+    2.213,
+    2.324,
+    2.526,
+    1.998,
+    1.208
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Leveraged-Calmar objective at VIX<15 (bull 2.5x/bear 1.0x), tv=6.5%. Targets Calmar > H592 (2.264). Tighter bull threshold than H594 (VIX<20 Calmar, 2.117).",
+  "canonical_params": {
+    "calmar": 2.0399,
+    "sortino": 1.9498,
+    "top_weights": {
+      "H063": 0.02119754669271517,
+      "H065": 0.28156234184425444,
+      "H068": 0.027366009281130386,
+      "H076": 0.22322229700920054,
+      "H157": 0.26307857852420546,
+      "H473": 0.1835731778783997
+    },
+    "n_strategies": 55,
+    "objective": "lev-calmar-vix15",
+    "vix_threshold": 15.0,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

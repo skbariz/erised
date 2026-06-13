@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H597",
+  "name": "vix-regime-cagr-max",
+  "strategy_class": "VIXRegimeCAGRMax",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0332,
+  "ci_low": 1.6334,
+  "ci_high": 2.4326,
+  "cagr": 0.1363,
+  "max_drawdown": -0.0855,
+  "n_trades": 0,
+  "h001_corr": 0.3844,
+  "fold_sharpes": [
+    2.889,
+    2.017,
+    2.157,
+    1.761,
+    2.515,
+    1.094,
+    1.847,
+    2.118,
+    1.792,
+    3.206,
+    1.529,
+    1.646
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Leveraged-CAGR objective + VIX<20.0 regime (bull cap=3.0x/bear 1.0x). Sh=2.033 Calmar=1.595. Mandate: CAGR>16% at Sh>1.6; overfit guard CI-lower>1.4 = PASS. H583 CAGR ref 17.60%. CAGR delta vs H583: -3.97pp.",
+  "canonical_params": {
+    "objective": "lev-cagr-vix-regime",
+    "vix_threshold": 20.0,
+    "leverage_max_bull": 3.0,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "calmar": 1.5945,
+    "ci_guard_pass": true,
+    "top_weights": {
+      "H016": 0.03686382637435096,
+      "H019": 0.011040161774470553,
+      "H065": 0.1940763607294749,
+      "H076": 0.22600763343464841,
+      "H082": 0.01410011560889032,
+      "H191": 0.12397904430084411,
+      "H192": 0.06822431377217107,
+      "H199": 0.007952224555248877,
+      "H265": 0.08305614461319938,
+      "H268": 0.026487170078919473,
+      "H473": 0.20821300475778182
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

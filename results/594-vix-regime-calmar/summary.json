@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H594",
+  "name": "vix-regime-calmar",
+  "strategy_class": "VIXRegimeCalmar",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.7367,
+  "ci_low": 1.3421,
+  "ci_high": 2.1332,
+  "cagr": 0.1126,
+  "max_drawdown": -0.0532,
+  "n_trades": 0,
+  "h001_corr": 0.4655,
+  "fold_sharpes": [
+    2.194,
+    1.222,
+    2.283,
+    1.745,
+    1.777,
+    1.062,
+    1.534,
+    2.16,
+    1.911,
+    2.278,
+    1.355,
+    1.236
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Leveraged-Calmar objective + VIX<20.0 regime (bull cap=2.5x/bear 1.0x). Calmar=2.117. H587 ref Calmar 2.181 / MaxDD -5.41% / Sh 1.821. Calmar delta vs H587: -0.064.",
+  "canonical_params": {
+    "objective": "lev-calmar-vix-regime",
+    "vix_threshold": 20.0,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "calmar": 2.1172,
+    "top_weights": {
+      "H016": 0.019272830040238158,
+      "H019": 0.009590289602704666,
+      "H046": 0.031819594795001994,
+      "H060": 0.04157468088411019,
+      "H063": 0.03174108540640528,
+      "H065": 0.21549035141208203,
+      "H068": 0.030160273524823703,
+      "H076": 0.11846336668132411,
+      "H157": 0.28776736577785006,
+      "H265": 0.007749312505565076,
+      "H473": 0.2046414551652876
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H605",
+  "name": "realized-vol-regime",
+  "strategy_class": "RealizedVolRegime",
+  "family": "Set9 Regime Forms",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.8912,
+  "ci_low": 1.4905,
+  "ci_high": 2.2824,
+  "cagr": 0.1268,
+  "max_drawdown": -0.0912,
+  "n_trades": 0,
+  "h001_corr": 0.3793,
+  "fold_sharpes": [
+    2.48,
+    1.232,
+    2.622,
+    1.773,
+    2.408,
+    1.094,
+    1.518,
+    1.941,
+    1.948,
+    2.888,
+    1.45,
+    1.554
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Regime from portfolio's OWN 20d realized vol vs 252d rolling median (NO external VIX). Bull cap=2.5x/bear 1.0x, tv=6.5%. Falsification test for VIX-specificity. H600/H591 (VIX<15) ref 2.237; near-match => edge is the leverage mechanism, generalizes VIX-less.",
+  "canonical_params": {
+    "calmar": 1.3902,
+    "sortino": 1.9257,
+    "top_weights": {
+      "H016": 0.01812951309102761,
+      "H065": 0.2507016879785721,
+      "H076": 0.25280834854489387,
+      "H097": 0.033741255902854726,
+      "H191": 0.07745061049297712,
+      "H192": 0.054468065254407415,
+      "H194": 0.0279620258727364,
+      "H199": 0.010302897547813404,
+      "H265": 0.14080688573506647,
+      "H268": 0.01204323062044685,
+      "H471": 0.027961933263242946,
+      "H472": 0.010962915408805503,
+      "H473": 0.0786734956944777
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-realized-vol-regime",
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

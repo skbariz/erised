@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H587",
+  "name": "regime-conditional-calmar",
+  "strategy_class": "RegimeConditionalCalmar",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.8205,
+  "ci_low": 1.4309,
+  "ci_high": 2.2061,
+  "cagr": 0.1179,
+  "max_drawdown": -0.0541,
+  "n_trades": 0,
+  "h001_corr": 0.5294,
+  "fold_sharpes": [
+    1.84,
+    1.29,
+    2.752,
+    1.576,
+    2.283,
+    1.368,
+    1.72,
+    1.57,
+    2.228,
+    2.489,
+    1.355,
+    1.27
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime caps (bull=2.5x/bear=1.0x, 200d MA) + lev-Calmar objective (vs H570 lev-Sharpe). tv=6.5%/lb=20d. Bull fraction: 62.5%. Lev-Sharpe ref: Sh=2.023 Cal=1.705. H570 reference: Sh=2.021 Cal=1.706. H558 reference (flat-cap Calmar): Cal=1.802 Sh=1.731. Delta vs H570: Sh -0.200, Cal +0.475.",
+  "canonical_params": {
+    "objective": "lev-calmar-regime-conditional",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "bull_regime_fraction": 0.6253,
+    "lev_sharpe_ref": 2.0234,
+    "top_weights": {
+      "H025": 0.01329966786779177,
+      "H034": 0.037832281551360064,
+      "H035": 0.044797670880632905,
+      "H065": 0.3350612429708131,
+      "H076": 0.2525797944948246,
+      "H157": 0.16189235312661057,
+      "H192": 0.051537078025461994,
+      "H473": 0.10299935683413085
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

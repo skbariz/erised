@@ -1,0 +1,71 @@
+{
+  "hypothesis": "H606",
+  "name": "concentrated-pool-vix15",
+  "strategy_class": "ConcentratedPoolVIX15",
+  "family": "Set9 Pool Robustness",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0605,
+  "ci_low": 1.6715,
+  "ci_high": 2.4553,
+  "cagr": 0.1123,
+  "max_drawdown": -0.0854,
+  "n_trades": 0,
+  "h001_corr": 0.27,
+  "fold_sharpes": [
+    2.865,
+    2.013,
+    1.683,
+    2.252,
+    2.301,
+    0.763,
+    1.484,
+    2.603,
+    1.902,
+    2.841,
+    2.275,
+    1.613
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Top-12 standalone-Sharpe sub-pool ['H192', 'H191', 'H185', 'H186', 'H157', 'H199', 'H284', 'H175', 'H473', 'H065', 'H293', 'H265'] + VIX<15 regime (bull 2.5x/bear 1.0x). Tests H516 small-pool finding under champion leverage. H600/H591 (full 55-pool) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.315,
+    "sortino": 2.1872,
+    "top_weights": {
+      "H192": 0.01790186999323599,
+      "H199": 0.04755952247948346,
+      "H284": 0.0512404010409728,
+      "H175": 0.007074534182972328,
+      "H473": 0.5014578370616076,
+      "H065": 0.23979671740939534,
+      "H265": 0.13496911783233234
+    },
+    "n_strategies": 12,
+    "objective": "lev-sharpe-concentrated-vix15",
+    "top_k": 12,
+    "selected": [
+      "H192",
+      "H191",
+      "H185",
+      "H186",
+      "H157",
+      "H199",
+      "H284",
+      "H175",
+      "H473",
+      "H065",
+      "H293",
+      "H265"
+    ],
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

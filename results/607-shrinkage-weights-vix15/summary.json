@@ -1,0 +1,65 @@
+{
+  "hypothesis": "H607",
+  "name": "shrinkage-weights-vix15",
+  "strategy_class": "ShrinkageWeightsVIX15",
+  "family": "Set9 Pool Robustness",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.237,
+  "ci_low": 1.8343,
+  "ci_high": 2.6216,
+  "cagr": 0.1148,
+  "max_drawdown": -0.0776,
+  "n_trades": 0,
+  "h001_corr": 0.385,
+  "fold_sharpes": [
+    3.177,
+    2.126,
+    1.695,
+    2.458,
+    2.832,
+    1.075,
+    1.357,
+    2.708,
+    2.156,
+    3.326,
+    2.355,
+    1.667
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "lev-Sharpe + mu*||w-w_mdr||^2 ridge shrinkage, VIX<15 regime. mu sweep {0.01: 2.237, 0.1: 2.2368, 0.5: 2.232, 2.0: 2.206}; best mu=0.01. Shrinkage toward MDR prior. H600/H591 (mu=0) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.4794,
+    "sortino": 2.3955,
+    "top_weights": {
+      "H016": 0.034334626929959214,
+      "H043": 0.014225621634595132,
+      "H065": 0.15366524821376548,
+      "H076": 0.1857072896712143,
+      "H157": 0.015644836404408405,
+      "H192": 0.03261410222205791,
+      "H199": 0.06011231709857648,
+      "H265": 0.12965712911129768,
+      "H473": 0.36374941026303487
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-mdr-shrinkage-vix15",
+    "mu_best": 0.01,
+    "mu_sweep": {
+      "0.01": 2.237,
+      "0.1": 2.2368,
+      "0.5": 2.232,
+      "2.0": 2.206
+    },
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

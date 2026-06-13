@@ -135,3 +135,63 @@ def h001_correlation(best_port, spy, folds):
 
 def top_weights(strategy_names, w, threshold: float = 0.005):
     return {strategy_names[i]: float(v) for i, v in enumerate(w) if v > threshold}
+
+
+def expanding_percentile_mask(series, index, q, min_periods=252):
+    """Bull mask: True where `series` is below its expanding q-quantile (no lookahead via shift)."""
+    s = series.reindex(index).ffill().bfill()
+    thr = s.expanding(min_periods=min_periods).quantile(q).shift(1)
+    return (s < thr).fillna(True)
+
+
+def per_strategy_sharpe(clean):
+    """Standalone annualized Sharpe of each pool column (NaN-safe)."""
+    out = {}
+    for c in clean.columns:
+        r = clean[c].dropna()
+        out[c] = float(sharpe(r)) if len(r) > 10 else 0.0
+    return out
+
+
+def finalize_run(hid, name, cls, family, r, idx, w, names, folds, spy, notes, extra, label):
+    """Compute metrics + CI + folds + H001 corr, decide KEEP/kill, write summary, print. Returns dict."""
+    from write_summary import write_summary
+
+    from quant.metrics.performance import bootstrap_sharpe_ci
+
+    sh, cal, cg, dd, so = portfolio_metrics(r)
+    port = pd.Series(r, index=idx)
+    lo, hi = bootstrap_sharpe_ci(port, n_boot=5000)
+    fs = fold_sharpe_list(port, folds)
+    corr = h001_correlation(port, spy, folds)
+    tw = top_weights(names, w) if w is not None else {}
+    decision = "KEEP" if sh > 0.51 and lo > 0 else "kill"
+    print(
+        f"{label}: Sh={sh:.3f} Cal={cal:.3f} Sortino={so:.3f} CAGR={cg:.2%} DD={dd:.2%} "
+        f"CI[{lo:.2f},{hi:.2f}] folds {min(fs):.2f}..{max(fs):.2f} corr={corr:+.3f} -> {decision}"
+    )
+    params = {
+        "calmar": round(float(cal), 4),
+        "sortino": round(float(so), 4),
+        "top_weights": tw,
+        "n_strategies": len(names),
+    }
+    params.update(extra)
+    write_summary(
+        hypothesis_id=hid,
+        name=name,
+        strategy_class=cls,
+        family=family,
+        sharpe=sh,
+        ci_low=lo,
+        ci_high=hi,
+        cagr=cg,
+        max_drawdown=dd,
+        n_trades=0,
+        h001_corr=corr,
+        fold_sharpes=fs,
+        decision=decision,
+        notes=notes,
+        canonical_params=params,
+    )
+    return {"sharpe": sh, "calmar": cal, "cagr": cg, "dd": dd, "sortino": so, "decision": decision}

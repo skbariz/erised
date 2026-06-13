@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H585",
+  "name": "spy-tlt-corr-regime-conditional",
+  "strategy_class": "SPYTLTCorrRegimeConditional",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.936,
+  "ci_low": 1.5467,
+  "ci_high": 2.3428,
+  "cagr": 0.1129,
+  "max_drawdown": -0.0822,
+  "n_trades": 0,
+  "h001_corr": 0.4428,
+  "fold_sharpes": [
+    2.987,
+    1.846,
+    1.637,
+    1.488,
+    2.397,
+    1.169,
+    1.492,
+    1.978,
+    1.894,
+    3.039,
+    1.475,
+    1.85
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "SPY-TLT 60d rolling correlation as regime: corr<=0 (normal) cap=2.5x; corr>0 (crisis) cap=1.0x. tv=6.5%/lb=20d. Bull (normal) fraction: 62.1%. H570 reference (MA regime): Sh=2.021 DD=-7.50%. Delta vs H570: -0.085 Sh.",
+  "canonical_params": {
+    "objective": "lev-sharpe-corr-regime",
+    "corr_window": 60,
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "bull_regime_fraction": 0.6208,
+    "top_weights": {
+      "H016": 0.06460391601128855,
+      "H065": 0.1615387889024605,
+      "H076": 0.2414651244978891,
+      "H097": 0.013477356621730852,
+      "H157": 0.022862078304681944,
+      "H192": 0.04113418187228311,
+      "H265": 0.1274906605161201,
+      "H268": 0.06385903953953045,
+      "H473": 0.26356885373401245
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

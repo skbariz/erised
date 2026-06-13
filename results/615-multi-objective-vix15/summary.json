@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H615",
+  "name": "multi-objective-vix15",
+  "strategy_class": "MultiObjectiveVIX15",
+  "family": "Set9 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0165,
+  "ci_low": 1.6172,
+  "ci_high": 2.4077,
+  "cagr": 0.1071,
+  "max_drawdown": -0.0536,
+  "n_trades": 0,
+  "h001_corr": 0.4637,
+  "fold_sharpes": [
+    1.91,
+    1.183,
+    2.258,
+    1.96,
+    2.594,
+    1.326,
+    1.464,
+    2.363,
+    2.477,
+    2.766,
+    2.113,
+    1.476
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Maximize Sharpe x Calmar (product) at VIX<15 (bull 2.5x/bear 1.0x), tv=6.5%. Balanced champion rewarding both risk-adjusted return and drawdown. H600/H591 (Sharpe-only) 2.237; H592 (Calmar) 2.264.",
+  "canonical_params": {
+    "calmar": 1.9963,
+    "sortino": 2.1468,
+    "top_weights": {
+      "H016": 0.008506307043872697,
+      "H060": 0.012833944660195612,
+      "H065": 0.2458309150743373,
+      "H068": 0.041766296965812785,
+      "H076": 0.26710583664300797,
+      "H157": 0.15986081781042968,
+      "H265": 0.05653672773335509,
+      "H473": 0.20748165815635164
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-times-calmar-vix15",
+    "vix_threshold": 15.0,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

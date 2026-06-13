@@ -1,0 +1,76 @@
+{
+  "hypothesis": "H614",
+  "name": "vix15-low-corr",
+  "strategy_class": "VIX15LowCorr",
+  "family": "Set9 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.2091,
+  "ci_low": 1.8104,
+  "ci_high": 2.6075,
+  "cagr": 0.1136,
+  "max_drawdown": -0.0819,
+  "n_trades": 0,
+  "h001_corr": 0.2695,
+  "fold_sharpes": [
+    3.34,
+    2.138,
+    1.448,
+    2.571,
+    2.84,
+    0.934,
+    1.353,
+    2.718,
+    1.967,
+    3.331,
+    2.42,
+    1.66
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H001-corr-penalized lev-Sharpe at VIX<15. lambda sweep {0.5: {'sharpe': 2.209, 'corr': 0.269}, 1.0: {'sharpe': 2.175, 'corr': 0.224}, 2.0: {'sharpe': 2.002, 'corr': 0.109}, 3.0: {'sharpe': 1.843, 'corr': 0.043}}; chosen lambda=0.5. Target corr<0.3 at high Sharpe. H596 (VIX<20) ref: corr +0.299 @ Sh 2.087.",
+  "canonical_params": {
+    "calmar": 1.3869,
+    "sortino": 2.3467,
+    "top_weights": {
+      "H043": 0.007300804845784967,
+      "H065": 0.13320093996853719,
+      "H076": 0.17838521005265867,
+      "H175": 0.00969088512339283,
+      "H192": 0.028401134999731393,
+      "H199": 0.06473459043860487,
+      "H265": 0.13986358542308372,
+      "H284": 0.01439750255317621,
+      "H473": 0.4240253465949907
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-minus-lambda-corr-vix15",
+    "vix_threshold": 15.0,
+    "lambda_chosen": 0.5,
+    "lambda_sweep": {
+      "0.5": {
+        "sharpe": 2.209,
+        "corr": 0.269
+      },
+      "1.0": {
+        "sharpe": 2.175,
+        "corr": 0.224
+      },
+      "2.0": {
+        "sharpe": 2.002,
+        "corr": 0.109
+      },
+      "3.0": {
+        "sharpe": 1.843,
+        "corr": 0.043
+      }
+    },
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

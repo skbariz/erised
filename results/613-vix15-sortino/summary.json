@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H613",
+  "name": "vix15-sortino",
+  "strategy_class": "VIX15Sortino",
+  "family": "Set9 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3488,
+  "ci_low": 1.9505,
+  "ci_high": 2.7371,
+  "cagr": 0.1419,
+  "max_drawdown": -0.0858,
+  "n_trades": 0,
+  "h001_corr": 0.3484,
+  "fold_sharpes": [
+    3.074,
+    2.052,
+    1.79,
+    2.496,
+    2.95,
+    1.091,
+    1.355,
+    3.042,
+    2.384,
+    3.425,
+    2.784,
+    1.845
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Downside semi-deviation vol leverage at VIX<15 (bull 2.5x/bear 1.0x), tv=6.5%. H595 (VIX<20 Sortino) ref: Sh 2.200, CAGR 15.82%. H583 CAGR ref 17.60%.",
+  "canonical_params": {
+    "calmar": 1.6524,
+    "sortino": 2.5667,
+    "top_weights": {
+      "H016": 0.018648411154235295,
+      "H065": 0.15803967635883337,
+      "H076": 0.16979887708499114,
+      "H097": 0.011351167275163438,
+      "H157": 0.04431453980704961,
+      "H175": 0.014863473755897293,
+      "H191": 0.020980133004965765,
+      "H192": 0.026540714721667816,
+      "H199": 0.02277358987476161,
+      "H265": 0.14642645823960568,
+      "H473": 0.3568764065395197
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-downside-vol-vix15",
+    "vix_threshold": 15.0,
+    "downside_vol": true,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

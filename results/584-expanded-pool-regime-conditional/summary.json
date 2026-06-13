@@ -1,0 +1,62 @@
+{
+  "hypothesis": "H584",
+  "name": "expanded-pool-regime-conditional",
+  "strategy_class": "ExpandedPoolRegimeConditional",
+  "family": "Set8 Batch3 Regime",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0238,
+  "ci_low": 1.6253,
+  "ci_high": 2.4233,
+  "cagr": 0.1283,
+  "max_drawdown": -0.0748,
+  "n_trades": 0,
+  "h001_corr": 0.4745,
+  "fold_sharpes": [
+    2.214,
+    1.939,
+    2.441,
+    1.708,
+    2.449,
+    1.305,
+    1.622,
+    1.923,
+    2.044,
+    3.169,
+    1.658,
+    1.847
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H570 regime conditional + H576 (QualityMomentumWeekly, H001 corr=-0.019) and H577 (SectorMomentumVolTarget, H001 corr=+0.068) added to 55-strategy pool. Total: 57 strategies. H576 weight=0.000, H577 weight=0.019. H570 reference: Sh=2.021 DD=-7.50%. Delta vs H570: +0.003 Sh.",
+  "canonical_params": {
+    "objective": "lev-sharpe-regime-expanded-pool",
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "ma_window": 200,
+    "n_strategies": 57,
+    "h576_weight": 0.0,
+    "h577_weight": 0.0186,
+    "top_weights": {
+      "H016": 0.01951000923584537,
+      "H019": 0.022348402164636964,
+      "H065": 0.2109931651080007,
+      "H076": 0.2415901652377474,
+      "H577": 0.018581927067608358,
+      "H191": 0.023159658258328865,
+      "H192": 0.0659745710528904,
+      "H194": 0.018235712561789335,
+      "H199": 0.01850612947369237,
+      "H265": 0.14308958897298465,
+      "H471": 0.01823618372901237,
+      "H473": 0.19195566099307196
+    }
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

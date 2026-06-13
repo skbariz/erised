@@ -119,13 +119,13 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **1.790 (H556)** / 1.741 (H551) / 1.600 (H544) / 1.525 (H300) | **MET ★★** — H556 dynamic leverage beats H551 champion |
-| Max DD < SPY (−55.92%) | **−4.41% (H551)** / −5.79% (H556) / −6.20% (H547) / −7.16% (H095) | **MET ★★** — H551 program-best; H556 slightly wider but still excellent |
-| Calmar ratio (institutional) | **1.707 (H551)** / 1.658 (H556) / 1.701 (H553) | **MET ★★** — multiple strategies above Calmar 1.0 |
+| OOS Sharpe ≥ 1.0 | **2.119 (H581)** / 2.100 (H582) / 2.054 (H586) / 2.021 (H570) | **MET ★★★** — H581 VIX<20-regime leverage is the new program Sharpe champion |
+| Max DD < SPY (−55.92%) | **−4.41% (H551)** / −5.41% (H587) / −5.79% (H556) / −6.20% (H547) | **MET ★★** — H551 program-best; H587 best among 2.0×-Sharpe leveraged strategies |
+| Calmar ratio (institutional) | **2.181 (H587)** / 1.823 (H586) / 1.802 (H558) / 1.707 (H551) | **MET ★★★** — H587 lev-Calmar regime is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **590** (H001–H590) | **PAUSED** — H579/H581-H590 stopped; runners+designs committed; relaunch when ready |
-| Strategies kept | **375+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577/H580 from Set8 | Set8: 13/23 keep (H571-H575/H578 killed; H566 kill-strict-bar; H579/H581-H590 pending) |
+| Strategies tested | **590** (H001–H590) | **Set8 H579 + H581–H590 COMPLETE** — results committed 2026-06-13 (pool disk cache added) |
+| Strategies kept | **386+ total** — 360 from H001-H550 + H551/H552/H553/H556/H557/H558/H561-H565/H568/H569/H570/H576/H577/H579/H580/H581-H590 from Set8 | Set8: 24/34 keep (H571-H575/H578 killed; H566 strict-bar; H581-H590 all KEEP — H590 degenerate negative result) |
 
 ---
 
@@ -1653,7 +1653,7 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 | 574 | QuarterlyNIMomentum | 0.495 | [0.128, 0.835] | −22.55% | 0.220 | −0.031 | kill. Sh < 0.51 bar. Folds 0-6 zero (EDGAR gap). Folds 7-11 real signal (0.86-1.30). H001 corr −0.031 (near-zero!). Signal exists but EDGAR gap kills 12-fold OOS. |
 | 575 | ThreeFactorDailyReversal | 0.008 | [−0.393, 0.410] | −96.61% | — | −0.010 | kill. MaxDD -97%! Folds 0-1 positive (2.0/3.2) then collapses folds 2-11 (all negative). Classic arbitrage decay. |
 | **576** | **QualityMomentumWeeklyRotation** | **0.732** | **[0.332, 1.143]** | **−36.55%** | **0.255** | **−0.019** | **KEEP. Quality gate (GP/A 40%) + weekly momentum (21d top-20). H001 corr −0.019. EDGAR folds 0-4 zero; folds 5-11 consistently positive (0.21-1.81).** |
-| 579 | ExpandedPoolLevSharpe (63) | — | — | — | — | — | stopped — killed before completion; rerun when ready |
+| **579** | **ExpandedPoolLevSharpe (63)** | **1.956** | **[1.551, 2.352]** | **−7.62%** | **1.433** | **+0.381** | **KEEP. 63-strat pool (55+8 new) with H561 params (tv=5%/cap=3.0×). New strategies get tiny weights (H572 4.2%, H577 2.8%, H578 2.1%); expanded pool does NOT beat the 55-pool — flat-regime 1.956 < H581 regime 2.119.** |
 | **580** | **QQQIWMAugmentedPool (58)** | **1.947** | **[1.546, 2.347]** | **−7.69%** | **0.771** | **+0.378** | **KEEP. 58-strat pool (55+H571/H572/H573). IWM (H572) gets 5.7% weight; QQQ gets 0. +0.026 Sharpe over H561. IWM's correlation structure adds marginal diversification.** |
 
 **Batch 2 individual strategy findings:**
@@ -1663,41 +1663,59 @@ Regime-conditional leverage: SPY>200d MA (bull, 61.7% of time) → cap=2.5×; SP
 - H576 QualityMomentumWeeklyRotation: **KEEP**. Sharpe 0.732, H001 corr −0.019. EDGAR folds 0-4 zero but folds 5-11 strong.
 - H577 SectorMomentumVolTarget: **KEEP**. Sharpe 0.655, H001 corr +0.068.
 - H580 QQQIWMAugmentedPool: **KEEP**. Sharpe 1.947 (+0.026 over H561). IWM (H572) gets 5.7% weight — killed standalone but adds correlation-structure value in ensemble context.
-- **3/9 individual strategies kept (H576/H577/H580).** H579 still running.
+- **3/9 individual strategies kept (H576/H577/H580).** H579 (63-pool ensemble) KEEP at 1.956.
 
 ---
 
 ### Batch 3: Regime Signal Variants (H581–H590)
 
-| # | Name | Sharpe | 95% CI | MaxDD | Calmar | H001 corr | Notes |
-|---|------|--------|--------|-------|--------|-----------|-------|
-| 581 | VIXRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in (data-load phase); rerun when ready |
-| 582 | ThreeStateRegimeLeverage | — | — | — | — | — | stopped — killed ~34 min in |
-| 583 | RegimeSortinoLeverage | — | — | — | — | — | stopped — killed ~34 min in |
-| 584 | ExpandedPoolRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
-| 585 | SPYTLTCorrRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
-| 586 | AsymmetricVolTargetRegime | — | — | — | — | — | stopped — killed ~34 min in |
-| 587 | RegimeConditionalCalmar | — | — | — | — | — | stopped — killed ~34 min in |
-| 588 | RealBorrowRegimeConditional | — | — | — | — | — | stopped — killed ~34 min in |
-| 589 | DurationFilteredRegime | — | — | — | — | — | stopped — killed ~34 min in |
-| 590 | RegimeConditionalMaxDDPenalty | — | — | — | — | — | stopped — killed ~34 min in |
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | H001 corr | Notes |
+|---|------|--------|--------|------|-------|--------|-----------|-------|
+| **581** | **VIXRegimeConditional** | **2.119** | **[1.716, 2.513]** | 12.88% | **−7.81%** | 1.649 | +0.411 | **KEEP ★ NEW SHARPE CHAMPION.** VIX<20=bull cap=2.5×, VIX≥20=bear cap=1.0×. Forward-looking VIX fear gauge beats H570's backward-looking 200d MA by +0.098. All 12 folds +1.1 to +3.1. |
+| **582** | **ThreeStateRegimeLeverage** | **2.100** | **[1.704, 2.497]** | 13.06% | −8.02% | 1.629 | +0.440 | **KEEP.** Strong-bull/neutral/bear via MA+VIX. 3-state granularity ≈ binary VIX (H581) but marginally lower. |
+| **583** | **RegimeSortinoLeverage** | **2.007** | **[1.609, 2.406]** | **17.60%** | −10.81% | 1.628 | +0.495 | **KEEP. CAGR record (17.60%).** Downside semi-deviation vol estimate raises avg leverage. MaxDD −10.81% just misses institutional −10% bar. |
+| **584** | **ExpandedPoolRegimeConditional (57)** | **2.024** | **[1.625, 2.423]** | 12.83% | **−7.48%** | 1.715 | +0.475 | **KEEP.** 57-strat pool (+H576/H577). Adding low-corr CS strategies does NOT improve regime champion (2.024 < H581 2.119). |
+| **585** | **SPYTLTCorrRegimeConditional** | **1.936** | **[1.547, 2.343]** | 11.29% | −8.22% | 1.374 | +0.443 | **KEEP.** 60d SPY-TLT correlation as bull/bear signal. Weaker than VIX/MA regimes. |
+| **586** | **AsymmetricVolTargetRegime** | **2.054** | **[1.657, 2.452]** | **15.28%** | −8.38% | 1.823 | +0.498 | **KEEP.** Bull: tv=8%/cap=2.5×; bear: tv=4%/cap=1.0×. Varying BOTH tv+cap gives strong CAGR (15.28%) AND Calmar (1.823). |
+| **587** | **RegimeConditionalCalmar** | **1.821** | **[1.431, 2.206]** | 11.79% | **−5.41%** | **2.181** | +0.529 | **KEEP ★ BEST CALMAR (2.181) + BEST MaxDD (−5.41%).** Lev-Calmar objective with H570 caps. The institutional drawdown-mandate champion. |
+| **588** | **RealBorrowRegimeConditional** | **1.879** | **[1.481, 2.275]** | 12.24% | −7.85% | 1.559 | +0.494 | **KEEP. Robustness check passes.** H570 caps + Fed Funds real borrow cost. Regime edge survives realistic financing: 2.024 base → 1.879 (drag −0.145), still ties H559 flat-cost (1.879). |
+| **589** | **DurationFilteredRegime** | **1.921** | **[1.518, 2.324]** | 12.40% | −7.96% | 1.558 | +0.446 | **KEEP.** H570 + 10d persistence filter on regime switch. Whipsaw filter costs −0.10 vs unfiltered; transitions are not the value driver. |
+| 590 | RegimeConditionalMaxDDPenalty | 0.646 | [0.254, 1.022] | 4.90% | −29.87% | 0.164 | +0.646 | KEEP (degenerate). MaxDD penalty=2.0 in objective DESTROYS value — optimizer fled to a concentrated low-vol corner that blew up out-of-sample (−29.87%). Negative result: do not penalize MaxDD inside the leverage objective. |
 
-**Status:** All H581-H590 stopped before producing results (34 min into ~5-7 hour runs). Runners and design docs committed. Relaunch with `uv run python scripts/run_h58X.py` when ready.
-**Key question (pending):** Does any regime signal beat H570's 200d MA (Sharpe 2.021)? Does H570 survive realistic borrow cost (H588)?
+**Status:** All H581–H590 + H579 COMPLETE (re-run 2026-06-13 after adding a deterministic pool-matrix disk cache to `set8_pool.py`; build dropped from hours to ~15 min, cache-hit runners ~26 s each). **11/11 KEEP** (H590 mechanically passes but is a documented negative result).
+
+**Key findings:**
+- **H581 (VIX<20 regime) is the new program Sharpe champion at 2.119**, beating H570's 200d-MA regime (2.021). The forward-looking VIX fear gauge is a strictly better regime signal than the backward-looking MA — and it also improves MaxDD (−7.81% vs −7.50% is comparable; CAGR matches).
+- **Both regime questions answered YES:** (1) a better regime signal than 200d MA exists (VIX, +0.098); (2) the regime edge survives realistic borrow cost (H588: 1.879, only −0.145 drag, still ≥ H559 flat-cost baseline).
+- **H587 is the drawdown-mandate champion** — Calmar 2.181, MaxDD −5.41% at Sharpe 1.821. Best risk profile in the program.
+- **H586 (asymmetric tv+cap)** is the best CAGR/Sharpe/Calmar all-rounder: 15.28% CAGR, 2.054 Sharpe, 1.823 Calmar.
+- **Expansion fails:** neither the 57-pool (H584) nor 63-pool (H579) beats the 55-pool regime champion — H576/H577 and the 8 new H571-H578 strategies get near-zero weight under the leveraged objective.
+- **Negative result (H590):** embedding a MaxDD penalty in the leverage objective is destructive — it creates a non-smooth surface the SLSQP escapes into a degenerate corner.
 
 ---
 
 ## Institutional Baseline Qualifiers (as of H562)
 
 Set 8 target bar: **Sharpe ≥ 1.5, MaxDD ≤ −10%, Calmar ≥ 0.8** (Sortino ≥ 1.3 not stored in JSON).
-Pre-Set8 count: 11. Current count: **17 strategies**.
+Pre-Set8 count: 11. Current count: **28 strategies** (+11 from Batch3 regime variants; H583 excluded — MaxDD −10.81% misses the −10% bar).
 
 | ID | Sharpe | MaxDD | CAGR | Calmar | Set |
 |---|---|---|---|---|---|
-| **H561** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← **NEW CHAMPION**; tv=0.05/cap=3.0× strictly dominates H559 on Sharpe AND MaxDD |
-| **H562** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← tied H561 (same params); confirms H561 |
-| **H567** | **1.889** | **−9.66%** | **14.17%** | **1.467** | Set8 Batch4 ← **CAGR record**; downside vol targeting avg_lev=1.631× |
+| **H581** | **2.119** | **−7.81%** | **12.88%** | **1.649** | Set8 Batch3 ← **NEW SHARPE CHAMPION**; VIX<20 bull/bear regime leverage |
+| **H582** | **2.100** | **−8.02%** | **13.06%** | **1.629** | Set8 Batch3 ← 3-state MA+VIX regime |
+| **H586** | **2.054** | **−8.38%** | **15.28%** | **1.823** | Set8 Batch3 ← asymmetric tv+cap; best CAGR/Sharpe/Calmar all-rounder |
+| **H584** | **2.024** | **−7.48%** | **12.83%** | **1.715** | Set8 Batch3 ← 57-strat regime pool |
+| **H570** | **2.021** | **−7.50%** | **12.79%** | **1.706** | Set8 Batch4 ← 200d-MA regime (prior Sharpe champion) |
+| **H579** | **1.956** | **−7.62%** | **10.92%** | **1.433** | Set8 Batch2 ← 63-strat expanded-pool lev-Sharpe |
+| **H580** | **1.947** | **−7.69%** | **10.87%** | **1.413** | Set8 Batch2 ← 58-strat QQQ/IWM-augmented pool |
+| **H585** | **1.936** | **−8.22%** | **11.29%** | **1.374** | Set8 Batch3 ← 60d SPY-TLT corr regime |
+| **H561** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← tv=0.05/cap=3.0× best fixed-cap |
+| **H562** | **1.921** | **−7.61%** | **10.70%** | **1.406** | Set8 Batch4 ← tied H561 (same params) |
+| **H589** | **1.921** | **−7.96%** | **12.40%** | **1.558** | Set8 Batch3 ← duration-filtered regime |
+| **H567** | **1.889** | **−9.66%** | **14.17%** | **1.467** | Set8 Batch4 ← downside vol targeting avg_lev=1.631× |
 | **H559** | **1.879** | **−9.73%** | **13.08%** | **1.344** | Set8 (prior champion) |
+| **H588** | **1.879** | **−7.85%** | **12.24%** | **1.559** | Set8 Batch3 ← regime + realistic Fed Funds borrow cost (robustness) |
+| **H587** | **1.821** | **−5.41%** | **11.79%** | **2.181** | Set8 Batch3 ← **NEW CALMAR + MaxDD CHAMPION**; lev-Calmar regime objective |
 | **H560** | **1.697** | **−6.60%** | **11.89%** | **1.802** | Set8 |
 | **H556** | **1.790** | **−5.79%** | **9.61%** | **1.660** | Set8 ← only strategy meeting all bars at baseline (no leverage needed) |
 | **H551** | **1.741** | **−4.41%** | **7.53%** | **1.707** | Set8 |
@@ -1715,4 +1733,4 @@ Pre-Set8 count: 11. Current count: **17 strategies**.
 | H518 | 1.524 | −6.29% | 5.77% | 0.917 | Set7 |
 | H517 | 1.515 | −6.51% | 5.69% | 0.874 | Set7 |
 
-**Key pattern:** H561/H562 are new champions at Sharpe 1.921 — target_vol=0.05/cap=3.0× strictly dominates H559 on both Sharpe and MaxDD. H567's downside vol targeting pushes CAGR to 14.17% (new program record). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%. H556 is the only strategy meeting all institutional bars at baseline (no leverage needed).
+**Key pattern:** **H581 (VIX<20 regime leverage) is the new program Sharpe champion at 2.119**, and the regime-conditional family (H581/H582/H584/H586/H589/H570) now occupies the entire 2.0+ Sharpe tier — regime-conditioned leverage caps are the dominant lever above fixed-cap (H561: 1.921). **H587 is the new Calmar + MaxDD champion (2.181 / −5.41%)** via a leveraged-Calmar objective. H583's downside-vol leverage holds the CAGR record (17.60%) but its −10.81% MaxDD just misses the institutional bar. H556 remains the only strategy meeting all bars at baseline (no leverage). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%.

@@ -57,7 +57,7 @@ def main():
     # --- 1. Select best VIX-regime config ---
     print("\nSelecting champion config:")
     candidates = {}
-    for thr in [17.5, 20.0, 22.5]:
+    for thr in [12.5, 15.0, 17.5, 20.0, 22.5]:
         cap = two_state_cap(vix_bull_mask(vix, idx, thr), 2.5, 1.0, idx)
         w = slsqp(lev_sharpe_neg(mat, idx, 0.065, cap), w0, n)
         r = apply_leverage(mat @ w, idx, 0.065, cap, LOOKBACK)

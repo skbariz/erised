@@ -1,0 +1,64 @@
+{
+  "hypothesis": "H591",
+  "name": "vix-threshold-optimal",
+  "strategy_class": "VIXThresholdOptimal",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.237,
+  "ci_low": 1.8342,
+  "ci_high": 2.6217,
+  "cagr": 0.1148,
+  "max_drawdown": -0.0776,
+  "n_trades": 0,
+  "h001_corr": 0.385,
+  "fold_sharpes": [
+    3.177,
+    2.125,
+    1.695,
+    2.458,
+    2.832,
+    1.074,
+    1.357,
+    2.708,
+    2.156,
+    3.325,
+    2.355,
+    1.667
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX threshold sweep [15.0, 17.5, 20.0, 22.5, 25.0]; best=VIX<15.0. Sharpe by threshold: {15.0: 2.237, 17.5: 2.1884, 20.0: 2.1187, 22.5: 2.1289, 25.0: 2.0616}. Bull cap=2.5x/bear cap=1.0x, tv=6.5%/lb=20d. H581 ref (threshold=20): Sh=2.119. Delta vs H581: +0.118. Doubles as H581 sensitivity analysis -- threshold robustness.",
+  "canonical_params": {
+    "objective": "lev-sharpe-vix-threshold-sweep",
+    "best_threshold": 15.0,
+    "sharpe_by_threshold": {
+      "15.0": 2.237,
+      "17.5": 2.1884,
+      "20.0": 2.1187,
+      "22.5": 2.1289,
+      "25.0": 2.0616
+    },
+    "leverage_target_vol": 0.065,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_lookback": 20,
+    "top_weights": {
+      "H016": 0.03428421854913107,
+      "H043": 0.01417004015631984,
+      "H065": 0.15386100540035633,
+      "H076": 0.18580669716298706,
+      "H157": 0.015645229411237124,
+      "H192": 0.03260490926029069,
+      "H199": 0.06061055912180933,
+      "H265": 0.1296286957420889,
+      "H473": 0.3637123778938552
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

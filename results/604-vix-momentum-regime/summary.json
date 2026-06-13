@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H604",
+  "name": "vix-momentum-regime",
+  "strategy_class": "VIXMomentumRegime",
+  "family": "Set9 Regime Forms",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.4224,
+  "ci_low": 2.0259,
+  "ci_high": 2.8091,
+  "cagr": 0.1116,
+  "max_drawdown": -0.075,
+  "n_trades": 0,
+  "h001_corr": 0.3339,
+  "fold_sharpes": [
+    3.3,
+    1.979,
+    1.597,
+    3.297,
+    2.994,
+    1.139,
+    1.491,
+    2.847,
+    2.553,
+    3.371,
+    2.81,
+    1.575
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Bull = VIX<15.0 AND VIX<=20d-mean (not rising). Bull cap=2.5x/bear 1.0x, tv=6.5%. Bull frac 21.3%. H600/H591 (VIX<15 level only) ref 2.237.",
+  "canonical_params": {
+    "calmar": 1.4876,
+    "sortino": 2.6868,
+    "top_weights": {
+      "H016": 0.01961105149233437,
+      "H043": 0.016564938825548683,
+      "H065": 0.14109194248749998,
+      "H076": 0.1625704118853132,
+      "H157": 0.11816987209095456,
+      "H175": 0.008013033319671584,
+      "H192": 0.011799997072268425,
+      "H265": 0.09634489611938793,
+      "H473": 0.4258338567070322
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-level-and-momentum",
+    "vix_level": 15.0,
+    "bull_fraction": 0.2128,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

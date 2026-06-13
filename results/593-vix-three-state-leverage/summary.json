@@ -1,0 +1,65 @@
+{
+  "hypothesis": "H593",
+  "name": "vix-three-state-leverage",
+  "strategy_class": "VIXThreeStateLeverage",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0824,
+  "ci_low": 1.6873,
+  "ci_high": 2.4784,
+  "cagr": 0.1332,
+  "max_drawdown": -0.0853,
+  "n_trades": 0,
+  "h001_corr": 0.4002,
+  "fold_sharpes": [
+    3.51,
+    1.99,
+    1.664,
+    2.109,
+    2.49,
+    1.231,
+    1.782,
+    2.044,
+    1.782,
+    2.972,
+    1.68,
+    1.865
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-state VIX: <15.0 cap=3.0x, 15.0-25.0 cap=2.0x, >=25.0 cap=1.0x. tv=6.5%/lb=20d. State fractions {'strong': 0.3034746573159069, 'neutral': 0.48214854956965253, 'bear': 0.21437679311444055}. H581 ref (binary VIX<20): 2.119. Delta vs H581: -0.037.",
+  "canonical_params": {
+    "objective": "lev-sharpe-vix-3state",
+    "low_vix": 15.0,
+    "high_vix": 25.0,
+    "cap_strong": 3.0,
+    "cap_neutral": 2.0,
+    "cap_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "state_fractions": {
+      "strong": 0.3034746573159069,
+      "neutral": 0.48214854956965253,
+      "bear": 0.21437679311444055
+    },
+    "top_weights": {
+      "H016": 0.03157089886953422,
+      "H043": 0.016412699653453055,
+      "H065": 0.15605334094242082,
+      "H076": 0.21128141335822823,
+      "H097": 0.011688990047393313,
+      "H192": 0.020347457139396116,
+      "H199": 0.07830881365425507,
+      "H265": 0.10467319312967353,
+      "H284": 0.011344647243911,
+      "H473": 0.3583185459617368
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

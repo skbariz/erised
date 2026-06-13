@@ -1,0 +1,64 @@
+{
+  "hypothesis": "H618",
+  "name": "regime-lag-vix15",
+  "strategy_class": "RegimeLagVIX15",
+  "family": "Set9 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.9773,
+  "ci_low": 1.5791,
+  "ci_high": 2.3695,
+  "cagr": 0.1078,
+  "max_drawdown": -0.0747,
+  "n_trades": 0,
+  "h001_corr": 0.4576,
+  "fold_sharpes": [
+    2.616,
+    2.096,
+    1.965,
+    1.705,
+    2.665,
+    1.226,
+    1.372,
+    2.155,
+    1.918,
+    2.863,
+    1.693,
+    1.69
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX<15 regime signal lagged k days (next-day+ execution). Sharpe by lag: {'lag1': 1.9773, 'lag3': 1.9258, 'lag5': 1.8981}. Headline = 1-day lag (realistic execution). H600/H591 (0-lag) ref 2.237; small degradation => robust.",
+  "canonical_params": {
+    "calmar": 1.4425,
+    "sortino": 2.0443,
+    "top_weights": {
+      "H016": 0.029487771075172652,
+      "H019": 0.012793444379776291,
+      "H060": 0.012441933095958629,
+      "H065": 0.20396425156716055,
+      "H076": 0.2094406480120657,
+      "H082": 0.0076648290943556055,
+      "H191": 0.06443031433184607,
+      "H192": 0.045663078636160016,
+      "H265": 0.13743912225068247,
+      "H473": 0.2766746075568257
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix15-lagged-regime",
+    "vix_threshold": 15.0,
+    "lag_sweep": {
+      "lag1": 1.9773,
+      "lag3": 1.9258,
+      "lag5": 1.8981
+    },
+    "headline_lag": 1,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

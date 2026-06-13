@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H595",
+  "name": "vix-regime-sortino",
+  "strategy_class": "VIXRegimeSortino",
+  "family": "Set8 Batch4 VIX-Regime Synthesis",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.1996,
+  "ci_low": 1.7979,
+  "ci_high": 2.5944,
+  "cagr": 0.1582,
+  "max_drawdown": -0.0915,
+  "n_trades": 0,
+  "h001_corr": 0.3942,
+  "fold_sharpes": [
+    3.175,
+    2.085,
+    2.116,
+    1.973,
+    2.625,
+    0.923,
+    2.237,
+    2.379,
+    2.014,
+    2.98,
+    2.393,
+    2.0
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Downside semi-deviation vol-target leverage + VIX<20.0 regime (bull cap=2.5x/bear 1.0x), tv=6.5%/lb=20d. Sortino=2.355, Calmar=1.729. H583 ref CAGR 17.60% / DD -10.81% / Sh 2.007. CAGR delta vs H583: -1.78pp; DD delta: +1.66pp.",
+  "canonical_params": {
+    "objective": "lev-sharpe-downside-vol-vix-regime",
+    "vix_threshold": 20.0,
+    "leverage_max_bull": 2.5,
+    "leverage_max_bear": 1.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20,
+    "downside_vol": true,
+    "sortino": 2.3545,
+    "calmar": 1.7293,
+    "top_weights": {
+      "H016": 0.04309220450145361,
+      "H043": 0.024768140856062614,
+      "H065": 0.15116120080154685,
+      "H076": 0.1573147895602658,
+      "H097": 0.012217807592204028,
+      "H192": 0.014427880029604514,
+      "H199": 0.05312799760322748,
+      "H254": 0.024885357149215345,
+      "H265": 0.09164764511435644,
+      "H268": 0.011868346322237227,
+      "H284": 0.04631806682232428,
+      "H473": 0.36917056364748047
+    },
+    "n_strategies": 55
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

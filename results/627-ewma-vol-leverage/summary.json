@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H627",
+  "name": "ewma-vol-leverage",
+  "strategy_class": "EWMAVolLeverage",
+  "family": "Set10 Leverage Mechanics",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.4625,
+  "ci_low": 2.0625,
+  "ci_high": 2.8483,
+  "cagr": 0.1153,
+  "max_drawdown": -0.0696,
+  "n_trades": 0,
+  "h001_corr": 0.333,
+  "fold_sharpes": [
+    3.302,
+    1.963,
+    1.567,
+    3.298,
+    3.11,
+    1.107,
+    1.81,
+    2.897,
+    2.453,
+    3.307,
+    2.866,
+    1.714
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "EWMA vol estimate (span 20) instead of rolling std, VIX<16-and-not-rising regime, tv=6.5%. EWMA reacts faster to vol spikes. H620 (rolling 20d) ref 2.472.",
+  "canonical_params": {
+    "calmar": 1.6568,
+    "sortino": 2.7356,
+    "top_weights": {
+      "H016": 0.019328238143264953,
+      "H043": 0.016436333726084607,
+      "H065": 0.13799321834636286,
+      "H076": 0.1616297920343962,
+      "H157": 0.119847558527086,
+      "H175": 0.011689880613422814,
+      "H192": 0.008636673803018868,
+      "H265": 0.09538549907999863,
+      "H473": 0.4290528057263591
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-ewma-vol-vix-momentum",
+    "ewma_span": 20,
+    "leverage_target_vol": 0.065
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

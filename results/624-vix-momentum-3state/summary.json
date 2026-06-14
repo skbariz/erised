@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H624",
+  "name": "vix-momentum-3state",
+  "strategy_class": "VIXMomentum3State",
+  "family": "Set10 VIX-Momentum",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3076,
+  "ci_low": 1.9057,
+  "ci_high": 2.6999,
+  "cagr": 0.1176,
+  "max_drawdown": -0.0791,
+  "n_trades": 0,
+  "h001_corr": 0.3467,
+  "fold_sharpes": [
+    3.302,
+    2.081,
+    1.451,
+    2.921,
+    3.157,
+    1.026,
+    1.659,
+    2.684,
+    2.04,
+    3.128,
+    2.517,
+    1.785
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "3-state: VIX>=16 cap=1.0; VIX<16 & falling cap=3.0; VIX<16 & flat cap=2.0. State fractions {'strong(low&falling)': 0.2161300605674211, 'neutral(low&flat)': 0.145680586547657, 'bear(high)': 0.6381893528849218}. tv=6.5%. H620 (binary VIX<16 not-rising) ref 2.472.",
+  "canonical_params": {
+    "calmar": 1.487,
+    "sortino": 2.507,
+    "top_weights": {
+      "H016": 0.021763043566443988,
+      "H043": 0.029778940097902787,
+      "H065": 0.13227390171303544,
+      "H076": 0.16578110976423222,
+      "H157": 0.03944807117897419,
+      "H175": 0.02638465531214329,
+      "H192": 0.014513032550169684,
+      "H199": 0.039576353908995464,
+      "H265": 0.10257336226550266,
+      "H473": 0.42392516363338445
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-3state-direction",
+    "vix_level": 16.0,
+    "state_fractions": {
+      "strong(low&falling)": 0.2161300605674211,
+      "neutral(low&flat)": 0.145680586547657,
+      "bear(high)": 0.6381893528849218
+    },
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

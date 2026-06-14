@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H635",
+  "name": "vix-mom-dd-floor",
+  "strategy_class": "VIXMomDDFloor",
+  "family": "Set10 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3597,
+  "ci_low": 1.9591,
+  "ci_high": 2.7487,
+  "cagr": 0.1036,
+  "max_drawdown": -0.0681,
+  "n_trades": 0,
+  "h001_corr": 0.3262,
+  "fold_sharpes": [
+    3.334,
+    1.975,
+    1.56,
+    3.17,
+    2.961,
+    1.085,
+    1.696,
+    2.641,
+    2.323,
+    3.306,
+    2.607,
+    1.621
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "DD floor via post-hoc tv reduction at VIX<16-and-not-rising (weights at tv=6.5%, lowered to 0.0550 for MaxDD<=7%). No in-objective penalty (H590 failed). H598 ref Sh 2.037.",
+  "canonical_params": {
+    "calmar": 1.5218,
+    "sortino": 2.5752,
+    "top_weights": {
+      "H016": 0.01926584776746407,
+      "H043": 0.01844100747005441,
+      "H065": 0.13591337080425875,
+      "H076": 0.1622714753555298,
+      "H157": 0.12188076764644944,
+      "H175": 0.008039292899096833,
+      "H192": 0.010995932214279325,
+      "H265": 0.09527991065612643,
+      "H473": 0.4279123951867477
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-then-dd-floor-vix-momentum",
+    "vix_threshold": 16.0,
+    "base_target_vol": 0.065,
+    "floored_target_vol": 0.055,
+    "dd_floor": 0.07,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,56 @@
+{
+  "hypothesis": "H634",
+  "name": "vix-mom-multi-obj",
+  "strategy_class": "VIXMomMultiObj",
+  "family": "Set10 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.0848,
+  "ci_low": 1.6936,
+  "ci_high": 2.4657,
+  "cagr": 0.1065,
+  "max_drawdown": -0.0436,
+  "n_trades": 0,
+  "h001_corr": 0.5533,
+  "fold_sharpes": [
+    2.007,
+    1.227,
+    2.27,
+    2.637,
+    2.703,
+    1.401,
+    1.667,
+    2.147,
+    2.61,
+    2.541,
+    2.041,
+    1.432
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Maximize Sharpe x Calmar at VIX<16-and-not-rising (bull 2.5x/bear 1.0x), tv=6.5%. Balanced champion on the best signal. H620 (Sharpe-only) 2.472; H592 (Calmar) 2.264.",
+  "canonical_params": {
+    "calmar": 2.444,
+    "sortino": 2.2924,
+    "top_weights": {
+      "H016": 0.05272228253721409,
+      "H043": 0.035994255765481334,
+      "H060": 0.01442339037644863,
+      "H065": 0.270980375287912,
+      "H076": 0.24801441567503588,
+      "H157": 0.17470485084382484,
+      "H473": 0.2031603114692756
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-times-calmar-vix-momentum",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

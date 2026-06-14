@@ -1,0 +1,57 @@
+{
+  "hypothesis": "H625",
+  "name": "vix-momentum-downside-vol",
+  "strategy_class": "VIXMomentumDownsideVol",
+  "family": "Set10 VIX-Momentum",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.6574,
+  "ci_low": 2.2634,
+  "ci_high": 3.0439,
+  "cagr": 0.1549,
+  "max_drawdown": -0.081,
+  "n_trades": 0,
+  "h001_corr": 0.2929,
+  "fold_sharpes": [
+    3.185,
+    1.911,
+    1.846,
+    3.449,
+    3.238,
+    1.095,
+    1.945,
+    3.299,
+    2.823,
+    3.613,
+    3.281,
+    1.933
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Downside semi-deviation vol leverage at VIX<16 & not-rising (bull 2.5x/bear 1.0x), tv=6.5%. CAGR-leaning sizing on the champion signal. H620 (std vol) ref 2.472.",
+  "canonical_params": {
+    "calmar": 1.9123,
+    "sortino": 3.0172,
+    "top_weights": {
+      "H016": 0.014630136128024746,
+      "H065": 0.15122857951338178,
+      "H076": 0.1621454068110624,
+      "H157": 0.14525024165513525,
+      "H192": 0.0312344716035471,
+      "H265": 0.11708934685554961,
+      "H473": 0.3730215459038458
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-downside-vol-vix-momentum",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "downside_vol": true,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

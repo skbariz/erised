@@ -1,0 +1,57 @@
+{
+  "hypothesis": "H629",
+  "name": "ratchet-vix-mom",
+  "strategy_class": "RatchetVIXMom",
+  "family": "Set10 Leverage Mechanics",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.4718,
+  "ci_low": 2.0705,
+  "ci_high": 2.8565,
+  "cagr": 0.1163,
+  "max_drawdown": -0.0752,
+  "n_trades": 0,
+  "h001_corr": 0.3266,
+  "fold_sharpes": [
+    3.332,
+    1.977,
+    1.573,
+    3.301,
+    3.099,
+    1.126,
+    1.809,
+    2.856,
+    2.524,
+    3.376,
+    2.878,
+    1.697
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum regime cap x tiered ratchet (dd<-5/-10/-15% -> 0.8/0.6/0.4x, lagged). Step-function vs H628 continuous throttle. H620 (regime only) ref 2.472.",
+  "canonical_params": {
+    "calmar": 1.5459,
+    "sortino": 2.7525,
+    "top_weights": {
+      "H016": 0.019273093841296173,
+      "H043": 0.0184434401181822,
+      "H065": 0.13590615488938818,
+      "H076": 0.16228859093726564,
+      "H157": 0.1218700648702073,
+      "H175": 0.008021500202888684,
+      "H192": 0.011014667557733178,
+      "H265": 0.09528737037899263,
+      "H473": 0.4278951172040315
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-ratchet",
+    "tiers": "5/10/15pct->0.8/0.6/0.4",
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

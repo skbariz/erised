@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H638",
+  "name": "regime-lag-vix-mom",
+  "strategy_class": "RegimeLagVIXMom",
+  "family": "Set10 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 1.9553,
+  "ci_low": 1.5524,
+  "ci_high": 2.3468,
+  "cagr": 0.1034,
+  "max_drawdown": -0.0762,
+  "n_trades": 0,
+  "h001_corr": 0.434,
+  "fold_sharpes": [
+    2.713,
+    2.112,
+    2.007,
+    1.86,
+    2.242,
+    1.193,
+    1.301,
+    2.168,
+    1.893,
+    2.737,
+    1.913,
+    1.636
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum signal lagged k days. Sharpe by lag: {'lag1': 1.9553, 'lag3': 1.8683, 'lag5': 1.8824}. Headline = 1-day lag (realistic). H620 (0-lag) ref 2.472. H618 (VIX<15, 1d lag) was 1.977.",
+  "canonical_params": {
+    "calmar": 1.3563,
+    "sortino": 2.0156,
+    "top_weights": {
+      "H016": 0.013141485481132616,
+      "H019": 0.024725785190656626,
+      "H060": 0.01934525640760662,
+      "H065": 0.19842203433745922,
+      "H076": 0.21069236485782686,
+      "H191": 0.0636212592182739,
+      "H192": 0.05887019576271158,
+      "H265": 0.11998933948069876,
+      "H473": 0.2911922792636336
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-lagged",
+    "vix_threshold": 16.0,
+    "lag_sweep": {
+      "lag1": 1.9553,
+      "lag3": 1.8683,
+      "lag5": 1.8824
+    },
+    "headline_lag": 1,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

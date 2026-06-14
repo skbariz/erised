@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H636",
+  "name": "real-borrow-vix-mom",
+  "strategy_class": "RealBorrowVIXMom",
+  "family": "Set10 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3397,
+  "ci_low": 1.9413,
+  "ci_high": 2.7257,
+  "cagr": 0.1116,
+  "max_drawdown": -0.0752,
+  "n_trades": 0,
+  "h001_corr": 0.3303,
+  "fold_sharpes": [
+    3.275,
+    1.965,
+    1.654,
+    2.672,
+    2.596,
+    1.126,
+    1.79,
+    2.822,
+    2.503,
+    3.243,
+    2.675,
+    1.689
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum champion + Fed Funds step borrow (+50bps). Mean borrow 2.622%/yr. H620 (flat 50bps) ref 2.472. H616 (VIX<15 real borrow) was 2.063.",
+  "canonical_params": {
+    "calmar": 1.4844,
+    "sortino": 2.572,
+    "top_weights": {
+      "H016": 0.021762540221835915,
+      "H043": 0.01681522632893188,
+      "H065": 0.1416025289728688,
+      "H076": 0.16608231666799714,
+      "H157": 0.12520436021520556,
+      "H175": 0.008459860090411036,
+      "H192": 0.01727843899695548,
+      "H265": 0.09678538585058402,
+      "H473": 0.40600934265520044
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-real-borrow",
+    "vix_threshold": 16.0,
+    "mean_borrow_annual": 0.0262,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

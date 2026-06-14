@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H630",
+  "name": "vol-of-vol-scaling",
+  "strategy_class": "VolOfVolScaling",
+  "family": "Set10 Leverage Mechanics",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.5927,
+  "ci_low": 2.1981,
+  "ci_high": 2.9789,
+  "cagr": 0.1088,
+  "max_drawdown": -0.0643,
+  "n_trades": 0,
+  "h001_corr": 0.2931,
+  "fold_sharpes": [
+    3.33,
+    1.82,
+    1.568,
+    3.399,
+    3.405,
+    1.003,
+    1.988,
+    2.944,
+    2.614,
+    3.577,
+    3.219,
+    1.699
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum regime cap x (1-0.4*vol-of-vol pctile); de-risk when VIX's own 20d vol is high. Mean scale 0.81, tv=6.5%. H620 (no vov scale) ref 2.472.",
+  "canonical_params": {
+    "calmar": 1.6916,
+    "sortino": 2.9478,
+    "top_weights": {
+      "H016": 0.015021457872486038,
+      "H043": 0.013646246158188097,
+      "H065": 0.13059240937645397,
+      "H076": 0.1611082187691153,
+      "H157": 0.10104330788616588,
+      "H175": 0.02343761340405749,
+      "H192": 0.013734747443096499,
+      "H199": 0.01625782805028793,
+      "H265": 0.10294532311543907,
+      "H268": 0.005604526757186799,
+      "H473": 0.4166083211675198
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-vol-of-vol",
+    "vov_window": 20,
+    "vov_weight": 0.4,
+    "mean_scale": 0.809,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

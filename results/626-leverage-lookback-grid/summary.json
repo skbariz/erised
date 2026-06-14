@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H626",
+  "name": "leverage-lookback-grid",
+  "strategy_class": "LeverageLookbackGrid",
+  "family": "Set10 Leverage Mechanics",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.4718,
+  "ci_low": 2.0705,
+  "ci_high": 2.8565,
+  "cagr": 0.1163,
+  "max_drawdown": -0.0752,
+  "n_trades": 0,
+  "h001_corr": 0.3266,
+  "fold_sharpes": [
+    3.331,
+    1.976,
+    1.573,
+    3.301,
+    3.099,
+    1.126,
+    1.809,
+    2.856,
+    2.524,
+    3.376,
+    2.878,
+    1.697
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Vol-target lookback sweep under VIX<16-and-not-rising regime. Sharpe by lookback: {10: 2.4666, 15: 2.4614, 20: 2.4718, 30: 2.4378, 63: 2.4135}. Best 20d. H620 (20d) ref 2.472. Tests the always-20d assumption since H559.",
+  "canonical_params": {
+    "calmar": 1.5459,
+    "sortino": 2.7525,
+    "top_weights": {
+      "H016": 0.01926584776746407,
+      "H043": 0.01844100747005441,
+      "H065": 0.13591337080425875,
+      "H076": 0.1622714753555298,
+      "H157": 0.12188076764644944,
+      "H175": 0.008039292899096833,
+      "H192": 0.010995932214279325,
+      "H265": 0.09527991065612643,
+      "H473": 0.4279123951867477
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-lookback-grid",
+    "best_lookback": 20,
+    "lookback_sweep": {
+      "10": 2.4666,
+      "15": 2.4614,
+      "20": 2.4718,
+      "30": 2.4378,
+      "63": 2.4135
+    },
+    "leverage_target_vol": 0.065
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

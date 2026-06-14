@@ -1,0 +1,77 @@
+{
+  "hypothesis": "H640",
+  "name": "grand-champion-640",
+  "strategy_class": "GrandChampion640",
+  "family": "Set10 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 3.0378,
+  "ci_low": 2.6605,
+  "ci_high": 3.422,
+  "cagr": 0.1673,
+  "max_drawdown": -0.0585,
+  "n_trades": 0,
+  "h001_corr": 0.244,
+  "fold_sharpes": [
+    3.222,
+    1.861,
+    2.439,
+    4.356,
+    3.771,
+    1.023,
+    2.573,
+    3.62,
+    3.062,
+    4.45,
+    3.327,
+    2.391
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "TERMINAL Set10 strategy. Champion config: t18w10-asym. 5-start Sharpes [3.0378, 3.0292, 3.0378, 3.0375, 3.0378] (range 0.0086). Sensitivity {'thr16': 2.308, 'thr17': 2.369, 'thr18': 2.421, 'thr19': 2.47, 'thr20': 2.511, 'win5': 2.461, 'win10': 2.421, 'win20': 2.286, 'win40': 2.217}. vs H620 (2.472): +0.566. Sortino 3.591, Calmar 2.859.",
+  "canonical_params": {
+    "calmar": 2.8585,
+    "sortino": 3.5906,
+    "top_weights": {
+      "H016": 0.02364008411761091,
+      "H065": 0.12040507467309389,
+      "H076": 0.19062766767696313,
+      "H157": 0.0941225497529099,
+      "H192": 0.04548950008549845,
+      "H199": 0.027206151136735354,
+      "H265": 0.12897363073993484,
+      "H268": 0.12868990494646113,
+      "H284": 0.011757099432091323,
+      "H473": 0.22908833743869714
+    },
+    "n_strategies": 55,
+    "objective": "grand-champion-640-vix-momentum",
+    "champion_config": "t18w10-asym",
+    "vix_threshold": 18.0,
+    "window": 10,
+    "restart_sharpes": [
+      3.0378,
+      3.0292,
+      3.0378,
+      3.0375,
+      3.0378
+    ],
+    "sensitivity": {
+      "thr16": 2.308,
+      "thr17": 2.369,
+      "thr18": 2.421,
+      "thr19": 2.47,
+      "thr20": 2.511,
+      "win5": 2.461,
+      "win10": 2.421,
+      "win20": 2.286,
+      "win40": 2.217
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H628",
+  "name": "drawdown-throttle-vix-mom",
+  "strategy_class": "DrawdownThrottleVIXMom",
+  "family": "Set10 Leverage Mechanics",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.4858,
+  "ci_low": 2.0863,
+  "ci_high": 2.8693,
+  "cagr": 0.1157,
+  "max_drawdown": -0.0738,
+  "n_trades": 0,
+  "h001_corr": 0.3237,
+  "fold_sharpes": [
+    3.341,
+    2.002,
+    1.585,
+    3.316,
+    3.109,
+    1.095,
+    1.831,
+    2.865,
+    2.52,
+    3.413,
+    2.909,
+    1.712
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum regime cap x continuous drawdown throttle (clip(1+dd*3.0,0.4,1) on base DD, lagged). Two-layer de-risking. H620 (regime only) ref 2.472. H557 found ratchet degrades low-DD bases.",
+  "canonical_params": {
+    "calmar": 1.5675,
+    "sortino": 2.7683,
+    "top_weights": {
+      "H016": 0.01951980687559878,
+      "H043": 0.018981331035501703,
+      "H065": 0.13452699335663418,
+      "H076": 0.1619795397777694,
+      "H157": 0.11849420303835582,
+      "H175": 0.01154672281351013,
+      "H192": 0.013294446170039739,
+      "H265": 0.09812793804793606,
+      "H473": 0.4235290188846546
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-dd-throttle",
+    "throttle_k": 3.0,
+    "throttle_floor": 0.4,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

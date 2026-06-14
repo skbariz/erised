@@ -1,0 +1,73 @@
+{
+  "hypothesis": "H621",
+  "name": "vix-momentum-grid",
+  "strategy_class": "VIXMomentumGrid",
+  "family": "Set10 VIX-Momentum",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.7475,
+  "ci_low": 2.355,
+  "ci_high": 3.1333,
+  "cagr": 0.1352,
+  "max_drawdown": -0.076,
+  "n_trades": 0,
+  "h001_corr": 0.3219,
+  "fold_sharpes": [
+    3.46,
+    2.045,
+    2.041,
+    3.986,
+    3.501,
+    1.149,
+    2.232,
+    3.26,
+    2.749,
+    3.622,
+    3.074,
+    1.895
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum grid (threshold x not-rising window). Sharpe grid: {'t15w10': 2.5212, 't15w20': 2.4224, 't15w40': 2.3643, 't16w10': 2.5959, 't16w20': 2.4718, 't16w40': 2.3959, 't17w10': 2.6851, 't17w20': 2.5156, 't17w40': 2.3975, 't18w10': 2.7475, 't18w20': 2.5487, 't18w40': 2.4432}. Best VIX<18/10d. H620 ref (t16/w20) 2.472. Sensitivity for the champion signal.",
+  "canonical_params": {
+    "calmar": 1.7787,
+    "sortino": 3.1854,
+    "top_weights": {
+      "H016": 0.02803140600597879,
+      "H043": 0.026020796648279432,
+      "H065": 0.115447824732443,
+      "H076": 0.15368215993178588,
+      "H157": 0.12964719771740374,
+      "H175": 0.011742431958808065,
+      "H192": 0.008243565281630349,
+      "H265": 0.07851439414351676,
+      "H268": 0.00668898285300494,
+      "H473": 0.4419812407271453
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-grid",
+    "best_threshold": 18.0,
+    "best_window": 10,
+    "sharpe_grid": {
+      "t15w10": 2.5212,
+      "t15w20": 2.4224,
+      "t15w40": 2.3643,
+      "t16w10": 2.5959,
+      "t16w20": 2.4718,
+      "t16w40": 2.3959,
+      "t17w10": 2.6851,
+      "t17w20": 2.5156,
+      "t17w40": 2.3975,
+      "t18w10": 2.7475,
+      "t18w20": 2.5487,
+      "t18w40": 2.4432
+    },
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

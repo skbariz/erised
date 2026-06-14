@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H637",
+  "name": "turnover-vix-mom",
+  "strategy_class": "TurnoverVIXMom",
+  "family": "Set10 Realism",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.3938,
+  "ci_low": 1.9954,
+  "ci_high": 2.7767,
+  "cagr": 0.1132,
+  "max_drawdown": -0.0753,
+  "n_trades": 0,
+  "h001_corr": 0.3246,
+  "fold_sharpes": [
+    3.32,
+    1.975,
+    1.602,
+    3.093,
+    2.948,
+    1.129,
+    1.746,
+    2.754,
+    2.403,
+    3.288,
+    2.755,
+    1.674
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX-momentum champion + leverage-rebalance turnover cost (|d_lev|*1.5bps). Capacity/cost realism. H620 (no turnover) ref 2.472. H617 (VIX<15) was 2.198 (-0.04).",
+  "canonical_params": {
+    "calmar": 1.5031,
+    "sortino": 2.6467,
+    "top_weights": {
+      "H016": 0.01927405891136959,
+      "H043": 0.01885295264580822,
+      "H065": 0.1371835438936932,
+      "H076": 0.16452320066163303,
+      "H157": 0.12439061540112376,
+      "H175": 0.00557991692811284,
+      "H192": 0.014377370251070415,
+      "H265": 0.09966596194235565,
+      "H473": 0.41615237936483446
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-turnover",
+    "vix_threshold": 16.0,
+    "turnover_bps": 1.4999999999999998,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

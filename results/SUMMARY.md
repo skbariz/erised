@@ -119,13 +119,13 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 
 | Target | Current best | Status |
 |--------|-------------|--------|
-| OOS Sharpe ≥ 1.0 | **2.472 (H620)** / 2.422 (H604) / 2.349 (H613) / 2.348 (H611) | **MET ★★★** — H620 GrandChampion620 (VIX<16 AND not-rising) is the terminal Sharpe champion |
-| Max DD < SPY (−55.92%) | **−4.41% (H551)** / −5.32% (H594) / −6.84% (H599) / −6.87% (H592/H598) | **MET ★★** — H551 program-best; H594/H592/H598/H599 best among 2.0×-Sharpe leveraged strategies |
-| Calmar ratio (institutional) | **2.264 (H592)** / 2.181 (H587) / 2.117 (H594) / 1.823 (H586) | **MET ★★★** — H592 asymmetric-VIX is the new Calmar record |
+| OOS Sharpe ≥ 1.0 | robust **~2.66 (H625)** / 2.64 (H622) / 2.47 (H620) — H640 hits **3.04 in-sample but is grid-corner OVERFIT** | **MET ★★★** — defensible champion is the VIX-momentum interior band ~2.5–2.66 (see Set10 overfitting caveat) |
+| Max DD < SPY (−55.92%) | **−4.12% (H631)** / −4.22% (H553) / −4.36% (H634) / −4.41% (H551) | **MET ★★★** — H631 (VIX-mom lev-Calmar) is the new program MaxDD record |
+| Calmar ratio (institutional) | **2.538 (H631)** / 2.444 (H634) / 2.264 (H592) / 2.172 (H622) | **MET ★★★** — H631 (VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **620** (H001–H620) | **Set9 (H601–H620) COMPLETE** — 20/20 KEEP; H620 GrandChampion620 (2.472) terminal strategy |
-| Strategies kept | **416+ total** — H001-H550 (360) + Set8 H551-H600 (36) + Set9 H601-H620 (20) | Set9: 20/20 keep; VIX-momentum regime is the new dominant signal |
+| Strategies tested | **640** (H001–H640) | **Set10 (H621–H640) COMPLETE** — 20/20 KEEP; H640 3.04 in-sample but overfit; robust champion ~2.5–2.66 |
+| Strategies kept | **436+ total** — H001-H550 (360) + Set8 H551-H600 (36) + Set9 H601-H620 (20) + Set10 H621-H640 (20) | Set10: 20/20 keep; VIX-momentum refinements hit an overfitting wall (no interior optimum in threshold×window) |
 
 ---
 
@@ -1757,10 +1757,47 @@ Built on the VIX<15 champion. Two thrusts: (A/C) genuinely new regime-signal for
 
 ---
 
+## Set 10 (H621–H640): VIX-Momentum Refinement, Leverage Mechanics & Robustness
+
+Refined the VIX-momentum champion, tested the leverage mechanics held fixed since H559, and re-ran the
+robustness battery. **20/20 KEEP — but the headline Sharpe gains are largely overfitting (see caveat).**
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| 640 | GrandChampion640 | **3.038** | [2.66, 3.42] | 16.73% | −5.85% | 2.859 | +0.244 | ⚠ **IN-SAMPLE MAX, OVERFIT.** VIX<18/not-rising-10d + asym. Sensitivity has NO interior optimum (Sharpe ↑ monotonically to grid corner). Not a defensible champion. |
+| 621 | VIXMomentumGrid | 2.748 | [2.35, 3.13] | 13.52% | −7.60% | 1.779 | +0.322 | ⚠ grid-edge. threshold×window sweep climbs to the corner (t18/w10); same overfit pattern as H640. |
+| **625** | **VIXMomentumDownsideVol** | **2.657** | [2.26, 3.04] | 15.49% | −8.10% | 1.912 | +0.293 | KEEP. Interior (thr16/win20) + downside vol; Sortino 3.017. Defensible upper band. |
+| **622** | **VIXMomentumAsymmetric** | **2.642** | [2.25, 3.02] | 13.49% | −6.21% | 2.172 | +0.276 | KEEP. Interior VIX-mom + asymmetric tv+cap; strong all-rounder, MaxDD −6.21%, low corr. |
+| **630** | **VolOfVolScaling** | **2.593** | [2.20, 2.98] | 10.88% | −6.43% | 1.692 | +0.293 | KEEP. De-risk by VIX's own vol; a real *interior* improvement over H620. |
+| 628 | DrawdownThrottleVIXMom | 2.486 | [2.09, 2.87] | 11.57% | −7.38% | 1.568 | +0.324 | KEEP. Continuous DD throttle on regime; marginal +0.014. |
+| 626 | LeverageLookbackGrid | 2.472 | [2.07, 2.86] | 11.63% | −7.52% | 1.546 | +0.327 | KEEP. **Vol-lookback peaks cleanly at 20d (interior)** — validates the fixed-since-H559 default. |
+| 629 | RatchetVIXMom | 2.472 | [2.07, 2.86] | 11.63% | −7.52% | 1.546 | +0.327 | KEEP. Tiered ratchet never fires on the low-DD base (= regime-only) — confirms H557. |
+| 627 | EWMAVolLeverage | 2.462 | [2.06, 2.85] | 11.53% | −6.96% | 1.657 | +0.333 | KEEP. EWMA vol ≈ rolling 20d; no improvement. |
+| 632 | VIXMomLowCorr | 2.456 | [2.05, 2.85] | 11.61% | −7.81% | **+0.253** | KEEP. Low-corr frontier at VIX-momentum. |
+| 637 | TurnoverVIXMom | 2.394 | [2.00, 2.78] | 11.32% | −7.53% | 1.503 | +0.325 | KEEP. **Realism:** turnover cost only −0.08. |
+| 635 | VIXMomDDFloor | 2.360 | [1.96, 2.75] | 10.36% | −6.81% | 1.522 | +0.326 | KEEP. DD floor via post-hoc tv. |
+| 636 | RealBorrowVIXMom | 2.340 | [1.94, 2.73] | 11.16% | −7.52% | 1.484 | +0.330 | KEEP. **Realism:** real Fed Funds borrow, −0.13 drag. |
+| 624 | VIXMomentum3State | 2.308 | [1.91, 2.70] | 11.76% | −7.91% | 1.487 | +0.347 | KEEP. 3-state direction; below binary not-rising. |
+| 639 | BootstrapVIXMom | 2.277 | [1.89, 2.65] | 11.01% | −6.71% | +0.524 | KEEP. **Robustness:** bootstrap weights. |
+| 633 | VIXMomCAGRMax | 2.216 | [1.81, 2.62] | 13.46% | −8.42% | 1.598 | +0.275 | KEEP. CAGR-max (cap 3.0x). |
+| 623 | VIXRateOfChangeContinuous | 2.213 | [1.82, 2.60] | 15.03% | −8.44% | 1.782 | +0.410 | KEEP. Continuous VIX rate-of-change; binary not-rising flag beats the magnitude. |
+| 634 | VIXMomMultiObj | 2.085 | [1.69, 2.47] | 10.65% | −4.36% | 2.444 | +0.553 | KEEP. Sharpe×Calmar; Calmar 2.444, MaxDD −4.36%. |
+| **631** | **VIXMomCalmar** | **1.975** | [1.59, 2.35] | 10.45% | **−4.12%** | **2.538** | +0.589 | **KEEP ★ NEW CALMAR + MaxDD RECORD** (2.538 / −4.12%). Lev-Calmar objective — a defensible, not edge-seeking, record. |
+| 638 | RegimeLagVIXMom | 1.955 | [1.55, 2.35] | 10.34% | −7.62% | 1.356 | +0.434 | ⚠ KEEP. **1-day execution lag drops VIX-momentum 2.472→1.955 (−0.52)** — much of the edge is same-day VIX info. |
+
+**Key findings (read this as the honest verdict on the leverage program):**
+- **The VIX-momentum Sharpe gains beyond ~2.47 are largely overfitting.** H640 (3.038) and H621 (2.747) sit at grid corners; the threshold×window sensitivity has **no interior optimum** — Sharpe rises monotonically toward "always max-leverage except when VIX ticked up yesterday." The optimizer is dodging the specific in-sample 2008/2020 drawdowns, not finding durable edge.
+- **Execution lag confirms it (H638):** a realistic 1-day signal delay cuts the VIX-momentum champion by −0.52 Sharpe (2.472→1.955). A large fraction of the headline edge depends on same-day VIX information.
+- **What IS robust:** the vol-target **lookback was already optimal at 20d** (H626, clean interior peak); EWMA/ratchet/throttle add nothing (H627/H629/H628); the champion survives real borrow (H636) and turnover (H637) with small drags.
+- **Genuine new records (defensible, objective-driven, not edge-seeking):** **H631 lev-Calmar at VIX-momentum → Calmar 2.538 / MaxDD −4.12%** (both program records), and H634 (Calmar 2.444 / MaxDD −4.36%).
+- **Defensible Sharpe champion:** the interior VIX-momentum configs **H625 (2.657) / H622 (2.642)** — not H640. **Recommended reporting champion: H622** (2.642 Sharpe, Calmar 2.172, MaxDD −6.21%, H001 corr +0.276) — strong on every axis without sitting on a grid edge.
+
+---
+
 ## Institutional Baseline Qualifiers (as of H562)
 
 Set 8 target bar: **Sharpe ≥ 1.5, MaxDD ≤ −10%, Calmar ≥ 0.8** (Sortino ≥ 1.3 not stored in JSON).
-Pre-Set8 count: 11. Current count: **57 strategies** (+19 from Set9 — all but H608 qualify). H620 (2.472) leads; H583 & H608 excluded (MaxDD/Sharpe miss).
+Pre-Set8 count: 11. Current count: **77 strategies** (+20 from Set10 — all qualify). H640 leads on raw Sharpe (3.04) but is overfit; **H622 (2.642) is the defensible Sharpe champion**, **H631 the Calmar/MaxDD champion (2.538 / −4.12%)**. H583 & H608 excluded.
 
 | ID | Sharpe | MaxDD | CAGR | Calmar | Set |
 |---|---|---|---|---|---|
@@ -1811,4 +1848,4 @@ Pre-Set8 count: 11. Current count: **57 strategies** (+19 from Set9 — all but 
 | H518 | 1.524 | −6.29% | 5.77% | 0.917 | Set7 |
 | H517 | 1.515 | −6.51% | 5.69% | 0.874 | Set7 |
 
-**Key pattern:** **H620 (VIX<16 AND not-rising) is the terminal program Sharpe champion at 2.472.** The decisive lever in Set8–9 was the regime *signal*: fixed-cap (H561: 1.921) → VIX<20 (H581: 2.119) → VIX<15 (H600: 2.237) → **VIX-momentum, i.e. VIX low AND not rising (H620: 2.472)**. Each refinement of *when* to deploy leverage added more than any weight or objective change. **H592 (asymmetric VIX tv+cap) remains the Calmar champion at 2.264.** Robustness is validated (subperiod H609, bootstrap H619, real-borrow H616, turnover H617, regime-lag H618 all hold ≥1.98), and falsification baselines (equal-weight H608: 1.425; VIX-less proxy H605: 1.891) confirm the edge is the joint product of signal + leverage mechanism + optimized weights. H556 remains the only strategy meeting all bars at baseline (no leverage). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%.
+**Key pattern (final verdict):** the regime *signal* drove every gain in Set8–9 — fixed-cap (H561: 1.921) → VIX<20 (H581: 2.119) → VIX<15 (H600: 2.237) → VIX-momentum (H620: 2.472). **But Set10 shows this hit an overfitting wall:** further refinement of the VIX-momentum threshold/window has no interior optimum (H640 reaches 3.04 in-sample by drifting to a grid corner, and a 1-day execution lag erases −0.52 of it). **The defensible Sharpe champion is H622 (2.642, interior VIX-mom + asymmetric), and H631 sets genuine Calmar/MaxDD records (2.538 / −4.12%) via a lev-Calmar objective.** Each Set8–9 *signal* refinement was real; the Set10 *parameter* refinements are mostly curve-fitting. **H592 (asymmetric VIX tv+cap) remains the Calmar champion at 2.264.** Robustness is validated (subperiod H609, bootstrap H619, real-borrow H616, turnover H617, regime-lag H618 all hold ≥1.98), and falsification baselines (equal-weight H608: 1.425; VIX-less proxy H605: 1.891) confirm the edge is the joint product of signal + leverage mechanism + optimized weights. H556 remains the only strategy meeting all bars at baseline (no leverage). Pre-Set8 qualifiers (H300–H549) all have Calmar 0.80–0.92 and CAGR ~5.6–5.8%.

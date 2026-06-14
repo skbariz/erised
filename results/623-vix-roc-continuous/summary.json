@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H623",
+  "name": "vix-roc-continuous",
+  "strategy_class": "VIXRateOfChangeContinuous",
+  "family": "Set10 VIX-Momentum",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.2132,
+  "ci_low": 1.8204,
+  "ci_high": 2.6021,
+  "cagr": 0.1503,
+  "max_drawdown": -0.0844,
+  "n_trades": 0,
+  "h001_corr": 0.4099,
+  "fold_sharpes": [
+    3.566,
+    2.214,
+    1.679,
+    2.079,
+    2.555,
+    1.21,
+    1.825,
+    2.391,
+    1.848,
+    3.24,
+    1.879,
+    2.107
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Continuous cap=clip(3.0-5.0*max(0,VIX 21d %chg),1,3): leverage falls with VIX rise speed. Mean cap 2.62, tv=6.5%. Tests magnitude vs H620's binary not-rising flag (2.472).",
+  "canonical_params": {
+    "calmar": 1.7817,
+    "sortino": 2.3688,
+    "top_weights": {
+      "H016": 0.05577028105041722,
+      "H065": 0.13889988313755577,
+      "H076": 0.1908315934119381,
+      "H097": 0.01446214830254119,
+      "H157": 0.029204017503498134,
+      "H192": 0.022103159715185047,
+      "H199": 0.04712335552886004,
+      "H265": 0.12468237166486135,
+      "H268": 0.03528724944324667,
+      "H473": 0.3404981462556772
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-roc-continuous",
+    "k": 5.0,
+    "roc_window": 21,
+    "mean_cap": 2.619,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

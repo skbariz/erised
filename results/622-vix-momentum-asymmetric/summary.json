@@ -1,0 +1,63 @@
+{
+  "hypothesis": "H622",
+  "name": "vix-momentum-asymmetric",
+  "strategy_class": "VIXMomentumAsymmetric",
+  "family": "Set10 VIX-Momentum",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.6422,
+  "ci_low": 2.2483,
+  "ci_high": 3.0247,
+  "cagr": 0.1349,
+  "max_drawdown": -0.0621,
+  "n_trades": 0,
+  "h001_corr": 0.2761,
+  "fold_sharpes": [
+    3.092,
+    1.819,
+    1.762,
+    3.511,
+    3.239,
+    1.011,
+    1.963,
+    3.153,
+    2.666,
+    3.964,
+    3.071,
+    1.909
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "VIX<16 & not-rising bull: tv=8%/cap=2.5x; bear: tv=4%/cap=1.0x. Combines H620 VIX-momentum (2.472) + H592 asymmetric (Calmar 2.264). Tests whether the two strongest levers compose.",
+  "canonical_params": {
+    "calmar": 2.1717,
+    "sortino": 2.9708,
+    "top_weights": {
+      "H016": 0.014143715933342845,
+      "H065": 0.14291262432845014,
+      "H076": 0.1885233219837238,
+      "H157": 0.08175684560955762,
+      "H191": 0.018140289260517157,
+      "H192": 0.03705406110275047,
+      "H199": 0.013153612154082275,
+      "H265": 0.13033312316726256,
+      "H268": 0.07990368949882651,
+      "H284": 0.011690341887682231,
+      "H473": 0.2797210921143031
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vix-momentum-asymmetric",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "bull_tv": 0.08,
+    "bull_cap": 2.5,
+    "bear_tv": 0.04,
+    "bear_cap": 1.0,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

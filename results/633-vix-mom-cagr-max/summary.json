@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H633",
+  "name": "vix-mom-cagr-max",
+  "strategy_class": "VIXMomCAGRMax",
+  "family": "Set10 Frontier Objectives",
+  "run_date": "2026-06-13",
+  "oos_sharpe": 2.2161,
+  "ci_low": 1.8124,
+  "ci_high": 2.6159,
+  "cagr": 0.1346,
+  "max_drawdown": -0.0842,
+  "n_trades": 0,
+  "h001_corr": 0.2753,
+  "fold_sharpes": [
+    2.811,
+    1.798,
+    1.662,
+    3.154,
+    2.843,
+    0.982,
+    1.654,
+    2.414,
+    1.985,
+    3.624,
+    2.25,
+    1.698
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Leveraged-CAGR objective at VIX<16-and-not-rising, bull cap=3.0x/bear 1.0x, tv=6.5%. Family-office CAGR mandate on the champion signal. H613 (VIX<15 Sortino) CAGR ref 14.19%.",
+  "canonical_params": {
+    "calmar": 1.5976,
+    "sortino": 2.3246,
+    "top_weights": {
+      "H019": 0.00811588596953091,
+      "H065": 0.20506960995239515,
+      "H076": 0.21148532768180833,
+      "H157": 0.015040650019172023,
+      "H191": 0.14705267826055143,
+      "H192": 0.0633934701199805,
+      "H199": 0.008542532784598818,
+      "H265": 0.09579087195022659,
+      "H268": 0.024795021345560816,
+      "H473": 0.2207139519161755
+    },
+    "n_strategies": 55,
+    "objective": "lev-cagr-vix-momentum",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "leverage_max_bull": 3.0,
+    "leverage_target_vol": 0.065,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

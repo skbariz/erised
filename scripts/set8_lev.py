@@ -69,6 +69,13 @@ def two_state_cap(mask, bull_cap, bear_cap, index):
     return pd.Series(np.where(np.asarray(mask), bull_cap, bear_cap), index=index)
 
 
+def vix_momentum_mask(vix, index, threshold, window=20):
+    """Bull = VIX < threshold AND VIX not rising (VIX <= its `window`-day mean). H620 champion signal."""
+    vixr = vix.reindex(index).ffill().bfill()
+    not_rising = vixr <= vixr.rolling(window, min_periods=max(5, window // 2)).mean()
+    return ((vixr < threshold) & not_rising).fillna(True)
+
+
 def mdr_warm_start(mat, n):
     """Max-diversification-ratio weights as a warm start for the leveraged objective."""
     cov = np.cov(mat.T) * TRADING_DAYS

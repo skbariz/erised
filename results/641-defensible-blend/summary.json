@@ -1,0 +1,51 @@
+{
+  "hypothesis": "H641",
+  "name": "defensible-blend",
+  "strategy_class": "DefensibleBlend",
+  "family": "Set11 Defensible",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 2.5752,
+  "ci_low": 2.1817,
+  "ci_high": 2.9518,
+  "cagr": 0.1257,
+  "max_drawdown": -0.0583,
+  "n_trades": 0,
+  "h001_corr": 0.3835,
+  "fold_sharpes": [
+    2.818,
+    1.697,
+    1.962,
+    3.249,
+    3.194,
+    1.201,
+    1.962,
+    3.013,
+    2.825,
+    3.531,
+    3.017,
+    1.838
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Equal-weight blend of 4 defensible leveraged champion streams ['asym', 'downside', 'volofvol', 'calmar'] (H622 asym, H625 downside, H630 vol-of-vol, H631 lev-Calmar). Excludes overfit H640/H621 corner. Defensible Sharpe champion H622 ref 2.642; Calmar champion H631 ref 2.538/-4.12%.",
+  "canonical_params": {
+    "calmar": 2.1575,
+    "sortino": 2.8933,
+    "top_weights": {},
+    "n_strategies": 55,
+    "objective": "equal-blend-defensible-streams",
+    "components": [
+      "asym",
+      "downside",
+      "volofvol",
+      "calmar"
+    ],
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

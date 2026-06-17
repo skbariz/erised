@@ -1,0 +1,60 @@
+{
+  "hypothesis": "H649",
+  "name": "deployable-multi-obj",
+  "strategy_class": "DeployableMultiObj",
+  "family": "Set12 Deployable",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 1.8526,
+  "ci_low": 1.4551,
+  "ci_high": 2.2299,
+  "cagr": 0.1047,
+  "max_drawdown": -0.0532,
+  "n_trades": 0,
+  "h001_corr": 0.4442,
+  "fold_sharpes": [
+    2.39,
+    1.387,
+    2.302,
+    1.803,
+    2.421,
+    0.993,
+    1.394,
+    2.15,
+    1.999,
+    2.167,
+    1.867,
+    1.247
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Sharpe x Calmar objective + deployable (1-day-lagged) asymmetric VIX-momentum regime. Balanced executable champion. H643 (deployable plain Sharpe) ref 1.918; H649 adds Calmar reward.",
+  "canonical_params": {
+    "calmar": 1.9661,
+    "sortino": 1.952,
+    "top_weights": {
+      "H019": 0.01772855403424672,
+      "H060": 0.021725337034766416,
+      "H065": 0.3491206141292593,
+      "H076": 0.19718584920216195,
+      "H191": 0.13799631199811088,
+      "H192": 0.06559367679386778,
+      "H194": 0.07430883719399634,
+      "H265": 0.0076122018931411035,
+      "H471": 0.09065102455847525,
+      "H472": 0.008691225346703553,
+      "H473": 0.025139214576725685
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-times-calmar-vixmom-asym-lag",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "regime_lag_days": 1,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,77 @@
+{
+  "hypothesis": "H645",
+  "name": "defensible-terminal-645",
+  "strategy_class": "DefensibleTerminal645",
+  "family": "Set11 Defensible",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 2.7401,
+  "ci_low": 2.3521,
+  "ci_high": 3.1301,
+  "cagr": 0.1445,
+  "max_drawdown": -0.0619,
+  "n_trades": 0,
+  "h001_corr": 0.2614,
+  "fold_sharpes": [
+    3.045,
+    1.918,
+    2.078,
+    3.657,
+    3.227,
+    0.957,
+    2.396,
+    3.345,
+    2.695,
+    4.108,
+    3.101,
+    1.989
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "TERMINAL DEFENSIBLE champion (interior-only grid, window=20, thr<=17). Config t17w20-asym. 5-start Sharpes [2.7402, 2.7402, 2.7382, 2.7401, 2.7396] (range 0.0020). Sensitivity {'thr16': 2.26, 'thr17': 2.306, 'thr18': 2.339, 'win10': 2.422, 'win20': 2.306, 'win40': 2.231, 'lag1d': 1.778}. 1-day-lag Sharpe 1.778 (gap +0.962). Calmar 2.335, Sortino 3.097. Excludes overfit H640 corner (3.04). Honest deployable champion.",
+  "canonical_params": {
+    "calmar": 2.3345,
+    "sortino": 3.0974,
+    "top_weights": {
+      "H016": 0.019151467396453233,
+      "H019": 0.006083310098818145,
+      "H065": 0.12792231608929264,
+      "H076": 0.16812278150187548,
+      "H157": 0.06716153844662175,
+      "H192": 0.03995458549422005,
+      "H199": 0.022073659153214867,
+      "H265": 0.13110308535284113,
+      "H268": 0.11199925603836298,
+      "H284": 0.03287608611245482,
+      "H473": 0.27252102362946057
+    },
+    "n_strategies": 55,
+    "objective": "defensible-terminal-interior-vixmom",
+    "champion_config": "t17w20-asym",
+    "vix_threshold": 17.0,
+    "window": 20,
+    "restart_sharpes": [
+      2.7402,
+      2.7402,
+      2.7382,
+      2.7401,
+      2.7396
+    ],
+    "sensitivity": {
+      "thr16": 2.26,
+      "thr17": 2.306,
+      "thr18": 2.339,
+      "win10": 2.422,
+      "win20": 2.306,
+      "win40": 2.231,
+      "lag1d": 1.778
+    },
+    "lag1d_sharpe": 1.778,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

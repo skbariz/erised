@@ -1,0 +1,61 @@
+{
+  "hypothesis": "H646",
+  "name": "deployable-calmar",
+  "strategy_class": "DeployableCalmar",
+  "family": "Set12 Deployable",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 1.7836,
+  "ci_low": 1.3907,
+  "ci_high": 2.1599,
+  "cagr": 0.1005,
+  "max_drawdown": -0.0517,
+  "n_trades": 0,
+  "h001_corr": 0.5197,
+  "fold_sharpes": [
+    2.447,
+    1.402,
+    1.84,
+    2.15,
+    2.284,
+    0.907,
+    1.163,
+    2.391,
+    1.871,
+    2.034,
+    1.405,
+    1.277
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H642 mechanism (asym tv+cap + lev-Calmar) with regime signal lagged 1 day. Deployable Calmar champion. H642 (0-lag) ref Calmar 3.093 / MaxDD -3.97%. Gap = execution cost of the Calmar edge.",
+  "canonical_params": {
+    "calmar": 1.9454,
+    "sortino": 1.8817,
+    "top_weights": {
+      "H016": 0.007130420527059287,
+      "H019": 0.03372742223954292,
+      "H060": 0.06765299082155617,
+      "H063": 0.03276081977077502,
+      "H065": 0.2690658470575361,
+      "H076": 0.11347116885433679,
+      "H157": 0.008175813349753374,
+      "H189": 0.026572369779592726,
+      "H191": 0.1681737002955028,
+      "H194": 0.1049792850283923,
+      "H471": 0.024610918083880974,
+      "H473": 0.1401356077062912
+    },
+    "n_strategies": 55,
+    "objective": "lev-calmar-vixmom-asym-1day-lag",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "regime_lag_days": 1,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

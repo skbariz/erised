@@ -1,0 +1,73 @@
+{
+  "hypothesis": "H650",
+  "name": "grand-deployable-650",
+  "strategy_class": "GrandDeployable650",
+  "family": "Set12 Deployable",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 1.9795,
+  "ci_low": 1.5843,
+  "ci_high": 2.3705,
+  "cagr": 0.1008,
+  "max_drawdown": -0.0757,
+  "n_trades": 0,
+  "h001_corr": 0.4389,
+  "fold_sharpes": [
+    2.745,
+    2.121,
+    1.934,
+    1.952,
+    2.349,
+    1.205,
+    1.384,
+    2.226,
+    1.871,
+    2.678,
+    1.909,
+    1.689
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "TERMINAL DEPLOYABLE champion: weights fit on the 1-day-LAGGED signal, interior-only grid. Config t15w20. 5-start Sharpes [1.9794, 1.9795, 1.9795, 1.9795, 1.9795] (range 0.0001). Sensitivity {'thr14': 1.957, 'thr15': 1.979, 'thr16': 1.954}. Calmar 1.332, Sortino 2.049. vs H645 same-day (2.740): -0.761; vs H643 optimize-then-lag (1.918): +0.061. Honest executable terminal strategy.",
+  "canonical_params": {
+    "calmar": 1.3319,
+    "sortino": 2.0493,
+    "top_weights": {
+      "H016": 0.019147861355425656,
+      "H019": 0.018924808910972524,
+      "H060": 0.022295349818496457,
+      "H065": 0.19783469357305133,
+      "H076": 0.20306757270348216,
+      "H191": 0.0537000358377067,
+      "H192": 0.05403449241895459,
+      "H199": 0.005049245300998011,
+      "H265": 0.12317021016366181,
+      "H473": 0.3020956341037298
+    },
+    "n_strategies": 55,
+    "objective": "grand-deployable-lagged-fit-interior",
+    "champion_config": "t15w20",
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_sharpes": [
+      1.9794,
+      1.9795,
+      1.9795,
+      1.9795,
+      1.9795
+    ],
+    "sensitivity": {
+      "thr14": 1.957,
+      "thr15": 1.979,
+      "thr16": 1.954
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

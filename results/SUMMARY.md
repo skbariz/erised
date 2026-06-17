@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **3.093 (H642)** / 2.538 (H631) / 2.444 (H634) / 2.335 (H645) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **645** (H001–H645) | **Set11 (H641–H645) COMPLETE** — 5/5 KEEP; defensible consolidations; H642 sets new Calmar/MaxDD records |
-| Strategies kept | **441+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 H641-H645 (5) | Set11: 5/5 keep; H642 Calmar 3.093/MaxDD −3.97% records; H643 honest deployable champ 1.918 (1-day lag) |
+| Strategies tested | **650** (H001–H650) | **Set12 (H646–H650) COMPLETE** — 5/5 KEEP; deployable (lag-aware) frontier; H650 terminal deployable champ 1.980 |
+| Strategies kept | **446+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 H646-H650 (5) | Set12: 5/5 keep; honest deployable Sharpe ~1.78–1.98; H650 weights-fit-on-lagged-signal is the executable terminal strategy |
 
 ---
 
@@ -1812,6 +1812,29 @@ runner, and unit test (7 tests pass).
 - **H642 is the genuine win:** a leveraged-Calmar objective on the asymmetric VIX-momentum regime sets **new program Calmar (3.093) and MaxDD (−3.97%) records** — and unlike the Set10 Sharpe corner, it's defensible (objective rewards drawdown control, not curve-fit Sharpe).
 - **H644 closes the weight-overfitting question:** shrinking the champion's weights all the way to the MDR prior costs essentially nothing (−0.026). The 55-strategy weights are robust; the overfitting in Set10 was entirely in the *regime parameters*, not the weights.
 - **H643 gives the honest deployable number: Sharpe 1.918** (1-day execution lag built in). This is the figure to quote for a real mandate — still excellent (3.7× SPY's 0.51), without the same-day-VIX illusion.
+
+---
+
+## Set 12 (H646–H650): Deployable (Lag-Aware) Frontier
+
+Re-derives the defensible champions with a **1-day execution lag built in**, so every reported stat is
+actually realizable (addressing the Set10/11 same-day-VIX caveat). **5/5 KEEP.** Design + runner + test each.
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| **650** | **GrandDeployable650** | **1.980** | [1.58, 2.37] | 10.08% | −7.57% | 1.332 | +0.439 | **KEEP ★ TERMINAL DEPLOYABLE champion.** Weights fit on the 1-day-lagged signal (t15/w20, interior); 5/5 restarts identical (range 0.0001). Beats optimize-then-lag H643 (+0.061). |
+| **649** | **DeployableMultiObj** | 1.853 | [1.46, 2.23] | 10.47% | **−5.32%** | 1.966 | +0.444 | KEEP. Sharpe×Calmar + lagged asym; best deployable Calmar/MaxDD (1.966 / −5.32%). |
+| **647** | **DeployableLowCorr** | 1.862 | [1.46, 2.25] | 10.11% | −7.71% | 1.311 | **+0.272** | KEEP. Deployable diversifier — corr +0.272 @ Sh 1.862; λ-sweep reaches corr **+0.002** @ Sh 1.391. |
+| **646** | **DeployableCalmar** | 1.784 | [1.39, 2.16] | 10.05% | −5.17% | 1.945 | +0.520 | KEEP. Deployable version of the H642 Calmar record (3.093 same-day → 1.945 with lag). |
+| **648** | **DeployableEqualWeight** | 1.383 | [0.99, 1.77] | 7.77% | −7.42% | 1.047 | +0.653 | KEEP. No-optimization deployable baseline; weight optimization adds **~0.6 Sharpe** vs H650. |
+
+**Key findings:**
+- **H650 is the program's honest, executable terminal champion: Sharpe 1.980** — weights fit directly on the
+  lagged (tradeable) signal, perfectly weight-stable, and beating the naive optimize-then-lag (H643: 1.918).
+- **The deployable frontier sits at ~1.78–1.98** — once execution is honest, every champion lands here,
+  confirming the same-day ~2.7–3.0 figures were inflated by ~0.6–0.8 Sharpe. This is the number to quote for a real mandate (still ~3.9× SPY's 0.51).
+- **Weights still matter even deployable (H648):** equal-weight gives only 1.383 — optimization is worth ~0.6 Sharpe — consistent with H644's finding that the weights are earned, not overfit.
+- **Deployable diversifier (H647):** a tradeable overlay reaching near-zero H001 correlation (+0.002) at Sharpe 1.391, or +0.272 at 1.862.
 
 ---
 

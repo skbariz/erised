@@ -120,12 +120,12 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Target | Current best | Status |
 |--------|-------------|--------|
 | OOS Sharpe ≥ 1.0 | robust **~2.66 (H625)** / 2.64 (H622) / 2.47 (H620) — H640 hits **3.04 in-sample but is grid-corner OVERFIT** | **MET ★★★** — defensible champion is the VIX-momentum interior band ~2.5–2.66 (see Set10 overfitting caveat) |
-| Max DD < SPY (−55.92%) | **−4.12% (H631)** / −4.22% (H553) / −4.36% (H634) / −4.41% (H551) | **MET ★★★** — H631 (VIX-mom lev-Calmar) is the new program MaxDD record |
-| Calmar ratio (institutional) | **2.538 (H631)** / 2.444 (H634) / 2.264 (H592) / 2.172 (H622) | **MET ★★★** — H631 (VIX-mom lev-Calmar) is the new Calmar record |
+| Max DD < SPY (−55.92%) | **−3.97% (H642)** / −4.12% (H631) / −4.22% (H553) / −4.36% (H634) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new program MaxDD record |
+| Calmar ratio (institutional) | **3.093 (H642)** / 2.538 (H631) / 2.444 (H634) / 2.335 (H645) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **640** (H001–H640) | **Set10 (H621–H640) COMPLETE** — 20/20 KEEP; H640 3.04 in-sample but overfit; robust champion ~2.5–2.66 |
-| Strategies kept | **436+ total** — H001-H550 (360) + Set8 H551-H600 (36) + Set9 H601-H620 (20) + Set10 H621-H640 (20) | Set10: 20/20 keep; VIX-momentum refinements hit an overfitting wall (no interior optimum in threshold×window) |
+| Strategies tested | **645** (H001–H645) | **Set11 (H641–H645) COMPLETE** — 5/5 KEEP; defensible consolidations; H642 sets new Calmar/MaxDD records |
+| Strategies kept | **441+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 H641-H645 (5) | Set11: 5/5 keep; H642 Calmar 3.093/MaxDD −3.97% records; H643 honest deployable champ 1.918 (1-day lag) |
 
 ---
 
@@ -1791,6 +1791,27 @@ robustness battery. **20/20 KEEP — but the headline Sharpe gains are largely o
 - **What IS robust:** the vol-target **lookback was already optimal at 20d** (H626, clean interior peak); EWMA/ratchet/throttle add nothing (H627/H629/H628); the champion survives real borrow (H636) and turnover (H637) with small drags.
 - **Genuine new records (defensible, objective-driven, not edge-seeking):** **H631 lev-Calmar at VIX-momentum → Calmar 2.538 / MaxDD −4.12%** (both program records), and H634 (Calmar 2.444 / MaxDD −4.36%).
 - **Defensible Sharpe champion:** the interior VIX-momentum configs **H625 (2.657) / H622 (2.642)** — not H640. **Recommended reporting champion: H622** (2.642 Sharpe, Calmar 2.172, MaxDD −6.21%, H001 corr +0.276) — strong on every axis without sitting on a grid edge.
+
+---
+
+## Set 11 (H641–H645): Defensible Champion Consolidations
+
+Set10 showed the raw VIX-momentum Sharpe is overfit. Set11 consolidates the *defensible* champions
+(interior configs, objective-driven records, robustness/realism). **5/5 KEEP.** Each has a design doc,
+runner, and unit test (7 tests pass).
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| **642** | **VIXMomAsymCalmar** | 2.207 | [1.82, 2.58] | 12.27% | **−3.97%** | **3.093** | +0.538 | **KEEP ★ NEW CALMAR + MaxDD RECORDS** (3.093 / −3.97%). Asymmetric tv+cap + lev-Calmar objective — defensible, objective-driven. |
+| **645** | **DefensibleTerminal645** | **2.740** | [2.35, 3.13] | 14.45% | −6.19% | 2.335 | +0.261 | KEEP. Interior-only champion (t17/w20-asym); 5/5 restarts stable (range 0.002). **But 1-day-lag gap +0.96** — still same-day-dependent. |
+| **644** | **ShrinkageRobustChampion** | 2.616 | [2.23, 2.99] | 13.12% | −5.84% | 2.246 | +0.315 | KEEP. **Robustness confirmed:** shrinking H622 weights to MDR (μ=2.0) costs only −0.026 Sharpe (2.642→2.616) — weights are earned, not overfit. |
+| **641** | **DefensibleBlend** | 2.575 | [2.18, 2.95] | 12.57% | −5.83% | 2.158 | +0.384 | KEEP. Equal-blend of 4 defensible champion streams (H622/H625/H630/H631); robust all-rounder, MaxDD −5.83%. |
+| **643** | **DeployableLaggedChampion** | **1.918** | [1.52, 2.30] | 10.56% | −6.42% | 1.646 | +0.423 | KEEP. **The honest deployable champion** — H622 asym mechanism with 1-day execution lag baked in. What you'd actually realize after the same-day-VIX haircut. |
+
+**Key findings:**
+- **H642 is the genuine win:** a leveraged-Calmar objective on the asymmetric VIX-momentum regime sets **new program Calmar (3.093) and MaxDD (−3.97%) records** — and unlike the Set10 Sharpe corner, it's defensible (objective rewards drawdown control, not curve-fit Sharpe).
+- **H644 closes the weight-overfitting question:** shrinking the champion's weights all the way to the MDR prior costs essentially nothing (−0.026). The 55-strategy weights are robust; the overfitting in Set10 was entirely in the *regime parameters*, not the weights.
+- **H643 gives the honest deployable number: Sharpe 1.918** (1-day execution lag built in). This is the figure to quote for a real mandate — still excellent (3.7× SPY's 0.51), without the same-day-VIX illusion.
 
 ---
 

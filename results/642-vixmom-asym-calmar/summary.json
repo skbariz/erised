@@ -1,0 +1,58 @@
+{
+  "hypothesis": "H642",
+  "name": "vixmom-asym-calmar",
+  "strategy_class": "VIXMomAsymCalmar",
+  "family": "Set11 Defensible",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 2.2066,
+  "ci_low": 1.8244,
+  "ci_high": 2.5766,
+  "cagr": 0.1227,
+  "max_drawdown": -0.0397,
+  "n_trades": 0,
+  "h001_corr": 0.5383,
+  "fold_sharpes": [
+    2.015,
+    1.192,
+    2.131,
+    2.735,
+    2.847,
+    1.103,
+    1.745,
+    2.704,
+    2.64,
+    2.709,
+    2.36,
+    1.558
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Asymmetric tv+cap (bull tv=8%/cap=2.5x, bear tv=4%/cap=1.0x) at VIX<16-and-not-rising, lev-Calmar objective. Combines H622 (asym) + H631 (Calmar obj). Target Calmar > 2.538 at MaxDD<=-5%.",
+  "canonical_params": {
+    "calmar": 3.0928,
+    "sortino": 2.5015,
+    "top_weights": {
+      "H019": 0.022231691626581826,
+      "H063": 0.05387774153246299,
+      "H065": 0.2677710672832038,
+      "H068": 0.01639382166781788,
+      "H076": 0.15032026773150223,
+      "H157": 0.1782873429024615,
+      "H265": 0.01990091166974856,
+      "H473": 0.28628489367059684
+    },
+    "n_strategies": 55,
+    "objective": "lev-calmar-vixmom-asymmetric",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "bull_tv": 0.08,
+    "bear_tv": 0.04,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

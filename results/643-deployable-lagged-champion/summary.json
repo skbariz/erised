@@ -1,0 +1,59 @@
+{
+  "hypothesis": "H643",
+  "name": "deployable-lagged-champion",
+  "strategy_class": "DeployableLaggedChampion",
+  "family": "Set11 Defensible",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 1.9183,
+  "ci_low": 1.5188,
+  "ci_high": 2.3,
+  "cagr": 0.1056,
+  "max_drawdown": -0.0642,
+  "n_trades": 0,
+  "h001_corr": 0.423,
+  "fold_sharpes": [
+    2.451,
+    1.501,
+    2.153,
+    1.969,
+    2.399,
+    0.965,
+    1.255,
+    2.318,
+    1.744,
+    2.71,
+    1.855,
+    1.554
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "H622 asymmetric VIX-momentum mechanism with regime signal lagged 1 day (next-day execution baked in). Honest deployable Sharpe. H622 (0-lag) ref 2.642; gap = execution cost of the signal.",
+  "canonical_params": {
+    "calmar": 1.6456,
+    "sortino": 1.9883,
+    "top_weights": {
+      "H019": 0.035440310590344595,
+      "H060": 0.021437673188243134,
+      "H065": 0.2281342517166865,
+      "H076": 0.25648075714866553,
+      "H191": 0.12499608795205429,
+      "H192": 0.06715230646945491,
+      "H194": 0.007564169895727331,
+      "H265": 0.11205832220933389,
+      "H471": 0.007564851968796607,
+      "H473": 0.13725132891065717
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-vixmom-asym-1day-lag",
+    "vix_threshold": 16.0,
+    "window": 20,
+    "regime_lag_days": 1,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

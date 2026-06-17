@@ -1,0 +1,69 @@
+{
+  "hypothesis": "H644",
+  "name": "shrinkage-robust-champion",
+  "strategy_class": "ShrinkageRobustChampion",
+  "family": "Set11 Defensible",
+  "run_date": "2026-06-16",
+  "oos_sharpe": 2.6164,
+  "ci_low": 2.2279,
+  "ci_high": 2.9945,
+  "cagr": 0.1312,
+  "max_drawdown": -0.0584,
+  "n_trades": 0,
+  "h001_corr": 0.315,
+  "fold_sharpes": [
+    3.269,
+    1.831,
+    1.562,
+    3.506,
+    3.139,
+    0.984,
+    1.926,
+    3.189,
+    2.559,
+    3.87,
+    3.077,
+    1.898
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Asymmetric VIX-momentum + ridge shrinkage to MDR. mu sweep {0.01: 2.6422, 0.1: 2.6422, 0.5: 2.6404, 2.0: 2.6164}; chosen mu=2.0 (most-shrunk within 0.05 of best). Max weight 0.264. H622 (mu=0) ref 2.642.",
+  "canonical_params": {
+    "calmar": 2.2464,
+    "sortino": 2.9619,
+    "top_weights": {
+      "H016": 0.033157881512319756,
+      "H043": 0.03696080126305467,
+      "H065": 0.11993023590939514,
+      "H076": 0.14200825567178055,
+      "H097": 0.012679679779706628,
+      "H157": 0.0817693593070513,
+      "H191": 0.014316882066024293,
+      "H192": 0.027834553246007088,
+      "H199": 0.017470606727845322,
+      "H265": 0.11191728408264663,
+      "H268": 0.05110681941305308,
+      "H284": 0.012993179681862473,
+      "H287": 0.012050706478807115,
+      "H472": 0.04355551225757121,
+      "H473": 0.2644900691351243
+    },
+    "n_strategies": 55,
+    "objective": "lev-sharpe-mdr-shrinkage-vixmom-asym",
+    "mu_chosen": 2.0,
+    "mu_sweep": {
+      "0.01": 2.6422,
+      "0.1": 2.6422,
+      "0.5": 2.6404,
+      "2.0": 2.6164
+    },
+    "max_weight": 0.2645,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,82 @@
+{
+  "hypothesis": "H654",
+  "name": "deployable-shrinkage",
+  "strategy_class": "DeployableShrinkage654",
+  "family": "Set13 Deployable",
+  "run_date": "2026-06-18",
+  "oos_sharpe": 1.9453,
+  "ci_low": 1.5478,
+  "ci_high": 2.3382,
+  "cagr": 0.1,
+  "max_drawdown": -0.0766,
+  "n_trades": 0,
+  "h001_corr": 0.4471,
+  "fold_sharpes": [
+    2.842,
+    2.011,
+    1.848,
+    2.051,
+    2.232,
+    1.185,
+    1.35,
+    2.307,
+    1.704,
+    2.734,
+    1.827,
+    1.636
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable ridge-shrinkage: lev-Sharpe - lambda*||w-1/n||^2 on the 1-day-LAGGED signal, interior config t15w20. lambda-sweep {'0.0': 1.9795, '1.0': 1.9453, '5.0': 1.8111, '20.0': 1.5966}; chosen lambda=1.0. 5-start Sharpes [1.9454, 1.9453, 1.9453, 1.9454, 1.9459] (range 0.0006). Sharpe 1.945, Calmar 1.305, Sortino 2.007. vs H650 unshrunk (1.980): -0.035. Deployable counterpart of H644.",
+  "canonical_params": {
+    "calmar": 1.3046,
+    "sortino": 2.007,
+    "top_weights": {
+      "H016": 0.022133452367444757,
+      "H019": 0.025275412009171702,
+      "H043": 0.02038792588463881,
+      "H060": 0.027489236676933156,
+      "H065": 0.1702642120998965,
+      "H076": 0.16002380569843627,
+      "H097": 0.020420231790344537,
+      "H157": 0.005660753547492772,
+      "H191": 0.049756420303199586,
+      "H192": 0.04889582222322625,
+      "H194": 0.06332944606071038,
+      "H199": 0.015521219418009916,
+      "H265": 0.09440182898888286,
+      "H268": 0.03263535484296561,
+      "H471": 0.06332944176963921,
+      "H472": 0.04330106939045196,
+      "H473": 0.13650627232417148
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-sharpe-ridge-shrinkage-lagged-fit-interior",
+    "champion_config": "t15w20",
+    "chosen_lambda": 1.0,
+    "lambda_sweep": {
+      "0.0": 1.9795,
+      "1.0": 1.9453,
+      "5.0": 1.8111,
+      "20.0": 1.5966
+    },
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_sharpes": [
+      1.9454,
+      1.9453,
+      1.9453,
+      1.9454,
+      1.9459
+    ],
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

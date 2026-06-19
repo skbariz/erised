@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **3.093 (H642)** / 2.538 (H631) / 2.444 (H634) / 2.335 (H645) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **650** (H001–H650) | **Set12 (H646–H650) COMPLETE** — 5/5 KEEP; deployable (lag-aware) frontier; H650 terminal deployable champ 1.980 |
-| Strategies kept | **446+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 H646-H650 (5) | Set12: 5/5 keep; honest deployable Sharpe ~1.78–1.98; H650 weights-fit-on-lagged-signal is the executable terminal strategy |
+| Strategies tested | **655** (H001–H655) | **Set13 (H651–H655) COMPLETE** — 5/5 KEEP; deployable-frontier objective variants (Sortino, sparse, inverse-vol, shrinkage, CAGR+floor) |
+| Strategies kept | **451+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 (5) + Set13 H651-H655 (5) | Set13: 5/5 keep; H655 best deployable CAGR 12.22%; H651 best deployable Sortino 2.067; inverse-vol (H653) lands below equal-weight |
 
 ---
 
@@ -1835,6 +1835,34 @@ actually realizable (addressing the Set10/11 same-day-VIX caveat). **5/5 KEEP.**
   confirming the same-day ~2.7–3.0 figures were inflated by ~0.6–0.8 Sharpe. This is the number to quote for a real mandate (still ~3.9× SPY's 0.51).
 - **Weights still matter even deployable (H648):** equal-weight gives only 1.383 — optimization is worth ~0.6 Sharpe — consistent with H644's finding that the weights are earned, not overfit.
 - **Deployable diversifier (H647):** a tradeable overlay reaching near-zero H001 correlation (+0.002) at Sharpe 1.391, or +0.272 at 1.862.
+
+---
+
+## Set 13 (H651–H655): Deployable Frontier — Objective Variants
+
+Five distinct objectives on the H650 deployable construction (weights fit on the **1-day-lagged** signal,
+interior-only grid), isolating how the *choice of objective* moves the deployable frontier. **5/5 KEEP.**
+Design + runner + test each.
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| **651** | **DeployableSortino651** | **1.969** | [1.57, 2.35] | 9.68% | −7.59% | 1.276 | +0.463 | KEEP. Leveraged-**Sortino** objective; **Sortino 2.067** (> H650's 2.049) at ~equal Sharpe (−0.011). Best deployable Sortino. |
+| **654** | **DeployableShrinkage654** | 1.945 | [1.55, 2.34] | 10.00% | −7.66% | 1.305 | +0.447 | KEEP. Ridge shrinkage toward equal weight; λ=1 costs only −0.035 Sharpe → robustness nearly free (cf. H644). |
+| **652** | **DeployableSparse652** | 1.933 | [1.54, 2.33] | 9.15% | −7.30% | 1.253 | +0.385 | KEEP. Top-K sparse weights; **just 5 of 55 sleeves** hold within 0.05 of the full blend. Operational-cost lever. |
+| **655** | **DeployableCagrDDfloor655** | 1.751 | [1.34, 2.14] | **12.22%** | −10.11% | 1.209 | +0.424 | KEEP. CAGR-max with −10% MaxDD floor; **best deployable CAGR (+2.14% vs H650)**, floor held to within 0.11pp. |
+| **653** | **DeployableInverseVol653** | 1.303 | [0.91, 1.69] | 7.00% | −8.06% | 0.868 | +0.683 | KEEP. Non-optimized inverse-vol baseline; lands **below equal-weight H648 (1.383)** — naive vol-weighting over-weights sparse sleeves. |
+
+**Key findings:**
+- **The objective choice trades around a fixed deployable frontier.** Sharpe-optimal H650 (1.980) is the
+  apex; Sortino (H651: 1.969) and shrinkage (H654: 1.945) sit right beneath it, confirming the H650 weights
+  are well-conditioned — re-optimizing for a related objective barely moves Sharpe.
+- **H655 is the deployable CAGR champion (12.22%, +2.14% vs H650)** — for a growth mandate, the CAGR+floor
+  objective buys materially higher compounding for ~0.23 Sharpe, holding the −10% drawdown floor to 0.11pp.
+- **The weighting-scheme ladder is now complete:** optimized (H650 1.980) > sparse-5 (H652 1.933) >
+  equal-weight (H648 1.383) > inverse-vol (H653 1.303). Inverse-vol *underperforms* equal-weight because it
+  over-weights low-vol/sparse sleeves — optimization's ~0.6 Sharpe over equal-weight is genuinely earned.
+- **Sparsity is cheap (H652):** 5 of 55 sleeves retain Sharpe within 0.05 of the full blend — the deployable
+  edge is concentrated, not diffuse.
 
 ---
 

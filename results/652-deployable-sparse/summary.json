@@ -1,0 +1,64 @@
+{
+  "hypothesis": "H652",
+  "name": "deployable-sparse",
+  "strategy_class": "DeployableSparse652",
+  "family": "Set13 Deployable",
+  "run_date": "2026-06-18",
+  "oos_sharpe": 1.9334,
+  "ci_low": 1.5377,
+  "ci_high": 2.3261,
+  "cagr": 0.0915,
+  "max_drawdown": -0.073,
+  "n_trades": 0,
+  "h001_corr": 0.3851,
+  "fold_sharpes": [
+    2.656,
+    2.006,
+    2.045,
+    1.337,
+    2.325,
+    1.333,
+    1.506,
+    2.08,
+    1.892,
+    2.431,
+    2.21,
+    1.648
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable sparse top-K: full Sharpe-optimal weights on the 1-day-LAGGED signal (config t15w20, Sharpe 1.979) truncated to K=5 sleeves. K-sweep {'3': 1.4976, '5': 1.9334, '8': 1.9719, '12': 1.9795}. Sharpe 1.933, Calmar 1.253, Sortino 2.020. vs H650 full-blend (1.980): -0.047. Operational-cost (fewer-sleeve) variant.",
+  "canonical_params": {
+    "calmar": 1.253,
+    "sortino": 2.0201,
+    "top_weights": {
+      "H065": 0.2247604050557375,
+      "H076": 0.23070548987236522,
+      "H192": 0.06138869873489042,
+      "H265": 0.13993393083484915,
+      "H473": 0.34321147550215764
+    },
+    "n_strategies": 55,
+    "objective": "deployable-sparse-topk-lagged-fit-interior",
+    "champion_config": "t15w20",
+    "chosen_k": 5,
+    "k_sweep": {
+      "3": 1.4976,
+      "5": 1.9334,
+      "8": 1.9719,
+      "12": 1.9795
+    },
+    "full_blend_sharpe": 1.9795,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -1,0 +1,74 @@
+{
+  "hypothesis": "H655",
+  "name": "deployable-cagr-ddfloor",
+  "strategy_class": "DeployableCagrDDfloor655",
+  "family": "Set13 Deployable",
+  "run_date": "2026-06-18",
+  "oos_sharpe": 1.7505,
+  "ci_low": 1.3422,
+  "ci_high": 2.1415,
+  "cagr": 0.1222,
+  "max_drawdown": -0.1011,
+  "n_trades": 0,
+  "h001_corr": 0.4243,
+  "fold_sharpes": [
+    2.28,
+    1.382,
+    2.144,
+    1.833,
+    1.853,
+    0.746,
+    1.301,
+    1.95,
+    1.713,
+    3.179,
+    1.273,
+    1.459
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable growth-with-floor: maximize leveraged CAGR s.t. -10% MaxDD floor (quadratic penalty, pen=25.0) on the 1-day-LAGGED signal, interior-only grid. Config t17w20. 5-start CAGRs [0.1222, 0.1222, 0.1222, 0.1222, 0.1222] (range 0.0000). Sensitivity {'thr16': 1.753, 'thr17': 1.751, 'thr18': 1.749}. CAGR 12.22%, MaxDD -10.11% (floor breached), Sharpe 1.751, Calmar 1.209. vs H650 CAGR (10.08%): +2.14%.",
+  "canonical_params": {
+    "calmar": 1.2088,
+    "sortino": 1.7773,
+    "top_weights": {
+      "H019": 0.06402422700589246,
+      "H063": 0.05414288545225677,
+      "H065": 0.22679003328137903,
+      "H076": 0.19340190134857302,
+      "H082": 0.047795642406604805,
+      "H191": 0.19315970849644226,
+      "H192": 0.18600574525927854,
+      "H265": 0.034679856749573135
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-cagr-ddfloor-lagged-fit-interior",
+    "champion_config": "t17w20",
+    "dd_floor": -0.1,
+    "penalty": 25.0,
+    "floor_held": false,
+    "vix_threshold": 17.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_cagrs": [
+      0.1222,
+      0.1222,
+      0.1222,
+      0.1222,
+      0.1222
+    ],
+    "sensitivity": {
+      "thr16": 1.753,
+      "thr17": 1.751,
+      "thr18": 1.749
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

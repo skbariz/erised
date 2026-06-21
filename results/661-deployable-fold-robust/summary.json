@@ -1,0 +1,78 @@
+{
+  "hypothesis": "H661",
+  "name": "deployable-fold-robust",
+  "strategy_class": "DeployableFoldRobust661",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9615,
+  "ci_low": 1.5718,
+  "ci_high": 2.3492,
+  "cagr": 0.0991,
+  "max_drawdown": -0.0724,
+  "n_trades": 0,
+  "h001_corr": 0.4577,
+  "fold_sharpes": [
+    2.535,
+    2.015,
+    2.159,
+    1.789,
+    2.299,
+    1.307,
+    1.434,
+    2.193,
+    1.972,
+    2.58,
+    1.925,
+    1.703
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable fold-robust: maximize mean - 0.5*std of per-fold OOS Sharpe on the 1-day-LAGGED signal, interior-only grid. Config t15w20. Fold mean 1.994, std 0.378, range 1.31..2.58. 5-start scores [1.8039, 1.8052, 1.8039, 1.8052, 1.8052] (range 0.0013). Sensitivity {'thr14': 1.939, 'thr15': 1.962, 'thr16': 1.936}. Sharpe 1.962, Calmar 1.369, Sortino 2.030. vs H650 fold range (1.21..2.75).",
+  "canonical_params": {
+    "calmar": 1.369,
+    "sortino": 2.03,
+    "top_weights": {
+      "H016": 0.01953968054086211,
+      "H019": 0.0089532242922506,
+      "H035": 0.009849977234018648,
+      "H060": 0.021821782093535812,
+      "H065": 0.22294895352970545,
+      "H076": 0.1901517796413625,
+      "H097": 0.024042873883183855,
+      "H191": 0.04279852744269507,
+      "H192": 0.05099757349912465,
+      "H265": 0.1161158220886703,
+      "H268": 0.025915802670410906,
+      "H473": 0.2668640030841826
+    },
+    "n_strategies": 55,
+    "objective": "deployable-fold-mean-minus-lambda-std-lagged-interior",
+    "champion_config": "t15w20",
+    "lambda": 0.5,
+    "fold_sharpe_mean": 1.9944,
+    "fold_sharpe_std": 0.3784,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_scores": [
+      1.8039,
+      1.8052,
+      1.8039,
+      1.8052,
+      1.8052
+    ],
+    "sensitivity": {
+      "thr14": 1.939,
+      "thr15": 1.962,
+      "thr16": 1.936
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

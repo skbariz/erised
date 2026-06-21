@@ -19,4 +19,9 @@ spread than H650 at comparable mean, weight-stable. **Falsify:** the fold-robust
 spread without dropping below the keep bar, or it collapses to H650 (λ inactive) → fold-variance targeting
 adds nothing.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Sharpe **1.962** [1.57, 2.35], fold-Sharpe mean 1.994 / std **0.378**,
+Calmar 1.369, Sortino 2.030, CAGR 9.91%, MaxDD −7.24%, H001 corr +0.458, folds **1.31–2.58**. The objective
+did exactly what it promised: vs the pooled-Sharpe H650 (folds 1.21–2.75, std ≈0.45) it **compressed the
+fold range** — worst fold 1.21→1.31, best 2.75→2.58 — at essentially no cost to the mean (1.994 vs ≈1.97) or
+pooled Sharpe (1.962 vs 1.979). The most uniform OOS profile in the program's deployable family; directly
+optimizing fold-variance is a free lunch in consistency here.

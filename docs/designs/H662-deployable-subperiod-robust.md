@@ -18,4 +18,8 @@ more balanced than H650's, possibly at a small cost to the pooled Sharpe.
 H650's worse half, weight-stable. **Falsify:** balancing the halves drops the strategy below the keep bar,
 or the minimax fit coincides with H650 → no era concentration to correct.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Pooled Sharpe **1.963** [1.57, 2.36], half-period Sharpes **1.989 / 1.989**
+(split 2010-01-14) — the minimax balanced the two eras to the third decimal — Calmar 1.315, Sortino 2.027,
+CAGR 9.70%, MaxDD −7.37%, H001 corr +0.441, folds 1.26–2.78. Forcing the worse half up delivered
+near-identical pre/post-2010 Sharpes at only −0.016 pooled vs H650: regime balance is nearly free on this
+pool, and no single macro era is load-bearing for the deployable edge.

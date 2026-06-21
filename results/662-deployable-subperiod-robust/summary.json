@@ -1,0 +1,76 @@
+{
+  "hypothesis": "H662",
+  "name": "deployable-subperiod-robust",
+  "strategy_class": "DeployableSubperiodRobust662",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9627,
+  "ci_low": 1.567,
+  "ci_high": 2.3552,
+  "cagr": 0.097,
+  "max_drawdown": -0.0737,
+  "n_trades": 0,
+  "h001_corr": 0.4408,
+  "fold_sharpes": [
+    2.553,
+    2.088,
+    2.043,
+    1.736,
+    2.345,
+    1.265,
+    1.375,
+    2.207,
+    1.829,
+    2.782,
+    2.013,
+    1.766
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable subperiod-robust: maximize min(half1 Sharpe, half2 Sharpe) on the 1-day-LAGGED signal, interior-only grid. Split 2010-01-14. Config t15w20. Half-Sharpes 1.989/1.989 (min 1.989). 5-start min-half-Sharpes [1.9894, 1.9894, 1.9893, 1.9894, 1.9894] (range 0.0001). Sensitivity {'thr14': 1.938, 'thr15': 1.963, 'thr16': 1.935}. Pooled Sharpe 1.963, Calmar 1.315, Sortino 2.027. vs H650 (1.979): -0.016.",
+  "canonical_params": {
+    "calmar": 1.315,
+    "sortino": 2.0267,
+    "top_weights": {
+      "H016": 0.015453124982111672,
+      "H019": 0.023259504472592292,
+      "H060": 0.007959629445917195,
+      "H065": 0.1957790447666062,
+      "H076": 0.21858145857756323,
+      "H191": 0.02136509734342227,
+      "H192": 0.04824772669334278,
+      "H199": 0.01177892612795471,
+      "H265": 0.16601319156886196,
+      "H473": 0.29156229602136846
+    },
+    "n_strategies": 55,
+    "objective": "deployable-max-min-half-sharpe-lagged-interior",
+    "champion_config": "t15w20",
+    "split_date": "2010-01-14",
+    "half1_sharpe": 1.9894,
+    "half2_sharpe": 1.9894,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_min_half_sharpes": [
+      1.9894,
+      1.9894,
+      1.9893,
+      1.9894,
+      1.9894
+    ],
+    "sensitivity": {
+      "thr14": 1.938,
+      "thr15": 1.963,
+      "thr16": 1.935
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **3.093 (H642)** / 2.538 (H631) / 2.444 (H634) / 2.335 (H645) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **655** (H001–H655) | **Set13 (H651–H655) COMPLETE** — 5/5 KEEP; deployable-frontier objective variants (Sortino, sparse, inverse-vol, shrinkage, CAGR+floor) |
-| Strategies kept | **451+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 (5) + Set13 H651-H655 (5) | Set13: 5/5 keep; H655 best deployable CAGR 12.22%; H651 best deployable Sortino 2.067; inverse-vol (H653) lands below equal-weight |
+| Strategies tested | **665** (H001–H665) | **Set14 (H656–H665) COMPLETE** — 10/10 KEEP; deployable risk-measure & robustness battery (CVaR, Omega, MAD, ERC, LW-GMV, fold/subperiod/borrow robustness, turnover, ensemble) |
+| Strategies kept | **461+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 (5) + Set13 (5) + Set14 H656-H665 (10) | Set14: 10/10 keep; H658 best MaxDD −6.70% / Calmar 1.427; H661/H662 robustness apex; H659 ERC > inverse-vol H653; H665 ensemble dilutes (return-blind drag) |
 
 ---
 
@@ -1863,6 +1863,51 @@ Design + runner + test each.
   over-weights low-vol/sparse sleeves — optimization's ~0.6 Sharpe over equal-weight is genuinely earned.
 - **Sparsity is cheap (H652):** 5 of 55 sleeves retain Sharpe within 0.05 of the full blend — the deployable
   edge is concentrated, not diffuse.
+
+---
+
+## Set 14 (H656–H665): Deployable Frontier — Risk Measures, Allocations & Robustness Battery
+
+Ten more angles on the H650 deployable construction (weights fit on the **1-day-lagged** signal, interior-only
+grid): three alternative risk-measure objectives (CVaR, Omega, MAD), two correlation-aware non-optimized
+allocations (ERC, Ledoit-Wolf GMV), two robustness-targeting objectives (fold-variance, subperiod minimax),
+a financing-cost stress re-fit, an L1 turnover penalty, and an ensemble-of-objectives capstone. **10/10 KEEP.**
+Design + runner + test + results commit each.
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| **662** | **DeployableSubperiodRobust662** | **1.963** | [1.57, 2.36] | 9.70% | −7.37% | 1.315 | +0.441 | KEEP. max-min half-Sharpe; halves balanced **1.989 / 1.989** (split 2010) at only −0.016 vs H650 — regime-robust. |
+| **661** | **DeployableFoldRobust661** | **1.962** | [1.57, 2.35] | 9.91% | −7.24% | 1.369 | +0.458 | KEEP. mean−0.5·std of fold Sharpe; **fold-std 0.378 < H650's ≈0.45**, range 1.31–2.58 — tightest OOS profile, ~free. |
+| **656** | **DeployableCVaR656** | 1.958 | [1.56, 2.34] | 9.78% | −7.58% | 1.291 | +0.470 | KEEP. return-to-**CVaR(5%)** tail objective; **Sortino 2.068 > H650 (2.049)** at −0.020 Sharpe. |
+| **657** | **DeployableOmega657** | 1.953 | [1.56, 2.34] | 9.50% | −6.72% | 1.413 | +0.438 | KEEP. **Omega(0)** full-distribution; selects asym config; better MaxDD/Calmar than H650. |
+| **658** | **DeployableMAD658** | 1.953 | [1.56, 2.34] | 9.56% | **−6.70%** | **1.427** | +0.439 | KEEP. return-to-**MAD** (L1 dispersion); **Set14-best MaxDD & Calmar**; near-twin of H657. |
+| **664** | **DeployableTurnoverPenalized664** | 1.941 | [1.54, 2.33] | 9.63% | −7.23% | 1.333 | +0.469 | KEEP. Sharpe − λ·‖w−w_mdr‖₁; **λ=0.2 nearly free** (−0.038), 40% closer to MDR anchor. Distinct from L2 ridge H654. |
+| **663** | **DeployableHighBorrow663** | 1.925 | [1.53, 2.32] | 10.05% | −7.49% | 1.341 | +0.443 | KEEP. **200bps borrow** re-fit & re-scored; edge survives (−0.052 drag) — not a cheap-financing artifact. |
+| **665** | **DeployableEnsembleCapstone665** | 1.887 | [1.49, 2.27] | 9.93% | −7.58% | 1.309 | +0.527 | KEEP. equal-weight blend of 6 champion allocations; **diluted by return-blind ERC/GMV** (−0.092 vs H650). |
+| **660** | **DeployableMinVarLW660** | 1.516 | [1.12, 1.90] | 5.90% | −6.94% | 0.850 | +0.529 | KEEP. **Ledoit-Wolf GMV**; δ=0.003 (T≫N → shrinkage muted); lowest book vol (3.05% ann.). |
+| **659** | **DeployableERC659** | 1.414 | [1.02, 1.80] | 7.78% | −8.36% | 0.930 | +0.693 | KEEP. **equal-risk-contribution** (perfect 1/55); beats inverse-vol H653 by **+0.111** — corr-awareness > naive vol. |
+
+**Key findings:**
+- **The deployable frontier is now densely mapped and stable.** All ten land where the H650 weights predict:
+  the risk-measure objectives (CVaR/Omega/MAD) cluster at Sharpe ≈1.95–1.96, with the L1/tail-aware pair
+  (H657/H658) posting the **lowest MaxDD (−6.70/−6.72%) and highest Calmar (1.41–1.43)** of the family — better
+  downside efficiency for ~−0.02 Sharpe. L2 variance over-weights a few outlier days that L1/MAD ignores.
+- **Robustness is validated three ways on the deployable base:** fold-variance (H661, fold-std 0.378 vs H650's
+  ≈0.45), regime split (H662, halves 1.989/1.989), and 200bps financing (H663, −0.052 drag) all hold **≥1.92** —
+  the deployable edge is consistent across folds, macro eras, and realistic borrow, not a single-regime or
+  cheap-leverage artifact.
+- **Correlation-aware allocation ladder extends H653:** ERC (H659 1.414) **> inverse-vol (H653 1.303)** by +0.111
+  — accounting for correlations genuinely beats naive vol-weighting — but both trail the return-optimized H650,
+  so return information is worth ~0.5 Sharpe over any return-blind allocator.
+- **Ledoit-Wolf shrinkage is muted at this T/N (δ=0.003):** with 6,274 days and 55 sleeves the sample covariance
+  is already well-conditioned, so GMV (H660) is a clean low-vol baseline rather than a shrinkage win — shrinkage
+  earns its keep only when N/T is large.
+- **Diversification/turnover discipline is nearly free (H664):** the largest L1 pull to the MDR anchor (λ=0.2)
+  costs only 0.038 Sharpe while cutting the anchor distance 40% — the concentrated Sharpe fit is not load-bearing.
+- **Ensembling objectives dilutes when it includes return-blind baselines (H665):** the blend (1.887) trails the
+  simple Sharpe H650 on both Sharpe and Calmar because ERC/GMV drag the average — blend only the
+  *return-optimized* objectives, echoing the program's composite-dilution rule. **9 of 10 Set14 strategies meet
+  the institutional bar** (Sharpe ≥1.5, MaxDD ≤−10%, Calmar ≥0.8); only ERC (H659, Sharpe 1.414) falls short.
 
 ---
 

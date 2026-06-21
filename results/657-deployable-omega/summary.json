@@ -1,0 +1,74 @@
+{
+  "hypothesis": "H657",
+  "name": "deployable-omega",
+  "strategy_class": "DeployableOmega657",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9528,
+  "ci_low": 1.5565,
+  "ci_high": 2.341,
+  "cagr": 0.095,
+  "max_drawdown": -0.0672,
+  "n_trades": 0,
+  "h001_corr": 0.4382,
+  "fold_sharpes": [
+    2.59,
+    2.057,
+    2.007,
+    1.768,
+    2.373,
+    1.3,
+    1.396,
+    2.344,
+    1.531,
+    2.711,
+    1.988,
+    1.83
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable Omega ratio: maximize Omega(0)=sum(gains)/sum(|losses|) on the 1-day-LAGGED signal, interior-only grid. Config t15w20-asym. 5-start Omegas [1.4024, 1.4024, 1.4024, 1.4024, 1.4024] (range 0.0000). Sensitivity {'thr14': 1.915, 'thr15': 1.953, 'thr16': 1.907}. Omega 1.402, Sharpe 1.953, Calmar 1.413, Sortino 2.035. vs H650 Sharpe (1.979): -0.026.",
+  "canonical_params": {
+    "calmar": 1.413,
+    "sortino": 2.0348,
+    "top_weights": {
+      "H016": 0.025081545041437267,
+      "H019": 0.02057310225454303,
+      "H065": 0.17710682226308563,
+      "H076": 0.2764237002709555,
+      "H191": 0.03889945508454742,
+      "H192": 0.0525713098753373,
+      "H265": 0.14010453459959066,
+      "H268": 0.05370556038203137,
+      "H473": 0.2155339702284715
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-omega-lagged-fit-interior",
+    "champion_config": "t15w20-asym",
+    "omega_threshold": 0.0,
+    "omega": 1.4022,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": true,
+    "regime_lag_days": 1,
+    "restart_omegas": [
+      1.4024,
+      1.4024,
+      1.4024,
+      1.4024,
+      1.4024
+    ],
+    "sensitivity": {
+      "thr14": 1.915,
+      "thr15": 1.953,
+      "thr16": 1.907
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

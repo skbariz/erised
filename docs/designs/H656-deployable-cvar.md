@@ -19,4 +19,7 @@ than the Sharpe-optimal H650, weight-stable across restarts. **Falsify:** CVaR-f
 on *both* Sharpe and the tail ratio, or no interior config clears Sharpe 1.7 → tail-targeting adds nothing
 on this pool.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Sharpe **1.959** [1.56, 2.34], **Sortino 2.068** (> the Sharpe-optimal
+H650's 2.049), Calmar 1.291, CAGR 9.78%, MaxDD −7.58%, return-to-CVaR ratio 0.958, H001 corr +0.470, folds
+1.16–2.76, 5-start ratio range 0.0001 (weight-stable). The tail denominator costs just −0.020 Sharpe vs H650
+while *improving* Sortino — tail-targeting buys marginally better downside efficiency, exactly as hypothesized.

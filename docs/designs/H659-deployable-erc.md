@@ -19,4 +19,9 @@ return-optimized blend because it ignores expected returns entirely.
 realized risk contributions (a correct ERC solve). **Falsify:** ERC lands below inverse-vol, or fails the
 keep bar → correlation-aware risk parity adds nothing over naive inverse-vol here.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Sharpe **1.414** [1.02, 1.80], Calmar 0.930, Sortino 1.481, CAGR 7.78%,
+MaxDD −8.36%, H001 corr +0.693, folds 0.70–2.22. Realized risk-contribution shares are **0.01818 = 1/55 for
+every sleeve** (a textbook-perfect ERC solve). Beats the naive inverse-vol baseline H653 (1.303) by
+**+0.111** — correlation-aware risk parity is a genuine improvement over inverse-vol, as hypothesized — but
+sits well below the return-optimized H650 (1.979): a return-blind allocation leaves real Sharpe on the table.
+ERC is the honest null the optimized objectives must beat, and they do.

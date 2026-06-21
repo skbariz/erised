@@ -18,4 +18,8 @@ penalizes.
 the Sharpe-optimal H650's, weight-stable. **Falsify:** MAD-fitting underperforms H650 on both Sharpe and the
 MAD ratio, or no interior config clears Sharpe 1.7 → L1 dispersion adds nothing on this pool.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20-asym. Sharpe **1.953** [1.56, 2.34], return-to-MAD ratio 2.684, Calmar
+**1.427** (Set14 high), Sortino 2.035, CAGR 9.56%, MaxDD **−6.70%** (Set14 low), H001 corr +0.439, folds
+1.30–2.73. The L1-dispersion objective is a near-twin of the Omega fit (H657) and posts the lowest MaxDD and
+highest Calmar of the whole set — linear (vs squared) penalty on deviations yields the steadiest deployable
+book, confirming that L2 variance over-weights a handful of outlier days that L1 ignores.

@@ -1,0 +1,73 @@
+{
+  "hypothesis": "H658",
+  "name": "deployable-mad",
+  "strategy_class": "DeployableMAD658",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9534,
+  "ci_low": 1.558,
+  "ci_high": 2.3404,
+  "cagr": 0.0956,
+  "max_drawdown": -0.067,
+  "n_trades": 0,
+  "h001_corr": 0.4385,
+  "fold_sharpes": [
+    2.526,
+    2.033,
+    2.062,
+    1.755,
+    2.363,
+    1.302,
+    1.399,
+    2.344,
+    1.546,
+    2.733,
+    1.984,
+    1.838
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable return-to-MAD: maximize annualized return / mean-absolute-deviation on the 1-day-LAGGED signal, interior-only grid. Config t15w20-asym. 5-start MAD-ratios [2.684, 2.684, 2.684, 2.6839, 2.684] (range 0.0001). Sensitivity {'thr14': 1.915, 'thr15': 1.953, 'thr16': 1.908}. MAD-ratio 2.684, Sharpe 1.953, Calmar 1.427, Sortino 2.035. vs H650 Sharpe (1.979): -0.026.",
+  "canonical_params": {
+    "calmar": 1.4268,
+    "sortino": 2.0346,
+    "top_weights": {
+      "H016": 0.02008628425521351,
+      "H019": 0.02428567626294509,
+      "H065": 0.17879088180285765,
+      "H076": 0.28174362966617295,
+      "H191": 0.0372370499305522,
+      "H192": 0.055205003781242025,
+      "H265": 0.13939472751077295,
+      "H268": 0.057944289864932226,
+      "H473": 0.20409615087901598
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-return-mad-lagged-fit-interior",
+    "champion_config": "t15w20-asym",
+    "mad_ratio": 2.684,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": true,
+    "regime_lag_days": 1,
+    "restart_mad_ratios": [
+      2.684,
+      2.684,
+      2.684,
+      2.6839,
+      2.684
+    ],
+    "sensitivity": {
+      "thr14": 1.915,
+      "thr15": 1.953,
+      "thr16": 1.908
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

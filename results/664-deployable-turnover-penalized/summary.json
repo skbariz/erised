@@ -1,0 +1,99 @@
+{
+  "hypothesis": "H664",
+  "name": "deployable-turnover-penalized",
+  "strategy_class": "DeployableTurnoverPenalized664",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9412,
+  "ci_low": 1.5376,
+  "ci_high": 2.33,
+  "cagr": 0.0963,
+  "max_drawdown": -0.0723,
+  "n_trades": 0,
+  "h001_corr": 0.4686,
+  "fold_sharpes": [
+    2.882,
+    2.03,
+    1.999,
+    1.952,
+    2.184,
+    1.229,
+    1.396,
+    2.223,
+    1.817,
+    2.551,
+    1.838,
+    1.59
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable Sharpe - lambda*||w - w_mdr||_1 (L1 pull to the MDR anchor) on the 1-day-LAGGED signal, config t15w20. Finalized lambda=0.2 (within 0.05 of lambda=0 1.979). Sharpe@lambda {'0.0': np.float64(1.9795), '0.05': np.float64(1.9779), '0.1': np.float64(1.9656), '0.2': np.float64(1.9412)}; anchor-distance L1@lambda {'0.0': 1.0287, '0.05': 0.9691, '0.1': 0.7839, '0.2': 0.6173}. 5-start Sharpes [1.9412, 1.9404, 1.9404, 1.9404, 1.9404] (range 0.0008). Sensitivity {'thr14': 1.923, 'thr15': 1.941, 'thr16': 1.91}. Sharpe 1.941, Calmar 1.333, Sortino 2.016. vs H650 (1.979): -0.038.",
+  "canonical_params": {
+    "calmar": 1.3334,
+    "sortino": 2.0159,
+    "top_weights": {
+      "H016": 0.03475347620716572,
+      "H019": 0.008746212665853828,
+      "H035": 0.008464738488179639,
+      "H043": 0.03670262835191217,
+      "H060": 0.026729010428524862,
+      "H065": 0.17734132620572007,
+      "H076": 0.16547622403624618,
+      "H097": 0.023824915776472083,
+      "H157": 0.049293218187271205,
+      "H191": 0.026984103986185996,
+      "H192": 0.05185856951666364,
+      "H265": 0.08635984535366598,
+      "H268": 0.00942203264446143,
+      "H287": 0.005419583831324967,
+      "H472": 0.047208604194230584,
+      "H473": 0.23538616886806302
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-sharpe-l1-mdr-anchor-lagged",
+    "champion_config": "t15w20",
+    "lambda_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.2
+    ],
+    "finalized_lambda": 0.2,
+    "sharpe_by_lambda": {
+      "0.0": 1.9795,
+      "0.05": 1.9779,
+      "0.1": 1.9656,
+      "0.2": 1.9412
+    },
+    "anchor_l1_by_lambda": {
+      "0.0": 1.0287,
+      "0.05": 0.9691,
+      "0.1": 0.7839,
+      "0.2": 0.6173
+    },
+    "tolerance": 0.05,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_sharpes": [
+      1.9412,
+      1.9404,
+      1.9404,
+      1.9404,
+      1.9404
+    ],
+    "sensitivity": {
+      "thr14": 1.923,
+      "thr15": 1.941,
+      "thr16": 1.91
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

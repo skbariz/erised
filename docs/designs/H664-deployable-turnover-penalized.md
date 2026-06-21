@@ -21,4 +21,9 @@ and costs Sharpe. The finalize rule keeps the most-diversified allocation that i
 diversification is nearly free here. **Falsify:** any λ > 0 costs > 0.05 Sharpe (the concentrated fit is
 load-bearing) → finalize collapses to λ=0 and the penalty buys nothing.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20, finalized **λ=0.2** (the largest in the grid). Sharpe **1.941** [1.54, 2.33]
+— within 0.038 of the λ=0 optimum (1.9795), inside the 0.05 tolerance — while the L1 distance from the MDR
+anchor falls from 1.029 (λ=0) to **0.617** (λ=0.2), a 40% pull toward diversification; Calmar 1.333, Sortino
+2.016, MaxDD −7.23%, H001 corr +0.469. Sharpe-by-λ {0:1.980, 0.05:1.978, 0.1:1.966, 0.2:1.941} confirms
+**diversification is nearly free** — every grid λ stayed within tolerance, so the concentrated H650 fit is
+not load-bearing. Distinct from the L2-toward-equal-weight ridge H654 (different norm, MDR anchor).

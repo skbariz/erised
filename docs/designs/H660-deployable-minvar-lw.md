@@ -20,4 +20,9 @@ lowest realized vol of the deployable allocations, with Sharpe near the ERC/inve
 keep bar and competitive with ERC (H659). **Falsify:** GMV underperforms the simpler inverse-vol/ERC
 baselines, or δ pins to 0/1 → shrinkage adds nothing on this pool.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Sharpe **1.516** [1.12, 1.90], Calmar 0.850, Sortino 1.634, CAGR 5.90%,
+MaxDD −6.94%, H001 corr +0.529, folds 0.62–3.43. The Ledoit-Wolf intensity is **δ=0.003** — almost no
+shrinkage, because with T=6274 ≫ N=55 the sample covariance is already well-conditioned. GMV delivers the
+lowest book vol of the set (3.05% annualized) and a respectable Sharpe, but the robust-covariance angle is
+**muted here**: shrinkage earns its keep only when N/T is large, which this pool is not. Honest partial
+falsification of the premise — the result is the low-vol GMV point, not a shrinkage win.

@@ -1,0 +1,69 @@
+{
+  "hypothesis": "H660",
+  "name": "deployable-minvar-lw",
+  "strategy_class": "DeployableMinVarLW660",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.5163,
+  "ci_low": 1.1181,
+  "ci_high": 1.9004,
+  "cagr": 0.059,
+  "max_drawdown": -0.0694,
+  "n_trades": 0,
+  "h001_corr": 0.5292,
+  "fold_sharpes": [
+    3.432,
+    2.278,
+    0.621,
+    1.478,
+    1.88,
+    1.141,
+    1.041,
+    1.743,
+    1.283,
+    1.552,
+    1.402,
+    1.232
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable global-minimum-variance on a Ledoit-Wolf shrunk covariance (analytical intensity delta=0.0032, no tuning) + 1-day-LAGGED interior-grid leverage. Config t15w20. GMV annualized vol 0.0305. Sensitivity {'thr14': 1.487, 'thr15': 1.516, 'thr16': 1.496}. Sharpe 1.516, Calmar 0.850, Sortino 1.634. vs H650 (1.979): -0.463.",
+  "canonical_params": {
+    "calmar": 0.8501,
+    "sortino": 1.634,
+    "top_weights": {
+      "H016": 0.04435014467406614,
+      "H035": 0.009133271040648655,
+      "H043": 0.09714852121712614,
+      "H065": 0.0583674370898052,
+      "H068": 0.024551860461369472,
+      "H076": 0.15661471298133686,
+      "H087": 0.057046057304321315,
+      "H157": 0.022310204922131024,
+      "H265": 0.030058020642186718,
+      "H287": 0.01016284497471743,
+      "H473": 0.4902569246922911
+    },
+    "n_strategies": 55,
+    "objective": "deployable-ledoit-wolf-gmv-lagged-interior",
+    "champion_config": "t15w20",
+    "lw_shrinkage_delta": 0.00322,
+    "gmv_annual_vol": 0.03052,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "sensitivity": {
+      "thr14": 1.487,
+      "thr15": 1.516,
+      "thr16": 1.496
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

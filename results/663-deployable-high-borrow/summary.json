@@ -1,0 +1,75 @@
+{
+  "hypothesis": "H663",
+  "name": "deployable-high-borrow",
+  "strategy_class": "DeployableHighBorrow663",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9249,
+  "ci_low": 1.5278,
+  "ci_high": 2.3162,
+  "cagr": 0.1005,
+  "max_drawdown": -0.0749,
+  "n_trades": 0,
+  "h001_corr": 0.4427,
+  "fold_sharpes": [
+    2.68,
+    2.093,
+    1.963,
+    1.807,
+    2.225,
+    1.195,
+    1.366,
+    2.165,
+    1.823,
+    2.646,
+    1.764,
+    1.697
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable Sharpe champion re-fit AND scored at 2% borrow (vs 50bps default) on the 1-day-LAGGED signal, interior-only grid. Config t15w20. Sharpe@200bps 1.925 vs same weights @50bps 1.977 (borrow drag -0.052). 5-start Sharpes [1.9249, 1.9249, 1.9249, 1.9249, 1.9249] (range 0.0000). Sensitivity {'thr14': 1.909, 'thr15': 1.925, 'thr16': 1.896}. Calmar 1.341, Sortino 1.980, CAGR 10.05%. vs H650 50bps (1.979): -0.054. Edge survives realistic financing.",
+  "canonical_params": {
+    "calmar": 1.341,
+    "sortino": 1.9803,
+    "top_weights": {
+      "H016": 0.017295482228371267,
+      "H019": 0.02330562311391059,
+      "H060": 0.027640948645328216,
+      "H065": 0.19978187348564716,
+      "H076": 0.21119472777023296,
+      "H191": 0.0669740036332154,
+      "H192": 0.058170984736874494,
+      "H265": 0.12435376385843064,
+      "H473": 0.27126253255538024
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-sharpe-highborrow-lagged-fit-interior",
+    "champion_config": "t15w20",
+    "borrow_annual": 0.02,
+    "sharpe_at_50bps_same_weights": 1.9773,
+    "borrow_drag": -0.0524,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_sharpes": [
+      1.9249,
+      1.9249,
+      1.9249,
+      1.9249,
+      1.9249
+    ],
+    "sensitivity": {
+      "thr14": 1.909,
+      "thr15": 1.925,
+      "thr16": 1.896
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

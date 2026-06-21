@@ -20,4 +20,9 @@ sleeves that need less leverage to hit target vol.
 not an artifact of cheap financing. **Falsify:** the high-borrow Sharpe collapses below the keep bar → the
 leveraged edge is a financing-cost mirage.
 
-**Result:** appended after run.
+**Result (KEEP).** Config t15w20. Sharpe@200bps **1.925** [1.53, 2.32] vs the same re-fit weights @50bps
+1.977 — a borrow drag of just **−0.052** Sharpe for 150bps of extra financing; Calmar 1.341, Sortino 1.980,
+CAGR 10.05%, MaxDD −7.49%, H001 corr +0.443, folds 1.20–2.68. The deployable edge **survives realistic
+financing**: at 200bps it still clears the institutional 1.5 bar comfortably, and the high-borrow re-fit
+barely moves the weights (the 200bps-fit allocation scores ≈H650's 1.979 at 50bps). The leveraged frontier
+is not an artifact of cheap borrow.

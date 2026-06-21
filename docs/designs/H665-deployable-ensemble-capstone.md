@@ -21,4 +21,11 @@ the better single objectives.
 component — i.e. the blend is on or above the deployable frontier, not a dilutive average. **Falsify:** the
 blend underperforms the simple Sharpe H650 on *both* Sharpe and Calmar → averaging objectives only dilutes.
 
-**Result:** appended after run.
+**Result (KEEP, partial falsification).** Config t15w20, equal-weight blend of six champion allocations
+(Sharpe/Sortino/CAGR-floor/CVaR/ERC/LW-GMV). Sharpe **1.887** [1.49, 2.27], Calmar 1.309, Sortino 1.970,
+CAGR 9.93%, MaxDD −7.58%, H001 corr +0.527, folds 1.11–2.65. Component Sharpes ranged 1.41 (ERC) to 1.98
+(H650); the blend lands **below** the simple Sharpe H650 on both Sharpe (−0.092) and Calmar (−0.023) — so
+the falsification clause fires: averaging in the two **return-blind** baselines (ERC 1.414, GMV 1.516)
+dilutes more than objective-diversification adds. The lesson mirrors the program's composite-dilution finding
+([[feedback_composite_signal_dilution]]): blend only the return-optimized objectives, not return-blind
+allocators. Still a robust, fully-executable book far above the keep bar — just not frontier-leading.

@@ -1,0 +1,75 @@
+{
+  "hypothesis": "H656",
+  "name": "deployable-cvar",
+  "strategy_class": "DeployableCVaR656",
+  "family": "Set14 Deployable",
+  "run_date": "2026-06-20",
+  "oos_sharpe": 1.9585,
+  "ci_low": 1.5642,
+  "ci_high": 2.339,
+  "cagr": 0.0978,
+  "max_drawdown": -0.0758,
+  "n_trades": 0,
+  "h001_corr": 0.4697,
+  "fold_sharpes": [
+    2.758,
+    2.118,
+    1.947,
+    1.94,
+    2.271,
+    1.161,
+    1.441,
+    2.225,
+    1.911,
+    2.439,
+    1.886,
+    1.595
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable return-to-CVaR: maximize annualized return / CVaR(5%) on the 1-day-LAGGED signal, interior-only grid. Config t15w20. 5-start CVaR-ratios [0.9576, 0.9576, 0.9575, 0.9576, 0.9576] (range 0.0001). Sensitivity {'thr14': 1.932, 'thr15': 1.959, 'thr16': 1.931}. CVaR-ratio 0.958, Sharpe 1.959, Calmar 1.291, Sortino 2.068. vs H650 Sharpe (1.979): -0.020.",
+  "canonical_params": {
+    "calmar": 1.2912,
+    "sortino": 2.0682,
+    "top_weights": {
+      "H019": 0.03527658076253426,
+      "H043": 0.014721618491153866,
+      "H060": 0.025555057757725874,
+      "H065": 0.1934063494653643,
+      "H076": 0.17980074549346162,
+      "H157": 0.0319382969329509,
+      "H191": 0.036543356636050635,
+      "H192": 0.05227028148282018,
+      "H265": 0.06930735176829299,
+      "H473": 0.3601634069105467
+    },
+    "n_strategies": 55,
+    "objective": "deployable-lev-return-cvar-lagged-fit-interior",
+    "champion_config": "t15w20",
+    "cvar_alpha": 0.05,
+    "cvar_ratio": 0.9576,
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "restart_cvar_ratios": [
+      0.9576,
+      0.9576,
+      0.9575,
+      0.9576,
+      0.9576
+    ],
+    "sensitivity": {
+      "thr14": 1.932,
+      "thr15": 1.959,
+      "thr16": 1.931
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

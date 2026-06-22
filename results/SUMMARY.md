@@ -124,8 +124,8 @@ SPY benchmark (same OOS windows): Sharpe 0.51 | CAGR 8.35% | Max DD −55.92%
 | Calmar ratio (institutional) | **3.093 (H642)** / 2.538 (H631) / 2.444 (H634) / 2.335 (H645) | **MET ★★★** — H642 (asym VIX-mom lev-Calmar) is the new Calmar record |
 | Institutional bars at 1.5× | All 12 Target-bar survivors + H556 (CAGR 9.61%, MaxDD −5.79%) | **MET ★★** — H556 exceeds all bars at avg 1.23× realized leverage |
 | Holdout evaluation | **H049 Sharpe 1.346 / MaxDD −9.91%** (SPY: 1.465 / −18.76%) | **COMPLETE ★** — H049 holds up OOS; MaxDD advantage maintained |
-| Strategies tested | **665** (H001–H665) | **Set14 (H656–H665) COMPLETE** — 10/10 KEEP; deployable risk-measure & robustness battery (CVaR, Omega, MAD, ERC, LW-GMV, fold/subperiod/borrow robustness, turnover, ensemble) |
-| Strategies kept | **461+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 (5) + Set13 (5) + Set14 H656-H665 (10) | Set14: 10/10 keep; H658 best MaxDD −6.70% / Calmar 1.427; H661/H662 robustness apex; H659 ERC > inverse-vol H653; H665 ensemble dilutes (return-blind drag) |
+| Strategies tested | **670** (H001–H670) | **Set15 (H666–H670) COMPLETE** — 5/5 KEEP; deployable allocation & regularization battery (HRP, min-correlation, max-Sortino, ridge-shrinkage, inverse-MaxDD) |
+| Strategies kept | **466+ total** — H001-H550 (360) + Set8 (36) + Set9 (20) + Set10 (20) + Set11 (5) + Set12 (5) + Set13 (5) + Set14 (10) + Set15 H666-H670 (5) | Set15: 5/5 keep; H669 ridge λ-path falsifies shrinkage (H650 not overfit); H668 best Sortino 2.006; HRP < flat ERC; inverse-MaxDD ≈ inverse-vol |
 
 ---
 
@@ -1908,6 +1908,40 @@ Design + runner + test + results commit each.
   simple Sharpe H650 on both Sharpe and Calmar because ERC/GMV drag the average — blend only the
   *return-optimized* objectives, echoing the program's composite-dilution rule. **9 of 10 Set14 strategies meet
   the institutional bar** (Sharpe ≥1.5, MaxDD ≤−10%, Calmar ≥0.8); only ERC (H659, Sharpe 1.414) falls short.
+
+---
+
+## Set 15 (H666–H670): Deployable Frontier — Allocation Methods & Weight Regularization
+
+Five more allocation angles on the H650 deployable construction (weights fit on the **1-day-lagged** signal,
+interior-only grid): three return-blind allocators (Hierarchical Risk Parity, minimum-correlation tilt,
+inverse-MaxDD parity) and two return-aware objectives (max-Sortino, ridge-shrunk max-Sharpe). **5/5 KEEP**, but
+none sets a new frontier — the value here is two clean *negative* results that confirm the construction is
+sound. Design + runner + test + results commit each.
+
+| # | Name | Sharpe | 95% CI | CAGR | MaxDD | Calmar | corr | Notes |
+|---|------|--------|--------|------|-------|--------|------|-------|
+| **669** | **DeployableRidge669** | **1.909** | [1.51, 2.29] | **9.01%** | **−6.74%** | 1.336 | +0.520 | KEEP. Sharpe − λ·‖w−1/n‖²; **λ-path monotonically decreasing (1.926→1.862)** ⇒ H650 solve **not overfit**; canonical λ=0.5 costs only −0.017 for the batch-best CAGR/MaxDD pair. |
+| **668** | **DeployableMaxSortino668** | **1.895** | [1.50, 2.28] | 8.47% | −6.94% | 1.221 | +0.506 | KEEP. return ÷ downside-dev objective; **batch-best Sortino 2.006**; ~H650 (−0.084) but the lowest H001 corr of the return-aware fits. 5-start weight-stable. |
+| **667** | **DeployableMinCorr667** | 1.383 | [0.99, 1.77] | 7.83% | −8.91% | 0.879 | +0.698 | KEEP. (1−avg-corr)/vol tilt; **beats inverse-vol H653 by +0.080**, just below ERC H659 (−0.031) — a corr-rank heuristic ≈ the full variance solve. |
+| **670** | **DeployableInvMaxDD670** | 1.311 | [0.92, 1.70] | 7.06% | −8.03% | 0.879 | +0.686 | KEEP. w ∝ 1/\|MaxDD\|; **ties inverse-vol H653 (+0.008)** — drawdown depth ≈ daily vol; asym leverage config wins here. |
+| **666** | **DeployableHRP666** | 1.223 | [0.83, 1.61] | 6.02% | −7.40% | 0.813 | +0.673 | KEEP. Hierarchical Risk Parity (cluster + recursive bisection); **below flat ERC H659 by −0.191** — cluster structure adds nothing over flat risk parity on this pool. |
+
+**Key findings:**
+- **Two clean negative results, both recorded honestly.** (1) HRP (H666, 1.223) lands **below** flat ERC (H659,
+  1.414): single-linkage cluster structure adds nothing over flat risk-contribution parity on this pool. (2) The
+  ridge λ-path (H669) is **monotonically decreasing** in λ — 1.926 (λ=0) → 1.862 (λ=2) while ‖w−1/n‖ shrinks
+  0.436 → 0.251 — so shrinking the optimized weights toward equal weight only *costs* return: the H650-style
+  Sharpe solve is **not overfit** on this pool, its in-sample edge survives OOS.
+- **The return-aware objectives approach but don't beat H650 (1.979):** ridge (1.909) and max-Sortino (1.895)
+  trail by ≈0.07–0.08 Sharpe, posting strong but not record CAGR/MaxDD. Max-Sortino earns the **batch-best
+  Sortino (2.006)** as expected from its objective, not a Sharpe win.
+- **The sizing-statistic ladder is now complete and monotone:** vol (H653, 1.303) ≈ MaxDD (H670, 1.311) <
+  min-corr tilt (H667, 1.383) < variance-contribution ERC (H659, 1.414) ≪ return-aware (H650, 1.979).
+  Drawdown depth carries essentially no information beyond daily vol; correlation-awareness is worth ~+0.1;
+  return information is worth ~+0.5 over any return-blind allocator.
+- **2 of 5 meet the institutional bar** (Sharpe ≥1.5, MaxDD ≤−10%, Calmar ≥0.8): H668 and H669. The three
+  return-blind allocators clear the keep bar (CI > 0) but sit in the 1.22–1.38 Sharpe band, below the bar.
 
 ---
 

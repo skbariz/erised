@@ -20,3 +20,13 @@ is *flat or improved* — i.e. the dropped in-sample Sharpe was overfit.
 **Success:** a non-trivial λ whose deployable Sharpe ≥ H650 (or within noise) at clearly flatter weights and
 tighter fold dispersion, clearing the keep bar. **Falsify:** every λ > 0 strictly lowers deployable Sharpe →
 the H650 solution is not overfit on this pool and shrinkage only costs return.
+
+**Result (KEEP — hypothesis falsified).** Config t15w20, λ=0.5. Sharpe **1.909** [1.51, 2.29], Calmar 1.336,
+Sortino 1.995, CAGR **9.01%** (batch high), MaxDD **−6.74%** (batch low), H001 corr +0.520, folds 1.41–2.79.
+**The λ-path is the finding and it fires the falsify clause:** deployable Sharpe is *monotonically decreasing*
+in λ — 1.926 (λ=0) → 1.921 (0.25) → 1.909 (0.5) → 1.890 (1.0) → 1.862 (2.0) — while ‖w−1/n‖ shrinks
+0.436 → 0.251. Shrinking the optimized weights toward equal weight only *costs* return here, so the
+H650-style Sharpe solve is **not overfit** on this pool: the in-sample edge it loads onto survives OOS. The
+λ=0 point (1.926) confirms the unregularized solve sits in H650's neighborhood. Kept because the canonical
+λ=0.5 sacrifices just −0.017 Sharpe for a flatter, more robust book and posts the best CAGR/MaxDD pair in the
+batch — a defensible deployment even though, on this pool, regularization is not a free lunch.

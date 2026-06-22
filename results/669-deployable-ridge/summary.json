@@ -1,0 +1,93 @@
+{
+  "hypothesis": "H669",
+  "name": "deployable-ridge",
+  "strategy_class": "DeployableRidge669",
+  "family": "Set15 Deployable",
+  "run_date": "2026-06-21",
+  "oos_sharpe": 1.9095,
+  "ci_low": 1.513,
+  "ci_high": 2.2949,
+  "cagr": 0.0901,
+  "max_drawdown": -0.0674,
+  "n_trades": 0,
+  "h001_corr": 0.5199,
+  "fold_sharpes": [
+    2.793,
+    1.92,
+    2.079,
+    1.744,
+    2.216,
+    1.41,
+    1.456,
+    2.198,
+    1.859,
+    2.366,
+    1.835,
+    1.456
+  ],
+  "decision": "keep",
+  "kept": true,
+  "notes": "Deployable ridge-regularized max-Sharpe (SLSQP, MDR warm-start, lambda=0.5 L2-shrink toward 1/n) + 1-day-LAGGED interior-grid leverage. Config t15w20. ||w-1/n||=0.3453. Lambda path {'lam0.0': (1.926, 0.4356), 'lam0.25': (1.921, 0.4029), 'lam0.5': (1.909, 0.3453), 'lam1.0': (1.89, 0.2947), 'lam2.0': (1.862, 0.2513)}. Sensitivity {'thr14': 1.896, 'thr15': 1.909, 'thr16': 1.872}. Sharpe 1.909, Calmar 1.336, Sortino 1.995. vs H650 (1.979): -0.070.",
+  "canonical_params": {
+    "calmar": 1.3361,
+    "sortino": 1.9951,
+    "top_weights": {
+      "H016": 0.05429812282601542,
+      "H035": 0.01532949173139533,
+      "H043": 0.018799918618172453,
+      "H065": 0.18101972408231295,
+      "H076": 0.18395727802354703,
+      "H097": 0.04051688062675693,
+      "H157": 0.08365584804828093,
+      "H192": 0.03561523650313608,
+      "H194": 0.03377257714558928,
+      "H265": 0.08148758329252173,
+      "H471": 0.03377258727595814,
+      "H472": 0.010640432687746408,
+      "H473": 0.219769188848007
+    },
+    "n_strategies": 55,
+    "objective": "deployable-ridge-shrink-lagged-interior",
+    "champion_config": "t15w20",
+    "lambda": 0.5,
+    "l2_to_equal": 0.3453,
+    "lambda_path": {
+      "lam0.0": [
+        1.926,
+        0.4356
+      ],
+      "lam0.25": [
+        1.921,
+        0.4029
+      ],
+      "lam0.5": [
+        1.909,
+        0.3453
+      ],
+      "lam1.0": [
+        1.89,
+        0.2947
+      ],
+      "lam2.0": [
+        1.862,
+        0.2513
+      ]
+    },
+    "vix_threshold": 15.0,
+    "window": 20,
+    "asymmetric": false,
+    "regime_lag_days": 1,
+    "sensitivity": {
+      "thr14": 1.896,
+      "thr15": 1.909,
+      "thr16": 1.872
+    },
+    "leverage_lookback": 20
+  },
+  "spy_benchmark": {
+    "sharpe": 0.51,
+    "cagr": 0.0835,
+    "max_drawdown": -0.5592
+  },
+  "beats_benchmark": true
+}

@@ -20,3 +20,10 @@ since it ignores expected returns entirely. Weights should concentrate across bl
 **Success:** deployable Sharpe ≥ the ERC baseline H659 and clearing the keep bar, with a valid simplex weight
 vector and a sensible quasi-diagonal ordering. **Falsify:** HRP lands below ERC, or fails the keep bar →
 cluster structure adds nothing over flat risk parity on this pool.
+
+**Result (KEEP).** Config t15w20. Sharpe **1.223** [0.83, 1.61], Calmar 0.813, Sortino 1.283, CAGR 6.02%,
+MaxDD −7.40%, H001 corr +0.673, folds 0.56–2.29. Single-linkage HRP lands **below** flat ERC (H659, 1.414) by
+−0.191 and even slightly below naive inverse-vol (H653, 1.303) by −0.080. The recursive-bisection split is
+more defensive (the batch's lowest CAGR, 6.02%, and a tight −7.40% MaxDD) but without the Sharpe to match ERC:
+on this 55-sleeve pool the cluster hierarchy adds nothing over flat risk-contribution parity — **the falsify
+clause fires.** Kept as an honest return-blind baseline (CI clears zero), not a frontier strategy.

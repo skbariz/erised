@@ -21,3 +21,12 @@ drawdowns), so it is not a pure covariance baseline.
 **Success:** deployable Sharpe ≥ the inverse-vol baseline H653 (1.303) and clearing the keep bar, with a valid
 simplex weight vector that down-weights the deepest-drawdown sleeves. **Falsify:** Sharpe below inverse-vol,
 or no keep → drawdown-depth sizing adds nothing over plain volatility sizing on this pool.
+
+**Result (KEEP).** Config t15w20-asym. Sharpe **1.311** [0.92, 1.70], Calmar 0.879, Sortino 1.400, CAGR 7.06%,
+MaxDD −8.03%, H001 corr +0.686, folds 0.51–2.05. Sizing by inverse standalone-MaxDD essentially **ties naive
+inverse-vol** (H653, 1.303) at +0.008 and lands below ERC (H659, 1.414) by −0.103 — confirming the design's
+prior that drawdown depth and daily volatility are strongly rank-correlated, so the drawdown-depth statistic
+carries almost no information beyond vol on this pool. The asymmetric leverage config wins here (the only
+batch member where asym beats plain), but the **allocation** itself adds nothing over plain inverse-vol. Kept
+as the risk-measure baseline that closes the Set14/15 sizing-statistic battery: vol ≈ MaxDD < CVaR/MAD <
+variance-contribution (ERC) < return-aware (H650).

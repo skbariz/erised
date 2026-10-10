@@ -22,9 +22,8 @@ This is intentionally simple. It does not model:
 - Partial fills (irrelevant for SPY size at daily frequency)
 - Bid-ask asymmetry (folded into the slippage assumption)
 
-When we deploy live, the same target positions will be sent to Alpaca.
-The live execution will produce its own fills which we'll reconcile in
-post-trade reporting.
+The same target positions can be sent to a broker through
+erised.execution.paper_trader; live fills will differ from these modeled costs.
 """
 
 from __future__ import annotations

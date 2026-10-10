@@ -3,11 +3,11 @@
 Loads research data, runs buy-and-hold and MA crossover strategies through
 the backtest engine and walk-forward validator, and prints metrics.
 
-This is the script we run at the end of Phase 1 to confirm everything plumbs
-together. The numbers themselves are not meaningful on synthetic data; the
-goal is just to verify the pipeline runs and produces sensible outputs.
+Use it to confirm the data, engine, and validation layers plumb together.
+On synthetic data the numbers are not meaningful; the goal is to verify the
+pipeline runs and produces sensible outputs.
 
-Run: PYTHONPATH=src python scripts/sanity_check.py
+Run: uv run python scripts/sanity_check.py
 """
 
 from __future__ import annotations

@@ -1,4 +1,4 @@
-"""Data schema and constants for the quant platform.
+"""Data schema and constants for Erised.
 
 All bar data follows this schema. Enforced at ingestion and load time.
 """

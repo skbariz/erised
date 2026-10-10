@@ -1,31 +1,76 @@
 # Architecture
 
+## Repository layout
+
+```
+erised/
+├── src/erised/          the installable package (library + CLI)
+├── tests/
+│   ├── unit/            engine, data, metrics, config, broker
+│   ├── strategies/      per-strategy tests (single_asset/, cross_sectional/)
+│   ├── integration/     CLI and examples, end to end
+│   └── research/        checks on research-archive helpers
+├── examples/            small runnable scripts (offline)
+├── docs/                user documentation
+├── research/            frozen archive of the H001-H670 program (not part of the package)
+└── .github/             CI, issue and pull request templates
+```
+
+Market data lives outside version control: `./data` in a source checkout by default, or
+wherever `ERISED_DATA_DIR` points.
+
 ## Package layout
 
 ```
 src/erised/
-├── config.py               DATA_DIR resolution (ERISED_DATA_DIR override)
+├── __init__.py              __version__
+├── cli.py                   `erised` command (also `python -m erised`)
+├── config.py                DATA_DIR resolution
 ├── backtest/
-│   ├── engine.py           run_backtest, run_multiasset_backtest, assert_no_lookahead[_multi]
-│   └── panel_engine.py     run_panel_backtest for stock-level weight panels
+│   ├── engine.py            run_backtest, run_multiasset_backtest, assert_no_lookahead[_multi]
+│   └── panel_engine.py      run_panel_backtest for stock-level weight panels
 ├── validation/
-│   └── walk_forward.py     make_folds, walk_forward, walk_forward_multi,
-│                           walk_forward_cross_sectional
+│   └── walk_forward.py      make_folds, walk_forward, walk_forward_multi,
+│                            walk_forward_cross_sectional
 ├── metrics/
-│   └── performance.py      sharpe, sortino, cagr, max_drawdown, calmar,
-│                           bootstrap_sharpe_ci, report -> PerformanceReport
+│   └── performance.py       sharpe, sortino, cagr, max_drawdown, calmar,
+│                            bootstrap_sharpe_ci, report -> PerformanceReport
 ├── data/
-│   ├── schema.py           column schema and validate_bars
-│   ├── loader.py           load_full, load_research, load_holdout (guarded)
-│   ├── ingest.py           yfinance download with Stooq cross-validation
-│   ├── stocks.py           S&P 500 constituent prices and point-in-time membership
-│   ├── fundamentals.py     SEC EDGAR fundamentals as filing-date panels
-│   └── synthetic.py        synthetic_bars for tests and examples
+│   ├── schema.py            column schema and validate_bars
+│   ├── loader.py            load_full, load_research, load_holdout (guarded)
+│   ├── holdout.py           seal_holdout: research/holdout split + hash record
+│   ├── universe.py          ETF_UNIVERSE and vendor ticker mapping
+│   ├── stocks.py            constituent prices, point-in-time membership, ticker validation
+│   ├── fundamentals.py      SEC EDGAR fundamentals as filing-date panels
+│   ├── synthetic.py         synthetic_bars and write_synthetic_universe
+│   └── sources/             network downloaders
+│       ├── prices.py        Yahoo Finance bars with Stooq cross-validation; constituents
+│       ├── sp500.py         S&P 500 membership from Wikipedia change history
+│       └── edgar.py         SEC EDGAR XBRL company facts
 ├── strategies/
-│   ├── base.py             Strategy, MultiAssetStrategy, and ~150 SPY / ETF strategies
-│   └── cross_sectional.py  CrossSectionalStrategy and ~300 stock-selection strategies
+│   ├── base.py              Strategy, MultiAssetStrategy, BuyAndHold
+│   ├── trend.py             moving-average and time-series momentum
+│   ├── mean_reversion.py    short-horizon reversion and contrarian entries
+│   ├── seasonal.py          calendar effects
+│   ├── volatility.py        VIX, variance risk premium, vol targeting, drawdown control
+│   ├── allocation.py        risk parity and multi-asset rotation
+│   ├── macro.py             credit, yield curve, funding stress, breadth overlays
+│   ├── ensemble.py          fixed blends of other strategies
+│   └── cross_sectional/
+│       ├── base.py          CrossSectionalStrategy
+│       ├── momentum.py, reversal.py, stat_arb.py, long_short.py
+│       ├── quality.py, value.py, earnings.py, risk.py
+│       └── proxies.py, composite.py, ml.py
 └── execution/
-    └── paper_trader.py     Alpaca paper-trading bridge (optional "live" extra)
+    └── paper_trader.py      Alpaca paper-trading bridge (optional "live" extra)
+```
+
+Modules prefixed with `_` (`strategies/_helpers.py`, `strategies/cross_sectional/_helpers.py`)
+are private. Import strategies from the package, not the module:
+
+```python
+from erised.strategies import RiskParity, MovingAverageCrossover
+from erised.strategies.cross_sectional import BettingAgainstBeta
 ```
 
 Data flows one way: `data` loads validated bars, a strategy turns them into positions or
@@ -34,7 +79,7 @@ and `metrics` summarizes the stitched returns.
 
 ## Core types
 
-### `BacktestResult` (`erised.backtest.engine`)
+### `BacktestResult` (`erised.backtest`)
 
 | Field | Description |
 |---|---|
@@ -46,7 +91,7 @@ and `metrics` summarizes the stitched returns.
 | `equity` | Cumulative equity curve starting at 1.0 |
 | `bench_returns`, `bench_equity` | Buy-and-hold over the same dates |
 
-### `WalkForwardResult` (`erised.validation.walk_forward`)
+### `WalkForwardResult` (`erised.validation`)
 
 | Field | Description |
 |---|---|
@@ -56,7 +101,7 @@ and `metrics` summarizes the stitched returns.
 | `combined_positions` | Stitched out-of-sample positions |
 | `combined_report` | `PerformanceReport` over `combined_returns` |
 
-### `PerformanceReport` (`erised.metrics.performance`)
+### `PerformanceReport` (`erised.metrics`)
 
 `n_periods, total_return, cagr, annualized_vol, sharpe, sortino, max_drawdown, calmar,
 hit_rate, avg_win, avg_loss, turnover, n_trades`. Printing it gives a formatted table;
@@ -83,22 +128,24 @@ report(returns, positions=None) -> PerformanceReport
 membership) and returns a strategy instance. Parameter-free strategies can ignore it:
 `lambda train: RiskParity()`.
 
-## Scripts
+## Command-line interface
 
-| Script | Purpose |
+| Command | Does |
 |---|---|
-| `scripts/fetch_data.py` | Download ETF and VIX daily bars |
-| `scripts/fetch_sp500_members.py` | Build point-in-time S&P 500 membership from Wikipedia change history |
-| `scripts/fetch_stocks.py` | Download prices for every historical constituent |
-| `scripts/fetch_fundamentals.py` | Download SEC EDGAR XBRL fundamentals (needs `SEC_EDGAR_USER_AGENT`) |
-| `scripts/seal_holdout.py` | Split research and holdout files and record hashes |
-| `scripts/generate_synthetic_data.py` | Write synthetic files for every symbol (used by CI) |
-| `scripts/sanity_check.py` | End-to-end MA(50,200) walk-forward on whatever data is present |
+| `erised data fetch [SYMBOL ...]` | Download ETF and VIX bars (`erised.data.sources.prices.download_universe`) |
+| `erised data seal [--force]` | Split research/holdout files and write hashes (`erised.data.holdout.seal_holdout`) |
+| `erised data synthetic` | Write synthetic bars for every universe symbol |
+| `erised data sp500` | Rebuild point-in-time S&P 500 membership |
+| `erised data stocks` | Download constituent prices |
+| `erised data fundamentals [--user-agent UA]` | Download SEC EDGAR fundamentals |
+| `erised strategies [--cross-sectional]` | List strategies with one-line descriptions |
+| `erised backtest NAME [--assets ...] [--param k=v ...]` | Walk-forward a single- or multi-asset strategy |
+
+Every command is a thin wrapper over a library function, so anything the CLI does can be
+scripted from Python.
 
 ## Tests
 
-`tests/` holds about 1,100 tests: a lookahead and behavioral test for most strategies,
-metric correctness checks, data-schema and holdout-guard checks, and smoke tests for the
-examples. Some tests import research runners from `research/runners/` to check their
-helpers. CI generates synthetic data and seals it before running the suite, so no network
-access or real market data is needed.
+About 1,100 tests. CI generates and seals synthetic data before running the suite, so no
+network access or real market data is needed. Run a single suite with, for example,
+`uv run pytest tests/unit`.

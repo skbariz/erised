@@ -32,6 +32,8 @@ archive of a 670-hypothesis research program that used them.
 - **Sealed holdout.** Research and holdout slices are written once and hash-verified;
   reading the holdout requires an explicit opt-in flag.
 - **Single-asset, multi-asset, and cross-sectional engines** sharing one conventions model.
+- **A command-line tool** (`erised`) for downloading data, sealing the holdout, listing
+  strategies, and running walk-forward backtests.
 - **Point-in-time data helpers** for S&P 500 membership and SEC EDGAR fundamentals keyed by
   filing date, not period end.
 
@@ -47,6 +49,15 @@ uv run python examples/01_quickstart.py   # runs offline on synthetic data
 uv run pytest -q                          # ~1,100 tests, about a minute
 ```
 
+The `erised` command covers the data pipeline and quick backtests:
+
+```bash
+uv run erised data fetch                  # download ETF + VIX bars
+uv run erised data seal                   # split research / sealed holdout
+uv run erised strategies                  # list available strategies
+uv run erised backtest RiskParity --assets TLT
+```
+
 A minimal backtest:
 
 ```python
@@ -55,7 +66,7 @@ from erised.metrics.performance import bootstrap_sharpe_ci
 from erised.strategies import MovingAverageCrossover
 from erised.validation.walk_forward import make_folds, walk_forward
 
-prices = synthetic_bars()  # or erised.data.loader.load_research("SPY")
+prices = synthetic_bars()  # or erised.data.load_research("SPY")
 folds = make_folds(prices, train_years=5, test_years=2)
 wf = walk_forward(prices, lambda train: MovingAverageCrossover(50, 200), folds=folds)
 
@@ -86,13 +97,11 @@ To work with real market data, see [Getting started](docs/getting-started.md).
 ## Repository layout
 
 ```
-src/erised/        Library: backtest engines, walk-forward, metrics, data, strategies
+src/erised/        The package: engines, walk-forward, metrics, data, strategies, CLI
+tests/             unit/, strategies/, integration/, research/ test suites
 examples/          Small runnable examples (offline, synthetic data)
-scripts/           Data and operations tools: fetch data, seal holdout, sanity check
-tests/             pytest suite
 docs/              User documentation
-research/          Archive of the H001-H670 research program (runners, results, designs)
-data/              Local Parquet store (git-ignored except the holdout hash)
+research/          Frozen archive of the H001-H670 research program
 ```
 
 ## Research archive

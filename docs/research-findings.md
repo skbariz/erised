@@ -77,8 +77,8 @@ in CI, or on your machine without real data, is meaningless.
 ## Reproducing a result
 
 ```bash
-uv run python scripts/fetch_data.py
-uv run python scripts/seal_holdout.py
+uv run erised data fetch
+uv run erised data seal
 uv run python research/runners/run_h021.py
 ```
 

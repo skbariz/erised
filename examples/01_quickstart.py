@@ -4,9 +4,8 @@ Runs offline on synthetic prices, so no data download is needed:
 
     uv run python examples/01_quickstart.py
 
-To use real data instead, run ``scripts/fetch_data.py`` and
-``scripts/seal_holdout.py`` once, then replace ``synthetic_bars()`` with
-``erised.data.loader.load_research("SPY")``.
+To use real data instead, run ``erised data fetch`` and ``erised data seal`` once, then
+replace ``synthetic_bars()`` with ``erised.data.load_research("SPY")``.
 """
 
 from __future__ import annotations

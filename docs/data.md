@@ -1,7 +1,7 @@
 # Data
 
-Erised does not ship market data. The fetch scripts download it from public sources into a
-local Parquet store that git ignores.
+Erised does not ship market data. The `erised data` commands download it from public
+sources into a local Parquet store that is never committed.
 
 ## Location
 
@@ -15,12 +15,12 @@ The data directory resolves in this order:
 
 ```
 data/
-├── <SYMBOL>.parquet              full daily history (written by fetch_data.py)
+├── <SYMBOL>.parquet              full daily history (erised data fetch)
 ├── <SYMBOL>_research.parquet     everything before the holdout start
 ├── <SYMBOL>_holdout.parquet      sealed holdout
-├── HOLDOUT_HASH.txt              SHA-256 of each holdout file (the only tracked file)
-├── stocks/<TICKER>.parquet       constituent prices (fetch_stocks.py)
-├── fundamentals/<TICKER>.parquet SEC EDGAR fundamentals (fetch_fundamentals.py)
+├── HOLDOUT_HASH.txt              SHA-256 of each holdout file (erised data seal)
+├── stocks/<TICKER>.parquet       constituent prices (erised data stocks)
+├── fundamentals/<TICKER>.parquet SEC EDGAR fundamentals (erised data fundamentals)
 ├── sp500_members.parquet         point-in-time membership, dates by tickers
 ├── sp500_sectors.parquet         ticker to GICS sector
 └── sp500_tickers.txt             every ticker that has been a constituent
@@ -42,7 +42,7 @@ Every bar file follows `erised.data.schema`: tz-naive daily `DatetimeIndex` and 
 under Yahoo's terms, and redistribution is generally not permitted, so don't commit
 downloaded files to a public repository. The SEC asks automated clients to identify
 themselves (hence `SEC_EDGAR_USER_AGENT`) and to stay under 10 requests per second;
-`fetch_fundamentals.py` sleeps between requests to respect that. Wikipedia content is
+`erised data fundamentals` sleeps between requests to respect that. Wikipedia content is
 CC BY-SA.
 
 ## Data availability
@@ -55,6 +55,6 @@ sparse before 2009.
 ## Synthetic data
 
 `erised.data.synthetic.synthetic_bars()` builds schema-valid random-walk bars in memory, and
-`scripts/generate_synthetic_data.py` writes a synthetic file for every symbol so the full
+`erised data synthetic` writes a synthetic file for every symbol so the full
 pipeline (sealing, loaders, runners) can be exercised offline. CI does exactly this.
 Results on synthetic data mean nothing about a strategy.

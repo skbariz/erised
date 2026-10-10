@@ -22,6 +22,7 @@ explains which reported numbers are out-of-sample and which are not.
 | `log/` | Narrative research log template and early entries |
 | `literature/` | Paper notes that seeded later batches, with source links |
 | `run-logs/` | Captured console output from selected runs |
+| `holdout-seal.txt` | SHA-256 record of the holdout files sealed for this program |
 
 `summary.json` fields: `oos_sharpe`, `ci_low` / `ci_high` (95% bootstrap), `cagr`,
 `max_drawdown`, `n_trades`, `h001_corr` (correlation with the MA(50,200) baseline),

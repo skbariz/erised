@@ -18,21 +18,20 @@ git clone https://github.com/<you>/erised.git
 cd erised
 uv sync --all-extras
 uv run pre-commit install
-uv run python scripts/generate_synthetic_data.py
-uv run python scripts/seal_holdout.py
+uv run erised data synthetic
+uv run erised data seal
 ```
 
-The last two commands create synthetic data so the full test suite runs offline. They
-rewrite `data/HOLDOUT_HASH.txt`; don't commit that change
-(`git restore data/HOLDOUT_HASH.txt`).
+The last two commands create synthetic data in the git-ignored `data/` directory so the
+full test suite runs offline.
 
 ## Checks
 
 Pull requests must pass the same checks CI runs:
 
 ```bash
-uv run ruff check src scripts tests examples
-uv run ruff format --check src scripts tests examples
+uv run ruff check src tests examples
+uv run ruff format --check src tests examples
 uv run pytest -q
 ```
 
@@ -43,9 +42,11 @@ uv run pytest -q
 1. Write down the hypothesis, expected behavior in key regimes, and what would falsify it
    before you run anything. A short section in the pull request is enough; see
    `research/designs/` for examples.
-2. Implement the class in `src/erised/strategies/base.py` or `cross_sectional.py`, matching
-   the style of nearby classes. See [Writing strategies](docs/writing-strategies.md).
-3. Add tests: a lookahead check (`assert_no_lookahead` or `assert_no_lookahead_multi`) plus
+2. Implement the class in the matching family module (for example
+   `src/erised/strategies/volatility.py` or `src/erised/strategies/cross_sectional/quality.py`),
+   following the style of nearby classes, and export it from the package `__init__.py`.
+   See [Writing strategies](docs/writing-strategies.md).
+3. Add tests under `tests/strategies/`: a lookahead check (`assert_no_lookahead` or `assert_no_lookahead_multi`) plus
    behavioral tests on synthetic data.
 4. If you report performance, include the out-of-sample Sharpe, its 95% confidence
    interval, max drawdown, and per-fold Sharpe, and state the data range you used. Don't

@@ -57,7 +57,7 @@ cash.
 
 ```python
 import pandas as pd
-from erised.strategies.cross_sectional import CrossSectionalStrategy
+from erised.strategies import CrossSectionalStrategy
 
 
 class LowVol(CrossSectionalStrategy):
@@ -100,7 +100,8 @@ confidence interval, then a keep/kill decision you wrote down before running it.
 
 ## Contributing a strategy
 
-Library strategies live in `src/erised/strategies/base.py` (single- and multi-asset) and
-`src/erised/strategies/cross_sectional.py`. Follow the style of nearby classes, export new
-public classes from `erised/strategies/__init__.py` if they're broadly useful, and include
-tests. See [CONTRIBUTING.md](../CONTRIBUTING.md).
+Library strategies are grouped by family: `src/erised/strategies/<family>.py` for single-
+and multi-asset strategies and `src/erised/strategies/cross_sectional/<family>.py` for stock
+selection (see [Architecture](architecture.md) for the list). Add new classes to the closest
+family, export them from that package's `__init__.py`, and include tests under
+`tests/strategies/`. See [CONTRIBUTING.md](../CONTRIBUTING.md).

@@ -8,18 +8,19 @@ environments and locking.
 ```bash
 git clone https://github.com/skbariz/erised.git
 cd erised
-uv sync --all-extras        # core + research + live extras, plus dev tools
+uv sync --all-extras        # library, CLI, all extras, and dev tools
+uv run erised --version
 ```
 
 Extras:
 
 | Extra | Adds | Needed for |
 |---|---|---|
-| *(core)* | numpy, pandas, pyarrow, scipy, scikit-learn, requests, yfinance | the library |
+| *(core)* | numpy, pandas, pyarrow, scipy, scikit-learn, requests, yfinance | the library and CLI |
 | `research` | matplotlib, lxml | charts, S&P 500 membership scrape |
 | `live` | alpaca-py | `erised.execution.paper_trader` |
 
-If you prefer pip: `pip install -e ".[research]"`.
+With pip instead: `pip install -e ".[research]"`, then run `erised ...` directly.
 
 ## 2. Try it offline
 
@@ -32,49 +33,68 @@ uv run python examples/02_custom_strategy.py
 uv run python examples/03_multi_asset_risk_parity.py
 ```
 
+To exercise the full data pipeline offline, write a synthetic universe and seal it:
+
+```bash
+uv run erised data synthetic
+uv run erised data seal
+uv run erised backtest MovingAverageCrossover
+```
+
+Delete the data directory (or `erised data fetch` over it) before doing real research;
+results on synthetic data mean nothing.
+
 ## 3. Fetch real data
 
 ```bash
-uv run python scripts/fetch_data.py
+uv run erised data fetch            # ETF universe + VIX (or: erised data fetch SPY TLT)
 ```
 
-This downloads daily bars for SPY and the ETFs used by the multi-asset strategies from Yahoo
-Finance, cross-checks adjusted closes against Stooq, and writes `data/<SYMBOL>.parquet`.
-Edit `SYMBOLS` in the script to change the universe. Data is stored in `./data` by default;
-set `ERISED_DATA_DIR` to put it elsewhere (see [Data](data.md)).
+This downloads daily bars from Yahoo Finance, cross-checks adjusted closes against Stooq,
+and writes `<SYMBOL>.parquet` files. The universe is defined in `erised.data.universe`.
+Data goes to `./data` in a source checkout; set `ERISED_DATA_DIR` to put it elsewhere (see
+[Data](data.md)).
 
 Cross-sectional strategies also need constituent data:
 
 ```bash
-uv run python scripts/fetch_sp500_members.py      # point-in-time S&P 500 membership
-uv run python scripts/fetch_stocks.py             # one Parquet per historical constituent
+uv run erised data sp500            # point-in-time S&P 500 membership and sectors
+uv run erised data stocks           # prices for every historical constituent (resumable)
 SEC_EDGAR_USER_AGENT="your-project you@example.com" \
-  uv run python scripts/fetch_fundamentals.py     # SEC EDGAR XBRL fundamentals
+  uv run erised data fundamentals   # SEC EDGAR XBRL fundamentals (resumable)
 ```
 
-The SEC requires every client to identify itself with a contact address, so
-`fetch_fundamentals.py` will not run without `SEC_EDGAR_USER_AGENT`.
+The SEC requires every client to identify itself with a contact address, so the
+fundamentals download will not run without `SEC_EDGAR_USER_AGENT` (or `--user-agent`).
 
 ## 4. Seal the holdout (once)
 
 ```bash
-uv run python scripts/seal_holdout.py
+uv run erised data seal
 ```
 
 This splits each series at 2023-01-01 into `<SYMBOL>_research.parquet` and
-`<SYMBOL>_holdout.parquet` and records SHA-256 hashes in `data/HOLDOUT_HASH.txt`. Do all
-research with `load_research()`. `load_holdout()` refuses to run unless you pass
-`_i_understand_this_is_final_evaluation=True`; spend it once, at the end.
+`<SYMBOL>_holdout.parquet` and writes SHA-256 hashes to `HOLDOUT_HASH.txt` in the data
+directory. Existing holdouts are never overwritten without `--force`.
 
-The committed `HOLDOUT_HASH.txt` records the seal used for the published research. Your own
-seal will produce different hashes because your download date differs; that is expected.
+Do all research with `load_research()`. `load_holdout()` refuses to run unless you pass
+`_i_understand_this_is_final_evaluation=True`; spend it once, at the end. The seal used for
+the published research is recorded in `research/holdout-seal.txt`. Your hashes will differ
+because your download date differs.
 
-## 5. Verify
+## 5. Run a backtest
 
 ```bash
-uv run pytest -q
-uv run python scripts/sanity_check.py    # MA(50,200) walk-forward report on your data
+uv run erised strategies                                  # list single/multi-asset strategies
+uv run erised strategies --cross-sectional                # list stock-selection strategies
+uv run erised backtest MovingAverageCrossover --param fast=50 --param slow=200
+uv run erised backtest LowVolTargetPortfolio --assets TLT --param vol_target=0.08
 ```
+
+`erised backtest` runs a walk-forward (5-year train, 2-year test by default) on research
+data and prints per-fold Sharpe, the combined report, a bootstrap confidence interval, and
+SPY buy-and-hold over the same windows. Multi-asset strategies need their extra price columns
+joined with `--assets` (for example `--assets TLT,GLD,VIX`).
 
 ## 6. Next steps
 

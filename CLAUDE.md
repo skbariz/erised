@@ -5,12 +5,15 @@ plus the archive of the H001-H670 research program that produced it.
 
 ## Layout
 
-- Library: `src/erised/` (import as `erised`)
-  - Strategies: `strategies/base.py` (single- and multi-asset), `strategies/cross_sectional.py`
+- Package: `src/erised/` (import as `erised`; CLI `erised`, defined in `cli.py`)
+  - Strategy interfaces: `strategies/base.py`, `strategies/cross_sectional/base.py`
+  - Strategy families: `strategies/<family>.py`, `strategies/cross_sectional/<family>.py`
+    (see `docs/architecture.md`); import from the package, not the module
   - Engines: `backtest/engine.py`, `backtest/panel_engine.py`
   - Walk-forward: `validation/walk_forward.py`
-  - Data: `data/loader.py` (holdout guard), `data/stocks.py`, `data/fundamentals.py`, `config.py`
-- Data and ops tools: `scripts/`
+  - Data: `data/loader.py` (holdout guard), `data/holdout.py`, `data/universe.py`,
+    `data/sources/` (downloaders), `config.py` (`ERISED_DATA_DIR`)
+- Tests: `tests/unit`, `tests/strategies/{single_asset,cross_sectional}`, `tests/integration`, `tests/research`
 - Examples: `examples/`
 - Docs: `docs/` (start with `methodology.md` and `writing-strategies.md`)
 - Research archive: `research/` (runners, results, design docs; frozen, not linted)
@@ -18,10 +21,9 @@ plus the archive of the H001-H670 research program that produced it.
 ## Commands
 
 - Install: `uv sync --all-extras`
-- Offline data for tests: `uv run python scripts/generate_synthetic_data.py && uv run python scripts/seal_holdout.py`
-  (then `git restore data/HOLDOUT_HASH.txt`)
+- Offline data for tests: `uv run erised data synthetic && uv run erised data seal`
 - Test: `uv run pytest -x -q`
-- Lint: `uv run ruff check src scripts tests examples && uv run ruff format src scripts tests examples`
+- Lint: `uv run ruff check src tests examples && uv run ruff format src tests examples`
 - Type check: `uv run pyright <file>`
 - Run a hypothesis: `uv run python research/runners/run_h<NNN>.py` (overwrites its result; restore with git if on synthetic data)
 
@@ -63,9 +65,9 @@ Don't open raw run logs or Parquet files unless asked. Result folders use short 
 1. Write `research/designs/H<NNN>-<name>.md` first: the signal and why it should work,
    expected behavior in 2000-02, 2008-09, 2020, and 2013-17, success criteria, and what
    would falsify it.
-2. Implement the class next to similar ones in `src/erised/strategies/`.
+2. Implement the class in the matching family module and export it from the package `__init__.py`.
 3. Copy `research/runners/run_h021.py` for the runner, including the `write_summary` call.
-4. Add a lookahead test and behavioral tests in `tests/`.
+4. Add a lookahead test and behavioral tests in `tests/strategies/`.
 5. Append the result and keep/kill decision to the design doc.
 
 ## Coding rules

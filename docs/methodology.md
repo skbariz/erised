@@ -54,7 +54,7 @@ autocorrelated returns. Treat the interval as a floor on how uncertain you shoul
 
 ## Sealed holdout
 
-`scripts/seal_holdout.py` writes the final years of each series (2023 onward by default) to
+`erised data seal` writes the final years of each series (2023 onward by default) to
 a separate file and records its SHA-256. `load_research()` never returns holdout rows, and
 `load_holdout()` raises unless called with `_i_understand_this_is_final_evaluation=True`.
 Evaluate on the holdout once, after every research decision is final. Once you've looked,

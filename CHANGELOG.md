@@ -17,6 +17,8 @@ First public release.
 - `erised.data.synthetic.synthetic_bars` for offline tests and examples.
 - `ERISED_DATA_DIR` to place the data store anywhere.
 - Runnable examples in `examples/`.
+- `erised` command-line tool: `data fetch|seal|synthetic|sp500|stocks|fundamentals`,
+  `strategies`, and `backtest`.
 - User documentation in `docs/`.
 - VIX is now fetched and sealed with the ETF universe.
 - Research archive for hypotheses H001-H670 under `research/`.
@@ -24,9 +26,14 @@ First public release.
 ### Changed
 
 - The import package is now `erised` (previously `quant`).
-- Experiment runners, results, and design docs moved from `scripts/`, `results/`, and
-  `docs/designs/` into `research/`.
-- `scripts/fetch_fundamentals.py` reads the SEC contact string from `SEC_EDGAR_USER_AGENT`.
+- Strategies are split by family into `erised.strategies.<family>` and
+  `erised.strategies.cross_sectional.<family>`; import them from the package.
+- `scripts/` is replaced by the CLI; downloaders live in `erised.data.sources`, sealing in
+  `erised.data.holdout`.
+- Tests are organized into `unit`, `strategies`, `integration`, and `research` suites.
+- Experiment runners, results, and design docs moved into `research/`; `data/` is no longer
+  tracked.
+- The SEC EDGAR contact string comes from `SEC_EDGAR_USER_AGENT`.
 
 ### Fixed
 

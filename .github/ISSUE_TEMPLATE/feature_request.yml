@@ -1,0 +1,16 @@
+name: Feature or strategy proposal
+description: Suggest an engine feature, data source, or new strategy
+labels: [enhancement]
+body:
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should Erised do, and why is it useful?
+    validations:
+      required: true
+  - type: textarea
+    id: hypothesis
+    attributes:
+      label: For strategies, the hypothesis
+      description: The signal, why it should work, and what result would falsify it. Cite papers if relevant.

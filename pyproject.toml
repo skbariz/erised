@@ -61,7 +61,7 @@ build-backend = "hatchling.build"
 packages = ["src/erised"]
 
 [tool.hatch.build.targets.sdist]
-include = ["src/erised", "tests", "README.md", "LICENSE", "CHANGELOG.md"]
+include = ["/src/erised", "/README.md", "/LICENSE", "/CHANGELOG.md", "/pyproject.toml"]
 
 [tool.ruff]
 line-length = 100

@@ -1,0 +1,30 @@
+name: Bug report
+description: Something in Erised behaves incorrectly
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Security issues: please use private vulnerability reporting (see SECURITY.md) instead.
+        Don't paste API keys, account details, or downloaded market data.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Ideally a snippet using `erised.data.synthetic.synthetic_bars()` so it runs without data files.
+      render: python
+  - type: input
+    id: version
+    attributes:
+      label: Erised version or commit
+  - type: input
+    id: env
+    attributes:
+      label: Python version and OS

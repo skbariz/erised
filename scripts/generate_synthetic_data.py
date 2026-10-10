@@ -11,12 +11,10 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 
-import numpy as np
-import pandas as pd
-
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from erised.data.loader import _full_path  # noqa: E402
+from erised.data.synthetic import synthetic_bars  # noqa: E402
 
 END_DATE = "2026-05-20"
 
@@ -42,61 +40,12 @@ SYMBOL_CONFIGS: dict[str, tuple[str, float, float, float, int]] = {
 }
 
 
-def generate_symbol(
-    symbol: str,
-    start: str,
-    initial_price: float,
-    daily_drift: float,
-    daily_vol: float,
-    seed: int,
-    end: str = END_DATE,
-) -> pd.DataFrame:
-    """Produce a plausible price series for one symbol.
-
-    NOT for backtesting — only for verifying pipeline plumbing.
-    """
-    rng = np.random.default_rng(seed)
-    dates = pd.bdate_range(start=start, end=end)
-    n = len(dates)
-
-    log_returns = rng.normal(daily_drift, daily_vol, size=n)
-
-    # Occasional fat-tail shocks
-    shocks = rng.choice([0, 1], size=n, p=[0.995, 0.005])
-    log_returns += rng.normal(0, 0.04, size=n) * shocks
-
-    close = initial_price * np.exp(np.cumsum(log_returns))
-
-    intraday_range = np.abs(rng.normal(0, daily_vol * 0.7, n))
-    high = close * (1 + intraday_range)
-    low = close * (1 - intraday_range)
-    open_ = close * (1 + rng.normal(0, daily_vol * 0.3, n))
-    high = np.maximum.reduce([high, low, open_, close])
-    low = np.minimum.reduce([high, low, open_, close])
-
-    volume = rng.integers(1_000_000, 50_000_000, size=n)
-
-    df = pd.DataFrame(
-        {
-            "open": open_,
-            "high": high,
-            "low": low,
-            "close": close,
-            "adj_close": close,
-            "volume": volume,
-        },
-        index=dates,
-    )
-    df.index.name = "date"
-    return df
-
-
 def main() -> None:
     out_dir = _full_path("SPY").parent
     out_dir.mkdir(parents=True, exist_ok=True)
 
     for symbol, (start, price, drift, vol, seed) in SYMBOL_CONFIGS.items():
-        df = generate_symbol(symbol, start, price, drift, vol, seed)
+        df = synthetic_bars(start, END_DATE, price, drift, vol, seed)
         out = _full_path(symbol)
         df.to_parquet(out, compression="snappy")
         print(

@@ -43,6 +43,9 @@ First public release.
   non-positive prices before contacting the broker.
 - Ticker symbols scraped from Wikipedia are validated before being used as file names, so
   a vandalized entry can't direct downloads outside the data directory.
+- ETF/index symbols passed to the loaders, `erised backtest --assets`, and `erised data seal`
+  are validated the same way, so a path-like argument can't read or write outside the data
+  directory.
 
 ### Security
 

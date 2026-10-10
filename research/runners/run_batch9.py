@@ -18,7 +18,7 @@ import pandas as pd
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, cagr, max_drawdown, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     AbsoluteMomentumStrategy,
     DefensiveEquityHedge,
     GoldFearGauge,
@@ -36,7 +36,7 @@ from erised.strategies.base import (
     TimeSeriesMomentum,
     VolScaledTrend,
 )
-from erised.strategies.base import MultiAssetStrategy
+from erised.strategies import MultiAssetStrategy
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 
 

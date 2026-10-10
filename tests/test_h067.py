@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from erised.strategies.base import VixPercentileRegime
+from erised.strategies import VixPercentileRegime
 
 
 def _prices(vix_arr: list[float] | None = None, n: int = 300) -> pd.DataFrame:

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import CreditSpreadRegime
+from erised.strategies import CreditSpreadRegime
 
 
 def _prices(spy_rets, hyg_rets=None, lqd_rets=None, start="2010-01-04"):

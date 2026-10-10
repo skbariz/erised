@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import JanuaryBarometerGoldFilter
+from erised.strategies import JanuaryBarometerGoldFilter
 
 
 def _prices_with_gld(n_years=5, spy_jan_ret=0.03, gld_trend="flat", start_year=2010):

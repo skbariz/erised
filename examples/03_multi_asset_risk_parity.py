@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from erised.data.synthetic import synthetic_bars
 from erised.metrics.performance import bootstrap_sharpe_ci
-from erised.strategies.base import LowVolTargetPortfolio, RiskParity
+from erised.strategies import LowVolTargetPortfolio, RiskParity
 from erised.validation.walk_forward import make_folds, walk_forward_multi
 
 

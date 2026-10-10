@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import SmallCapCyclical
+from erised.strategies import SmallCapCyclical
 
 
 def _prices(spy_rets, iwm_rets=None, hyg_rets=None, lqd_rets=None, start="2010-01-04"):

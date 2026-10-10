@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import SellInMayBondConfirm
+from erised.strategies import SellInMayBondConfirm
 
 
 def _prices(spy_rets, tlt_levels, start="2010-01-04"):

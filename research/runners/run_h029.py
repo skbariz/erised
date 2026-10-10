@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import VIXRegimeFilter
+from erised.strategies import VIXRegimeFilter
 from erised.validation.walk_forward import make_folds, walk_forward
 
 SEP = "=" * 64

@@ -18,7 +18,7 @@ import pandas as pd
 from scipy.optimize import minimize
 
 from erised.metrics.performance import sharpe
-from erised.strategies.base import MovingAverageCrossover
+from erised.strategies import MovingAverageCrossover
 from erised.validation.walk_forward import walk_forward
 
 TRADING_DAYS = 252

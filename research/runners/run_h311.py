@@ -15,7 +15,7 @@ from write_summary import write_summary
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import MovingAverageCrossover, RiskParity, TermSpreadSPYTimer
+from erised.strategies import MovingAverageCrossover, RiskParity, TermSpreadSPYTimer
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 
 SEP = "=" * 64

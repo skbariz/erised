@@ -6,7 +6,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import SPYTLTDualMomentum
+from erised.strategies import SPYTLTDualMomentum
 
 
 def _prices(spy_rets, tlt_rets, start="2010-01-04"):

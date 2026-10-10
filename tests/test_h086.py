@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import LowVolTargetPortfolio
+from erised.strategies import LowVolTargetPortfolio
 
 
 def _prices(n: int = 400) -> pd.DataFrame:

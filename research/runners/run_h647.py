@@ -27,7 +27,7 @@ from set8_lev import (
 )
 from set8_pool import build_pool
 
-from erised.strategies.base import MovingAverageCrossover
+from erised.strategies import MovingAverageCrossover
 from erised.validation.walk_forward import walk_forward
 
 LOOKBACK = 20

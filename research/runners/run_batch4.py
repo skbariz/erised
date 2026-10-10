@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     JanuaryBarometer,
     MovingAverageCrossover,
     QuarterEndDrift,

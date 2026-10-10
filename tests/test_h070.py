@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import MultiAssetDynamicVolTarget
+from erised.strategies import MultiAssetDynamicVolTarget
 
 
 def _prices(n: int = 300, spy_vol: float = 0.01, tlt_vol: float = 0.005) -> pd.DataFrame:

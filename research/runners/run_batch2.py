@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     DualMALongShort,
     LongShortMACrossover,
     LongShortTSMomentum,
@@ -77,7 +77,7 @@ def main():
     print(section("H013: LongShortMACrossover  canonical (fast=50, slow=200)"))
     wf13, rep13, lo13, hi13 = run(prices, folds, LongShortMACrossover, "canonical")
     print("  1-D sensitivity (fast/slow):")
-    from erised.strategies.base import LongShortMACrossover as LSMA
+    from erised.strategies import LongShortMACrossover as LSMA
 
     for f, s in [(20, 100), (50, 200), (50, 150)]:
         wf = walk_forward(prices, lambda _, ff=f, ss=s: LSMA(ff, ss), folds=folds)

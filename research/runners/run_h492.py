@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from write_summary import write_summary
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import VIXPercentileScalerPort, MovingAverageCrossover
+from erised.strategies import VIXPercentileScalerPort, MovingAverageCrossover
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 SEP = "=" * 64

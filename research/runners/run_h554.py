@@ -26,7 +26,7 @@ import pandas as pd
 
 from erised.data.loader import load_research
 from erised.metrics.performance import cagr, max_drawdown, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     CarryMomentumSPYTLT, DefensiveSectorOverlay, EqualWeightDefensiveFactor,
     FourAssetRiskParity, GoldFearGauge, H043H021RegimeBlend,
     HalloweenMomentumConfirm, LowVolTargetPortfolio, MonthlyRebalancingRiskParity,

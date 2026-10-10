@@ -20,7 +20,7 @@ from write_summary import write_summary
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     MovingAverageCrossover,
     RiskParity,
     SeasonalRiskParity,

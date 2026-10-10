@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import RiskParityYieldCurveOverlay
+from erised.strategies import RiskParityYieldCurveOverlay
 
 
 def _prices(n: int = 300, curve_inverted: bool = False) -> pd.DataFrame:

@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import DefensiveEquityHedge
+from erised.strategies import DefensiveEquityHedge
 
 
 def _prices(spy_rets, tlt_rets, start="2010-01-04"):

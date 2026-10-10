@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import CommodityMomentumOverlay
+from erised.strategies import CommodityMomentumOverlay
 
 
 def _prices(spy_rets, dbc_rets=None, start="2010-01-04"):

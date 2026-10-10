@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import DualFrequencyMomentum
+from erised.strategies import DualFrequencyMomentum
 
 
 def _prices(n: int = 500, trend: float = 0.0003, noise: float = 0.01) -> pd.DataFrame:

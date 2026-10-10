@@ -11,7 +11,7 @@ import pandas as pd
 from write_summary import write_summary
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import VIXMeanReversionPort, MovingAverageCrossover
+from erised.strategies import VIXMeanReversionPort, MovingAverageCrossover
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 DATA_DIR = Path(__file__).resolve().parents[2] / "data"
 SEP = "=" * 64

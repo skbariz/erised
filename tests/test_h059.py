@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import MacroFearComposite
+from erised.strategies import MacroFearComposite
 
 
 def _prices(

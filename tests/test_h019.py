@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import SPYGLDRotation
+from erised.strategies import SPYGLDRotation
 
 
 def _prices(spy_rets, gld_rets, start="2010-01-04"):

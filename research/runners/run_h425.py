@@ -13,7 +13,7 @@ import pandas as pd
 from write_summary import write_summary
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import MovingAverageCrossover, MacroRegimeSectorBlend
+from erised.strategies import MovingAverageCrossover, MacroRegimeSectorBlend
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_multi
 SEP = "=" * 64
 

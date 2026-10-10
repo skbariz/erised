@@ -15,7 +15,7 @@ from erised.data.fundamentals import load_fundamentals_panel
 from erised.data.loader import load_research
 from erised.data.stocks import get_all_historical_tickers, load_sp500_members, load_stocks_panel
 from erised.metrics.performance import bootstrap_sharpe_ci, cagr, max_drawdown, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     AbsoluteMomentumStrategy, CarryMomentumSPYTLT, CorrelationRiskParityHybrid,
     CrisisProtocolRiskParity, DefensiveEquityHedge, DefensiveSectorOverlay, EqualWeightDefensiveFactor,
     FourAssetRiskParity, GoldFearGauge, H001H021DirectBlend, H043H021RegimeBlend,

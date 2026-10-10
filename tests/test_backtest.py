@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead, assert_no_lookahead_multi, run_backtest
-from erised.strategies.base import (
+from erised.strategies import (
     AbsoluteMomentumStrategy,
     ADXFilteredMACrossover,
     BuyAndHold,

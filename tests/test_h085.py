@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import MomentumMacroGate
+from erised.strategies import MomentumMacroGate
 
 
 def _prices(n: int = 500, include_dbc: bool = True, include_vnq: bool = True) -> pd.DataFrame:

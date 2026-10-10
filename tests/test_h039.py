@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import DeepDrawdownCrisisBuyer
+from erised.strategies import DeepDrawdownCrisisBuyer
 
 
 def _prices(levels, start="2000-01-03"):

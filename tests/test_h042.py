@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import VolOfVolCalm
+from erised.strategies import VolOfVolCalm
 
 
 def _prices(spy_rets, vix_levels, start="2000-01-03"):

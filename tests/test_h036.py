@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import EquityVsSafeHavenMomentum
+from erised.strategies import EquityVsSafeHavenMomentum
 
 
 def _prices(spy_rets, tlt_rets, gld_rets, start="2010-01-04"):

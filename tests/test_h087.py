@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import RatchetDrawdownProtection
+from erised.strategies import RatchetDrawdownProtection
 
 
 def _prices(n: int = 400) -> pd.DataFrame:

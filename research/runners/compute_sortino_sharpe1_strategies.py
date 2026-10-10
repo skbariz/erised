@@ -36,7 +36,7 @@ def sortino_ratio(returns: pd.Series, target: float = 0.0) -> float:
 def run_aa_ensemble(prices_aa, folds):
     """Run H094 and H095 to get actual Sortino ratios."""
     from erised.metrics.performance import sharpe as calc_sharpe
-    from erised.strategies.base import (
+    from erised.strategies import (
         CarryMomentumSPYTLT,
         GoldFearGauge,
         HalloweenMomentumConfirm,
@@ -74,7 +74,7 @@ def run_aa_ensemble(prices_aa, folds):
 
     # Build H095: MDR over 35 strategies — approximate with 5 highest-weight components
     # H043(24%), H078(20%), H035(15%), H060(13%), H025(10%)
-    from erised.strategies.base import JanuaryBarometer, SellInMayBondConfirm
+    from erised.strategies import JanuaryBarometer, SellInMayBondConfirm
 
     components_h095 = {
         "H043": SellInMayBondConfirm(),

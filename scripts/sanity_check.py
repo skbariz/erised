@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from erised.backtest.engine import run_backtest
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, report
-from erised.strategies.base import BuyAndHold, MovingAverageCrossover
+from erised.strategies import BuyAndHold, MovingAverageCrossover
 from erised.validation.walk_forward import make_folds, walk_forward
 
 

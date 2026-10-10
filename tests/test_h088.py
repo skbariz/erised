@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import H001H021DirectBlend
+from erised.strategies import H001H021DirectBlend
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

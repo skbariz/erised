@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import GoldFearGauge
+from erised.strategies import GoldFearGauge
 
 
 def _prices(spy_rets, gld_levels, start="2010-01-04"):

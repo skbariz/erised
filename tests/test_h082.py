@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import RiskAdjustedMomentum
+from erised.strategies import RiskAdjustedMomentum
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

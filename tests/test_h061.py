@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import ValueGrowthRotation
+from erised.strategies import ValueGrowthRotation
 
 
 def _prices(

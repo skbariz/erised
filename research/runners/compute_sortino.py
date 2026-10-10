@@ -21,7 +21,7 @@ import pandas as pd
 
 from erised.data.loader import load_research
 from erised.metrics.performance import sharpe as calc_sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     AbsoluteMomentumStrategy,
     CarryMomentumSPYTLT,
     CorrelationRiskParityHybrid,

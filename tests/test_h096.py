@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import PCARiskRegime
+from erised.strategies import PCARiskRegime
 
 
 def _prices(n: int = 600, spy_drift: float = 0.0003, tlt_drift: float = 0.0001) -> pd.DataFrame:

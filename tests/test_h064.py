@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import TechDefensiveMomentum
+from erised.strategies import TechDefensiveMomentum
 
 
 def _prices(spy_rets, qqq_rets=None, xlu_rets=None, start="2005-01-04"):

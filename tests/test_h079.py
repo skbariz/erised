@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import CrisisProtocolRiskParity
+from erised.strategies import CrisisProtocolRiskParity
 
 
 def _prices(n: int = 300, crash_at: int | None = None) -> pd.DataFrame:

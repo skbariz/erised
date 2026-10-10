@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import ContrarianMultiAssetRotation
+from erised.strategies import ContrarianMultiAssetRotation
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

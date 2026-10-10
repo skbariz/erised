@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from erised.strategies.base import TripleConfirmCalendar
+from erised.strategies import TripleConfirmCalendar
 
 
 def _prices(start: str = "2003-01-01", n: int = 600, tlt_trend: str = "down") -> pd.DataFrame:

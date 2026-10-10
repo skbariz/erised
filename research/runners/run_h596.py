@@ -32,7 +32,7 @@ from set8_pool import build_pool
 from write_summary import write_summary
 
 from erised.metrics.performance import bootstrap_sharpe_ci
-from erised.strategies.base import MovingAverageCrossover
+from erised.strategies import MovingAverageCrossover
 from erised.validation.walk_forward import walk_forward
 
 VIX_THRESHOLD = 20.0

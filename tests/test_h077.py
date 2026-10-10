@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from erised.strategies.base import RiskParityMomentumFilter
+from erised.strategies import RiskParityMomentumFilter
 
 
 def _prices(n: int = 400, spy_up: bool = True, tlt_up: bool = True) -> pd.DataFrame:

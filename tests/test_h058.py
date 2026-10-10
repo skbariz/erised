@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import InvertedCurveTreasuryLadder
+from erised.strategies import InvertedCurveTreasuryLadder
 
 
 def _prices(spy_rets, shy_rets=None, tlt_rets=None, ief_rets=None, start="2010-01-04"):

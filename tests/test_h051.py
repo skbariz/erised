@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import ThreeAssetRiskParity
+from erised.strategies import ThreeAssetRiskParity
 
 
 def _prices(spy_rets, tlt_rets, gld_rets=None, start="2010-01-04"):

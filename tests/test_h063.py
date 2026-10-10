@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead_multi
-from erised.strategies.base import DefensiveSectorOverlay
+from erised.strategies import DefensiveSectorOverlay
 
 
 def _prices(spy_rets, vix_vals=None, xlp_rets=None, start="2010-01-04"):

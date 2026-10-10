@@ -24,7 +24,7 @@ from write_summary import write_summary
 
 from erised.data.loader import load_research
 from erised.metrics.performance import bootstrap_sharpe_ci, cagr, max_drawdown, sharpe
-from erised.strategies.base import (
+from erised.strategies import (
     GoldFearGauge,
     HalloweenMomentumConfirm,
     MultiAssetStrategy,
@@ -165,7 +165,7 @@ def main():
             f"  CI [{lo_v:.3f}, {hi_v:.3f}]  MaxDD {max_drawdown(er):.2%}"
         )
 
-    from erised.strategies.base import MovingAverageCrossover
+    from erised.strategies import MovingAverageCrossover
     from erised.validation.walk_forward import walk_forward
 
     wf_h001_ma = walk_forward(spy, lambda _: MovingAverageCrossover(50, 200), folds=folds)

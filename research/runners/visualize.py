@@ -328,7 +328,7 @@ def plot_equity_curves() -> None:
     sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src"))
 
     from erised.data.loader import load_research
-    from erised.strategies.base import (
+    from erised.strategies import (
         AbsoluteMomentumStrategy,
         DefensiveEquityHedge,
         HalloweenMomentumConfirm,

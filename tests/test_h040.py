@@ -7,7 +7,7 @@ import pandas as pd
 import pytest
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import ShortTermWeeklyReversal
+from erised.strategies import ShortTermWeeklyReversal
 
 
 def _prices(rets, start="2000-01-03"):

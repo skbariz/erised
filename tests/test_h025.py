@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from erised.backtest.engine import assert_no_lookahead
-from erised.strategies.base import JanuaryBarometer
+from erised.strategies import JanuaryBarometer
 
 
 def _prices(rets, start="2005-01-03"):

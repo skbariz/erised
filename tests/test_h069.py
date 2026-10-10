@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from erised.strategies.base import VixTermStructureProxy
+from erised.strategies import VixTermStructureProxy
 
 
 def _prices(vix_arr: list[float] | None = None, n: int = 200) -> pd.DataFrame:

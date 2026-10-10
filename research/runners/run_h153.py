@@ -23,7 +23,7 @@ from erised.data.stocks import (
     load_stocks_panel,
 )
 from erised.metrics.performance import bootstrap_sharpe_ci, sharpe
-from erised.strategies.base import MovingAverageCrossover
+from erised.strategies import MovingAverageCrossover
 from erised.strategies.cross_sectional import MomentumLongOnly, SectorNeutralMomentum
 from erised.validation.walk_forward import make_folds, walk_forward, walk_forward_cross_sectional
 

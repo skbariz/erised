@@ -34,6 +34,7 @@ log = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from erised.config import DATA_DIR  # noqa: E402
+from erised.data.stocks import is_valid_ticker  # noqa: E402
 
 FUNDAMENTALS_DIR = DATA_DIR / "fundamentals"
 TICKERS_FILE = DATA_DIR / "sp500_tickers.txt"
@@ -212,6 +213,9 @@ def main() -> None:
         log.error(f"Tickers file not found: {TICKERS_FILE}. Run fetch_sp500_members.py first.")
         sys.exit(1)
     tickers = [t.strip() for t in TICKERS_FILE.read_text().splitlines() if t.strip()]
+    for bad in [t for t in tickers if not is_valid_ticker(t)]:
+        log.warning(f"Skipping invalid ticker symbol in {TICKERS_FILE.name}: {bad!r}")
+    tickers = [t for t in tickers if is_valid_ticker(t)]
     log.info(f"Tickers to process: {len(tickers)}")
 
     # Build CIK map from EDGAR

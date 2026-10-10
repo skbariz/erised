@@ -9,6 +9,8 @@ Run scripts/fetch_sp500_members.py then scripts/fetch_stocks.py to populate.
 
 from __future__ import annotations
 
+import re
+
 import pandas as pd
 
 from ..config import DATA_DIR
@@ -19,9 +21,25 @@ SECTORS_FILE = DATA_DIR / "sp500_sectors.parquet"
 
 RESEARCH_END = pd.Timestamp("2022-12-31")
 
+# Tickers become file names, and they are scraped from an editable web page, so
+# anything that could form a path (slashes, dots, absolute paths) is rejected.
+_TICKER_RE = re.compile(r"[A-Z0-9][A-Z0-9-]{0,9}")
+
+
+def is_valid_ticker(ticker: str) -> bool:
+    return isinstance(ticker, str) and _TICKER_RE.fullmatch(ticker) is not None
+
+
+def validate_ticker(ticker: str) -> str:
+    """Return ``ticker`` upper-cased, or raise ValueError if it is not a plain symbol."""
+    t = ticker.strip().upper()
+    if not is_valid_ticker(t):
+        raise ValueError(f"Invalid ticker symbol: {ticker!r}")
+    return t
+
 
 def load_stock_adj_close(ticker: str, research_only: bool = True) -> pd.Series:
-    path = STOCKS_DIR / f"{ticker.upper()}.parquet"
+    path = STOCKS_DIR / f"{validate_ticker(ticker)}.parquet"
     if not path.exists():
         raise FileNotFoundError(f"No data for {ticker}. Run scripts/fetch_stocks.py first.")
     s = pd.read_parquet(path)["adj_close"]

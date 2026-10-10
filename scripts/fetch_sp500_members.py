@@ -27,6 +27,7 @@ log = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from erised.config import DATA_DIR  # noqa: E402
+from erised.data.stocks import is_valid_ticker  # noqa: E402
 
 RESEARCH_END = pd.Timestamp("2022-12-31")
 RESEARCH_START = pd.Timestamp("1993-01-01")
@@ -43,7 +44,7 @@ def _fetch_wiki_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
         WIKI_URL,
         headers={"User-Agent": "Mozilla/5.0 (compatible; research-bot/1.0)"},
     )
-    with urllib.request.urlopen(req) as resp:
+    with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310 - fixed https URL
         html = resp.read()
     tables = pd.read_html(io.BytesIO(html), header=0)
     current = tables[0]
@@ -196,9 +197,18 @@ def main() -> None:
 
     current, changes = _fetch_wiki_tables()
     current_info = _parse_current(current)
+    valid = current_info["ticker"].map(is_valid_ticker)
+    for bad in current_info.loc[~valid, "ticker"]:
+        log.warning(f"Skipping invalid ticker symbol from Wikipedia: {bad!r}")
+    current_info = current_info[valid].reset_index(drop=True)
     log.info(f"Current S&P 500 members: {len(current_info)}")
 
-    events = _parse_changes(changes)
+    events = []
+    for event in _parse_changes(changes):
+        if is_valid_ticker(event[1]):
+            events.append(event)
+        else:
+            log.warning(f"Skipping invalid ticker symbol from Wikipedia: {event[1]!r}")
     log.info(f"Historical change events parsed: {len(events)}")
 
     # Save sector map

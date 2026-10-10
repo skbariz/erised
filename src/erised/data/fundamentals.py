@@ -23,6 +23,7 @@ import numpy as np
 import pandas as pd
 
 from ..config import DATA_DIR
+from .stocks import validate_ticker
 
 FUNDAMENTALS_DIR = DATA_DIR / "fundamentals"
 
@@ -43,7 +44,7 @@ VALID_FIELDS = [
 @lru_cache(maxsize=512)
 def _load_ticker_fundamentals(ticker: str) -> pd.DataFrame | None:
     """Load raw filing-level fundamentals for a single ticker (cached)."""
-    path = FUNDAMENTALS_DIR / f"{ticker}.parquet"
+    path = FUNDAMENTALS_DIR / f"{validate_ticker(ticker)}.parquet"
     if not path.exists():
         return None
     df = pd.read_parquet(path)

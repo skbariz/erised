@@ -1,4 +1,4 @@
-"""Fetch quarterly fundamental data for all historical S&P 500 tickers via SEC EDGAR XBRL.
+"""Download quarterly fundamentals for historical S&P 500 members from SEC EDGAR XBRL.
 
 Uses the EDGAR company facts API (free, no key required):
   https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json
@@ -7,37 +7,31 @@ Coverage: XBRL mandatory for large accelerated filers from 2009, accelerated fil
 Pre-2009 data will be absent — strategies using fundamentals will have zero signal for
 folds 0-4 (test periods 1998-2008) and valid signal for folds 5-11 (2008-2022).
 
-Output: one parquet per ticker at data/fundamentals/{TICKER}.parquet
+Output: one Parquet file per ticker at <data dir>/fundamentals/{TICKER}.parquet
   Columns: period_end, filed_date, form, total_assets, book_equity, net_income,
            gross_profit, revenue, operating_cf, current_assets, current_liabilities,
            long_term_debt, shares_outstanding
 
-Run: SEC_EDGAR_USER_AGENT="my-project you@example.com" uv run python scripts/fetch_fundamentals.py
-     Resumable — already-downloaded tickers are skipped.
-     Expect ~10-20 minutes for 1112 tickers (SEC rate limit: 10 req/s).
+CLI: SEC_EDGAR_USER_AGENT="my-project you@example.com" erised data fundamentals
+Resumable: tickers already downloaded are skipped. Expect 10-20 minutes for ~1,100
+tickers at the SEC's 10 requests/second limit.
 """
 
 from __future__ import annotations
 
 import logging
 import os
-import sys
 import time
-from pathlib import Path
 
 import pandas as pd
 import requests
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+from ...config import DATA_DIR
+from ..stocks import read_ticker_list
+
 log = logging.getLogger(__name__)
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from erised.config import DATA_DIR  # noqa: E402
-from erised.data.stocks import is_valid_ticker  # noqa: E402
-
 FUNDAMENTALS_DIR = DATA_DIR / "fundamentals"
-TICKERS_FILE = DATA_DIR / "sp500_tickers.txt"
 
 # SEC EDGAR endpoints
 EDGAR_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
@@ -46,10 +40,6 @@ EDGAR_FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 # SEC requires a descriptive user-agent with contact info, e.g. "my-project you@example.com".
 # https://www.sec.gov/os/accessing-edgar-data
 USER_AGENT_ENV = "SEC_EDGAR_USER_AGENT"
-HEADERS = {
-    "User-Agent": os.environ.get(USER_AGENT_ENV, ""),
-    "Accept-Encoding": "gzip, deflate",
-}
 
 # Rate limit: SEC allows 10 requests/second; we use 0.12s sleep = ~8 req/s
 RATE_LIMIT_SLEEP = 0.12
@@ -81,10 +71,10 @@ CONCEPTS: dict[str, list[str]] = {
 }
 
 
-def _build_cik_map() -> dict[str, str]:
+def _build_cik_map(headers: dict[str, str]) -> dict[str, str]:
     """Fetch ticker→CIK mapping from SEC EDGAR. Returns {TICKER: CIK_padded_10digits}."""
     log.info("Fetching CIK map from SEC EDGAR...")
-    resp = requests.get(EDGAR_TICKERS_URL, headers=HEADERS, timeout=30)
+    resp = requests.get(EDGAR_TICKERS_URL, headers=headers, timeout=30)
     resp.raise_for_status()
     data = resp.json()
     # Format: {idx: {"cik_str": "320193", "ticker": "AAPL", "title": "Apple Inc."}}
@@ -145,11 +135,13 @@ def _extract_concept(
     return pd.DataFrame(columns=["period_end", "filed_date", "form", field_name])
 
 
-def _fetch_ticker_fundamentals(ticker: str, cik: str) -> pd.DataFrame | None:
+def _fetch_ticker_fundamentals(
+    ticker: str, cik: str, headers: dict[str, str]
+) -> pd.DataFrame | None:
     """Fetch and parse EDGAR XBRL facts for one ticker. Returns per-filing DataFrame."""
     url = EDGAR_FACTS_URL.format(cik=cik)
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=30)
+        resp = requests.get(url, headers=headers, timeout=30)
         if resp.status_code == 404:
             log.debug(f"{ticker}: no EDGAR XBRL data (404)")
             return None
@@ -199,27 +191,25 @@ def _fetch_ticker_fundamentals(ticker: str, cik: str) -> pd.DataFrame | None:
     return base.sort_values(["period_end", "filed_date"]).reset_index(drop=True)
 
 
-def main() -> None:
-    if not HEADERS["User-Agent"]:
-        log.error(
+def download_fundamentals(user_agent: str | None = None) -> dict[str, int]:
+    """Download fundamentals for every ticker in the S&P 500 ticker list.
+
+    ``user_agent`` defaults to the ``SEC_EDGAR_USER_AGENT`` environment variable.
+    Returns counts of saved, missing-CIK, and failed tickers.
+    """
+    user_agent = user_agent or os.environ.get(USER_AGENT_ENV, "")
+    if not user_agent:
+        raise RuntimeError(
             f"Set {USER_AGENT_ENV} to a contact string such as 'my-project you@example.com' "
-            "(required by SEC EDGAR fair-access policy)."
+            "(required by the SEC EDGAR fair-access policy)."
         )
-        sys.exit(1)
+    headers = {"User-Agent": user_agent, "Accept-Encoding": "gzip, deflate"}
     FUNDAMENTALS_DIR.mkdir(parents=True, exist_ok=True)
 
-    # Load all historical tickers
-    if not TICKERS_FILE.exists():
-        log.error(f"Tickers file not found: {TICKERS_FILE}. Run fetch_sp500_members.py first.")
-        sys.exit(1)
-    tickers = [t.strip() for t in TICKERS_FILE.read_text().splitlines() if t.strip()]
-    for bad in [t for t in tickers if not is_valid_ticker(t)]:
-        log.warning(f"Skipping invalid ticker symbol in {TICKERS_FILE.name}: {bad!r}")
-    tickers = [t for t in tickers if is_valid_ticker(t)]
+    tickers = read_ticker_list()
     log.info(f"Tickers to process: {len(tickers)}")
 
-    # Build CIK map from EDGAR
-    cik_map = _build_cik_map()
+    cik_map = _build_cik_map(headers)
     time.sleep(RATE_LIMIT_SLEEP)
 
     done = {f.stem for f in FUNDAMENTALS_DIR.glob("*.parquet")}
@@ -245,7 +235,7 @@ def main() -> None:
             pd.DataFrame().to_parquet(FUNDAMENTALS_DIR / f"{ticker}.parquet")
             continue
 
-        df = _fetch_ticker_fundamentals(ticker, cik)
+        df = _fetch_ticker_fundamentals(ticker, cik, headers)
         time.sleep(RATE_LIMIT_SLEEP)
 
         if df is None or len(df) == 0:
@@ -265,7 +255,4 @@ def main() -> None:
         f"Done. Saved: {saved}, no-CIK: {missing_cik}, errors: {errors}, "
         f"total processed: {len(tickers) - len(done)}"
     )
-
-
-if __name__ == "__main__":
-    main()
+    return {"saved": saved, "missing_cik": missing_cik, "errors": errors}

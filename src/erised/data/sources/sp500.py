@@ -1,11 +1,11 @@
-"""Fetch S&P 500 point-in-time membership and GICS sectors from Wikipedia.
+"""Reconstruct point-in-time S&P 500 membership and GICS sectors from Wikipedia.
 
-Outputs:
-  data/sp500_members.parquet  -- wide bool DataFrame: dates x tickers
-  data/sp500_sectors.parquet  -- ticker -> GICS sector mapping
-  data/sp500_tickers.txt      -- all unique historical tickers (one per line)
+Outputs, in the data directory:
+  sp500_members.parquet  -- wide bool DataFrame: dates x tickers
+  sp500_sectors.parquet  -- ticker -> GICS sector mapping
+  sp500_tickers.txt      -- all unique historical tickers (one per line)
 
-Run: uv run python scripts/fetch_sp500_members.py
+CLI: erised data sp500
 
 Note: Wikipedia historical changes go back reliably to ~2000. Pre-2000 folds
 may have minor survivorship-bias due to incomplete records before that date.
@@ -16,18 +16,13 @@ by yfinance on download.
 from __future__ import annotations
 
 import logging
-import sys
-from pathlib import Path
 
 import pandas as pd
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+from ...config import DATA_DIR
+from ..stocks import MEMBERS_FILE, SECTORS_FILE, TICKERS_FILE, is_valid_ticker
+
 log = logging.getLogger(__name__)
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-
-from erised.config import DATA_DIR  # noqa: E402
-from erised.data.stocks import is_valid_ticker  # noqa: E402
 
 RESEARCH_END = pd.Timestamp("2022-12-31")
 RESEARCH_START = pd.Timestamp("1993-01-01")
@@ -192,8 +187,9 @@ def build_membership(
     return df.astype(bool)
 
 
-def main() -> None:
-    DATA_DIR.mkdir(exist_ok=True)
+def download_sp500_membership() -> pd.DataFrame:
+    """Scrape Wikipedia, write membership, sector, and ticker files, and return membership."""
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
     current, changes = _fetch_wiki_tables()
     current_info = _parse_current(current)
@@ -213,7 +209,7 @@ def main() -> None:
 
     # Save sector map
     sectors = current_info.set_index("ticker")["sector"]
-    sectors_path = DATA_DIR / "sp500_sectors.parquet"
+    sectors_path = SECTORS_FILE
     sectors.to_frame().to_parquet(sectors_path)
     log.info(f"Sectors saved: {sectors_path}")
 
@@ -222,15 +218,12 @@ def main() -> None:
     members = build_membership(current_info["ticker"].tolist(), events)
     log.info(f"Membership table: {members.shape[0]} days x {members.shape[1]} tickers")
 
-    members_path = DATA_DIR / "sp500_members.parquet"
+    members_path = MEMBERS_FILE
     members.to_parquet(members_path)
     log.info(f"Membership saved: {members_path}")
 
     # Save ticker list
-    tickers_path = DATA_DIR / "sp500_tickers.txt"
+    tickers_path = TICKERS_FILE
     tickers_path.write_text("\n".join(sorted(members.columns)), encoding="utf-8")
     log.info(f"Tickers saved: {tickers_path}  ({len(members.columns)} total)")
-
-
-if __name__ == "__main__":
-    main()
+    return members

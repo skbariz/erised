@@ -1,40 +1,27 @@
-"""Seal the holdout. Run ONCE, ever.
+"""Seal the holdout: split each full series into research and holdout files, once.
 
-This script splits the full data file into:
-- SPY_research.parquet : everything before HOLDOUT_START
-- SPY_holdout.parquet  : everything from HOLDOUT_START onward
+For every symbol, ``<SYMBOL>.parquet`` is split into:
+- ``<SYMBOL>_research.parquet``: everything before ``HOLDOUT_START``
+- ``<SYMBOL>_holdout.parquet``: everything from ``HOLDOUT_START`` onward
 
-The holdout file's SHA-256 is recorded in data/HOLDOUT_HASH.txt.
-If we re-run this script, it refuses to overwrite an existing holdout
-unless --force is passed (which we should never do during the sprint).
+Each holdout file's SHA-256 is written to ``HOLDOUT_HASH.txt`` in the data directory.
+Existing holdouts are never overwritten unless ``force=True``.
 
-The hash file is committed to git. If the holdout changes, the diff
-is visible in PRs.
-
-Run: uv run python scripts/seal_holdout.py
+CLI: ``erised data seal [--force]``
 """
 
 from __future__ import annotations
 
-import argparse
 import logging
-import sys
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from ..config import DATA_DIR
+from .loader import _holdout_path, _research_path, file_hash, load_full
+from .universe import ETF_UNIVERSE
 
-from erised.data.loader import (  # noqa: E402
-    _full_path,
-    _holdout_path,
-    _research_path,
-    file_hash,
-    load_full,
-)
-
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
 
 
@@ -47,25 +34,6 @@ logger = logging.getLogger(__name__)
 #   - 2024: continued bull market
 #   - 2025-2026: whatever happens
 HOLDOUT_START = date(2023, 1, 1)
-
-SYMBOLS = [
-    "SPY",
-    "TLT",
-    "GLD",
-    "SHY",
-    "IEF",
-    "LQD",
-    "HYG",
-    "DBC",
-    "VNQ",
-    "IVE",
-    "IVW",
-    "IWM",
-    "QQQ",
-    "XLP",
-    "XLU",
-    "VIX",
-]
 
 
 def seal_one(symbol: str, force: bool = False) -> dict:
@@ -125,17 +93,12 @@ def seal_one(symbol: str, force: bool = False) -> dict:
     }
 
 
-def main() -> None:
-    p = argparse.ArgumentParser()
-    p.add_argument("--force", action="store_true", help="Re-seal even if holdout exists")
-    args = p.parse_args()
-
-    reports = [seal_one(s, force=args.force) for s in SYMBOLS]
-
-    # Write the hash record, committed to git.
-    hash_file = _full_path("SPY").parent / "HOLDOUT_HASH.txt"
+def seal_holdout(symbols: list[str] | None = None, force: bool = False) -> list[dict]:
+    """Seal every symbol (default: the ETF universe) and write the hash record."""
+    reports = [seal_one(s, force=force) for s in (symbols or list(ETF_UNIVERSE))]
+    hash_file: Path = DATA_DIR / "HOLDOUT_HASH.txt"
     lines = [
-        "# Holdout integrity record. Committed to git.",
+        "# Holdout integrity record.",
         f"# Holdout start: {HOLDOUT_START}",
         "",
     ]
@@ -148,7 +111,4 @@ def main() -> None:
             lines.append(f"{r['symbol']}  sha256={r['hash']}  (already sealed, not re-written)")
     hash_file.write_text("\n".join(lines) + "\n")
     logger.info("Wrote %s", hash_file)
-
-
-if __name__ == "__main__":
-    main()
+    return reports

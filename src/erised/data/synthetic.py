@@ -10,6 +10,32 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
+from .loader import _full_path
+
+SYNTHETIC_END = "2026-05-20"
+
+# Per-symbol (start, initial price, daily drift, daily vol, seed). Start dates match real
+# inception dates so the research/holdout split and data-availability gaps behave as with
+# real data.
+SYNTHETIC_PARAMS: dict[str, tuple[str, float, float, float, int]] = {
+    "SPY": ("1993-01-29", 44.0, 0.00040, 0.011, 42),
+    "TLT": ("2002-07-30", 90.0, 0.00010, 0.007, 43),
+    "GLD": ("2004-11-18", 45.0, 0.00020, 0.009, 44),
+    "SHY": ("2002-07-31", 77.0, 0.00005, 0.001, 45),
+    "IEF": ("2002-07-31", 82.0, 0.00010, 0.004, 46),
+    "LQD": ("2002-07-31", 110.0, 0.00010, 0.004, 47),
+    "HYG": ("2007-04-11", 95.0, 0.00020, 0.006, 48),
+    "DBC": ("2006-02-07", 25.0, 0.00010, 0.010, 49),
+    "VNQ": ("2004-09-30", 30.0, 0.00030, 0.012, 50),
+    "IVE": ("2000-05-23", 60.0, 0.00030, 0.010, 51),
+    "IVW": ("2000-05-23", 65.0, 0.00030, 0.012, 52),
+    "IWM": ("2000-05-23", 55.0, 0.00030, 0.013, 53),
+    "QQQ": ("1999-03-11", 50.0, 0.00040, 0.015, 54),
+    "XLP": ("1998-12-17", 15.0, 0.00020, 0.007, 55),
+    "XLU": ("1998-12-17", 13.0, 0.00020, 0.007, 56),
+    "VIX": ("1993-01-29", 20.0, 0.00000, 0.050, 57),
+}
+
 
 def synthetic_bars(
     start: str = "1993-01-29",
@@ -52,3 +78,14 @@ def synthetic_bars(
     )
     df.index.name = "date"
     return df
+
+
+def write_synthetic_universe(end: str = SYNTHETIC_END) -> list[str]:
+    """Write a synthetic ``<SYMBOL>.parquet`` for every universe symbol; return the paths."""
+    paths = []
+    for symbol, (start, price, drift, vol, seed) in SYNTHETIC_PARAMS.items():
+        out = _full_path(symbol)
+        out.parent.mkdir(parents=True, exist_ok=True)
+        synthetic_bars(start, end, price, drift, vol, seed).to_parquet(out, compression="snappy")
+        paths.append(str(out))
+    return paths

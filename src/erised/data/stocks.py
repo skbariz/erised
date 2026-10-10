@@ -4,12 +4,14 @@ Individual stock parquet files live in data/stocks/{TICKER}.parquet.
 Point-in-time S&P 500 membership lives in data/sp500_members.parquet.
 GICS sector mapping lives in data/sp500_sectors.parquet.
 
-Run scripts/fetch_sp500_members.py then scripts/fetch_stocks.py to populate.
+Populate with `erised data sp500` then `erised data stocks`.
 """
 
 from __future__ import annotations
 
+import logging
 import re
+from pathlib import Path
 
 import pandas as pd
 
@@ -18,6 +20,9 @@ from ..config import DATA_DIR
 STOCKS_DIR = DATA_DIR / "stocks"
 MEMBERS_FILE = DATA_DIR / "sp500_members.parquet"
 SECTORS_FILE = DATA_DIR / "sp500_sectors.parquet"
+TICKERS_FILE = DATA_DIR / "sp500_tickers.txt"
+
+logger = logging.getLogger(__name__)
 
 RESEARCH_END = pd.Timestamp("2022-12-31")
 
@@ -28,6 +33,16 @@ _TICKER_RE = re.compile(r"[A-Z0-9][A-Z0-9-]{0,9}")
 
 def is_valid_ticker(ticker: str) -> bool:
     return isinstance(ticker, str) and _TICKER_RE.fullmatch(ticker) is not None
+
+
+def read_ticker_list(path: Path = TICKERS_FILE) -> list[str]:
+    """Read the historical ticker list, dropping (and logging) any invalid symbols."""
+    if not path.exists():
+        raise FileNotFoundError(f"{path} not found. Run `erised data sp500` first.")
+    tickers = [t.strip() for t in path.read_text(encoding="utf-8").splitlines() if t.strip()]
+    for bad in [t for t in tickers if not is_valid_ticker(t)]:
+        logger.warning("Skipping invalid ticker symbol in %s: %r", path.name, bad)
+    return [t for t in tickers if is_valid_ticker(t)]
 
 
 def validate_ticker(ticker: str) -> str:
@@ -41,7 +56,7 @@ def validate_ticker(ticker: str) -> str:
 def load_stock_adj_close(ticker: str, research_only: bool = True) -> pd.Series:
     path = STOCKS_DIR / f"{validate_ticker(ticker)}.parquet"
     if not path.exists():
-        raise FileNotFoundError(f"No data for {ticker}. Run scripts/fetch_stocks.py first.")
+        raise FileNotFoundError(f"No data for {ticker}. Run `erised data stocks` first.")
     s = pd.read_parquet(path)["adj_close"]
     s.index = pd.to_datetime(s.index)
     s.name = ticker.upper()
@@ -59,7 +74,7 @@ def load_stocks_panel(tickers: list[str], research_only: bool = True) -> pd.Data
         with contextlib.suppress(FileNotFoundError):
             series[t] = load_stock_adj_close(t, research_only=research_only)
     if not series:
-        raise FileNotFoundError("No stock data found. Run scripts/fetch_stocks.py first.")
+        raise FileNotFoundError("No stock data found. Run `erised data stocks` first.")
     panel = pd.DataFrame(series)
     panel.index = pd.to_datetime(panel.index)
     panel.sort_index(inplace=True)
@@ -73,7 +88,7 @@ def load_sp500_members(research_only: bool = True) -> pd.DataFrame:
     """
     if not MEMBERS_FILE.exists():
         raise FileNotFoundError(
-            f"No membership file at {MEMBERS_FILE}. Run scripts/fetch_sp500_members.py first."
+            f"No membership file at {MEMBERS_FILE}. Run `erised data sp500` first."
         )
     df = pd.read_parquet(MEMBERS_FILE)
     df.index = pd.to_datetime(df.index)
@@ -87,7 +102,7 @@ def load_sp500_sectors() -> pd.Series:
     """Return Series: index=ticker, values=GICS sector string."""
     if not SECTORS_FILE.exists():
         raise FileNotFoundError(
-            f"No sectors file at {SECTORS_FILE}. Run scripts/fetch_sp500_members.py first."
+            f"No sectors file at {SECTORS_FILE}. Run `erised data sp500` first."
         )
     df = pd.read_parquet(SECTORS_FILE)
     return df.iloc[:, 0]

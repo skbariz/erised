@@ -1,12 +1,6 @@
-# Data
-data/*.parquet
-data/cache/
-data/raw/
-data/fundamentals/
-data/stocks/
-data/sp500_tickers.txt
-!data/HOLDOUT_HASH.txt
-!data/.gitkeep
+# Local market data (default ERISED_DATA_DIR in a source checkout)
+/data/
+*.parquet
 
 # Python
 __pycache__/

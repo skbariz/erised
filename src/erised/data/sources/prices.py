@@ -1,22 +1,28 @@
-"""Data ingestion: fetch from sources, cross-validate, store as Parquet.
+"""Daily price downloads: ETF/index bars and S&P 500 constituent closes.
 
 Two independent sources are used to catch silent data errors:
 - yfinance (Yahoo) for the canonical OHLCV + adjusted close
 - Stooq for cross-validation of the adjusted close series
 
 We do not blindly trust either. Discrepancies above a tolerance raise.
+
+CLI: ``erised data fetch`` (ETF universe) and ``erised data stocks`` (constituents).
 """
 
 from __future__ import annotations
 
 import io
 import logging
+import time
 from pathlib import Path
 
 import pandas as pd
 import requests
 
-from .schema import ALL_COLUMNS, validate_bars
+from ..loader import _full_path
+from ..schema import ALL_COLUMNS, validate_bars
+from ..stocks import STOCKS_DIR, read_ticker_list
+from ..universe import ETF_UNIVERSE, YAHOO_TICKERS
 
 logger = logging.getLogger(__name__)
 
@@ -151,3 +157,72 @@ def ingest(symbol: str, out_path: Path, start: str = "1993-01-01") -> dict:
         }
     )
     return report
+
+
+def download_universe(symbols: list[str] | None = None) -> list[dict]:
+    """Download and store daily bars for ``symbols`` (default: the full ETF universe)."""
+    symbols = symbols or list(ETF_UNIVERSE)
+    unknown = [s for s in symbols if s not in ETF_UNIVERSE]
+    if unknown:
+        raise ValueError(f"Unknown symbols {unknown}; add them to erised.data.universe first.")
+    return [ingest(YAHOO_TICKERS.get(s, s), _full_path(s), start=ETF_UNIVERSE[s]) for s in symbols]
+
+
+CONSTITUENT_START = "1990-01-01"  # extra history for signal warm-up before 1993
+CONSTITUENT_SLEEP = 0.25  # seconds between downloads
+
+
+def _download_constituent(ticker: str, end: str) -> pd.DataFrame | None:
+    import yfinance as yf
+
+    try:
+        raw = yf.download(
+            ticker,
+            start=CONSTITUENT_START,
+            end=end,
+            auto_adjust=True,
+            progress=False,
+            threads=False,
+        )
+    except Exception as e:  # noqa: BLE001 - one bad ticker must not stop the batch
+        logger.warning("%s: download failed: %s", ticker, e)
+        return None
+    if raw is None or raw.empty:
+        return None
+    # yfinance returns MultiIndex columns for single tickers in recent versions.
+    if isinstance(raw.columns, pd.MultiIndex):
+        raw.columns = [c[0].lower().replace(" ", "_") for c in raw.columns]
+    else:
+        raw.columns = [c.lower().replace(" ", "_") for c in raw.columns]
+    # auto_adjust=True means Close is already the adjusted close.
+    if "close" in raw.columns and "adj_close" not in raw.columns:
+        raw = raw.rename(columns={"close": "adj_close"})
+    raw.index = pd.to_datetime(raw.index)
+    return raw[["adj_close"]].dropna()
+
+
+def download_constituent_prices(end: str | None = None) -> dict[str, int]:
+    """Download adjusted closes for every historical S&P 500 member. Resumable."""
+    end = end or (pd.Timestamp.today().normalize() + pd.Timedelta(days=1)).strftime("%Y-%m-%d")
+    STOCKS_DIR.mkdir(parents=True, exist_ok=True)
+    tickers = read_ticker_list()
+    logger.info("Tickers to download: %d", len(tickers))
+
+    skipped = downloaded = failed = 0
+    for i, ticker in enumerate(tickers):
+        out_path = STOCKS_DIR / f"{ticker}.parquet"
+        if out_path.exists():
+            skipped += 1
+            continue
+        df = _download_constituent(ticker, end)
+        if df is not None and not df.empty:
+            df.to_parquet(out_path)
+            downloaded += 1
+            logger.info("[%d/%d] %s: %d rows", i + 1, len(tickers), ticker, len(df))
+        else:
+            failed += 1
+            logger.warning("[%d/%d] %s: no data", i + 1, len(tickers), ticker)
+        time.sleep(CONSTITUENT_SLEEP)
+
+    logger.info("Done. downloaded=%d skipped=%d failed=%d", downloaded, skipped, failed)
+    return {"downloaded": downloaded, "skipped": skipped, "failed": failed}

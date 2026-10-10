@@ -1,6 +1,6 @@
 """Point-in-time fundamental data loader for cross-sectional strategies.
 
-Data source: SEC EDGAR XBRL via fetch_fundamentals.py.
+Data source: SEC EDGAR XBRL via `erised data fundamentals`.
 Coverage: ~2009+ (XBRL mandatory for large-cap filers from 2009).
 
 Key principle: values become available on their `filed_date`, NOT on their

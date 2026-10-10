@@ -42,7 +42,7 @@ def load_full(symbol: str) -> pd.DataFrame:
     """
     path = _full_path(symbol)
     if not path.exists():
-        raise FileNotFoundError(f"No data file at {path}. Run scripts/fetch_data.py first.")
+        raise FileNotFoundError(f"No data file at {path}. Run `erised data fetch` first.")
     df = pd.read_parquet(path)
     validate_bars(df, symbol)
     return df
@@ -56,7 +56,7 @@ def load_research(symbol: str) -> pd.DataFrame:
     path = _research_path(symbol)
     if not path.exists():
         raise FileNotFoundError(
-            f"No research file at {path}. Run scripts/seal_holdout.py to create one."
+            f"No research file at {path}. Run `erised data seal` to create one."
         )
     df = pd.read_parquet(path)
     validate_bars(df, symbol)

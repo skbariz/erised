@@ -39,6 +39,9 @@ live = [
     "alpaca-py>=0.30",
 ]
 
+[project.scripts]
+erised = "erised.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/skbariz/erised"
 Documentation = "https://github.com/skbariz/erised/tree/main/docs"

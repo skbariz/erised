@@ -5,15 +5,11 @@ handles the bridge: at each scheduled tick, it fetches current prices,
 asks the strategy for a target position, and reconciles with current
 holdings via Alpaca's API.
 
-For Phase 1 we only define the interface. Actual deployment happens
-in Phase 2 once we have a strategy worth running.
-
-To use, set:
-  ALPACA_API_KEY=...
-  ALPACA_SECRET_KEY=...
-  ALPACA_PAPER=true   # always start with paper
-
-Run: PYTHONPATH=src python -m erised.execution.paper_trader --symbol SPY --dry-run
+Credentials are read from the ALPACA_API_KEY and ALPACA_SECRET_KEY
+environment variables (see .env.example). PaperBroker defaults to Alpaca's
+paper-trading endpoint; pass paper=False only if you intend to trade real money.
+run_once() is a dry run unless dry_run=False and a broker is supplied.
+Requires the optional dependency: pip install "erised[live]".
 """
 
 from __future__ import annotations
@@ -21,7 +17,7 @@ from __future__ import annotations
 import logging
 import os
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 import pandas as pd
 
@@ -69,13 +65,21 @@ class PaperBroker:
         )
 
     def get_position(self, symbol: str) -> Position | None:
+        """Return the open position, or None if there is none.
+
+        Only a 404 means "no position". Any other error is re-raised: treating a
+        transient failure as flat would make submit_target_position re-buy the
+        whole target.
+        """
+        from alpaca.common.exceptions import APIError
+
         try:
             p = self._client.get_open_position(symbol)
-            return Position(
-                symbol=p.symbol, qty=float(p.qty), avg_entry_price=float(p.avg_entry_price)
-            )
-        except Exception:
-            return None
+        except APIError as e:
+            if e.status_code == 404:
+                return None
+            raise
+        return Position(symbol=p.symbol, qty=float(p.qty), avg_entry_price=float(p.avg_entry_price))
 
     def submit_target_position(
         self, symbol: str, target_fraction: float, latest_price: float
@@ -125,7 +129,7 @@ def run_once(
     target = float(positions.iloc[-1])
     latest_price = float(prices["close"].iloc[-1])
     decision = {
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
         "symbol": symbol,
         "strategy": strategy.name,
         "target_position": target,

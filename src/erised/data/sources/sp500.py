@@ -18,6 +18,7 @@ from __future__ import annotations
 import logging
 
 import pandas as pd
+import requests
 
 from ...config import DATA_DIR
 from ..stocks import MEMBERS_FILE, SECTORS_FILE, TICKERS_FILE, is_valid_ticker
@@ -32,16 +33,15 @@ WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 
 def _fetch_wiki_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
     import io
-    import urllib.request
 
     log.info("Fetching Wikipedia S&P 500 page...")
-    req = urllib.request.Request(
+    resp = requests.get(
         WIKI_URL,
         headers={"User-Agent": "Mozilla/5.0 (compatible; research-bot/1.0)"},
+        timeout=30,
     )
-    with urllib.request.urlopen(req, timeout=30) as resp:  # nosec B310 - fixed https URL
-        html = resp.read()
-    tables = pd.read_html(io.BytesIO(html), header=0)
+    resp.raise_for_status()
+    tables = pd.read_html(io.BytesIO(resp.content), header=0)
     current = tables[0]
     changes = tables[1]
     return current, changes

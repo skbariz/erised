@@ -15,6 +15,7 @@ import pandas as pd
 
 from ..config import DATA_DIR
 from .schema import validate_bars
+from .stocks import validate_ticker
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +23,17 @@ logger = logging.getLogger(__name__)
 # Filename convention: SYMBOL.parquet for the full series,
 # SYMBOL_research.parquet for the research-only slice,
 # SYMBOL_holdout.parquet for the sealed holdout.
+# Symbols come from CLI arguments, so validate_ticker rejects anything path-like.
 def _full_path(symbol: str) -> Path:
-    return DATA_DIR / f"{symbol.upper()}.parquet"
+    return DATA_DIR / f"{validate_ticker(symbol)}.parquet"
 
 
 def _research_path(symbol: str) -> Path:
-    return DATA_DIR / f"{symbol.upper()}_research.parquet"
+    return DATA_DIR / f"{validate_ticker(symbol)}_research.parquet"
 
 
 def _holdout_path(symbol: str) -> Path:
-    return DATA_DIR / f"{symbol.upper()}_holdout.parquet"
+    return DATA_DIR / f"{validate_ticker(symbol)}_holdout.parquet"
 
 
 def load_full(symbol: str) -> pd.DataFrame:

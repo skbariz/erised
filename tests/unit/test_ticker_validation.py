@@ -38,3 +38,14 @@ def test_loaders_refuse_path_like_symbols(ticker):
         load_stock_adj_close(ticker)
     with pytest.raises(ValueError, match="Invalid ticker"):
         load_pit_field(ticker, "book_equity", pd.DatetimeIndex([]))
+
+
+@pytest.mark.parametrize("symbol", ["../SPY", "/etc/passwd", "a/b", "SPY\x00"])
+def test_price_loaders_refuse_path_like_symbols(symbol):
+    from erised.data.loader import load_full, load_holdout, load_research
+
+    for load in (load_full, load_research):
+        with pytest.raises(ValueError, match="Invalid ticker"):
+            load(symbol)
+    with pytest.raises(ValueError, match="Invalid ticker"):
+        load_holdout(symbol, _i_understand_this_is_final_evaluation=True)

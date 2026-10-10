@@ -32,3 +32,13 @@ First public release.
 
 - `PaperBroker.get_position` no longer treats every API error as "no position", which could
   have caused a duplicate full-size order after a transient failure.
+- `PaperBroker.submit_target_position` rejects non-finite or out-of-range targets and
+  non-positive prices before contacting the broker.
+- Ticker symbols scraped from Wikipedia are validated before being used as file names, so
+  a vandalized entry can't direct downloads outside the data directory.
+
+### Security
+
+- Upgraded transitive dependencies with published advisories (pillow, urllib3, soupsieve,
+  msgpack, virtualenv). CI now runs `pip-audit` on the lockfile and pins actions to commit
+  SHAs.

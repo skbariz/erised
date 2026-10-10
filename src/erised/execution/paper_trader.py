@@ -15,6 +15,7 @@ Requires the optional dependency: pip install "erised[live]".
 from __future__ import annotations
 
 import logging
+import math
 import os
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -85,6 +86,12 @@ class PaperBroker:
         self, symbol: str, target_fraction: float, latest_price: float
     ) -> dict:
         """Bring the position to target_fraction * equity worth of `symbol`."""
+        if not math.isfinite(target_fraction) or abs(target_fraction) > 1.0:
+            raise ValueError(
+                f"target_fraction must be finite and in [-1, 1], got {target_fraction}"
+            )
+        if not math.isfinite(latest_price) or latest_price <= 0:
+            raise ValueError(f"latest_price must be a positive number, got {latest_price}")
         from alpaca.trading.enums import OrderSide, TimeInForce
         from alpaca.trading.requests import MarketOrderRequest
 

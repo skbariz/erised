@@ -51,3 +51,21 @@ def test_missing_credentials_raise(monkeypatch):
     monkeypatch.delenv("ALPACA_SECRET_KEY", raising=False)
     with pytest.raises(RuntimeError, match="must be set"):
         PaperBroker()
+
+
+@pytest.mark.parametrize(
+    ("target", "price"),
+    [
+        (1.5, 100.0),
+        (-2.0, 100.0),
+        (float("nan"), 100.0),
+        (float("inf"), 100.0),
+        (0.5, 0.0),
+        (0.5, float("nan")),
+    ],
+)
+def test_out_of_range_orders_are_rejected_before_any_api_call(target, price):
+    with pytest.raises(ValueError):
+        _broker(raises=AssertionError("API must not be called")).submit_target_position(
+            "SPY", target, price
+        )

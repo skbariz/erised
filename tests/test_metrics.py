@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.metrics.performance import (
+from erised.metrics.performance import (
     annualized_vol,
     cagr,
     max_drawdown,

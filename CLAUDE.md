@@ -7,9 +7,9 @@ Costs: 0.5 bps commission + 1.0 bps slippage.
 SPY benchmark: Sharpe 0.51 | CAGR 8.35% | Max DD -55.92%.
 
 # Repo structure
-- Strategy classes: src/quant/strategies/base.py (all strategies in one file)
-- Backtest engine: src/quant/backtest/engine.py
-- Walk-forward: src/quant/validation/walk_forward.py
+- Strategy classes: src/erised/strategies/base.py (all strategies in one file)
+- Backtest engine: src/erised/backtest/engine.py
+- Walk-forward: src/erised/validation/walk_forward.py
 - Per-hypothesis runners: scripts/run_h<NNN>.py
 - JSON summary (read this first): results/<NNN>-<name>/summary.json
 - Full stats: results/<NNN>-<name>/stats.md
@@ -216,7 +216,7 @@ For any new hypothesis:
    - Expected behavior in key regimes (2000-2002 tech crash, 2008-2009 GFC, 2020 COVID, low-vol 2013-2017)
    - Success criteria: what Sharpe/CI/H001-corr would make this worth keeping?
    - What would falsify this hypothesis?
-2. Implement strategy class in src/quant/strategies/base.py following existing patterns.
+2. Implement strategy class in src/erised/strategies/base.py following existing patterns.
 3. Write runner scripts/run_h<NNN>.py following run_h021.py as template (includes write_summary call).
 4. After running OOS backtest, append results and kill/keep decision to the design doc.
 
@@ -230,7 +230,7 @@ For any new hypothesis:
 
 ## Simplicity first
 - Write the minimum code that tests the hypothesis. Nothing speculative.
-- New strategy classes go in src/quant/strategies/base.py alongside existing ones.
+- New strategy classes go in src/erised/strategies/base.py alongside existing ones.
 - New runners follow run_h021.py exactly - same structure, same write_summary call at the end.
 - If 200 lines could be 50, write 50.
 

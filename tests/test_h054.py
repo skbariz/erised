@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import YieldCurveProxy
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import YieldCurveProxy
 
 
 def _prices(spy_rets, shy_rets=None, tlt_rets=None, start="2010-01-04"):

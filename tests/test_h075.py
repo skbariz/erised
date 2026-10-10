@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import EarningsSeasonDrift
+from erised.strategies.base import EarningsSeasonDrift
 
 
 def _prices(start: str = "2000-01-01", n: int = 500) -> pd.DataFrame:

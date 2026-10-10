@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import FourAssetRiskParity
+from erised.strategies.base import FourAssetRiskParity
 
 
 def _prices(n: int = 300, include_dbc: bool = True) -> pd.DataFrame:

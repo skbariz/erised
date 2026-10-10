@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import VrpCalendarHybrid
+from erised.strategies.base import VrpCalendarHybrid
 
 
 def _prices(start: str = "2000-01-01", n: int = 300, vix_val: float = 25.0) -> pd.DataFrame:
@@ -19,7 +19,9 @@ def _prices(start: str = "2000-01-01", n: int = 300, vix_val: float = 25.0) -> p
 
 def test_raises_without_vix():
     strat = VrpCalendarHybrid()
-    df = pd.DataFrame({"adj_close": [100.0] * 50}, index=pd.date_range("2000-01-01", periods=50, freq="B"))
+    df = pd.DataFrame(
+        {"adj_close": [100.0] * 50}, index=pd.date_range("2000-01-01", periods=50, freq="B")
+    )
     with pytest.raises(ValueError, match="vix_close"):
         strat.generate_positions(df)
 

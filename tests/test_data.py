@@ -5,8 +5,8 @@ from __future__ import annotations
 import pandas as pd
 import pytest
 
-from quant.data.loader import load_holdout, load_research
-from quant.data.schema import validate_bars
+from erised.data.loader import load_holdout, load_research
+from erised.data.schema import validate_bars
 
 
 def test_validate_bars_rejects_tz_aware():

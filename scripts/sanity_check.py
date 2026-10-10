@@ -17,11 +17,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from quant.backtest.engine import run_backtest
-from quant.data.loader import load_research
-from quant.metrics.performance import bootstrap_sharpe_ci, report
-from quant.strategies.base import BuyAndHold, MovingAverageCrossover
-from quant.validation.walk_forward import make_folds, walk_forward
+from erised.backtest.engine import run_backtest
+from erised.data.loader import load_research
+from erised.metrics.performance import bootstrap_sharpe_ci, report
+from erised.strategies.base import BuyAndHold, MovingAverageCrossover
+from erised.validation.walk_forward import make_folds, walk_forward
 
 
 def fmt_report(name: str, prices, rep) -> str:

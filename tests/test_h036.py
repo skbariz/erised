@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import EquityVsSafeHavenMomentum
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import EquityVsSafeHavenMomentum
 
 
 def _prices(spy_rets, tlt_rets, gld_rets, start="2010-01-04"):
@@ -22,9 +22,7 @@ def _prices(spy_rets, tlt_rets, gld_rets, start="2010-01-04"):
     gld_px = [100.0]
     for r in gld_rets:
         gld_px.append(gld_px[-1] * (1 + r))
-    return pd.DataFrame(
-        {"adj_close": spy_px, "tlt_close": tlt_px, "gld_close": gld_px}, index=idx
-    )
+    return pd.DataFrame({"adj_close": spy_px, "tlt_close": tlt_px, "gld_close": gld_px}, index=idx)
 
 
 def test_no_lookahead():

@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import MacroFearComposite
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import MacroFearComposite
 
 
 def _prices(
@@ -26,7 +26,7 @@ def _prices(
         spy.append(spy[-1] * (1 + r))
     df = pd.DataFrame({"adj_close": spy}, index=idx)
     if vix_vals is not None:
-        df["vix_close"] = ([vix_vals[0]] + vix_vals)[:n + 1]
+        df["vix_close"] = ([vix_vals[0]] + vix_vals)[: n + 1]
     for col, rets in [
         ("gld_close", gld_rets),
         ("hyg_close", hyg_rets),
@@ -62,12 +62,12 @@ def test_fully_long_when_no_fear():
     n = 200
     prices = _prices(
         [0.001] * n,
-        vix_vals=[15.0] * n,        # VIX below 25
-        gld_rets=[-0.001] * n,      # GLD falling (below MA)
-        hyg_rets=[0.003] * n,       # HYG outperforming
+        vix_vals=[15.0] * n,  # VIX below 25
+        gld_rets=[-0.001] * n,  # GLD falling (below MA)
+        hyg_rets=[0.003] * n,  # HYG outperforming
         lqd_rets=[0.001] * n,
         shy_rets=[0.001] * n,
-        tlt_rets=[0.004] * n,       # TLT outperforming → curve normal
+        tlt_rets=[0.004] * n,  # TLT outperforming → curve normal
     )
     pos = MacroFearComposite(vix_thresh=25, gld_ma=50, mom_days=63).generate_positions(prices)
     assert pos.iloc[-1] == 1.0
@@ -78,12 +78,12 @@ def test_flat_when_multiple_fear_signals():
     n = 200
     prices = _prices(
         [0.001] * n,
-        vix_vals=[35.0] * n,        # VIX above 25 (fear)
-        gld_rets=[0.003] * n,       # GLD above MA (fear)
-        hyg_rets=[0.001] * n,       # HYG lagging LQD (fear)
+        vix_vals=[35.0] * n,  # VIX above 25 (fear)
+        gld_rets=[0.003] * n,  # GLD above MA (fear)
+        hyg_rets=[0.001] * n,  # HYG lagging LQD (fear)
         lqd_rets=[0.003] * n,
         shy_rets=[0.001] * n,
-        tlt_rets=[0.004] * n,       # curve normal (no fear here)
+        tlt_rets=[0.004] * n,  # curve normal (no fear here)
     )
     pos = MacroFearComposite(vix_thresh=25, gld_ma=50, mom_days=63).generate_positions(prices)
     assert pos.iloc[-1] == 0.0

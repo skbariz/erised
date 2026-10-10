@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import DefensiveSectorOverlay
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import DefensiveSectorOverlay
 
 
 def _prices(spy_rets, vix_vals=None, xlp_rets=None, start="2010-01-04"):
@@ -17,7 +17,7 @@ def _prices(spy_rets, vix_vals=None, xlp_rets=None, start="2010-01-04"):
         spy.append(spy[-1] * (1 + r))
     df = pd.DataFrame({"adj_close": spy}, index=idx)
     if vix_vals is not None:
-        df["vix_close"] = ([vix_vals[0]] + vix_vals)[:n + 1]
+        df["vix_close"] = ([vix_vals[0]] + vix_vals)[: n + 1]
     if xlp_rets is not None:
         xlp = [100.0]
         for r in xlp_rets:

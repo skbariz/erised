@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     ManagementMispricing,
     MispricingAvoidFilter,
     MispricingCombo,
@@ -72,8 +72,15 @@ def operating_cf(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def shares_outstanding(dates: pd.DatetimeIndex) -> pd.DataFrame:
     # CLEAN: no dilution; DIRTY: growing shares
-    base = {t: 100.0 for t in TICKERS}
-    growth = {"CLEAN": 0.0, "DIRTY": 0.0005, "HIGH_ROA": 0.0, "LOW_ROA": 0.0001, "HIGH_GP": 0.0, "LOW_GP": 0.0001}
+    base = dict.fromkeys(TICKERS, 100.0)
+    growth = {
+        "CLEAN": 0.0,
+        "DIRTY": 0.0005,
+        "HIGH_ROA": 0.0,
+        "LOW_ROA": 0.0001,
+        "HIGH_GP": 0.0,
+        "LOW_GP": 0.0001,
+    }
     data = {t: base[t] * (1 + growth[t]) ** np.arange(N_DATES) for t in TICKERS}
     return pd.DataFrame(data, index=dates)
 
@@ -86,7 +93,7 @@ def gross_profit(dates: pd.DatetimeIndex) -> pd.DataFrame:
         "HIGH_ROA": np.full(N_DATES, 100.0),
         "LOW_ROA": np.full(N_DATES, 100.0),
         "HIGH_GP": np.full(N_DATES, 250.0),  # high GP/TA
-        "LOW_GP": np.full(N_DATES, 20.0),    # low GP/TA
+        "LOW_GP": np.full(N_DATES, 20.0),  # low GP/TA
     }
     return pd.DataFrame(data, index=dates)
 
@@ -94,8 +101,14 @@ def gross_profit(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def sectors() -> pd.Series:
     return pd.Series(
-        {"CLEAN": "Tech", "DIRTY": "Tech", "HIGH_ROA": "Finance",
-         "LOW_ROA": "Finance", "HIGH_GP": "Health", "LOW_GP": "Health"}
+        {
+            "CLEAN": "Tech",
+            "DIRTY": "Tech",
+            "HIGH_ROA": "Finance",
+            "LOW_ROA": "Finance",
+            "HIGH_GP": "Health",
+            "LOW_GP": "Health",
+        }
     )
 
 
@@ -109,31 +122,47 @@ def _weights_valid(w: pd.DataFrame) -> None:
 # H356 ManagementMispricing
 # ---------------------------------------------------------------------------
 
-def test_management_mispricing_shape(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors):
+
+def test_management_mispricing_shape(
+    dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors
+):
     strat = ManagementMispricing(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding, sectors=sectors
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_management_mispricing_prefers_clean(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors):
+def test_management_mispricing_prefers_clean(
+    dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors
+):
     strat = ManagementMispricing(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding, sectors=sectors
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     late = w.iloc[600:]
-    assert late["CLEAN"].mean() >= late["DIRTY"].mean(), "should prefer clean management over diluting firms"
+    assert late["CLEAN"].mean() >= late["DIRTY"].mean(), (
+        "should prefer clean management over diluting firms"
+    )
 
 
 # ---------------------------------------------------------------------------
 # H357 PerformanceMispricing
 # ---------------------------------------------------------------------------
 
-def test_performance_mispricing_shape(dates, membership, prices, total_assets, net_income, operating_cf, sectors):
+
+def test_performance_mispricing_shape(
+    dates, membership, prices, total_assets, net_income, operating_cf, sectors
+):
     strat = PerformanceMispricing(
         total_assets=total_assets, net_income=net_income, operating_cf=operating_cf, sectors=sectors
     )
@@ -142,7 +171,9 @@ def test_performance_mispricing_shape(dates, membership, prices, total_assets, n
     _weights_valid(w)
 
 
-def test_performance_mispricing_prefers_high_roa(dates, membership, prices, total_assets, net_income, operating_cf, sectors):
+def test_performance_mispricing_prefers_high_roa(
+    dates, membership, prices, total_assets, net_income, operating_cf, sectors
+):
     strat = PerformanceMispricing(
         total_assets=total_assets, net_income=net_income, operating_cf=operating_cf, sectors=sectors
     )
@@ -155,10 +186,16 @@ def test_performance_mispricing_prefers_high_roa(dates, membership, prices, tota
 # H358 MispricingCombo
 # ---------------------------------------------------------------------------
 
-def test_mispricing_combo_shape(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors):
+
+def test_mispricing_combo_shape(
+    dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors
+):
     strat = MispricingCombo(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding, sectors=sectors
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
@@ -169,20 +206,31 @@ def test_mispricing_combo_shape(dates, membership, prices, total_assets, net_inc
 # H359 MispricingAvoidFilter
 # ---------------------------------------------------------------------------
 
-def test_mispricing_avoid_filter_shape(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors):
+
+def test_mispricing_avoid_filter_shape(
+    dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors
+):
     strat = MispricingAvoidFilter(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding, sectors=sectors
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_mispricing_avoid_filter_excludes_some(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors):
+def test_mispricing_avoid_filter_excludes_some(
+    dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, sectors
+):
     strat = MispricingAvoidFilter(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding, sectors=sectors,
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        sectors=sectors,
         exclude_pct=0.20,
     )
     w = strat.generate_weights(prices, membership)
@@ -196,11 +244,25 @@ def test_mispricing_avoid_filter_excludes_some(dates, membership, prices, total_
 # H360 MispricingQualityComposite
 # ---------------------------------------------------------------------------
 
-def test_mispricing_quality_composite_shape(dates, membership, prices, total_assets, net_income, operating_cf, shares_outstanding, gross_profit, sectors):
+
+def test_mispricing_quality_composite_shape(
+    dates,
+    membership,
+    prices,
+    total_assets,
+    net_income,
+    operating_cf,
+    shares_outstanding,
+    gross_profit,
+    sectors,
+):
     strat = MispricingQualityComposite(
-        total_assets=total_assets, net_income=net_income,
-        operating_cf=operating_cf, shares_outstanding=shares_outstanding,
-        gross_profit=gross_profit, sectors=sectors
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        shares_outstanding=shares_outstanding,
+        gross_profit=gross_profit,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape

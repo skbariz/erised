@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import SmallCapCyclical
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import SmallCapCyclical
 
 
 def _prices(spy_rets, iwm_rets=None, hyg_rets=None, lqd_rets=None, start="2010-01-04"):
@@ -41,10 +41,10 @@ def test_long_iwm_when_both_signals_positive():
     """Healthy credit AND IWM outperforms SPY → long IWM."""
     n = 400
     prices = _prices(
-        [0.001] * n,    # SPY moderate
-        [0.002] * n,    # IWM stronger → size momentum positive
-        [0.003] * n,    # HYG rising faster
-        [0.001] * n,    # LQD slower → credit ok
+        [0.001] * n,  # SPY moderate
+        [0.002] * n,  # IWM stronger → size momentum positive
+        [0.003] * n,  # HYG rising faster
+        [0.001] * n,  # LQD slower → credit ok
     )
     w = SmallCapCyclical(credit_days=63, mom_days=126).generate_weights(prices)
     assert w["IWM"].iloc[-1] == 1.0
@@ -56,9 +56,9 @@ def test_long_spy_when_credit_stressed():
     n = 400
     prices = _prices(
         [0.001] * n,
-        [0.002] * n,    # IWM outperforming
-        [0.001] * n,    # HYG slower than LQD
-        [0.003] * n,    # LQD rising → credit stress
+        [0.002] * n,  # IWM outperforming
+        [0.001] * n,  # HYG slower than LQD
+        [0.003] * n,  # LQD rising → credit stress
     )
     w = SmallCapCyclical(credit_days=63, mom_days=126).generate_weights(prices)
     assert w["SPY"].iloc[-1] == 1.0
@@ -69,9 +69,9 @@ def test_long_spy_when_iwm_lags():
     """IWM underperforms SPY → no size premium → SPY even with healthy credit."""
     n = 400
     prices = _prices(
-        [0.002] * n,    # SPY stronger
-        [0.001] * n,    # IWM weaker
-        [0.003] * n,    # HYG fine
+        [0.002] * n,  # SPY stronger
+        [0.001] * n,  # IWM weaker
+        [0.003] * n,  # HYG fine
         [0.001] * n,
     )
     w = SmallCapCyclical(credit_days=63, mom_days=126).generate_weights(prices)

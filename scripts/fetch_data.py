@@ -13,8 +13,8 @@ from pathlib import Path
 # Make src/ importable when run as a script
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from quant.data.ingest import ingest
-from quant.data.loader import _full_path
+from erised.data.ingest import ingest
+from erised.data.loader import _full_path
 
 logging.basicConfig(
     level=logging.INFO,

@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     CostAwareMomentumLongHold,
     ExecutionEfficientComposite,
     LowTurnoverQualityFactor,
@@ -32,7 +32,9 @@ def _make_sectors(panel: pd.DataFrame) -> pd.Series:
     return pd.Series([secs[i % len(secs)] for i in range(n)], index=panel.columns)
 
 
-def _make_fund(panel: pd.DataFrame, base: float = 1e9, growth: float = 0.03, seed: int = 7) -> pd.DataFrame:
+def _make_fund(
+    panel: pd.DataFrame, base: float = 1e9, growth: float = 0.03, seed: int = 7
+) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     n_days, n_stocks = panel.shape
     quarters = n_days // 63 + 2

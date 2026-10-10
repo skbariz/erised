@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     CoskewnessPortfolioPenalty,
     CrashSensitivityRegime,
     LeftTailLossFactor,

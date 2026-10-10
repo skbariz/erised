@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import TurnOfMonthLowVol
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import TurnOfMonthLowVol
 
 
 def _prices(spy_rets, vix_levels, start="2010-01-04"):

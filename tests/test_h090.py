@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.base import MonthlyRebalancingRiskParity
+from erised.strategies.base import MonthlyRebalancingRiskParity
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

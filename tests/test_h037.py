@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import DualSafeHavenConfirmation
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import DualSafeHavenConfirmation
 
 
 def _prices(spy_rets, tlt_levels, gld_levels, start="2010-01-04"):
@@ -50,8 +50,8 @@ def test_flat_when_tlt_above_ma():
     """TLT spikes above its MA even if GLD is below its MA -> position 0.0."""
     n = 200
     spy = [0.001] * n
-    tlt = [70.0] * 80 + [130.0] * 121   # TLT spikes above MA
-    gld = [160.0] * 80 + [90.0] * 121   # GLD drops below MA
+    tlt = [70.0] * 80 + [130.0] * 121  # TLT spikes above MA
+    gld = [160.0] * 80 + [90.0] * 121  # GLD drops below MA
     prices = _prices(spy, tlt, gld)
     pos = DualSafeHavenConfirmation(ma_period=30).generate_positions(prices)
     assert pos.iloc[85] == pytest.approx(0.0)
@@ -61,7 +61,7 @@ def test_flat_when_gld_above_ma():
     """GLD spikes above its MA even if TLT is below its MA -> position 0.0."""
     n = 200
     spy = [0.001] * n
-    tlt = [120.0] * 80 + [70.0] * 121   # TLT drops below MA
+    tlt = [120.0] * 80 + [70.0] * 121  # TLT drops below MA
     gld = [100.0] * 80 + [160.0] * 121  # GLD spikes above MA
     prices = _prices(spy, tlt, gld)
     pos = DualSafeHavenConfirmation(ma_period=30).generate_positions(prices)

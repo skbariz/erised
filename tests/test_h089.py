@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.base import H043H021RegimeBlend
+from erised.strategies.base import H043H021RegimeBlend
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

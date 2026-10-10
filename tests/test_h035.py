@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead
-from quant.strategies.base import GoldFearGauge
+from erised.backtest.engine import assert_no_lookahead
+from erised.strategies.base import GoldFearGauge
 
 
 def _prices(spy_rets, gld_levels, start="2010-01-04"):

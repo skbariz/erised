@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import VixTermStructureProxy
+from erised.strategies.base import VixTermStructureProxy
 
 
 def _prices(vix_arr: list[float] | None = None, n: int = 200) -> pd.DataFrame:
@@ -19,7 +19,9 @@ def _prices(vix_arr: list[float] | None = None, n: int = 200) -> pd.DataFrame:
 
 def test_raises_without_vix():
     strat = VixTermStructureProxy()
-    df = pd.DataFrame({"adj_close": [100.0] * 50}, index=pd.date_range("2000-01-01", periods=50, freq="B"))
+    df = pd.DataFrame(
+        {"adj_close": [100.0] * 50}, index=pd.date_range("2000-01-01", periods=50, freq="B")
+    )
     with pytest.raises(ValueError, match="vix_close"):
         strat.generate_positions(df)
 
@@ -60,9 +62,9 @@ def test_hysteresis_holds_prior_position():
     # VIX constant = 15, MA = 15, ratio = 1.0 → in neutral band (0.85-1.15) → hold 0
     n = 200
     vix = [15.0] * n
-    pos = VixTermStructureProxy(ma_days=30, contango_thresh=0.85, backwardation_thresh=1.15).generate_positions(
-        _prices(vix_arr=vix, n=n)
-    )
+    pos = VixTermStructureProxy(
+        ma_days=30, contango_thresh=0.85, backwardation_thresh=1.15
+    ).generate_positions(_prices(vix_arr=vix, n=n))
     # Started at 0 and stayed neutral band → should remain 0
     assert pos.iloc[35:].sum() == pytest.approx(0.0)
 

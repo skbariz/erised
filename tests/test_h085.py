@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import MomentumMacroGate
+from erised.strategies.base import MomentumMacroGate
 
 
 def _prices(n: int = 500, include_dbc: bool = True, include_vnq: bool = True) -> pd.DataFrame:
@@ -58,15 +57,22 @@ def test_each_row_at_most_one_asset():
 def test_inverted_curve_forces_tlt():
     # SHY rising much faster than TLT → curve inverted → must hold TLT
     idx = pd.date_range("2007-01-01", periods=400, freq="B")
-    spy = 100 * np.cumprod(np.full(400, 1.002))   # strong momentum
+    spy = 100 * np.cumprod(np.full(400, 1.002))  # strong momentum
     tlt = 100 * np.cumprod(np.full(400, 1.0001))  # barely rising
-    gld = 100 * np.cumprod(np.full(400, 1.003))   # also strong
-    shy = 100 * np.cumprod(np.full(400, 1.003))   # SHY >> TLT → inverted
+    gld = 100 * np.cumprod(np.full(400, 1.003))  # also strong
+    shy = 100 * np.cumprod(np.full(400, 1.003))  # SHY >> TLT → inverted
     dbc = 100 * np.cumprod(np.full(400, 1.001))
     vnq = 100 * np.cumprod(np.full(400, 1.001))
     prices = pd.DataFrame(
-        {"adj_close": spy, "tlt_close": tlt, "gld_close": gld, "shy_close": shy,
-         "dbc_close": dbc, "vnq_close": vnq}, index=idx
+        {
+            "adj_close": spy,
+            "tlt_close": tlt,
+            "gld_close": gld,
+            "shy_close": shy,
+            "dbc_close": dbc,
+            "vnq_close": vnq,
+        },
+        index=idx,
     )
     w = MomentumMacroGate(curve_days=63).generate_weights(prices)
     # After warmup, curve is always inverted → always TLT
@@ -78,15 +84,22 @@ def test_inverted_curve_forces_tlt():
 def test_normal_curve_follows_momentum():
     # TLT outperforms SHY → curve not inverted → follow momentum
     idx = pd.date_range("2007-01-01", periods=400, freq="B")
-    spy = 100 * np.cumprod(np.full(400, 1.003))   # strongest momentum
-    tlt = 100 * np.cumprod(np.full(400, 1.002))   # TLT > SHY → normal curve
+    spy = 100 * np.cumprod(np.full(400, 1.003))  # strongest momentum
+    tlt = 100 * np.cumprod(np.full(400, 1.002))  # TLT > SHY → normal curve
     gld = 100 * np.cumprod(np.full(400, 1.001))
     shy = 100 * np.cumprod(np.full(400, 1.0001))
     dbc = 100 * np.cumprod(np.full(400, 1.0005))
     vnq = 100 * np.cumprod(np.full(400, 1.0005))
     prices = pd.DataFrame(
-        {"adj_close": spy, "tlt_close": tlt, "gld_close": gld, "shy_close": shy,
-         "dbc_close": dbc, "vnq_close": vnq}, index=idx
+        {
+            "adj_close": spy,
+            "tlt_close": tlt,
+            "gld_close": gld,
+            "shy_close": shy,
+            "dbc_close": dbc,
+            "vnq_close": vnq,
+        },
+        index=idx,
     )
     w = MomentumMacroGate(curve_days=63).generate_weights(prices)
     tail = w.iloc[280:]

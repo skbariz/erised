@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import CrisisProtocolRiskParity
+from erised.strategies.base import CrisisProtocolRiskParity
 
 
 def _prices(n: int = 300, crash_at: int | None = None) -> pd.DataFrame:
@@ -17,8 +16,8 @@ def _prices(n: int = 300, crash_at: int | None = None) -> pd.DataFrame:
     vix = np.full(n, 18.0)
     if crash_at is not None:
         # Simulate crash: SPY falls 15%, VIX spikes to 45
-        spy[crash_at:crash_at + 30] *= np.cumprod(np.full(30, 0.994))
-        vix[crash_at:crash_at + 30] = 45.0
+        spy[crash_at : crash_at + 30] *= np.cumprod(np.full(30, 0.994))
+        vix[crash_at : crash_at + 30] = 45.0
     return pd.DataFrame({"adj_close": spy, "tlt_close": tlt, "vix_close": vix}, index=idx)
 
 
@@ -52,8 +51,13 @@ def test_resumes_normal_after_recovery():
     prices = _prices(n=400, crash_at=150)
     # VIX returns to 18 after crash window
     strat = CrisisProtocolRiskParity(
-        vol_lookback=60, drawdown_window=20, crisis_dd=-0.10,
-        resume_dd=-0.07, vix_spike=35.0, vix_resume=30.0, crisis_tlt=0.90
+        vol_lookback=60,
+        drawdown_window=20,
+        crisis_dd=-0.10,
+        resume_dd=-0.07,
+        vix_spike=35.0,
+        vix_resume=30.0,
+        crisis_tlt=0.90,
     )
     w = strat.generate_weights(prices)
     # After recovery (crash was at 150-180), later rows should not be all 90/10

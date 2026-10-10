@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import PreHolidayDrift
+from erised.strategies.base import PreHolidayDrift
 
 
 def _prices(start: str = "2000-01-01", n: int = 500) -> pd.DataFrame:

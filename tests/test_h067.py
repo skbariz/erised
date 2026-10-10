@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import VixPercentileRegime
+from erised.strategies.base import VixPercentileRegime
 
 
 def _prices(vix_arr: list[float] | None = None, n: int = 300) -> pd.DataFrame:
@@ -19,7 +19,9 @@ def _prices(vix_arr: list[float] | None = None, n: int = 300) -> pd.DataFrame:
 
 def test_raises_without_vix():
     strat = VixPercentileRegime()
-    df = pd.DataFrame({"adj_close": [100.0] * 100}, index=pd.date_range("2000-01-01", periods=100, freq="B"))
+    df = pd.DataFrame(
+        {"adj_close": [100.0] * 100}, index=pd.date_range("2000-01-01", periods=100, freq="B")
+    )
     with pytest.raises(ValueError, match="vix_close"):
         strat.generate_positions(df)
 

@@ -5,11 +5,13 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import FiveAssetRotation
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import FiveAssetRotation
 
 
-def _prices(spy_rets, tlt_rets=None, gld_rets=None, dbc_rets=None, vnq_rets=None, start="2010-01-04"):
+def _prices(
+    spy_rets, tlt_rets=None, gld_rets=None, dbc_rets=None, vnq_rets=None, start="2010-01-04"
+):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
     spy = [100.0]
@@ -47,11 +49,11 @@ def test_selects_top_momentum_asset():
     """SPY best momentum → all weight in SPY."""
     n = 400
     prices = _prices(
-        [0.003] * n,   # SPY: strong positive
-        [0.001] * n,   # TLT: weaker
+        [0.003] * n,  # SPY: strong positive
+        [0.001] * n,  # TLT: weaker
         [0.0005] * n,  # GLD: weakest
-        [0.001] * n,   # DBC
-        [0.001] * n,   # VNQ
+        [0.001] * n,  # DBC
+        [0.001] * n,  # VNQ
     )
     w = FiveAssetRotation(long_days=252, skip_days=21).generate_weights(prices)
     assert w["SPY"].iloc[-1] == 1.0

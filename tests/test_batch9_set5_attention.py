@@ -1,9 +1,12 @@
 """Tests for H391-H395: Set 5 Batch 9 attention/vol proxy strategies."""
+
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 import pytest
-from quant.strategies.cross_sectional import (
+
+from erised.strategies.cross_sectional import (
     ConsistentMomentumPort,
     LowAttentionValuePort,
     LowVolDisagreementAvoid,
@@ -63,14 +66,16 @@ def operating_cf(dates):
 
 @pytest.fixture
 def sectors():
-    return pd.Series({
-        "HIGH_GP": "Tech",
-        "LOW_GP": "Tech",
-        "HIGH_MOM": "Finance",
-        "LOW_MOM": "Finance",
-        "HIGH_VOL": "Energy",
-        "NEUTRAL": "Health",
-    })
+    return pd.Series(
+        {
+            "HIGH_GP": "Tech",
+            "LOW_GP": "Tech",
+            "HIGH_MOM": "Finance",
+            "LOW_MOM": "Finance",
+            "HIGH_VOL": "Energy",
+            "NEUTRAL": "Health",
+        }
+    )
 
 
 def _valid(w):
@@ -106,19 +111,29 @@ def test_low_vol_disagreement_avoid(dates, membership, prices, gross_profit, tot
     assert late["HIGH_VOL"].mean() <= late["NEUTRAL"].mean() + 0.1
 
 
-def test_return_spike_risk_filter(dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors):
+def test_return_spike_risk_filter(
+    dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors
+):
     w = ReturnSpikeRiskFilter(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        sectors=sectors,
     ).generate_weights(prices, membership)
     assert w.shape == prices.shape
     _valid(w)
 
 
-def test_volatility_aware_composite(dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors):
+def test_volatility_aware_composite(
+    dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors
+):
     w = VolatilityAwareComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        sectors=sectors,
     ).generate_weights(prices, membership)
     assert w.shape == prices.shape
     _valid(w)

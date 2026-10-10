@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import RiskParityMomentumFilter
+from erised.strategies.base import RiskParityMomentumFilter
 
 
 def _prices(n: int = 400, spy_up: bool = True, tlt_up: bool = True) -> pd.DataFrame:

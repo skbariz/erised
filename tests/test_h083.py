@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import ContrarianMultiAssetRotation
+from erised.strategies.base import ContrarianMultiAssetRotation
 
 
 def _prices(n: int = 500) -> pd.DataFrame:
@@ -43,9 +42,9 @@ def test_each_row_at_most_one_asset():
 def test_flat_when_loser_still_falling():
     # TLT is clearly the worst 12m performer AND still falling (3m negative) → flat
     idx = pd.date_range("2004-01-01", periods=500, freq="B")
-    spy = 100 * np.cumprod(np.full(500, 1.002))   # clearly winning
-    tlt = 100 * np.cumprod(np.full(500, 0.997))   # clearly losing AND still falling
-    gld = 100 * np.cumprod(np.full(500, 1.001))   # middle
+    spy = 100 * np.cumprod(np.full(500, 1.002))  # clearly winning
+    tlt = 100 * np.cumprod(np.full(500, 0.997))  # clearly losing AND still falling
+    gld = 100 * np.cumprod(np.full(500, 1.001))  # middle
     prices = pd.DataFrame({"adj_close": spy, "tlt_close": tlt, "gld_close": gld}, index=idx)
     w = ContrarianMultiAssetRotation().generate_weights(prices)
     # TLT keeps falling → confirm_days return still negative → no allocation

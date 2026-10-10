@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import TripleConfirmCalendar
+from erised.strategies.base import TripleConfirmCalendar
 
 
 def _prices(start: str = "2003-01-01", n: int = 600, tlt_trend: str = "down") -> pd.DataFrame:
@@ -22,7 +22,9 @@ def _prices(start: str = "2003-01-01", n: int = 600, tlt_trend: str = "down") ->
 
 def test_raises_without_tlt():
     strat = TripleConfirmCalendar()
-    df = pd.DataFrame({"adj_close": [100.0] * 100}, index=pd.date_range("2003-01-01", periods=100, freq="B"))
+    df = pd.DataFrame(
+        {"adj_close": [100.0] * 100}, index=pd.date_range("2003-01-01", periods=100, freq="B")
+    )
     with pytest.raises(ValueError, match="tlt_close"):
         strat.generate_positions(df)
 
@@ -59,9 +61,7 @@ def test_flat_before_tlt_data():
     idx = pd.date_range("2000-01-01", periods=100, freq="B")
     rng = np.random.default_rng(0)
     spy = 100 * np.cumprod(1 + rng.normal(0.0003, 0.01, 100))
-    prices = pd.DataFrame(
-        {"adj_close": spy, "tlt_close": np.nan}, index=idx
-    )
+    prices = pd.DataFrame({"adj_close": spy, "tlt_close": np.nan}, index=idx)
     pos = TripleConfirmCalendar().generate_positions(prices)
     assert pos.sum() == pytest.approx(0.0)
 

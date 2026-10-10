@@ -6,8 +6,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.engine import assert_no_lookahead, assert_no_lookahead_multi, run_backtest
-from quant.strategies.base import (
+from erised.backtest.engine import assert_no_lookahead, assert_no_lookahead_multi, run_backtest
+from erised.strategies.base import (
     AbsoluteMomentumStrategy,
     ADXFilteredMACrossover,
     BuyAndHold,
@@ -1069,11 +1069,6 @@ def test_quarter_end_drift_only_active_near_quarter_end():
     """No more than n_days per quarter should be in the window."""
     prices = _make_prices_dated(300, start="1995-01-03")
     pos = QuarterEndDrift(n_days=5).generate_positions(prices)
-    # Count active days per quarter
-    from quant.strategies.base import _calendar_quarter_rank_end
-
-    rank_end = _calendar_quarter_rank_end(prices.index)
-    # Active days = rank_end < 5; should be exactly 5 per quarter for full quarters
     quarters = prices.index.to_period("Q")
     for q in quarters.unique():
         q_active = pos[quarters == q].sum()

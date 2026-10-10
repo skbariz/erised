@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import VixRiskParityEnhanced
+from erised.strategies.base import VixRiskParityEnhanced
 
 
 def _prices(n: int = 300, vix_val: float = 20.0, spike_at: int | None = None) -> pd.DataFrame:

@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     AttentionReversalScreen,
     EarlyStageMomentum,
     MomentumVolatilityScore,
@@ -114,7 +114,6 @@ def test_vol_surge_row_sum():
 
 def test_vol_surge_excludes_negative_return_stocks():
     # Make all stocks have negative 21-day returns — no stocks flagged
-    rng = np.random.default_rng(99)
     n_days, n_stocks = 300, 10
     dates = pd.date_range("2005-01-03", periods=n_days, freq="B")
     tickers = [f"T{i:02d}" for i in range(n_stocks)]

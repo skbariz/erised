@@ -6,14 +6,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     LongShortMomentum,
     LongShortReversal,
     PCAOUMeanReversion,
     PCAResidualReversal,
     SectorPairsTrading,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -75,9 +74,7 @@ def make_cointegrated_prices() -> pd.DataFrame:
     sync_a = 100 * np.exp(common + rng.normal(0, 0.002, len(DATES)))
     sync_b = 100 * np.exp(common + rng.normal(0, 0.002, len(DATES)))
     noise = 100 * np.cumprod(1 + rng.normal(0, 0.02, len(DATES)))
-    df = pd.DataFrame(
-        {"SYNC_A": sync_a, "SYNC_B": sync_b, "NOISE": noise}, index=DATES
-    )
+    df = pd.DataFrame({"SYNC_A": sync_a, "SYNC_B": sync_b, "NOISE": noise}, index=DATES)
     return df
 
 
@@ -110,9 +107,7 @@ class TestSectorPairsTrading:
         """Cointegrated pair: verify reversal direction by forcing a spread divergence."""
         coint = make_cointegrated_prices()
         coint_sectors = pd.Series({"SYNC_A": "Tech", "SYNC_B": "Tech", "NOISE": "Energy"})
-        s = SectorPairsTrading(
-            train_prices=coint.iloc[:252], sectors=coint_sectors, entry_z=0.5
-        )
+        s = SectorPairsTrading(train_prices=coint.iloc[:252], sectors=coint_sectors, entry_z=0.5)
         w = s.generate_weights(coint, make_membership(coint))
         # Should have both positive and negative weights somewhere
         assert (w > 0).any().any(), "Should have long positions"
@@ -149,13 +144,11 @@ class TestPCAResidualReversal:
         assert s.components_df.shape[0] == 5
 
     def test_periodic_rebalance_structure(self, prices, membership, train_prices):
-        s = PCAResidualReversal(
-            train_prices=train_prices, sectors=SECTORS, rebalance_period=5
-        )
+        s = PCAResidualReversal(train_prices=train_prices, sectors=SECTORS, rebalance_period=5)
         w = s.generate_weights(prices, membership)
         # Rows 1-4 within each 5-day block should equal row 0 of that block
         block_start = w.iloc[::5]
-        for offset in range(1, 5):
+        for _ in range(1, 5):
             aligned = block_start.reindex(w.index, method="ffill")
             diff = (w - aligned).abs().max(axis=1)
             # Allow small float differences
@@ -230,7 +223,6 @@ class TestLongShortMomentum:
 
     def test_high_mom_long_low_mom_short(self):
         """Stock with monotonically rising price should be long; falling should be short."""
-        rng = np.random.default_rng(7)
         prices = make_prices()
         # Override: AAPL rises 100%, MSFT falls 50% over first 252 days
         up_factor = np.linspace(1.0, 2.0, len(DATES))

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     ElasticNetReturnForecast,
     MonotonicityVotingComposite,
     NonlinearMomentumBins,
@@ -79,8 +79,14 @@ def operating_cf(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def sectors() -> pd.Series:
     return pd.Series(
-        {"HIGH_GP": "Tech", "MED_GP": "Tech", "LOW_GP": "Finance",
-         "HIGH_MOM": "Finance", "MED_MOM": "Health", "LOW_MOM": "Health"}
+        {
+            "HIGH_GP": "Tech",
+            "MED_GP": "Tech",
+            "LOW_GP": "Finance",
+            "HIGH_MOM": "Finance",
+            "MED_MOM": "Health",
+            "LOW_MOM": "Health",
+        }
     )
 
 
@@ -94,15 +100,22 @@ def _weights_valid(w: pd.DataFrame) -> None:
 # H361 PercentileBinnedGP
 # ---------------------------------------------------------------------------
 
+
 def test_percentile_binned_gp_shape(dates, membership, prices, gross_profit, total_assets, sectors):
-    strat = PercentileBinnedGP(gross_profit=gross_profit, total_assets=total_assets, sectors=sectors)
+    strat = PercentileBinnedGP(
+        gross_profit=gross_profit, total_assets=total_assets, sectors=sectors
+    )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_percentile_binned_gp_prefers_high(dates, membership, prices, gross_profit, total_assets, sectors):
-    strat = PercentileBinnedGP(gross_profit=gross_profit, total_assets=total_assets, sectors=sectors)
+def test_percentile_binned_gp_prefers_high(
+    dates, membership, prices, gross_profit, total_assets, sectors
+):
+    strat = PercentileBinnedGP(
+        gross_profit=gross_profit, total_assets=total_assets, sectors=sectors
+    )
     w = strat.generate_weights(prices, membership)
     late = w.iloc[400:]
     assert late["HIGH_GP"].mean() >= late["LOW_GP"].mean(), "should prefer high GP/TA quintile"
@@ -112,10 +125,25 @@ def test_percentile_binned_gp_prefers_high(dates, membership, prices, gross_prof
 # H362 MonotonicityVotingComposite
 # ---------------------------------------------------------------------------
 
-def test_monotonicity_voting_shape(dates, membership, prices, gross_profit, total_assets, net_income, book_equity, operating_cf, sectors):
+
+def test_monotonicity_voting_shape(
+    dates,
+    membership,
+    prices,
+    gross_profit,
+    total_assets,
+    net_income,
+    book_equity,
+    operating_cf,
+    sectors,
+):
     strat = MonotonicityVotingComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
@@ -126,20 +154,49 @@ def test_monotonicity_voting_shape(dates, membership, prices, gross_profit, tota
 # H363 ElasticNetReturnForecast
 # ---------------------------------------------------------------------------
 
-def test_elastic_net_shape(dates, membership, prices, gross_profit, total_assets, net_income, book_equity, operating_cf, sectors):
+
+def test_elastic_net_shape(
+    dates,
+    membership,
+    prices,
+    gross_profit,
+    total_assets,
+    net_income,
+    book_equity,
+    operating_cf,
+    sectors,
+):
     strat = ElasticNetReturnForecast(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_elastic_net_no_negative_weights(dates, membership, prices, gross_profit, total_assets, net_income, book_equity, operating_cf, sectors):
+def test_elastic_net_no_negative_weights(
+    dates,
+    membership,
+    prices,
+    gross_profit,
+    total_assets,
+    net_income,
+    book_equity,
+    operating_cf,
+    sectors,
+):
     strat = ElasticNetReturnForecast(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert (w >= -1e-9).all().all(), "long-only: no negative weights"
@@ -148,6 +205,7 @@ def test_elastic_net_no_negative_weights(dates, membership, prices, gross_profit
 # ---------------------------------------------------------------------------
 # H364 NonlinearMomentumBins
 # ---------------------------------------------------------------------------
+
 
 def test_nonlinear_momentum_bins_shape(dates, membership, prices, sectors):
     strat = NonlinearMomentumBins(sectors=sectors)
@@ -178,27 +236,60 @@ def test_nonlinear_momentum_bins_narrower_than_quintile(dates, membership, price
 # H365 ShrunkSignalComposite
 # ---------------------------------------------------------------------------
 
-def test_shrunk_signal_composite_shape(dates, membership, prices, gross_profit, total_assets, net_income, book_equity, operating_cf, sectors):
+
+def test_shrunk_signal_composite_shape(
+    dates,
+    membership,
+    prices,
+    gross_profit,
+    total_assets,
+    net_income,
+    book_equity,
+    operating_cf,
+    sectors,
+):
     strat = ShrunkSignalComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_shrunk_signal_composite_clip_reduces_extremes(dates, membership, prices, gross_profit, total_assets, net_income, book_equity, operating_cf, sectors):
+def test_shrunk_signal_composite_clip_reduces_extremes(
+    dates,
+    membership,
+    prices,
+    gross_profit,
+    total_assets,
+    net_income,
+    book_equity,
+    operating_cf,
+    sectors,
+):
     # clip_val=1.0 should concentrate less than clip_val=5.0
     strat_tight = ShrunkSignalComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf,
-        sectors=sectors, clip_val=1.0
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
+        clip_val=1.0,
     )
     strat_loose = ShrunkSignalComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, book_equity=book_equity, operating_cf=operating_cf,
-        sectors=sectors, clip_val=5.0
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        book_equity=book_equity,
+        operating_cf=operating_cf,
+        sectors=sectors,
+        clip_val=5.0,
     )
     w_tight = strat_tight.generate_weights(prices, membership)
     w_loose = strat_loose.generate_weights(prices, membership)

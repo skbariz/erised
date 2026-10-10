@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     AccountingSustainabilityQualityComposite,
     DistressScreenedValueQuality,
     TailRiskFilteredCrossProgram,
@@ -35,7 +35,9 @@ def _make_spy_rets(panel: pd.DataFrame, seed: int = 99) -> pd.Series:
     return pd.Series(rng.normal(0.0004, 0.01, len(panel)), index=panel.index)
 
 
-def _make_fund(panel: pd.DataFrame, base: float = 1e9, growth: float = 0.03, seed: int = 7) -> pd.DataFrame:
+def _make_fund(
+    panel: pd.DataFrame, base: float = 1e9, growth: float = 0.03, seed: int = 7
+) -> pd.DataFrame:
     rng = np.random.default_rng(seed)
     n_days, n_stocks = panel.shape
     quarters = n_days // 63 + 2

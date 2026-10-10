@@ -9,8 +9,8 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.backtest.panel_engine import count_stock_trades, run_panel_backtest
-from quant.strategies.cross_sectional import (
+from erised.backtest.panel_engine import count_stock_trades, run_panel_backtest
+from erised.strategies.cross_sectional import (
     HighWaterMomentum,
     MomentumLongOnly,
     MomentumMarketNeutral,

@@ -26,7 +26,7 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from quant.data.loader import (  # noqa: E402
+from erised.data.loader import (  # noqa: E402
     _full_path,
     _holdout_path,
     _research_path,
@@ -48,8 +48,23 @@ logger = logging.getLogger(__name__)
 #   - 2025-2026: whatever happens
 HOLDOUT_START = date(2023, 1, 1)
 
-SYMBOLS = ["SPY", "TLT", "GLD", "SHY", "IEF", "LQD", "HYG", "DBC", "VNQ",
-           "IVE", "IVW", "IWM", "QQQ", "XLP", "XLU"]
+SYMBOLS = [
+    "SPY",
+    "TLT",
+    "GLD",
+    "SHY",
+    "IEF",
+    "LQD",
+    "HYG",
+    "DBC",
+    "VNQ",
+    "IVE",
+    "IVW",
+    "IWM",
+    "QQQ",
+    "XLP",
+    "XLU",
+]
 
 
 def seal_one(symbol: str, force: bool = False) -> dict:

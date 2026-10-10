@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.base import RatchetDrawdownProtection
+from erised.strategies.base import RatchetDrawdownProtection
 
 
 def _prices(n: int = 400) -> pd.DataFrame:
@@ -53,10 +53,12 @@ def test_reduced_scale_after_crash():
     n = 400
     idx = pd.date_range("2003-01-01", periods=n, freq="B")
     # Rise then crash
-    spy = np.concatenate([
-        100 * np.cumprod(np.full(200, 1.001)),
-        100 * np.cumprod(np.full(200, 0.994)) * 100 * np.cumprod(np.full(200, 1.001))[-1] / 100,
-    ])
+    spy = np.concatenate(
+        [
+            100 * np.cumprod(np.full(200, 1.001)),
+            100 * np.cumprod(np.full(200, 0.994)) * 100 * np.cumprod(np.full(200, 1.001))[-1] / 100,
+        ]
+    )
     tlt = 100 * np.cumprod(1 + np.random.default_rng(0).normal(0.0001, 0.002, n))
     prices = pd.DataFrame({"adj_close": spy, "tlt_close": tlt}, index=idx)
     w = RatchetDrawdownProtection(drawdown_limit=0.15).generate_weights(prices)

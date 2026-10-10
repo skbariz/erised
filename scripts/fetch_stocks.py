@@ -25,7 +25,8 @@ log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+from erised.config import DATA_DIR  # noqa: E402
+
 STOCKS_DIR = DATA_DIR / "stocks"
 TICKERS_FILE = DATA_DIR / "sp500_tickers.txt"
 

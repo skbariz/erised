@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     QFactorComposite,
     QInvestmentRank,
     QInvestProfCombo,
@@ -46,8 +46,22 @@ def prices(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def total_assets_panel(dates: pd.DatetimeIndex) -> pd.DataFrame:
     # HIGH_INV grows fast; LOW_INV stays flat
-    base = {"HIGH_INV": 500.0, "LOW_INV": 500.0, "HIGH_ROE": 300.0, "LOW_ROE": 300.0, "MOM_HI": 400.0, "MOM_LO": 400.0}
-    growth = {"HIGH_INV": 0.001, "LOW_INV": 0.0001, "HIGH_ROE": 0.0002, "LOW_ROE": 0.0002, "MOM_HI": 0.0003, "MOM_LO": 0.0003}
+    base = {
+        "HIGH_INV": 500.0,
+        "LOW_INV": 500.0,
+        "HIGH_ROE": 300.0,
+        "LOW_ROE": 300.0,
+        "MOM_HI": 400.0,
+        "MOM_LO": 400.0,
+    }
+    growth = {
+        "HIGH_INV": 0.001,
+        "LOW_INV": 0.0001,
+        "HIGH_ROE": 0.0002,
+        "LOW_ROE": 0.0002,
+        "MOM_HI": 0.0003,
+        "MOM_LO": 0.0003,
+    }
     data = {t: base[t] * (1 + growth[t]) ** np.arange(N_DATES) for t in TICKERS}
     return pd.DataFrame(data, index=dates)
 
@@ -87,7 +101,14 @@ def gross_profit_panel(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def sectors() -> pd.Series:
     return pd.Series(
-        {"HIGH_INV": "Tech", "LOW_INV": "Tech", "HIGH_ROE": "Finance", "LOW_ROE": "Finance", "MOM_HI": "Health", "MOM_LO": "Health"}
+        {
+            "HIGH_INV": "Tech",
+            "LOW_INV": "Tech",
+            "HIGH_ROE": "Finance",
+            "LOW_ROE": "Finance",
+            "MOM_HI": "Health",
+            "MOM_LO": "Health",
+        }
     )
 
 
@@ -100,6 +121,7 @@ def _weights_valid(w: pd.DataFrame) -> None:
 # ---------------------------------------------------------------------------
 # H351 QInvestmentRank
 # ---------------------------------------------------------------------------
+
 
 def test_q_investment_rank_shape(dates, membership, prices, total_assets_panel, sectors):
     strat = QInvestmentRank(total_assets=total_assets_panel, sectors=sectors)
@@ -119,6 +141,7 @@ def test_q_investment_rank_prefers_low_inv(dates, membership, prices, total_asse
 # H352 QROELevel
 # ---------------------------------------------------------------------------
 
+
 def test_q_roe_level_shape(dates, membership, prices, net_income_panel, book_equity_panel, sectors):
     strat = QROELevel(net_income=net_income_panel, book_equity=book_equity_panel, sectors=sectors)
     w = strat.generate_weights(prices, membership)
@@ -126,7 +149,9 @@ def test_q_roe_level_shape(dates, membership, prices, net_income_panel, book_equ
     _weights_valid(w)
 
 
-def test_q_roe_level_prefers_high_roe(dates, membership, prices, net_income_panel, book_equity_panel, sectors):
+def test_q_roe_level_prefers_high_roe(
+    dates, membership, prices, net_income_panel, book_equity_panel, sectors
+):
     strat = QROELevel(net_income=net_income_panel, book_equity=book_equity_panel, sectors=sectors)
     w = strat.generate_weights(prices, membership)
     late = w.iloc[600:]
@@ -137,10 +162,15 @@ def test_q_roe_level_prefers_high_roe(dates, membership, prices, net_income_pane
 # H353 QInvestProfCombo
 # ---------------------------------------------------------------------------
 
-def test_q_invest_prof_combo_shape(dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors):
+
+def test_q_invest_prof_combo_shape(
+    dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors
+):
     strat = QInvestProfCombo(
-        total_assets=total_assets_panel, net_income=net_income_panel,
-        book_equity=book_equity_panel, sectors=sectors
+        total_assets=total_assets_panel,
+        net_income=net_income_panel,
+        book_equity=book_equity_panel,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
@@ -151,20 +181,29 @@ def test_q_invest_prof_combo_shape(dates, membership, prices, total_assets_panel
 # H354 QResidualMomentum
 # ---------------------------------------------------------------------------
 
-def test_q_residual_momentum_shape(dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors):
+
+def test_q_residual_momentum_shape(
+    dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors
+):
     strat = QResidualMomentum(
-        total_assets=total_assets_panel, net_income=net_income_panel,
-        book_equity=book_equity_panel, sectors=sectors
+        total_assets=total_assets_panel,
+        net_income=net_income_panel,
+        book_equity=book_equity_panel,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape
     _weights_valid(w)
 
 
-def test_q_residual_momentum_no_lookahead(dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors):
+def test_q_residual_momentum_no_lookahead(
+    dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, sectors
+):
     strat = QResidualMomentum(
-        total_assets=total_assets_panel, net_income=net_income_panel,
-        book_equity=book_equity_panel, sectors=sectors
+        total_assets=total_assets_panel,
+        net_income=net_income_panel,
+        book_equity=book_equity_panel,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     # Early rows (before enough history) should be all-zero
@@ -175,10 +214,23 @@ def test_q_residual_momentum_no_lookahead(dates, membership, prices, total_asset
 # H355 QFactorComposite
 # ---------------------------------------------------------------------------
 
-def test_q_factor_composite_shape(dates, membership, prices, total_assets_panel, net_income_panel, book_equity_panel, gross_profit_panel, sectors):
+
+def test_q_factor_composite_shape(
+    dates,
+    membership,
+    prices,
+    total_assets_panel,
+    net_income_panel,
+    book_equity_panel,
+    gross_profit_panel,
+    sectors,
+):
     strat = QFactorComposite(
-        total_assets=total_assets_panel, net_income=net_income_panel,
-        book_equity=book_equity_panel, gross_profit=gross_profit_panel, sectors=sectors
+        total_assets=total_assets_panel,
+        net_income=net_income_panel,
+        book_equity=book_equity_panel,
+        gross_profit=gross_profit_panel,
+        sectors=sectors,
     )
     w = strat.generate_weights(prices, membership)
     assert w.shape == prices.shape

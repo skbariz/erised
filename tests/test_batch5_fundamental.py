@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     CashOperatingProfitability,
     FF5Composite,
     FF5InvestmentFactor,
@@ -31,10 +31,7 @@ def membership(dates: pd.DatetimeIndex) -> pd.DataFrame:
 @pytest.fixture
 def prices(dates: pd.DatetimeIndex) -> pd.DataFrame:
     np.random.seed(11)
-    data = {
-        t: 50 + np.linspace(0, 10, N_DATES) + np.random.randn(N_DATES) * 0.3
-        for t in TICKERS
-    }
+    data = {t: 50 + np.linspace(0, 10, N_DATES) + np.random.randn(N_DATES) * 0.3 for t in TICKERS}
     return pd.DataFrame(data, index=dates)
 
 
@@ -59,8 +56,8 @@ def total_assets(dates) -> pd.DataFrame:
     # We model as level; growth computed from shift(252)
     # After 252 days, CONS stays flat; AGG grows by 50%
     df = pd.DataFrame(np.nan, index=dates, columns=TICKERS)
-    for t, base, rate in zip(TICKERS, [500, 500, 500, 500, 500], [1.0, 1.5, 1.1, 1.2, 1.05]):
-        df.loc[dates[::63], t] = base
+    for t in TICKERS:
+        df.loc[dates[::63], t] = 500
     df = df.ffill()
     # Simulate growth after year 1 for AGG
     half = len(dates) // 2
@@ -136,7 +133,9 @@ class TestFF5InvestmentFactor:
 
 
 class TestOperatingProfitabilityFF5:
-    def test_weights_sum_to_one(self, prices, membership, gross_profit, book_equity, sectors, dates):
+    def test_weights_sum_to_one(
+        self, prices, membership, gross_profit, book_equity, sectors, dates
+    ):
         strat = OperatingProfitabilityFF5(gross_profit, book_equity, sectors)
         w = strat.generate_weights(prices, membership)
         late = w.loc[dates[700:]].sum(axis=1)
@@ -149,7 +148,9 @@ class TestOperatingProfitabilityFF5:
         late = w.loc[dates[700:]]
         assert late["CONS"].mean() > 0
 
-    def test_negative_be_excluded(self, prices, membership, gross_profit, book_equity, sectors, dates):
+    def test_negative_be_excluded(
+        self, prices, membership, gross_profit, book_equity, sectors, dates
+    ):
         be_bad = book_equity.copy()
         be_bad["WEAK"] = -50.0
         strat = OperatingProfitabilityFF5(gross_profit, be_bad, sectors)
@@ -164,7 +165,15 @@ class TestOperatingProfitabilityFF5:
 
 class TestFF5Composite:
     def test_weights_sum_to_one(
-        self, prices, membership, book_equity, shares_outstanding, gross_profit, total_assets, sectors, dates
+        self,
+        prices,
+        membership,
+        book_equity,
+        shares_outstanding,
+        gross_profit,
+        total_assets,
+        sectors,
+        dates,
     ):
         strat = FF5Composite(book_equity, shares_outstanding, gross_profit, total_assets, sectors)
         w = strat.generate_weights(prices, membership)
@@ -172,7 +181,15 @@ class TestFF5Composite:
         assert (late.round(6) == 1.0).mean() > 0.90
 
     def test_sector_neutral(
-        self, prices, membership, book_equity, shares_outstanding, gross_profit, total_assets, sectors, dates
+        self,
+        prices,
+        membership,
+        book_equity,
+        shares_outstanding,
+        gross_profit,
+        total_assets,
+        sectors,
+        dates,
     ):
         strat = FF5Composite(book_equity, shares_outstanding, gross_profit, total_assets, sectors)
         w = strat.generate_weights(prices, membership)
@@ -184,7 +201,15 @@ class TestFF5Composite:
         assert (tech_wt - fin_wt).abs().mean() < 0.05
 
     def test_no_nan_weights(
-        self, prices, membership, book_equity, shares_outstanding, gross_profit, total_assets, sectors, dates
+        self,
+        prices,
+        membership,
+        book_equity,
+        shares_outstanding,
+        gross_profit,
+        total_assets,
+        sectors,
+        dates,
     ):
         strat = FF5Composite(book_equity, shares_outstanding, gross_profit, total_assets, sectors)
         w = strat.generate_weights(prices, membership)
@@ -210,7 +235,9 @@ class TestReturnOnAssets:
         late = w.loc[dates[700:]]
         assert late["QUAL"].mean() > 0
 
-    def test_low_roa_not_dominant(self, prices, membership, net_income, total_assets, sectors, dates):
+    def test_low_roa_not_dominant(
+        self, prices, membership, net_income, total_assets, sectors, dates
+    ):
         """WEAK has NI/TA = 5/500 = 0.01 (lowest); should get less weight than QUAL."""
         strat = ReturnOnAssets(net_income, total_assets, sectors)
         w = strat.generate_weights(prices, membership)
@@ -224,7 +251,9 @@ class TestReturnOnAssets:
 
 
 class TestCashOperatingProfitability:
-    def test_weights_sum_to_one(self, prices, membership, operating_cf, book_equity, sectors, dates):
+    def test_weights_sum_to_one(
+        self, prices, membership, operating_cf, book_equity, sectors, dates
+    ):
         strat = CashOperatingProfitability(operating_cf, book_equity, sectors)
         w = strat.generate_weights(prices, membership)
         late = w.loc[dates[700:]].sum(axis=1)
@@ -237,7 +266,9 @@ class TestCashOperatingProfitability:
         late = w.loc[dates[700:]]
         assert late["QUAL"].mean() > 0
 
-    def test_negative_be_excluded(self, prices, membership, operating_cf, book_equity, sectors, dates):
+    def test_negative_be_excluded(
+        self, prices, membership, operating_cf, book_equity, sectors, dates
+    ):
         be_bad = book_equity.copy()
         be_bad["WEAK"] = -10.0
         strat = CashOperatingProfitability(operating_cf, be_bad, sectors)

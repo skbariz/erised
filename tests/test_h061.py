@@ -5,19 +5,25 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import ValueGrowthRotation
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import ValueGrowthRotation
 
 
-def _prices(spy_rets, shy_rets=None, tlt_rets=None, ive_rets=None, ivw_rets=None, start="2010-01-04"):
+def _prices(
+    spy_rets, shy_rets=None, tlt_rets=None, ive_rets=None, ivw_rets=None, start="2010-01-04"
+):
     n = len(spy_rets)
     idx = pd.bdate_range(start=start, periods=n + 1)
     spy = [100.0]
     for r in spy_rets:
         spy.append(spy[-1] * (1 + r))
     df = pd.DataFrame({"adj_close": spy}, index=idx)
-    for col, rets in [("shy_close", shy_rets), ("tlt_close", tlt_rets),
-                      ("ive_close", ive_rets), ("ivw_close", ivw_rets)]:
+    for col, rets in [
+        ("shy_close", shy_rets),
+        ("tlt_close", tlt_rets),
+        ("ive_close", ive_rets),
+        ("ivw_close", ivw_rets),
+    ]:
         if rets is not None:
             px = [100.0]
             for r in rets:

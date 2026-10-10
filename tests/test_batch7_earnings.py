@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     CashEarningsDrift,
     EarningsMomentumComposite,
     EarningsTrendLong,
@@ -95,8 +95,8 @@ def operating_cf(dates: pd.DatetimeIndex) -> pd.DataFrame:
         "GROW": [90 + i * 12 for i in range(N_DATES // 63 + 1)],
         "FLAT": [90] * (N_DATES // 63 + 1),
         "SHRINK": [150 - i * 12 for i in range(N_DATES // 63 + 1)],
-        "CASH": [75 + i * 10 for i in range(N_DATES // 63 + 1)],   # OCF ~ NI: cash quality
-        "ACCRUAL": [10 + i * 1 for i in range(N_DATES // 63 + 1)], # OCF << NI: accrual-heavy
+        "CASH": [75 + i * 10 for i in range(N_DATES // 63 + 1)],  # OCF ~ NI: cash quality
+        "ACCRUAL": [10 + i * 1 for i in range(N_DATES // 63 + 1)],  # OCF << NI: accrual-heavy
     }
     return _make_fund_panel(dates, ocf_values)
 
@@ -139,7 +139,9 @@ class TestEarningsTrendLong:
 
 
 class TestRevenueEarningsDoubleGrowth:
-    def test_weights_sum_to_one_or_zero(self, prices, membership, net_income, revenue, sectors, dates):
+    def test_weights_sum_to_one_or_zero(
+        self, prices, membership, net_income, revenue, sectors, dates
+    ):
         strat = RevenueEarningsDoubleGrowth(net_income, revenue, sectors)
         w = strat.generate_weights(prices, membership)
         row_sums = w.loc[dates[700:]].sum(axis=1)
@@ -233,9 +235,7 @@ class TestCashEarningsDrift:
 
 
 class TestEarningsMomentumComposite:
-    def test_weights_sum_to_one(
-        self, prices, membership, net_income, sectors, dates
-    ):
+    def test_weights_sum_to_one(self, prices, membership, net_income, sectors, dates):
         strat = EarningsMomentumComposite(net_income, sectors)
         w = strat.generate_weights(prices, membership)
         late = w.loc[dates[700:]].sum(axis=1)
@@ -249,7 +249,7 @@ class TestEarningsMomentumComposite:
     def test_uses_both_signals(self, prices, membership, net_income, sectors, dates):
         """Composite should differ from pure-momentum weights (NI contributes)."""
         strat_em = EarningsMomentumComposite(net_income, sectors)
-        from quant.strategies.cross_sectional import SectorNeutralMomentum
+        from erised.strategies.cross_sectional import SectorNeutralMomentum
 
         strat_m = SectorNeutralMomentum(sectors)
         w_em = strat_em.generate_weights(prices, membership)

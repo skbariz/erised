@@ -26,7 +26,8 @@ log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+from erised.config import DATA_DIR  # noqa: E402
+
 RESEARCH_END = pd.Timestamp("2022-12-31")
 RESEARCH_START = pd.Timestamp("1993-01-01")
 
@@ -35,7 +36,6 @@ WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
 
 def _fetch_wiki_tables() -> tuple[pd.DataFrame, pd.DataFrame]:
     import io
-
     import urllib.request
 
     log.info("Fetching Wikipedia S&P 500 page...")

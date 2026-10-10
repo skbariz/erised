@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.base import PCARiskRegime
+from erised.strategies.base import PCARiskRegime
 
 
 def _prices(n: int = 600, spy_drift: float = 0.0003, tlt_drift: float = 0.0001) -> pd.DataFrame:
@@ -52,8 +52,8 @@ def test_rising_spy_favors_spy_position():
     n = 600
     idx = pd.date_range("2003-01-01", periods=n, freq="B")
     rng = np.random.default_rng(42)
-    spy = 100 * np.cumprod(1 + rng.normal(0.002, 0.01, n))   # strong uptrend
-    tlt = 100 * np.cumprod(1 + rng.normal(0.0001, 0.005, n)) # near-flat
+    spy = 100 * np.cumprod(1 + rng.normal(0.002, 0.01, n))  # strong uptrend
+    tlt = 100 * np.cumprod(1 + rng.normal(0.0001, 0.005, n))  # near-flat
     gld = 100 * np.cumprod(1 + rng.normal(0.0001, 0.008, n))
     prices = pd.DataFrame({"adj_close": spy, "tlt_close": tlt, "gld_close": gld}, index=idx)
     w = PCARiskRegime(pca_lookback=252, signal_days=21).generate_weights(prices)

@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import TechDefensiveMomentum
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import TechDefensiveMomentum
 
 
 def _prices(spy_rets, qqq_rets=None, xlu_rets=None, start="2005-01-04"):

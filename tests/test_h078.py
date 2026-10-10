@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import SeasonalRiskParity
+from erised.strategies.base import SeasonalRiskParity
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

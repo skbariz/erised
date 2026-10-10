@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     CompositeValueMomentum,
     FiveYearReversal,
     LongTermReversal,
@@ -14,7 +14,6 @@ from quant.strategies.cross_sectional import (
     NearFiftyTwoWeekLow,
     ResidualMomentum,
 )
-
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -38,9 +37,9 @@ def reversal_panel(dates):
     n = len(dates)
     # W: steady winner (+30% per year), L: steady loser (-20% per year), M: flat
     w = pd.Series(100 * (1.30 ** (np.arange(n) / 252)), index=dates)
-    l = pd.Series(100 * (0.80 ** (np.arange(n) / 252)), index=dates)
+    loser = pd.Series(100 * (0.80 ** (np.arange(n) / 252)), index=dates)
     m = pd.Series(np.ones(n) * 100.0, index=dates)
-    return pd.DataFrame({"W": w, "L": l, "M": m})
+    return pd.DataFrame({"W": w, "L": loser, "M": m})
 
 
 @pytest.fixture
@@ -112,9 +111,7 @@ class TestLongTermReversal:
         n = 800
         strat = LongTermReversal()
         w_full = strat.generate_weights(reversal_panel, membership)
-        w_trunc = strat.generate_weights(
-            reversal_panel.iloc[:n], membership.iloc[:n]
-        )
+        w_trunc = strat.generate_weights(reversal_panel.iloc[:n], membership.iloc[:n])
         last_row_full = w_full.iloc[n - 1]
         last_row_trunc = w_trunc.iloc[-1]
         pd.testing.assert_series_equal(last_row_full, last_row_trunc, check_names=False)
@@ -299,7 +296,7 @@ class TestNearFiftyTwoWeekLow:
 
     def test_proxy_opposite_of_h152(self, synthetic_panel):
         """Near-52wk-low and HighWaterMomentum should generally select opposite stocks."""
-        from quant.strategies.cross_sectional import HighWaterMomentum
+        from erised.strategies.cross_sectional import HighWaterMomentum
 
         mem3 = pd.DataFrame(True, index=synthetic_panel.index, columns=["A", "B", "C"])
         strat_low = NearFiftyTwoWeekLow(top_quantile=0.40)

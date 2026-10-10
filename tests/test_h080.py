@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import RiskParityYieldCurveOverlay
+from erised.strategies.base import RiskParityYieldCurveOverlay
 
 
 def _prices(n: int = 300, curve_inverted: bool = False) -> pd.DataFrame:

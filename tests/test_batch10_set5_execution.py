@@ -1,9 +1,12 @@
 """Tests for H396-H399: Set 5 Batch 10 execution-aware strategies."""
+
 from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 import pytest
-from quant.strategies.cross_sectional import (
+
+from erised.strategies.cross_sectional import (
     ExecutionOptimizedComposite,
     LiquidityRegimeCapPort,
     LowTurnoverGP,
@@ -60,13 +63,15 @@ def operating_cf(dates):
 
 @pytest.fixture
 def sectors():
-    return pd.Series({
-        "HIGH_GP": "Tech",
-        "LOW_GP": "Tech",
-        "HIGH_VOL": "Energy",
-        "LOW_VOL": "Energy",
-        "NEUTRAL": "Health",
-    })
+    return pd.Series(
+        {
+            "HIGH_GP": "Tech",
+            "LOW_GP": "Tech",
+            "HIGH_VOL": "Energy",
+            "LOW_VOL": "Energy",
+            "NEUTRAL": "Health",
+        }
+    )
 
 
 def _valid(w):
@@ -85,10 +90,15 @@ def test_low_turnover_gp(dates, membership, prices, gross_profit, total_assets, 
     assert late["HIGH_GP"].mean() >= late["LOW_GP"].mean()
 
 
-def test_spread_aware_position_sizer(dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors):
+def test_spread_aware_position_sizer(
+    dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors
+):
     w = SpreadAwarePositionSizer(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        sectors=sectors,
     ).generate_weights(prices, membership)
     assert w.shape == prices.shape
     _valid(w)
@@ -102,10 +112,15 @@ def test_liquidity_regime_cap_port(dates, membership, prices, gross_profit, tota
     _valid(w)
 
 
-def test_execution_optimized_composite(dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors):
+def test_execution_optimized_composite(
+    dates, membership, prices, gross_profit, total_assets, net_income, operating_cf, sectors
+):
     w = ExecutionOptimizedComposite(
-        gross_profit=gross_profit, total_assets=total_assets,
-        net_income=net_income, operating_cf=operating_cf, sectors=sectors
+        gross_profit=gross_profit,
+        total_assets=total_assets,
+        net_income=net_income,
+        operating_cf=operating_cf,
+        sectors=sectors,
     ).generate_weights(prices, membership)
     assert w.shape == prices.shape
     _valid(w)

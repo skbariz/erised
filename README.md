@@ -29,7 +29,7 @@ uv run pytest
 ## Structure
 
 ```
-src/quant/
+src/erised/
   data/         # ingestion, validation, loading
   backtest/     # event-driven engine
   features/     # point-in-time feature library

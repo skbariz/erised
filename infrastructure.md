@@ -8,7 +8,7 @@ Complete guide to every tool, module, and script in this research platform.
 
 ```
 quant/
-├── src/quant/              # All importable library code (src layout)
+├── src/erised/              # All importable library code (src layout)
 │   ├── strategies/
 │   │   ├── base.py         # Strategy ABC + all hypothesis classes
 │   │   └── __init__.py     # Public exports
@@ -40,7 +40,7 @@ All Python commands are run through `uv` to ensure the correct virtualenv.
 ```bash
 uv run python scripts/run_batch1.py   # run a script
 uv run pytest                          # run tests
-uv run python -c "import quant"        # quick import check
+uv run python -c "import erised"        # quick import check
 ```
 
 `uv` reads `pyproject.toml` for dependencies and manages `.venv` automatically. Never activate the venv manually or use `python` directly — always prefix with `uv run`.
@@ -65,7 +65,7 @@ uv run python -c "import quant"        # quick import check
 ### Loading data in code
 
 ```python
-from quant.data.loader import load_research, load_holdout
+from erised.data.loader import load_research, load_holdout
 
 # Always use this for strategy development
 prices = load_research("SPY")   # returns DataFrame with adj_close, open, high, low, close, volume
@@ -96,7 +96,7 @@ Splits the full series at the holdout boundary, writes `*_research.parquet` and 
 
 ## Strategy interface
 
-### `quant.strategies.base.Strategy` (ABC)
+### `erised.strategies.base.Strategy` (ABC)
 
 Every trading algorithm inherits from `Strategy` and overrides one method:
 
@@ -190,10 +190,10 @@ class Strategy(ABC):
 
 ## Backtest engine
 
-### `quant.backtest.engine.run_backtest()`
+### `erised.backtest.engine.run_backtest()`
 
 ```python
-from quant.backtest.engine import run_backtest
+from erised.backtest.engine import run_backtest
 
 result = run_backtest(
     prices,           # DataFrame with adj_close
@@ -222,7 +222,7 @@ result = run_backtest(
 ### `assert_no_lookahead()`
 
 ```python
-from quant.backtest.engine import assert_no_lookahead
+from erised.backtest.engine import assert_no_lookahead
 
 assert_no_lookahead(strategy.generate_positions, prices, n_checks=20)
 ```
@@ -233,10 +233,10 @@ Picks 20 random dates, truncates the price series at each, and verifies that the
 
 ## Walk-forward validation
 
-### `quant.validation.walk_forward.make_folds()`
+### `erised.validation.walk_forward.make_folds()`
 
 ```python
-from quant.validation.walk_forward import make_folds
+from erised.validation.walk_forward import make_folds
 
 folds = make_folds(prices, train_years=5, test_years=2)
 # Returns list of 12 Fold objects for 1993–2022 SPY research data
@@ -247,7 +247,7 @@ Default configuration: **5-year train / 2-year test / 12 non-overlapping folds**
 ### `walk_forward()`
 
 ```python
-from quant.validation.walk_forward import walk_forward
+from erised.validation.walk_forward import walk_forward
 
 wf = walk_forward(
     prices,
@@ -265,7 +265,7 @@ wf = walk_forward(
 ### `walk_forward_multi()`
 
 ```python
-from quant.validation.walk_forward import walk_forward_multi
+from erised.validation.walk_forward import walk_forward_multi
 
 wf = walk_forward_multi(
     prices,
@@ -279,7 +279,7 @@ wf = walk_forward_multi(
 **Dispatch pattern (used in all ensemble runners):**
 
 ```python
-from quant.strategies.base import MultiAssetStrategy
+from erised.strategies.base import MultiAssetStrategy
 
 def run_wf(prices, strat, folds):
     if isinstance(strat, MultiAssetStrategy):
@@ -301,10 +301,10 @@ def run_wf(prices, strat, folds):
 
 ## Performance metrics
 
-### `quant.metrics.performance`
+### `erised.metrics.performance`
 
 ```python
-from quant.metrics.performance import sharpe, cagr, max_drawdown, bootstrap_sharpe_ci, report
+from erised.metrics.performance import sharpe, cagr, max_drawdown, bootstrap_sharpe_ci, report
 
 sh = sharpe(returns)                          # annualized Sharpe (rf=0)
 c = cagr(returns)                             # compound annual growth rate
@@ -404,7 +404,7 @@ Narrative write-up for each hypothesis: the idea, why it might work, what the re
    Files: results/0NN-slug/.gitkeep
 
 3. git commit "H0NN: implement <ClassName>"
-   Files: src/quant/strategies/base.py, src/quant/strategies/__init__.py
+   Files: src/erised/strategies/base.py, src/erised/strategies/__init__.py
 
 4. git commit "H0NN: no-lookahead + structural tests; add to run script"
    Files: tests/test_backtest.py, scripts/run_batchN.py

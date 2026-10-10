@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import HalloweenCreditConfirm
+from erised.strategies.base import HalloweenCreditConfirm
 
 
 def _prices(
@@ -22,9 +22,7 @@ def _prices(
     lqd_drift = 0.0001
     hyg = 100 * np.cumprod(1 + rng.normal(hyg_drift, 0.003, n))
     lqd = 100 * np.cumprod(1 + rng.normal(lqd_drift, 0.002, n))
-    return pd.DataFrame(
-        {"adj_close": spy, "hyg_close": hyg, "lqd_close": lqd}, index=idx
-    )
+    return pd.DataFrame({"adj_close": spy, "hyg_close": hyg, "lqd_close": lqd}, index=idx)
 
 
 def _prices_no_credit(start: str = "2000-01-01", n: int = 300) -> pd.DataFrame:
@@ -72,7 +70,4 @@ def test_flat_with_bad_credit_signal():
     # HYG trending down relative to LQD → credit_ok=False → flat even in season
     prices = _prices(start="2010-11-01", n=250, hyg_trend="down")
     pos = HalloweenCreditConfirm(mom_days=126, credit_days=60).generate_positions(prices)
-    # Even in Nov-Apr, credit bad → mostly flat (credit_ok=False)
-    winter = pos[prices.index.month.isin([11, 12, 1, 2, 3, 4])].iloc[130:]
-    # Not necessarily all zero (noise in returns), but very low
     assert isinstance(pos, pd.Series)

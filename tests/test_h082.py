@@ -4,9 +4,8 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-import pytest
 
-from quant.strategies.base import RiskAdjustedMomentum
+from erised.strategies.base import RiskAdjustedMomentum
 
 
 def _prices(n: int = 500) -> pd.DataFrame:

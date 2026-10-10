@@ -5,7 +5,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     FundamentalMomentumComposite,
     GrossProfitImprovementFactor,
     LowCoverageMomentumProxy,
@@ -49,9 +49,7 @@ def _make_fund_panel(
     n_days, n_stocks = panel.shape
     # Generate quarterly values
     quarters = n_days // 63 + 2
-    qvals = base_val * np.cumprod(
-        1 + rng.normal(growth_rate, 0.1, (quarters, n_stocks)), axis=0
-    )
+    qvals = base_val * np.cumprod(1 + rng.normal(growth_rate, 0.1, (quarters, n_stocks)), axis=0)
     # Expand to daily, updating every 63 days
     daily = np.full((n_days, n_stocks), np.nan)
     for q in range(quarters):

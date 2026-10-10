@@ -5,8 +5,8 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from quant.backtest.engine import assert_no_lookahead_multi
-from quant.strategies.base import ThreeAssetRiskParity
+from erised.backtest.engine import assert_no_lookahead_multi
+from erised.strategies.base import ThreeAssetRiskParity
 
 
 def _prices(spy_rets, tlt_rets, gld_rets=None, start="2010-01-04"):
@@ -66,9 +66,9 @@ def test_falls_back_to_two_assets_when_gld_missing():
 def test_higher_vol_gets_lower_weight():
     rng = np.random.default_rng(0)
     prices = _prices(
-        rng.normal(0, 0.025, 300).tolist(),   # high vol SPY
-        rng.normal(0, 0.005, 300).tolist(),   # low vol TLT
-        rng.normal(0, 0.010, 300).tolist(),   # medium vol GLD
+        rng.normal(0, 0.025, 300).tolist(),  # high vol SPY
+        rng.normal(0, 0.005, 300).tolist(),  # low vol TLT
+        rng.normal(0, 0.010, 300).tolist(),  # medium vol GLD
     )
     w = ThreeAssetRiskParity(vol_lookback=60).generate_weights(prices)
     # TLT (lowest vol) should have highest weight

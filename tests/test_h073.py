@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.base import SellInMayYieldCurveConfirm
+from erised.strategies.base import SellInMayYieldCurveConfirm
 
 
 def _prices(start: str = "2003-01-01", n: int = 600, curve_normal: bool = True) -> pd.DataFrame:

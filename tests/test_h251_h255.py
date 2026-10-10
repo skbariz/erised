@@ -14,7 +14,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from quant.strategies.cross_sectional import (
+from erised.strategies.cross_sectional import (
     DownsideBetaFactor,
     IdiosyncraticVolFactor,
     MaxReturnLotteryAvoid,
@@ -101,15 +101,15 @@ class TestIdiosyncraticVolFactor:
         """Weights at time t must not change when we append new future rows."""
         panel_short = self.panel.iloc[:400]
         mem_short = self.membership.iloc[:400]
-        w_short = IdiosyncraticVolFactor(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(panel_short, mem_short)
+        w_short = IdiosyncraticVolFactor(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            panel_short, mem_short
+        )
 
         panel_long = self.panel
         mem_long = self.membership
-        w_long = IdiosyncraticVolFactor(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(panel_long, mem_long)
+        w_long = IdiosyncraticVolFactor(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            panel_long, mem_long
+        )
 
         shared_idx = w_short.index
         pd.testing.assert_frame_equal(
@@ -161,9 +161,7 @@ class TestMaxReturnLotteryAvoid:
         w_long = MaxReturnLotteryAvoid(sectors=self.sectors).generate_weights(
             self.panel, self.membership
         )
-        pd.testing.assert_frame_equal(
-            w_short.round(8), w_long.iloc[: len(w_short)].round(8)
-        )
+        pd.testing.assert_frame_equal(w_short.round(8), w_long.iloc[: len(w_short)].round(8))
 
 
 # ---------------------------------------------------------------------------
@@ -240,15 +238,13 @@ class TestTailRiskComposite:
     def test_no_future_lookahead(self):
         panel_short = self.panel.iloc[:450]
         mem_short = self.membership.iloc[:450]
-        w_short = TailRiskComposite(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(panel_short, mem_short)
-        w_long = TailRiskComposite(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(self.panel, self.membership)
-        pd.testing.assert_frame_equal(
-            w_short.round(8), w_long.iloc[: len(w_short)].round(8)
+        w_short = TailRiskComposite(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            panel_short, mem_short
         )
+        w_long = TailRiskComposite(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            self.panel, self.membership
+        )
+        pd.testing.assert_frame_equal(w_short.round(8), w_long.iloc[: len(w_short)].round(8))
 
 
 # ---------------------------------------------------------------------------
@@ -294,12 +290,10 @@ class TestTailFilteredMomentum:
     def test_no_future_lookahead(self):
         panel_short = self.panel.iloc[:400]
         mem_short = self.membership.iloc[:400]
-        w_short = TailFilteredMomentum(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(panel_short, mem_short)
-        w_long = TailFilteredMomentum(
-            sectors=self.sectors, spy_rets=self.spy
-        ).generate_weights(self.panel, self.membership)
-        pd.testing.assert_frame_equal(
-            w_short.round(8), w_long.iloc[: len(w_short)].round(8)
+        w_short = TailFilteredMomentum(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            panel_short, mem_short
         )
+        w_long = TailFilteredMomentum(sectors=self.sectors, spy_rets=self.spy).generate_weights(
+            self.panel, self.membership
+        )
+        pd.testing.assert_frame_equal(w_short.round(8), w_long.iloc[: len(w_short)].round(8))

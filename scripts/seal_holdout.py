@@ -64,6 +64,7 @@ SYMBOLS = [
     "QQQ",
     "XLP",
     "XLU",
+    "VIX",
 ]
 
 

@@ -41,12 +41,16 @@ SYMBOLS = {
     "QQQ": "1999-01-01",  # Invesco Nasdaq-100 (growth/tech); inception 1999-03-10
     "XLP": "1998-01-01",  # SPDR Consumer Staples; inception 1998-12-16
     "XLU": "1998-01-01",  # SPDR Utilities; inception 1998-12-16
+    "VIX": "1993-01-01",  # CBOE Volatility Index (regime signal only, not tradable)
 }
+
+# Local symbol -> Yahoo Finance ticker, where they differ.
+YAHOO_TICKERS = {"VIX": "^VIX"}
 
 
 def main() -> None:
     for symbol, start in SYMBOLS.items():
-        report = ingest(symbol, _full_path(symbol), start=start)
+        report = ingest(YAHOO_TICKERS.get(symbol, symbol), _full_path(symbol), start=start)
         print(f"\n=== {symbol} ===")
         print(json.dumps(report, indent=2, default=str))
 

@@ -1,42 +1,42 @@
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
-C:\Users\bariz\Downloads\quant\quant\.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
+.venv\Lib\site-packages\pandas\core\nanops.py:1028: RuntimeWarning: invalid value encountered in subtract
   sqr = _ensure_numeric((avg - values) ** 2)
 H169: QualityValueComposite (B/M + GP/A + low accruals, sector-neutral)
 ================================================================
@@ -74,4 +74,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.6281
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\169-quality-value-composite\summary.json
+Summary written: results\169-quality-value-composite\summary.json

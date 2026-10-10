@@ -12,7 +12,7 @@ Output: one parquet per ticker at data/fundamentals/{TICKER}.parquet
            gross_profit, revenue, operating_cf, current_assets, current_liabilities,
            long_term_debt, shares_outstanding
 
-Run: uv run python scripts/fetch_fundamentals.py
+Run: SEC_EDGAR_USER_AGENT="my-project you@example.com" uv run python scripts/fetch_fundamentals.py
      Resumable — already-downloaded tickers are skipped.
      Expect ~10-20 minutes for 1112 tickers (SEC rate limit: 10 req/s).
 """
@@ -20,6 +20,7 @@ Run: uv run python scripts/fetch_fundamentals.py
 from __future__ import annotations
 
 import logging
+import os
 import sys
 import time
 from pathlib import Path
@@ -40,9 +41,11 @@ TICKERS_FILE = DATA_DIR / "sp500_tickers.txt"
 EDGAR_TICKERS_URL = "https://www.sec.gov/files/company_tickers.json"
 EDGAR_FACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json"
 
-# SEC requires a descriptive user-agent with contact info
+# SEC requires a descriptive user-agent with contact info, e.g. "my-project you@example.com".
+# https://www.sec.gov/os/accessing-edgar-data
+USER_AGENT_ENV = "SEC_EDGAR_USER_AGENT"
 HEADERS = {
-    "User-Agent": "quant-research bariz.sk7@gmail.com",
+    "User-Agent": os.environ.get(USER_AGENT_ENV, ""),
     "Accept-Encoding": "gzip, deflate",
 }
 
@@ -195,6 +198,12 @@ def _fetch_ticker_fundamentals(ticker: str, cik: str) -> pd.DataFrame | None:
 
 
 def main() -> None:
+    if not HEADERS["User-Agent"]:
+        log.error(
+            f"Set {USER_AGENT_ENV} to a contact string such as 'my-project you@example.com' "
+            "(required by SEC EDGAR fair-access policy)."
+        )
+        sys.exit(1)
     FUNDAMENTALS_DIR.mkdir(parents=True, exist_ok=True)
 
     # Load all historical tickers

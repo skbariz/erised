@@ -30,4 +30,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.2165
 Decision: kill
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\305-vrp-seasonal-hybrid\summary.json
+Summary written: results\305-vrp-seasonal-hybrid\summary.json

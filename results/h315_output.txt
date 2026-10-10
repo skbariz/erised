@@ -30,4 +30,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.5341
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\315-constrained-macro-overlay\summary.json
+Summary written: results\315-constrained-macro-overlay\summary.json

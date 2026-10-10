@@ -107,4 +107,4 @@ Per-fold Sharpe:
   Fold 11: +1.328  (2020-01-24 -- 2022-01-23)
 
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\450-ultimate-h401to450-mdr\summary.json
+Summary written: results\450-ultimate-h401to450-mdr\summary.json

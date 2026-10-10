@@ -33,4 +33,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.5001
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\164-piotroski-value-screen\summary.json
+Summary written: results\164-piotroski-value-screen\summary.json

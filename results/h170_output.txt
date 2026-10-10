@@ -34,4 +34,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.5746
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\170-ff5-investment-factor\summary.json
+Summary written: results\170-ff5-investment-factor\summary.json

@@ -34,4 +34,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.6199
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\165-gross-profitability-rank\summary.json
+Summary written: results\165-gross-profitability-rank\summary.json

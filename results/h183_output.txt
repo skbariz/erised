@@ -33,4 +33,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.5784
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\183-cash-earnings-drift\summary.json
+Summary written: results\183-cash-earnings-drift\summary.json

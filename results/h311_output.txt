@@ -30,4 +30,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.4156
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\311-term-spread-spy-timer\summary.json
+Summary written: results\311-term-spread-spy-timer\summary.json

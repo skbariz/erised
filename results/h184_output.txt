@@ -33,4 +33,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.6866
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\184-earnings-momentum-composite\summary.json
+Summary written: results\184-earnings-momentum-composite\summary.json

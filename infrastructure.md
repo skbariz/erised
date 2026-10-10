@@ -395,8 +395,6 @@ Narrative write-up for each hypothesis: the idea, why it might work, what the re
 
 ## GitHub workflow
 
-**Repo:** `skbariz/erised` (HTTPS, authenticated via `gh` CLI as `skbariz`)
-
 **4-commit + 1-issue pattern per hypothesis:**
 
 ```

@@ -32,4 +32,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.1161
 Decision: kill
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\193-long-short-momentum\summary.json
+Summary written: results\193-long-short-momentum\summary.json

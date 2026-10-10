@@ -32,4 +32,4 @@ Per-fold Sharpe:
 
 H001 correlation: +0.5890
 Decision: KEEP
-Summary written: C:\Users\bariz\Downloads\quant\quant\results\188-monthly-reversal-long\summary.json
+Summary written: results\188-monthly-reversal-long\summary.json
